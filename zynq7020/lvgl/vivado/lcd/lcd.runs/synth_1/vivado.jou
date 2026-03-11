@@ -1,0 +1,12 @@
+#-----------------------------------------------------------
+# Vivado v2020.2 (64-bit)
+# SW Build 3064766 on Wed Nov 18 09:12:45 MST 2020
+# IP Build 3064653 on Wed Nov 18 14:17:31 MST 2020
+# Start of session at: Mon Jan 26 17:56:15 2026
+# Process ID: 25732
+# Current directory: C:/Users/Admin/Desktop/7020/lcd/vivado/lcd/lcd.runs/synth_1
+# Command line: vivado.exe -log lcd_wrapper.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source lcd_wrapper.tcl
+# Log file: C:/Users/Admin/Desktop/7020/lcd/vivado/lcd/lcd.runs/synth_1/lcd_wrapper.vds
+# Journal file: C:/Users/Admin/Desktop/7020/lcd/vivado/lcd/lcd.runs/synth_1\vivado.jou
+#-----------------------------------------------------------
+source lcd_wrapper.tcl -notrace
