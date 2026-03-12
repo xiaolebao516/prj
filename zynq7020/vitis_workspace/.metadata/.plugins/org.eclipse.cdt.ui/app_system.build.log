@@ -1,0 +1,10 @@
+17:43:38 **** Incremental Build of configuration Debug for project app_system ****
+make all 
+Generating bif file for the system project
+generate_system_bif.bat 56841 D:/wyl/prj/zynq7020/vitis_workspace/my_platform/export/my_platform/my_platform.xpfm standalone_domain D:/wyl/prj/zynq7020/vitis_workspace/app_system/Debug/system.bif
+sdcard_gen --xpfm D:/wyl/prj/zynq7020/vitis_workspace/my_platform/export/my_platform/my_platform.xpfm --sys_config my_platform --bif D:/wyl/prj/zynq7020/vitis_workspace/app_system/Debug/system.bif --bitstream D:/wyl/prj/zynq7020/vitis_workspace/app/_ide/bitstream/design_1_wrapper.bit --elf D:/wyl/prj/zynq7020/vitis_workspace/app/Debug/app.elf,ps7_cortexa9_0
+creating BOOT.BIN using D:/wyl/prj/zynq7020/vitis_workspace/app/_ide/bitstream/design_1_wrapper.bit
+Running D:/Xilinx/Vitis/2020.2/bin/bootgen  -image D:/wyl/prj/zynq7020/vitis_workspace/app_system/Debug/sd_card_temp/boot.bif -w -o i BOOT.BIN
+
+17:43:41 Build Finished (took 2s.354ms)
+

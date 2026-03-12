@@ -1,0 +1,62 @@
+// app_monitor.c
+#include "app_monitor.h"
+#include "ui_main.h"      // 调用UI 层
+#include "adc_dma.h"      // 调用硬件层
+#include "xil_cache.h"
+#include "sleep.h"
+
+/* 引用 main.c 或其他模块定义的全局硬件句柄（使用 extern） */
+extern volatile int s2mm_flag;
+extern uint16_t DmaRxBuffer[];
+extern void send_adc_data_udp(uint16_t *data, uint32_t sample_num);
+
+/* 业务私有变量 */
+static uint32_t total_packets = 0;
+static uint32_t current_prf_hz = 30;
+static uint32_t prf_delay_us = 33333; // 1000000 / 30
+
+void App_Monitor_Init(void) {
+    total_packets = 0;
+    App_Monitor_SetPRF(30); // 初始设为 30Hz
+
+    // 通知 UI 进入初始运行状态
+    ui_update_acquisition_status(1);
+    ui_update_connection_status(0);
+}
+
+void App_Monitor_SetPRF(uint32_t target_hz) {
+    if (target_hz < 1) target_hz = 1;
+    if (target_hz > 500) target_hz = 500;
+
+    current_prf_hz = target_hz;
+    prf_delay_us = 1000000 / target_hz;
+
+    /* APP层计算好后，直接通知 UI 显示 */
+    ui_update_prf_value(current_prf_hz);
+}
+
+void App_Monitor_Tick(void) {
+    /* 检查 DMA 采样是否完成（原 main.c 逻辑） */
+    if (s2mm_flag) {
+        s2mm_flag = 0; // 清除标志位
+
+        // 1. 处理缓存一致性
+        Xil_DCacheInvalidateRange((uintptr_t)DmaRxBuffer, 32768); // 假设长度
+
+        // 2. 业务动作：通过网络发送数据
+        send_adc_data_udp(DmaRxBuffer, 16384);
+
+        // 3. 业务动作：更新包计数并通知 UI
+        total_packets++;
+        ui_update_packet_count(total_packets);
+
+        // 4. 根据 PRF 延时（维持采样频率）
+        if (prf_delay_us > 0) {
+            usleep(prf_delay_us);
+        }
+
+        // 5. 重新启动下一次硬件采集
+        // 这里假设底层函数名为 XAxiDma_Adc_Start
+        // XAxiDma_Adc_Start(...);
+    }
+}

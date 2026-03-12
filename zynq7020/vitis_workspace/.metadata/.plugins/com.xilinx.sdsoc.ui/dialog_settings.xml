@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section name="Workbench">
-	<item key="sdx.custom.platform.repository.locations" value="D:\516\prj\zynq7020\vitis_workspace\lcd_platform\export\lcd_platform"/>
-	<item key="sdx.custom.platform.repository.last.directory.dialog.location" value="D:\516\prj\zynq7020\vitis_workspace\lcd_platform\export\lcd_platform"/>
+	<item key="sdx.custom.platform.repository.locations" value="D:\516\prj\zynq7020\vitis_workspace\lcd_platform\export\lcd_platform;D:\516\prj\zynq7020\vitis_workspace\my_platform\export\my_platform;D:\516\prj\zynq7020\vitis_workspace\lab_platform\export\lab_platform;D:\wyl\prj\zynq7020\vitis_workspace\my_platform\export\my_platform"/>
+	<item key="sdx.custom.platform.repository.last.directory.dialog.location" value="D:\wyl\prj\zynq7020\vitis_workspace\my_platform\export\my_platform"/>
 </section>

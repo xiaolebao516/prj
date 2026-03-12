@@ -1,0 +1,10 @@
+15:44:25 **** Build of configuration Debug for project lcd_126_system ****
+make all 
+Generating bif file for the system project
+generate_system_bif.bat 52574 D:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/lcd_platform.xpfm standalone_domain D:/516/prj/zynq7020/vitis_workspace/lcd_126_system/Debug/system.bif
+sdcard_gen --xpfm D:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/lcd_platform.xpfm --sys_config lcd_platform --bif D:/516/prj/zynq7020/vitis_workspace/lcd_126_system/Debug/system.bif --bitstream D:/516/prj/zynq7020/vitis_workspace/lcd_126/_ide/bitstream/lcd_wrapper.bit --elf D:/516/prj/zynq7020/vitis_workspace/lcd_126/Debug/lcd_126.elf,ps7_cortexa9_0
+creating BOOT.BIN using D:/516/prj/zynq7020/vitis_workspace/lcd_126/_ide/bitstream/lcd_wrapper.bit
+Running D:/Xilinx/Vitis/2020.2/bin/bootgen  -image D:/516/prj/zynq7020/vitis_workspace/lcd_126_system/Debug/sd_card_temp/boot.bif -w -o i BOOT.BIN
+
+15:44:28 Build Finished (took 2s.410ms)
+

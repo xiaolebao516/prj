@@ -1,0 +1,785 @@
+15:44:12 **** Build of configuration Debug for project lcd_126 ****
+make all 
+make --no-print-directory pre-build
+a9-linaro-pre-build-step
+' '
+make --no-print-directory main-build
+'Building file: ../src/lvgl/src/widgets/lv_arc.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/widgets/lv_arc.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/widgets/lv_arc.d" -MT"src/lvgl/src/widgets/lv_arc.o" -o "src/lvgl/src/widgets/lv_arc.o" "../src/lvgl/src/widgets/lv_arc.c"
+'Finished building: ../src/lvgl/src/widgets/lv_arc.c'
+' '
+'Building file: ../src/lvgl/src/widgets/lv_bar.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/widgets/lv_bar.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/widgets/lv_bar.d" -MT"src/lvgl/src/widgets/lv_bar.o" -o "src/lvgl/src/widgets/lv_bar.o" "../src/lvgl/src/widgets/lv_bar.c"
+'Finished building: ../src/lvgl/src/widgets/lv_bar.c'
+' '
+'Building file: ../src/lvgl/src/widgets/lv_btn.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/widgets/lv_btn.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/widgets/lv_btn.d" -MT"src/lvgl/src/widgets/lv_btn.o" -o "src/lvgl/src/widgets/lv_btn.o" "../src/lvgl/src/widgets/lv_btn.c"
+'Finished building: ../src/lvgl/src/widgets/lv_btn.c'
+' '
+'Building file: ../src/lvgl/src/widgets/lv_btnmatrix.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/widgets/lv_btnmatrix.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/widgets/lv_btnmatrix.d" -MT"src/lvgl/src/widgets/lv_btnmatrix.o" -o "src/lvgl/src/widgets/lv_btnmatrix.o" "../src/lvgl/src/widgets/lv_btnmatrix.c"
+'Finished building: ../src/lvgl/src/widgets/lv_btnmatrix.c'
+' '
+'Building file: ../src/lvgl/src/widgets/lv_canvas.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/widgets/lv_canvas.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/widgets/lv_canvas.d" -MT"src/lvgl/src/widgets/lv_canvas.o" -o "src/lvgl/src/widgets/lv_canvas.o" "../src/lvgl/src/widgets/lv_canvas.c"
+'Finished building: ../src/lvgl/src/widgets/lv_canvas.c'
+' '
+'Building file: ../src/lvgl/src/widgets/lv_checkbox.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/widgets/lv_checkbox.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/widgets/lv_checkbox.d" -MT"src/lvgl/src/widgets/lv_checkbox.o" -o "src/lvgl/src/widgets/lv_checkbox.o" "../src/lvgl/src/widgets/lv_checkbox.c"
+'Finished building: ../src/lvgl/src/widgets/lv_checkbox.c'
+' '
+'Building file: ../src/lvgl/src/widgets/lv_dropdown.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/widgets/lv_dropdown.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/widgets/lv_dropdown.d" -MT"src/lvgl/src/widgets/lv_dropdown.o" -o "src/lvgl/src/widgets/lv_dropdown.o" "../src/lvgl/src/widgets/lv_dropdown.c"
+'Finished building: ../src/lvgl/src/widgets/lv_dropdown.c'
+' '
+'Building file: ../src/lvgl/src/widgets/lv_img.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/widgets/lv_img.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/widgets/lv_img.d" -MT"src/lvgl/src/widgets/lv_img.o" -o "src/lvgl/src/widgets/lv_img.o" "../src/lvgl/src/widgets/lv_img.c"
+'Finished building: ../src/lvgl/src/widgets/lv_img.c'
+' '
+'Building file: ../src/lvgl/src/widgets/lv_label.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/widgets/lv_label.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/widgets/lv_label.d" -MT"src/lvgl/src/widgets/lv_label.o" -o "src/lvgl/src/widgets/lv_label.o" "../src/lvgl/src/widgets/lv_label.c"
+'Finished building: ../src/lvgl/src/widgets/lv_label.c'
+' '
+'Building file: ../src/lvgl/src/widgets/lv_line.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/widgets/lv_line.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/widgets/lv_line.d" -MT"src/lvgl/src/widgets/lv_line.o" -o "src/lvgl/src/widgets/lv_line.o" "../src/lvgl/src/widgets/lv_line.c"
+'Finished building: ../src/lvgl/src/widgets/lv_line.c'
+' '
+'Building file: ../src/lvgl/src/widgets/lv_objx_templ.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/widgets/lv_objx_templ.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/widgets/lv_objx_templ.d" -MT"src/lvgl/src/widgets/lv_objx_templ.o" -o "src/lvgl/src/widgets/lv_objx_templ.o" "../src/lvgl/src/widgets/lv_objx_templ.c"
+'Finished building: ../src/lvgl/src/widgets/lv_objx_templ.c'
+' '
+'Building file: ../src/lvgl/src/widgets/lv_roller.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/widgets/lv_roller.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/widgets/lv_roller.d" -MT"src/lvgl/src/widgets/lv_roller.o" -o "src/lvgl/src/widgets/lv_roller.o" "../src/lvgl/src/widgets/lv_roller.c"
+'Finished building: ../src/lvgl/src/widgets/lv_roller.c'
+' '
+'Building file: ../src/lvgl/src/widgets/lv_slider.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/widgets/lv_slider.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/widgets/lv_slider.d" -MT"src/lvgl/src/widgets/lv_slider.o" -o "src/lvgl/src/widgets/lv_slider.o" "../src/lvgl/src/widgets/lv_slider.c"
+'Finished building: ../src/lvgl/src/widgets/lv_slider.c'
+' '
+'Building file: ../src/lvgl/src/widgets/lv_switch.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/widgets/lv_switch.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/widgets/lv_switch.d" -MT"src/lvgl/src/widgets/lv_switch.o" -o "src/lvgl/src/widgets/lv_switch.o" "../src/lvgl/src/widgets/lv_switch.c"
+'Finished building: ../src/lvgl/src/widgets/lv_switch.c'
+' '
+'Building file: ../src/lvgl/src/widgets/lv_table.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/widgets/lv_table.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/widgets/lv_table.d" -MT"src/lvgl/src/widgets/lv_table.o" -o "src/lvgl/src/widgets/lv_table.o" "../src/lvgl/src/widgets/lv_table.c"
+'Finished building: ../src/lvgl/src/widgets/lv_table.c'
+' '
+'Building file: ../src/lvgl/src/widgets/lv_textarea.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/widgets/lv_textarea.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/widgets/lv_textarea.d" -MT"src/lvgl/src/widgets/lv_textarea.o" -o "src/lvgl/src/widgets/lv_textarea.o" "../src/lvgl/src/widgets/lv_textarea.c"
+'Finished building: ../src/lvgl/src/widgets/lv_textarea.c'
+' '
+'Building file: ../src/lvgl/src/misc/lv_anim.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/misc/lv_anim.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/misc/lv_anim.d" -MT"src/lvgl/src/misc/lv_anim.o" -o "src/lvgl/src/misc/lv_anim.o" "../src/lvgl/src/misc/lv_anim.c"
+'Finished building: ../src/lvgl/src/misc/lv_anim.c'
+' '
+'Building file: ../src/lvgl/src/misc/lv_anim_timeline.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/misc/lv_anim_timeline.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/misc/lv_anim_timeline.d" -MT"src/lvgl/src/misc/lv_anim_timeline.o" -o "src/lvgl/src/misc/lv_anim_timeline.o" "../src/lvgl/src/misc/lv_anim_timeline.c"
+'Finished building: ../src/lvgl/src/misc/lv_anim_timeline.c'
+' '
+'Building file: ../src/lvgl/src/misc/lv_area.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/misc/lv_area.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/misc/lv_area.d" -MT"src/lvgl/src/misc/lv_area.o" -o "src/lvgl/src/misc/lv_area.o" "../src/lvgl/src/misc/lv_area.c"
+'Finished building: ../src/lvgl/src/misc/lv_area.c'
+' '
+'Building file: ../src/lvgl/src/misc/lv_async.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/misc/lv_async.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/misc/lv_async.d" -MT"src/lvgl/src/misc/lv_async.o" -o "src/lvgl/src/misc/lv_async.o" "../src/lvgl/src/misc/lv_async.c"
+'Finished building: ../src/lvgl/src/misc/lv_async.c'
+' '
+'Building file: ../src/lvgl/src/misc/lv_bidi.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/misc/lv_bidi.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/misc/lv_bidi.d" -MT"src/lvgl/src/misc/lv_bidi.o" -o "src/lvgl/src/misc/lv_bidi.o" "../src/lvgl/src/misc/lv_bidi.c"
+'Finished building: ../src/lvgl/src/misc/lv_bidi.c'
+' '
+'Building file: ../src/lvgl/src/misc/lv_color.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/misc/lv_color.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/misc/lv_color.d" -MT"src/lvgl/src/misc/lv_color.o" -o "src/lvgl/src/misc/lv_color.o" "../src/lvgl/src/misc/lv_color.c"
+'Finished building: ../src/lvgl/src/misc/lv_color.c'
+' '
+'Building file: ../src/lvgl/src/misc/lv_fs.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/misc/lv_fs.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/misc/lv_fs.d" -MT"src/lvgl/src/misc/lv_fs.o" -o "src/lvgl/src/misc/lv_fs.o" "../src/lvgl/src/misc/lv_fs.c"
+'Finished building: ../src/lvgl/src/misc/lv_fs.c'
+' '
+'Building file: ../src/lvgl/src/misc/lv_gc.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/misc/lv_gc.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/misc/lv_gc.d" -MT"src/lvgl/src/misc/lv_gc.o" -o "src/lvgl/src/misc/lv_gc.o" "../src/lvgl/src/misc/lv_gc.c"
+'Finished building: ../src/lvgl/src/misc/lv_gc.c'
+' '
+'Building file: ../src/lvgl/src/misc/lv_ll.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/misc/lv_ll.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/misc/lv_ll.d" -MT"src/lvgl/src/misc/lv_ll.o" -o "src/lvgl/src/misc/lv_ll.o" "../src/lvgl/src/misc/lv_ll.c"
+'Finished building: ../src/lvgl/src/misc/lv_ll.c'
+' '
+'Building file: ../src/lvgl/src/misc/lv_log.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/misc/lv_log.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/misc/lv_log.d" -MT"src/lvgl/src/misc/lv_log.o" -o "src/lvgl/src/misc/lv_log.o" "../src/lvgl/src/misc/lv_log.c"
+'Finished building: ../src/lvgl/src/misc/lv_log.c'
+' '
+'Building file: ../src/lvgl/src/misc/lv_math.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/misc/lv_math.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/misc/lv_math.d" -MT"src/lvgl/src/misc/lv_math.o" -o "src/lvgl/src/misc/lv_math.o" "../src/lvgl/src/misc/lv_math.c"
+'Finished building: ../src/lvgl/src/misc/lv_math.c'
+' '
+'Building file: ../src/lvgl/src/misc/lv_mem.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/misc/lv_mem.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/misc/lv_mem.d" -MT"src/lvgl/src/misc/lv_mem.o" -o "src/lvgl/src/misc/lv_mem.o" "../src/lvgl/src/misc/lv_mem.c"
+'Finished building: ../src/lvgl/src/misc/lv_mem.c'
+' '
+'Building file: ../src/lvgl/src/misc/lv_printf.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/misc/lv_printf.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/misc/lv_printf.d" -MT"src/lvgl/src/misc/lv_printf.o" -o "src/lvgl/src/misc/lv_printf.o" "../src/lvgl/src/misc/lv_printf.c"
+'Finished building: ../src/lvgl/src/misc/lv_printf.c'
+' '
+'Building file: ../src/lvgl/src/misc/lv_style.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/misc/lv_style.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/misc/lv_style.d" -MT"src/lvgl/src/misc/lv_style.o" -o "src/lvgl/src/misc/lv_style.o" "../src/lvgl/src/misc/lv_style.c"
+'Finished building: ../src/lvgl/src/misc/lv_style.c'
+' '
+'Building file: ../src/lvgl/src/misc/lv_style_gen.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/misc/lv_style_gen.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/misc/lv_style_gen.d" -MT"src/lvgl/src/misc/lv_style_gen.o" -o "src/lvgl/src/misc/lv_style_gen.o" "../src/lvgl/src/misc/lv_style_gen.c"
+'Finished building: ../src/lvgl/src/misc/lv_style_gen.c'
+' '
+'Building file: ../src/lvgl/src/misc/lv_templ.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/misc/lv_templ.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/misc/lv_templ.d" -MT"src/lvgl/src/misc/lv_templ.o" -o "src/lvgl/src/misc/lv_templ.o" "../src/lvgl/src/misc/lv_templ.c"
+'Finished building: ../src/lvgl/src/misc/lv_templ.c'
+' '
+'Building file: ../src/lvgl/src/misc/lv_timer.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/misc/lv_timer.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/misc/lv_timer.d" -MT"src/lvgl/src/misc/lv_timer.o" -o "src/lvgl/src/misc/lv_timer.o" "../src/lvgl/src/misc/lv_timer.c"
+'Finished building: ../src/lvgl/src/misc/lv_timer.c'
+' '
+'Building file: ../src/lvgl/src/misc/lv_tlsf.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/misc/lv_tlsf.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/misc/lv_tlsf.d" -MT"src/lvgl/src/misc/lv_tlsf.o" -o "src/lvgl/src/misc/lv_tlsf.o" "../src/lvgl/src/misc/lv_tlsf.c"
+'Finished building: ../src/lvgl/src/misc/lv_tlsf.c'
+' '
+'Building file: ../src/lvgl/src/misc/lv_txt.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/misc/lv_txt.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/misc/lv_txt.d" -MT"src/lvgl/src/misc/lv_txt.o" -o "src/lvgl/src/misc/lv_txt.o" "../src/lvgl/src/misc/lv_txt.c"
+'Finished building: ../src/lvgl/src/misc/lv_txt.c'
+' '
+'Building file: ../src/lvgl/src/misc/lv_txt_ap.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/misc/lv_txt_ap.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/misc/lv_txt_ap.d" -MT"src/lvgl/src/misc/lv_txt_ap.o" -o "src/lvgl/src/misc/lv_txt_ap.o" "../src/lvgl/src/misc/lv_txt_ap.c"
+'Finished building: ../src/lvgl/src/misc/lv_txt_ap.c'
+' '
+'Building file: ../src/lvgl/src/misc/lv_utils.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/misc/lv_utils.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/misc/lv_utils.d" -MT"src/lvgl/src/misc/lv_utils.o" -o "src/lvgl/src/misc/lv_utils.o" "../src/lvgl/src/misc/lv_utils.c"
+'Finished building: ../src/lvgl/src/misc/lv_utils.c'
+' '
+'Building file: ../src/lvgl/src/hal/lv_hal_disp.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/hal/lv_hal_disp.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/hal/lv_hal_disp.d" -MT"src/lvgl/src/hal/lv_hal_disp.o" -o "src/lvgl/src/hal/lv_hal_disp.o" "../src/lvgl/src/hal/lv_hal_disp.c"
+'Finished building: ../src/lvgl/src/hal/lv_hal_disp.c'
+' '
+'Building file: ../src/lvgl/src/hal/lv_hal_indev.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/hal/lv_hal_indev.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/hal/lv_hal_indev.d" -MT"src/lvgl/src/hal/lv_hal_indev.o" -o "src/lvgl/src/hal/lv_hal_indev.o" "../src/lvgl/src/hal/lv_hal_indev.c"
+'Finished building: ../src/lvgl/src/hal/lv_hal_indev.c'
+' '
+'Building file: ../src/lvgl/src/hal/lv_hal_tick.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/hal/lv_hal_tick.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/hal/lv_hal_tick.d" -MT"src/lvgl/src/hal/lv_hal_tick.o" -o "src/lvgl/src/hal/lv_hal_tick.o" "../src/lvgl/src/hal/lv_hal_tick.c"
+'Finished building: ../src/lvgl/src/hal/lv_hal_tick.c'
+' '
+'Building file: ../src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_arc.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_arc.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_arc.d" -MT"src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_arc.o" -o "src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_arc.o" "../src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_arc.c"
+'Finished building: ../src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_arc.c'
+' '
+'Building file: ../src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_blend.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_blend.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_blend.d" -MT"src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_blend.o" -o "src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_blend.o" "../src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_blend.c"
+'Finished building: ../src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_blend.c'
+' '
+'Building file: ../src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_img.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_img.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_img.d" -MT"src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_img.o" -o "src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_img.o" "../src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_img.c"
+'Finished building: ../src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_img.c'
+' '
+'Building file: ../src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_label.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_label.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_label.d" -MT"src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_label.o" -o "src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_label.o" "../src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_label.c"
+'Finished building: ../src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_label.c'
+' '
+'Building file: ../src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_line.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_line.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_line.d" -MT"src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_line.o" -o "src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_line.o" "../src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_line.c"
+'Finished building: ../src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_line.c'
+' '
+'Building file: ../src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_rect.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_rect.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_rect.d" -MT"src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_rect.o" -o "src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_rect.o" "../src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_rect.c"
+'Finished building: ../src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_rect.c'
+' '
+'Building file: ../src/lvgl/src/gpu/sdl/lv_gpu_sdl_lru.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/gpu/sdl/lv_gpu_sdl_lru.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/gpu/sdl/lv_gpu_sdl_lru.d" -MT"src/lvgl/src/gpu/sdl/lv_gpu_sdl_lru.o" -o "src/lvgl/src/gpu/sdl/lv_gpu_sdl_lru.o" "../src/lvgl/src/gpu/sdl/lv_gpu_sdl_lru.c"
+'Finished building: ../src/lvgl/src/gpu/sdl/lv_gpu_sdl_lru.c'
+' '
+'Building file: ../src/lvgl/src/gpu/sdl/lv_gpu_sdl_mask.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/gpu/sdl/lv_gpu_sdl_mask.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/gpu/sdl/lv_gpu_sdl_mask.d" -MT"src/lvgl/src/gpu/sdl/lv_gpu_sdl_mask.o" -o "src/lvgl/src/gpu/sdl/lv_gpu_sdl_mask.o" "../src/lvgl/src/gpu/sdl/lv_gpu_sdl_mask.c"
+'Finished building: ../src/lvgl/src/gpu/sdl/lv_gpu_sdl_mask.c'
+' '
+'Building file: ../src/lvgl/src/gpu/sdl/lv_gpu_sdl_stack_blur.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/gpu/sdl/lv_gpu_sdl_stack_blur.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/gpu/sdl/lv_gpu_sdl_stack_blur.d" -MT"src/lvgl/src/gpu/sdl/lv_gpu_sdl_stack_blur.o" -o "src/lvgl/src/gpu/sdl/lv_gpu_sdl_stack_blur.o" "../src/lvgl/src/gpu/sdl/lv_gpu_sdl_stack_blur.c"
+'Finished building: ../src/lvgl/src/gpu/sdl/lv_gpu_sdl_stack_blur.c'
+' '
+'Building file: ../src/lvgl/src/gpu/sdl/lv_gpu_sdl_texture_cache.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/gpu/sdl/lv_gpu_sdl_texture_cache.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/gpu/sdl/lv_gpu_sdl_texture_cache.d" -MT"src/lvgl/src/gpu/sdl/lv_gpu_sdl_texture_cache.o" -o "src/lvgl/src/gpu/sdl/lv_gpu_sdl_texture_cache.o" "../src/lvgl/src/gpu/sdl/lv_gpu_sdl_texture_cache.c"
+'Finished building: ../src/lvgl/src/gpu/sdl/lv_gpu_sdl_texture_cache.c'
+' '
+'Building file: ../src/lvgl/src/gpu/sdl/lv_gpu_sdl_utils.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/gpu/sdl/lv_gpu_sdl_utils.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/gpu/sdl/lv_gpu_sdl_utils.d" -MT"src/lvgl/src/gpu/sdl/lv_gpu_sdl_utils.o" -o "src/lvgl/src/gpu/sdl/lv_gpu_sdl_utils.o" "../src/lvgl/src/gpu/sdl/lv_gpu_sdl_utils.c"
+'Finished building: ../src/lvgl/src/gpu/sdl/lv_gpu_sdl_utils.c'
+' '
+'Building file: ../src/lvgl/src/gpu/lv_gpu_nxp_pxp.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/gpu/lv_gpu_nxp_pxp.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/gpu/lv_gpu_nxp_pxp.d" -MT"src/lvgl/src/gpu/lv_gpu_nxp_pxp.o" -o "src/lvgl/src/gpu/lv_gpu_nxp_pxp.o" "../src/lvgl/src/gpu/lv_gpu_nxp_pxp.c"
+'Finished building: ../src/lvgl/src/gpu/lv_gpu_nxp_pxp.c'
+' '
+'Building file: ../src/lvgl/src/gpu/lv_gpu_nxp_pxp_osa.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/gpu/lv_gpu_nxp_pxp_osa.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/gpu/lv_gpu_nxp_pxp_osa.d" -MT"src/lvgl/src/gpu/lv_gpu_nxp_pxp_osa.o" -o "src/lvgl/src/gpu/lv_gpu_nxp_pxp_osa.o" "../src/lvgl/src/gpu/lv_gpu_nxp_pxp_osa.c"
+'Finished building: ../src/lvgl/src/gpu/lv_gpu_nxp_pxp_osa.c'
+' '
+'Building file: ../src/lvgl/src/gpu/lv_gpu_nxp_vglite.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/gpu/lv_gpu_nxp_vglite.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/gpu/lv_gpu_nxp_vglite.d" -MT"src/lvgl/src/gpu/lv_gpu_nxp_vglite.o" -o "src/lvgl/src/gpu/lv_gpu_nxp_vglite.o" "../src/lvgl/src/gpu/lv_gpu_nxp_vglite.c"
+'Finished building: ../src/lvgl/src/gpu/lv_gpu_nxp_vglite.c'
+' '
+'Building file: ../src/lvgl/src/gpu/lv_gpu_sdl.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/gpu/lv_gpu_sdl.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/gpu/lv_gpu_sdl.d" -MT"src/lvgl/src/gpu/lv_gpu_sdl.o" -o "src/lvgl/src/gpu/lv_gpu_sdl.o" "../src/lvgl/src/gpu/lv_gpu_sdl.c"
+'Finished building: ../src/lvgl/src/gpu/lv_gpu_sdl.c'
+' '
+'Building file: ../src/lvgl/src/gpu/lv_gpu_stm32_dma2d.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/gpu/lv_gpu_stm32_dma2d.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/gpu/lv_gpu_stm32_dma2d.d" -MT"src/lvgl/src/gpu/lv_gpu_stm32_dma2d.o" -o "src/lvgl/src/gpu/lv_gpu_stm32_dma2d.o" "../src/lvgl/src/gpu/lv_gpu_stm32_dma2d.c"
+'Finished building: ../src/lvgl/src/gpu/lv_gpu_stm32_dma2d.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font.d" -MT"src/lvgl/src/font/lv_font.o" -o "src/lvgl/src/font/lv_font.o" "../src/lvgl/src/font/lv_font.c"
+'Finished building: ../src/lvgl/src/font/lv_font.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_dejavu_16_persian_hebrew.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_dejavu_16_persian_hebrew.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_dejavu_16_persian_hebrew.d" -MT"src/lvgl/src/font/lv_font_dejavu_16_persian_hebrew.o" -o "src/lvgl/src/font/lv_font_dejavu_16_persian_hebrew.o" "../src/lvgl/src/font/lv_font_dejavu_16_persian_hebrew.c"
+'Finished building: ../src/lvgl/src/font/lv_font_dejavu_16_persian_hebrew.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_fmt_txt.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_fmt_txt.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_fmt_txt.d" -MT"src/lvgl/src/font/lv_font_fmt_txt.o" -o "src/lvgl/src/font/lv_font_fmt_txt.o" "../src/lvgl/src/font/lv_font_fmt_txt.c"
+'Finished building: ../src/lvgl/src/font/lv_font_fmt_txt.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_loader.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_loader.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_loader.d" -MT"src/lvgl/src/font/lv_font_loader.o" -o "src/lvgl/src/font/lv_font_loader.o" "../src/lvgl/src/font/lv_font_loader.c"
+'Finished building: ../src/lvgl/src/font/lv_font_loader.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_montserrat_10.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_montserrat_10.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_montserrat_10.d" -MT"src/lvgl/src/font/lv_font_montserrat_10.o" -o "src/lvgl/src/font/lv_font_montserrat_10.o" "../src/lvgl/src/font/lv_font_montserrat_10.c"
+'Finished building: ../src/lvgl/src/font/lv_font_montserrat_10.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_montserrat_12.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_montserrat_12.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_montserrat_12.d" -MT"src/lvgl/src/font/lv_font_montserrat_12.o" -o "src/lvgl/src/font/lv_font_montserrat_12.o" "../src/lvgl/src/font/lv_font_montserrat_12.c"
+'Finished building: ../src/lvgl/src/font/lv_font_montserrat_12.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_montserrat_12_subpx.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_montserrat_12_subpx.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_montserrat_12_subpx.d" -MT"src/lvgl/src/font/lv_font_montserrat_12_subpx.o" -o "src/lvgl/src/font/lv_font_montserrat_12_subpx.o" "../src/lvgl/src/font/lv_font_montserrat_12_subpx.c"
+'Finished building: ../src/lvgl/src/font/lv_font_montserrat_12_subpx.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_montserrat_14.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_montserrat_14.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_montserrat_14.d" -MT"src/lvgl/src/font/lv_font_montserrat_14.o" -o "src/lvgl/src/font/lv_font_montserrat_14.o" "../src/lvgl/src/font/lv_font_montserrat_14.c"
+'Finished building: ../src/lvgl/src/font/lv_font_montserrat_14.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_montserrat_16.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_montserrat_16.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_montserrat_16.d" -MT"src/lvgl/src/font/lv_font_montserrat_16.o" -o "src/lvgl/src/font/lv_font_montserrat_16.o" "../src/lvgl/src/font/lv_font_montserrat_16.c"
+'Finished building: ../src/lvgl/src/font/lv_font_montserrat_16.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_montserrat_18.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_montserrat_18.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_montserrat_18.d" -MT"src/lvgl/src/font/lv_font_montserrat_18.o" -o "src/lvgl/src/font/lv_font_montserrat_18.o" "../src/lvgl/src/font/lv_font_montserrat_18.c"
+'Finished building: ../src/lvgl/src/font/lv_font_montserrat_18.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_montserrat_20.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_montserrat_20.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_montserrat_20.d" -MT"src/lvgl/src/font/lv_font_montserrat_20.o" -o "src/lvgl/src/font/lv_font_montserrat_20.o" "../src/lvgl/src/font/lv_font_montserrat_20.c"
+'Finished building: ../src/lvgl/src/font/lv_font_montserrat_20.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_montserrat_22.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_montserrat_22.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_montserrat_22.d" -MT"src/lvgl/src/font/lv_font_montserrat_22.o" -o "src/lvgl/src/font/lv_font_montserrat_22.o" "../src/lvgl/src/font/lv_font_montserrat_22.c"
+'Finished building: ../src/lvgl/src/font/lv_font_montserrat_22.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_montserrat_24.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_montserrat_24.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_montserrat_24.d" -MT"src/lvgl/src/font/lv_font_montserrat_24.o" -o "src/lvgl/src/font/lv_font_montserrat_24.o" "../src/lvgl/src/font/lv_font_montserrat_24.c"
+'Finished building: ../src/lvgl/src/font/lv_font_montserrat_24.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_montserrat_26.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_montserrat_26.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_montserrat_26.d" -MT"src/lvgl/src/font/lv_font_montserrat_26.o" -o "src/lvgl/src/font/lv_font_montserrat_26.o" "../src/lvgl/src/font/lv_font_montserrat_26.c"
+'Finished building: ../src/lvgl/src/font/lv_font_montserrat_26.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_montserrat_28.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_montserrat_28.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_montserrat_28.d" -MT"src/lvgl/src/font/lv_font_montserrat_28.o" -o "src/lvgl/src/font/lv_font_montserrat_28.o" "../src/lvgl/src/font/lv_font_montserrat_28.c"
+'Finished building: ../src/lvgl/src/font/lv_font_montserrat_28.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_montserrat_28_compressed.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_montserrat_28_compressed.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_montserrat_28_compressed.d" -MT"src/lvgl/src/font/lv_font_montserrat_28_compressed.o" -o "src/lvgl/src/font/lv_font_montserrat_28_compressed.o" "../src/lvgl/src/font/lv_font_montserrat_28_compressed.c"
+'Finished building: ../src/lvgl/src/font/lv_font_montserrat_28_compressed.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_montserrat_30.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_montserrat_30.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_montserrat_30.d" -MT"src/lvgl/src/font/lv_font_montserrat_30.o" -o "src/lvgl/src/font/lv_font_montserrat_30.o" "../src/lvgl/src/font/lv_font_montserrat_30.c"
+'Finished building: ../src/lvgl/src/font/lv_font_montserrat_30.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_montserrat_32.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_montserrat_32.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_montserrat_32.d" -MT"src/lvgl/src/font/lv_font_montserrat_32.o" -o "src/lvgl/src/font/lv_font_montserrat_32.o" "../src/lvgl/src/font/lv_font_montserrat_32.c"
+'Finished building: ../src/lvgl/src/font/lv_font_montserrat_32.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_montserrat_34.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_montserrat_34.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_montserrat_34.d" -MT"src/lvgl/src/font/lv_font_montserrat_34.o" -o "src/lvgl/src/font/lv_font_montserrat_34.o" "../src/lvgl/src/font/lv_font_montserrat_34.c"
+'Finished building: ../src/lvgl/src/font/lv_font_montserrat_34.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_montserrat_36.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_montserrat_36.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_montserrat_36.d" -MT"src/lvgl/src/font/lv_font_montserrat_36.o" -o "src/lvgl/src/font/lv_font_montserrat_36.o" "../src/lvgl/src/font/lv_font_montserrat_36.c"
+'Finished building: ../src/lvgl/src/font/lv_font_montserrat_36.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_montserrat_38.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_montserrat_38.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_montserrat_38.d" -MT"src/lvgl/src/font/lv_font_montserrat_38.o" -o "src/lvgl/src/font/lv_font_montserrat_38.o" "../src/lvgl/src/font/lv_font_montserrat_38.c"
+'Finished building: ../src/lvgl/src/font/lv_font_montserrat_38.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_montserrat_40.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_montserrat_40.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_montserrat_40.d" -MT"src/lvgl/src/font/lv_font_montserrat_40.o" -o "src/lvgl/src/font/lv_font_montserrat_40.o" "../src/lvgl/src/font/lv_font_montserrat_40.c"
+'Finished building: ../src/lvgl/src/font/lv_font_montserrat_40.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_montserrat_42.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_montserrat_42.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_montserrat_42.d" -MT"src/lvgl/src/font/lv_font_montserrat_42.o" -o "src/lvgl/src/font/lv_font_montserrat_42.o" "../src/lvgl/src/font/lv_font_montserrat_42.c"
+'Finished building: ../src/lvgl/src/font/lv_font_montserrat_42.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_montserrat_44.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_montserrat_44.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_montserrat_44.d" -MT"src/lvgl/src/font/lv_font_montserrat_44.o" -o "src/lvgl/src/font/lv_font_montserrat_44.o" "../src/lvgl/src/font/lv_font_montserrat_44.c"
+'Finished building: ../src/lvgl/src/font/lv_font_montserrat_44.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_montserrat_46.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_montserrat_46.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_montserrat_46.d" -MT"src/lvgl/src/font/lv_font_montserrat_46.o" -o "src/lvgl/src/font/lv_font_montserrat_46.o" "../src/lvgl/src/font/lv_font_montserrat_46.c"
+'Finished building: ../src/lvgl/src/font/lv_font_montserrat_46.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_montserrat_48.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_montserrat_48.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_montserrat_48.d" -MT"src/lvgl/src/font/lv_font_montserrat_48.o" -o "src/lvgl/src/font/lv_font_montserrat_48.o" "../src/lvgl/src/font/lv_font_montserrat_48.c"
+'Finished building: ../src/lvgl/src/font/lv_font_montserrat_48.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_montserrat_8.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_montserrat_8.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_montserrat_8.d" -MT"src/lvgl/src/font/lv_font_montserrat_8.o" -o "src/lvgl/src/font/lv_font_montserrat_8.o" "../src/lvgl/src/font/lv_font_montserrat_8.c"
+'Finished building: ../src/lvgl/src/font/lv_font_montserrat_8.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_simsun_16_cjk.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_simsun_16_cjk.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_simsun_16_cjk.d" -MT"src/lvgl/src/font/lv_font_simsun_16_cjk.o" -o "src/lvgl/src/font/lv_font_simsun_16_cjk.o" "../src/lvgl/src/font/lv_font_simsun_16_cjk.c"
+'Finished building: ../src/lvgl/src/font/lv_font_simsun_16_cjk.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_unscii_16.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_unscii_16.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_unscii_16.d" -MT"src/lvgl/src/font/lv_font_unscii_16.o" -o "src/lvgl/src/font/lv_font_unscii_16.o" "../src/lvgl/src/font/lv_font_unscii_16.c"
+'Finished building: ../src/lvgl/src/font/lv_font_unscii_16.c'
+' '
+'Building file: ../src/lvgl/src/font/lv_font_unscii_8.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/font/lv_font_unscii_8.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/font/lv_font_unscii_8.d" -MT"src/lvgl/src/font/lv_font_unscii_8.o" -o "src/lvgl/src/font/lv_font_unscii_8.o" "../src/lvgl/src/font/lv_font_unscii_8.c"
+'Finished building: ../src/lvgl/src/font/lv_font_unscii_8.c'
+' '
+'Building file: ../src/lvgl/src/extra/widgets/win/lv_win.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/extra/widgets/win/lv_win.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/extra/widgets/win/lv_win.d" -MT"src/lvgl/src/extra/widgets/win/lv_win.o" -o "src/lvgl/src/extra/widgets/win/lv_win.o" "../src/lvgl/src/extra/widgets/win/lv_win.c"
+'Finished building: ../src/lvgl/src/extra/widgets/win/lv_win.c'
+' '
+'Building file: ../src/lvgl/src/extra/widgets/tileview/lv_tileview.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/extra/widgets/tileview/lv_tileview.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/extra/widgets/tileview/lv_tileview.d" -MT"src/lvgl/src/extra/widgets/tileview/lv_tileview.o" -o "src/lvgl/src/extra/widgets/tileview/lv_tileview.o" "../src/lvgl/src/extra/widgets/tileview/lv_tileview.c"
+'Finished building: ../src/lvgl/src/extra/widgets/tileview/lv_tileview.c'
+' '
+'Building file: ../src/lvgl/src/extra/widgets/tabview/lv_tabview.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/extra/widgets/tabview/lv_tabview.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/extra/widgets/tabview/lv_tabview.d" -MT"src/lvgl/src/extra/widgets/tabview/lv_tabview.o" -o "src/lvgl/src/extra/widgets/tabview/lv_tabview.o" "../src/lvgl/src/extra/widgets/tabview/lv_tabview.c"
+'Finished building: ../src/lvgl/src/extra/widgets/tabview/lv_tabview.c'
+' '
+'Building file: ../src/lvgl/src/extra/widgets/spinner/lv_spinner.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/extra/widgets/spinner/lv_spinner.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/extra/widgets/spinner/lv_spinner.d" -MT"src/lvgl/src/extra/widgets/spinner/lv_spinner.o" -o "src/lvgl/src/extra/widgets/spinner/lv_spinner.o" "../src/lvgl/src/extra/widgets/spinner/lv_spinner.c"
+'Finished building: ../src/lvgl/src/extra/widgets/spinner/lv_spinner.c'
+' '
+'Building file: ../src/lvgl/src/extra/widgets/spinbox/lv_spinbox.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/extra/widgets/spinbox/lv_spinbox.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/extra/widgets/spinbox/lv_spinbox.d" -MT"src/lvgl/src/extra/widgets/spinbox/lv_spinbox.o" -o "src/lvgl/src/extra/widgets/spinbox/lv_spinbox.o" "../src/lvgl/src/extra/widgets/spinbox/lv_spinbox.c"
+'Finished building: ../src/lvgl/src/extra/widgets/spinbox/lv_spinbox.c'
+' '
+'Building file: ../src/lvgl/src/extra/widgets/span/lv_span.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/extra/widgets/span/lv_span.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/extra/widgets/span/lv_span.d" -MT"src/lvgl/src/extra/widgets/span/lv_span.o" -o "src/lvgl/src/extra/widgets/span/lv_span.o" "../src/lvgl/src/extra/widgets/span/lv_span.c"
+'Finished building: ../src/lvgl/src/extra/widgets/span/lv_span.c'
+' '
+'Building file: ../src/lvgl/src/extra/widgets/msgbox/lv_msgbox.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/extra/widgets/msgbox/lv_msgbox.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/extra/widgets/msgbox/lv_msgbox.d" -MT"src/lvgl/src/extra/widgets/msgbox/lv_msgbox.o" -o "src/lvgl/src/extra/widgets/msgbox/lv_msgbox.o" "../src/lvgl/src/extra/widgets/msgbox/lv_msgbox.c"
+'Finished building: ../src/lvgl/src/extra/widgets/msgbox/lv_msgbox.c'
+' '
+'Building file: ../src/lvgl/src/extra/widgets/meter/lv_meter.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/extra/widgets/meter/lv_meter.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/extra/widgets/meter/lv_meter.d" -MT"src/lvgl/src/extra/widgets/meter/lv_meter.o" -o "src/lvgl/src/extra/widgets/meter/lv_meter.o" "../src/lvgl/src/extra/widgets/meter/lv_meter.c"
+'Finished building: ../src/lvgl/src/extra/widgets/meter/lv_meter.c'
+' '
+'Building file: ../src/lvgl/src/extra/widgets/list/lv_list.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/extra/widgets/list/lv_list.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/extra/widgets/list/lv_list.d" -MT"src/lvgl/src/extra/widgets/list/lv_list.o" -o "src/lvgl/src/extra/widgets/list/lv_list.o" "../src/lvgl/src/extra/widgets/list/lv_list.c"
+'Finished building: ../src/lvgl/src/extra/widgets/list/lv_list.c'
+' '
+'Building file: ../src/lvgl/src/extra/widgets/led/lv_led.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/extra/widgets/led/lv_led.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/extra/widgets/led/lv_led.d" -MT"src/lvgl/src/extra/widgets/led/lv_led.o" -o "src/lvgl/src/extra/widgets/led/lv_led.o" "../src/lvgl/src/extra/widgets/led/lv_led.c"
+'Finished building: ../src/lvgl/src/extra/widgets/led/lv_led.c'
+' '
+'Building file: ../src/lvgl/src/extra/widgets/keyboard/lv_keyboard.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/extra/widgets/keyboard/lv_keyboard.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/extra/widgets/keyboard/lv_keyboard.d" -MT"src/lvgl/src/extra/widgets/keyboard/lv_keyboard.o" -o "src/lvgl/src/extra/widgets/keyboard/lv_keyboard.o" "../src/lvgl/src/extra/widgets/keyboard/lv_keyboard.c"
+'Finished building: ../src/lvgl/src/extra/widgets/keyboard/lv_keyboard.c'
+' '
+'Building file: ../src/lvgl/src/extra/widgets/imgbtn/lv_imgbtn.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/extra/widgets/imgbtn/lv_imgbtn.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/extra/widgets/imgbtn/lv_imgbtn.d" -MT"src/lvgl/src/extra/widgets/imgbtn/lv_imgbtn.o" -o "src/lvgl/src/extra/widgets/imgbtn/lv_imgbtn.o" "../src/lvgl/src/extra/widgets/imgbtn/lv_imgbtn.c"
+'Finished building: ../src/lvgl/src/extra/widgets/imgbtn/lv_imgbtn.c'
+' '
+'Building file: ../src/lvgl/src/extra/widgets/colorwheel/lv_colorwheel.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/extra/widgets/colorwheel/lv_colorwheel.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/extra/widgets/colorwheel/lv_colorwheel.d" -MT"src/lvgl/src/extra/widgets/colorwheel/lv_colorwheel.o" -o "src/lvgl/src/extra/widgets/colorwheel/lv_colorwheel.o" "../src/lvgl/src/extra/widgets/colorwheel/lv_colorwheel.c"
+'Finished building: ../src/lvgl/src/extra/widgets/colorwheel/lv_colorwheel.c'
+' '
+'Building file: ../src/lvgl/src/extra/widgets/chart/lv_chart.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/extra/widgets/chart/lv_chart.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/extra/widgets/chart/lv_chart.d" -MT"src/lvgl/src/extra/widgets/chart/lv_chart.o" -o "src/lvgl/src/extra/widgets/chart/lv_chart.o" "../src/lvgl/src/extra/widgets/chart/lv_chart.c"
+'Finished building: ../src/lvgl/src/extra/widgets/chart/lv_chart.c'
+' '
+'Building file: ../src/lvgl/src/extra/widgets/calendar/lv_calendar.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/extra/widgets/calendar/lv_calendar.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/extra/widgets/calendar/lv_calendar.d" -MT"src/lvgl/src/extra/widgets/calendar/lv_calendar.o" -o "src/lvgl/src/extra/widgets/calendar/lv_calendar.o" "../src/lvgl/src/extra/widgets/calendar/lv_calendar.c"
+'Finished building: ../src/lvgl/src/extra/widgets/calendar/lv_calendar.c'
+' '
+'Building file: ../src/lvgl/src/extra/widgets/calendar/lv_calendar_header_arrow.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/extra/widgets/calendar/lv_calendar_header_arrow.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/extra/widgets/calendar/lv_calendar_header_arrow.d" -MT"src/lvgl/src/extra/widgets/calendar/lv_calendar_header_arrow.o" -o "src/lvgl/src/extra/widgets/calendar/lv_calendar_header_arrow.o" "../src/lvgl/src/extra/widgets/calendar/lv_calendar_header_arrow.c"
+'Finished building: ../src/lvgl/src/extra/widgets/calendar/lv_calendar_header_arrow.c'
+' '
+'Building file: ../src/lvgl/src/extra/widgets/calendar/lv_calendar_header_dropdown.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/extra/widgets/calendar/lv_calendar_header_dropdown.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/extra/widgets/calendar/lv_calendar_header_dropdown.d" -MT"src/lvgl/src/extra/widgets/calendar/lv_calendar_header_dropdown.o" -o "src/lvgl/src/extra/widgets/calendar/lv_calendar_header_dropdown.o" "../src/lvgl/src/extra/widgets/calendar/lv_calendar_header_dropdown.c"
+'Finished building: ../src/lvgl/src/extra/widgets/calendar/lv_calendar_header_dropdown.c'
+' '
+'Building file: ../src/lvgl/src/extra/widgets/animimg/lv_animimg.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/extra/widgets/animimg/lv_animimg.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/extra/widgets/animimg/lv_animimg.d" -MT"src/lvgl/src/extra/widgets/animimg/lv_animimg.o" -o "src/lvgl/src/extra/widgets/animimg/lv_animimg.o" "../src/lvgl/src/extra/widgets/animimg/lv_animimg.c"
+'Finished building: ../src/lvgl/src/extra/widgets/animimg/lv_animimg.c'
+' '
+'Building file: ../src/lvgl/src/extra/themes/mono/lv_theme_mono.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/extra/themes/mono/lv_theme_mono.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/extra/themes/mono/lv_theme_mono.d" -MT"src/lvgl/src/extra/themes/mono/lv_theme_mono.o" -o "src/lvgl/src/extra/themes/mono/lv_theme_mono.o" "../src/lvgl/src/extra/themes/mono/lv_theme_mono.c"
+'Finished building: ../src/lvgl/src/extra/themes/mono/lv_theme_mono.c'
+' '
+'Building file: ../src/lvgl/src/extra/themes/default/lv_theme_default.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/extra/themes/default/lv_theme_default.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/extra/themes/default/lv_theme_default.d" -MT"src/lvgl/src/extra/themes/default/lv_theme_default.o" -o "src/lvgl/src/extra/themes/default/lv_theme_default.o" "../src/lvgl/src/extra/themes/default/lv_theme_default.c"
+'Finished building: ../src/lvgl/src/extra/themes/default/lv_theme_default.c'
+' '
+'Building file: ../src/lvgl/src/extra/themes/basic/lv_theme_basic.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/extra/themes/basic/lv_theme_basic.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/extra/themes/basic/lv_theme_basic.d" -MT"src/lvgl/src/extra/themes/basic/lv_theme_basic.o" -o "src/lvgl/src/extra/themes/basic/lv_theme_basic.o" "../src/lvgl/src/extra/themes/basic/lv_theme_basic.c"
+'Finished building: ../src/lvgl/src/extra/themes/basic/lv_theme_basic.c'
+' '
+'Building file: ../src/lvgl/src/extra/others/snapshot/lv_snapshot.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/extra/others/snapshot/lv_snapshot.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/extra/others/snapshot/lv_snapshot.d" -MT"src/lvgl/src/extra/others/snapshot/lv_snapshot.o" -o "src/lvgl/src/extra/others/snapshot/lv_snapshot.o" "../src/lvgl/src/extra/others/snapshot/lv_snapshot.c"
+'Finished building: ../src/lvgl/src/extra/others/snapshot/lv_snapshot.c'
+' '
+'Building file: ../src/lvgl/src/extra/layouts/grid/lv_grid.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/extra/layouts/grid/lv_grid.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/extra/layouts/grid/lv_grid.d" -MT"src/lvgl/src/extra/layouts/grid/lv_grid.o" -o "src/lvgl/src/extra/layouts/grid/lv_grid.o" "../src/lvgl/src/extra/layouts/grid/lv_grid.c"
+'Finished building: ../src/lvgl/src/extra/layouts/grid/lv_grid.c'
+' '
+'Building file: ../src/lvgl/src/extra/layouts/flex/lv_flex.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/extra/layouts/flex/lv_flex.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/extra/layouts/flex/lv_flex.d" -MT"src/lvgl/src/extra/layouts/flex/lv_flex.o" -o "src/lvgl/src/extra/layouts/flex/lv_flex.o" "../src/lvgl/src/extra/layouts/flex/lv_flex.c"
+'Finished building: ../src/lvgl/src/extra/layouts/flex/lv_flex.c'
+' '
+'Building file: ../src/lvgl/src/extra/lv_extra.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/extra/lv_extra.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/extra/lv_extra.d" -MT"src/lvgl/src/extra/lv_extra.o" -o "src/lvgl/src/extra/lv_extra.o" "../src/lvgl/src/extra/lv_extra.c"
+'Finished building: ../src/lvgl/src/extra/lv_extra.c'
+' '
+'Building file: ../src/lvgl/src/draw/lv_draw_arc.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/draw/lv_draw_arc.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/draw/lv_draw_arc.d" -MT"src/lvgl/src/draw/lv_draw_arc.o" -o "src/lvgl/src/draw/lv_draw_arc.o" "../src/lvgl/src/draw/lv_draw_arc.c"
+'Finished building: ../src/lvgl/src/draw/lv_draw_arc.c'
+' '
+'Building file: ../src/lvgl/src/draw/lv_draw_blend.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/draw/lv_draw_blend.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/draw/lv_draw_blend.d" -MT"src/lvgl/src/draw/lv_draw_blend.o" -o "src/lvgl/src/draw/lv_draw_blend.o" "../src/lvgl/src/draw/lv_draw_blend.c"
+'Finished building: ../src/lvgl/src/draw/lv_draw_blend.c'
+' '
+'Building file: ../src/lvgl/src/draw/lv_draw_img.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/draw/lv_draw_img.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/draw/lv_draw_img.d" -MT"src/lvgl/src/draw/lv_draw_img.o" -o "src/lvgl/src/draw/lv_draw_img.o" "../src/lvgl/src/draw/lv_draw_img.c"
+'Finished building: ../src/lvgl/src/draw/lv_draw_img.c'
+' '
+'Building file: ../src/lvgl/src/draw/lv_draw_label.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/draw/lv_draw_label.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/draw/lv_draw_label.d" -MT"src/lvgl/src/draw/lv_draw_label.o" -o "src/lvgl/src/draw/lv_draw_label.o" "../src/lvgl/src/draw/lv_draw_label.c"
+'Finished building: ../src/lvgl/src/draw/lv_draw_label.c'
+' '
+'Building file: ../src/lvgl/src/draw/lv_draw_line.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/draw/lv_draw_line.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/draw/lv_draw_line.d" -MT"src/lvgl/src/draw/lv_draw_line.o" -o "src/lvgl/src/draw/lv_draw_line.o" "../src/lvgl/src/draw/lv_draw_line.c"
+'Finished building: ../src/lvgl/src/draw/lv_draw_line.c'
+' '
+'Building file: ../src/lvgl/src/draw/lv_draw_mask.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/draw/lv_draw_mask.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/draw/lv_draw_mask.d" -MT"src/lvgl/src/draw/lv_draw_mask.o" -o "src/lvgl/src/draw/lv_draw_mask.o" "../src/lvgl/src/draw/lv_draw_mask.c"
+'Finished building: ../src/lvgl/src/draw/lv_draw_mask.c'
+' '
+'Building file: ../src/lvgl/src/draw/lv_draw_rect.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/draw/lv_draw_rect.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/draw/lv_draw_rect.d" -MT"src/lvgl/src/draw/lv_draw_rect.o" -o "src/lvgl/src/draw/lv_draw_rect.o" "../src/lvgl/src/draw/lv_draw_rect.c"
+'Finished building: ../src/lvgl/src/draw/lv_draw_rect.c'
+' '
+'Building file: ../src/lvgl/src/draw/lv_draw_triangle.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/draw/lv_draw_triangle.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/draw/lv_draw_triangle.d" -MT"src/lvgl/src/draw/lv_draw_triangle.o" -o "src/lvgl/src/draw/lv_draw_triangle.o" "../src/lvgl/src/draw/lv_draw_triangle.c"
+'Finished building: ../src/lvgl/src/draw/lv_draw_triangle.c'
+' '
+'Building file: ../src/lvgl/src/draw/lv_img_buf.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/draw/lv_img_buf.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/draw/lv_img_buf.d" -MT"src/lvgl/src/draw/lv_img_buf.o" -o "src/lvgl/src/draw/lv_img_buf.o" "../src/lvgl/src/draw/lv_img_buf.c"
+'Finished building: ../src/lvgl/src/draw/lv_img_buf.c'
+' '
+'Building file: ../src/lvgl/src/draw/lv_img_cache.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/draw/lv_img_cache.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/draw/lv_img_cache.d" -MT"src/lvgl/src/draw/lv_img_cache.o" -o "src/lvgl/src/draw/lv_img_cache.o" "../src/lvgl/src/draw/lv_img_cache.c"
+'Finished building: ../src/lvgl/src/draw/lv_img_cache.c'
+' '
+'Building file: ../src/lvgl/src/draw/lv_img_decoder.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/draw/lv_img_decoder.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/draw/lv_img_decoder.d" -MT"src/lvgl/src/draw/lv_img_decoder.o" -o "src/lvgl/src/draw/lv_img_decoder.o" "../src/lvgl/src/draw/lv_img_decoder.c"
+'Finished building: ../src/lvgl/src/draw/lv_img_decoder.c'
+' '
+'Building file: ../src/lvgl/src/core/lv_disp.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/core/lv_disp.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/core/lv_disp.d" -MT"src/lvgl/src/core/lv_disp.o" -o "src/lvgl/src/core/lv_disp.o" "../src/lvgl/src/core/lv_disp.c"
+'Finished building: ../src/lvgl/src/core/lv_disp.c'
+' '
+'Building file: ../src/lvgl/src/core/lv_event.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/core/lv_event.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/core/lv_event.d" -MT"src/lvgl/src/core/lv_event.o" -o "src/lvgl/src/core/lv_event.o" "../src/lvgl/src/core/lv_event.c"
+'Finished building: ../src/lvgl/src/core/lv_event.c'
+' '
+'Building file: ../src/lvgl/src/core/lv_group.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/core/lv_group.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/core/lv_group.d" -MT"src/lvgl/src/core/lv_group.o" -o "src/lvgl/src/core/lv_group.o" "../src/lvgl/src/core/lv_group.c"
+'Finished building: ../src/lvgl/src/core/lv_group.c'
+' '
+'Building file: ../src/lvgl/src/core/lv_indev.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/core/lv_indev.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/core/lv_indev.d" -MT"src/lvgl/src/core/lv_indev.o" -o "src/lvgl/src/core/lv_indev.o" "../src/lvgl/src/core/lv_indev.c"
+'Finished building: ../src/lvgl/src/core/lv_indev.c'
+' '
+'Building file: ../src/lvgl/src/core/lv_indev_scroll.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/core/lv_indev_scroll.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/core/lv_indev_scroll.d" -MT"src/lvgl/src/core/lv_indev_scroll.o" -o "src/lvgl/src/core/lv_indev_scroll.o" "../src/lvgl/src/core/lv_indev_scroll.c"
+'Finished building: ../src/lvgl/src/core/lv_indev_scroll.c'
+' '
+'Building file: ../src/lvgl/src/core/lv_obj.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/core/lv_obj.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/core/lv_obj.d" -MT"src/lvgl/src/core/lv_obj.o" -o "src/lvgl/src/core/lv_obj.o" "../src/lvgl/src/core/lv_obj.c"
+'Finished building: ../src/lvgl/src/core/lv_obj.c'
+' '
+'Building file: ../src/lvgl/src/core/lv_obj_class.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/core/lv_obj_class.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/core/lv_obj_class.d" -MT"src/lvgl/src/core/lv_obj_class.o" -o "src/lvgl/src/core/lv_obj_class.o" "../src/lvgl/src/core/lv_obj_class.c"
+'Finished building: ../src/lvgl/src/core/lv_obj_class.c'
+' '
+'Building file: ../src/lvgl/src/core/lv_obj_draw.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/core/lv_obj_draw.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/core/lv_obj_draw.d" -MT"src/lvgl/src/core/lv_obj_draw.o" -o "src/lvgl/src/core/lv_obj_draw.o" "../src/lvgl/src/core/lv_obj_draw.c"
+'Finished building: ../src/lvgl/src/core/lv_obj_draw.c'
+' '
+'Building file: ../src/lvgl/src/core/lv_obj_pos.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/core/lv_obj_pos.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/core/lv_obj_pos.d" -MT"src/lvgl/src/core/lv_obj_pos.o" -o "src/lvgl/src/core/lv_obj_pos.o" "../src/lvgl/src/core/lv_obj_pos.c"
+'Finished building: ../src/lvgl/src/core/lv_obj_pos.c'
+' '
+'Building file: ../src/lvgl/src/core/lv_obj_scroll.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/core/lv_obj_scroll.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/core/lv_obj_scroll.d" -MT"src/lvgl/src/core/lv_obj_scroll.o" -o "src/lvgl/src/core/lv_obj_scroll.o" "../src/lvgl/src/core/lv_obj_scroll.c"
+'Finished building: ../src/lvgl/src/core/lv_obj_scroll.c'
+' '
+'Building file: ../src/lvgl/src/core/lv_obj_style.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/core/lv_obj_style.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/core/lv_obj_style.d" -MT"src/lvgl/src/core/lv_obj_style.o" -o "src/lvgl/src/core/lv_obj_style.o" "../src/lvgl/src/core/lv_obj_style.c"
+'Finished building: ../src/lvgl/src/core/lv_obj_style.c'
+' '
+'Building file: ../src/lvgl/src/core/lv_obj_style_gen.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/core/lv_obj_style_gen.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/core/lv_obj_style_gen.d" -MT"src/lvgl/src/core/lv_obj_style_gen.o" -o "src/lvgl/src/core/lv_obj_style_gen.o" "../src/lvgl/src/core/lv_obj_style_gen.c"
+'Finished building: ../src/lvgl/src/core/lv_obj_style_gen.c'
+' '
+'Building file: ../src/lvgl/src/core/lv_obj_tree.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/core/lv_obj_tree.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/core/lv_obj_tree.d" -MT"src/lvgl/src/core/lv_obj_tree.o" -o "src/lvgl/src/core/lv_obj_tree.o" "../src/lvgl/src/core/lv_obj_tree.c"
+'Finished building: ../src/lvgl/src/core/lv_obj_tree.c'
+' '
+'Building file: ../src/lvgl/src/core/lv_refr.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/core/lv_refr.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/core/lv_refr.d" -MT"src/lvgl/src/core/lv_refr.o" -o "src/lvgl/src/core/lv_refr.o" "../src/lvgl/src/core/lv_refr.c"
+../src/lvgl/src/core/lv_refr.c: In function '_lv_disp_refr_timer':
+../src/lvgl/src/core/lv_refr.c:283:45: warning: format '%d' expects argument of type 'int', but argument 3 has type 'uint32_t' {aka 'long unsigned int'} [-Wformat=]
+  283 |         lv_label_set_text_fmt(perf_label, "%d FPS\n%d%% CPU", fps, cpu);
+      |                                            ~^                 ~~~
+      |                                             |                 |
+      |                                             int               uint32_t {aka long unsigned int}
+      |                                            %ld
+../src/lvgl/src/core/lv_refr.c:283:53: warning: format '%d' expects argument of type 'int', but argument 4 has type 'uint32_t' {aka 'long unsigned int'} [-Wformat=]
+  283 |         lv_label_set_text_fmt(perf_label, "%d FPS\n%d%% CPU", fps, cpu);
+      |                                                    ~^              ~~~
+      |                                                     |              |
+      |                                                     int            uint32_t {aka long unsigned int}
+      |                                                    %ld
+../src/lvgl/src/core/lv_refr.c:310:44: warning: format '%d' expects argument of type 'int', but argument 3 has type 'uint32_t' {aka 'long unsigned int'} [-Wformat=]
+  310 |         lv_label_set_text_fmt(mem_label, "%d.%d kB used (%d %%)\n%d%% frag.", used_kb,  used_kb_tenth, mon.used_pct,
+      |                                           ~^                                  ~~~~~~~
+      |                                            |                                  |
+      |                                            int                                uint32_t {aka long unsigned int}
+      |                                           %ld
+../src/lvgl/src/core/lv_refr.c:310:47: warning: format '%d' expects argument of type 'int', but argument 4 has type 'uint32_t' {aka 'long unsigned int'} [-Wformat=]
+  310 |         lv_label_set_text_fmt(mem_label, "%d.%d kB used (%d %%)\n%d%% frag.", used_kb,  used_kb_tenth, mon.used_pct,
+      |                                              ~^                                         ~~~~~~~~~~~~~
+      |                                               |                                         |
+      |                                               int                                       uint32_t {aka long unsigned int}
+      |                                              %ld
+'Finished building: ../src/lvgl/src/core/lv_refr.c'
+' '
+'Building file: ../src/lvgl/src/core/lv_theme.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/src/core/lv_theme.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/src/core/lv_theme.d" -MT"src/lvgl/src/core/lv_theme.o" -o "src/lvgl/src/core/lv_theme.o" "../src/lvgl/src/core/lv_theme.c"
+'Finished building: ../src/lvgl/src/core/lv_theme.c'
+' '
+'Building file: ../src/lvgl/examples/porting/lv_port_disp_template.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/examples/porting/lv_port_disp_template.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/examples/porting/lv_port_disp_template.d" -MT"src/lvgl/examples/porting/lv_port_disp_template.o" -o "src/lvgl/examples/porting/lv_port_disp_template.o" "../src/lvgl/examples/porting/lv_port_disp_template.c"
+'Finished building: ../src/lvgl/examples/porting/lv_port_disp_template.c'
+' '
+'Building file: ../src/lvgl/examples/porting/lv_port_fs_template.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/examples/porting/lv_port_fs_template.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/examples/porting/lv_port_fs_template.d" -MT"src/lvgl/examples/porting/lv_port_fs_template.o" -o "src/lvgl/examples/porting/lv_port_fs_template.o" "../src/lvgl/examples/porting/lv_port_fs_template.c"
+'Finished building: ../src/lvgl/examples/porting/lv_port_fs_template.c'
+' '
+'Building file: ../src/lvgl/examples/porting/lv_port_indev_template.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/examples/porting/lv_port_indev_template.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/examples/porting/lv_port_indev_template.d" -MT"src/lvgl/examples/porting/lv_port_indev_template.o" -o "src/lvgl/examples/porting/lv_port_indev_template.o" "../src/lvgl/examples/porting/lv_port_indev_template.c"
+'Finished building: ../src/lvgl/examples/porting/lv_port_indev_template.c'
+' '
+'Building file: ../src/lvgl/my_gui.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lvgl/my_gui.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lvgl/my_gui.d" -MT"src/lvgl/my_gui.o" -o "src/lvgl/my_gui.o" "../src/lvgl/my_gui.c"
+../src/lvgl/my_gui.c: In function 'my_gui_update_prf_value':
+../src/lvgl/my_gui.c:118:44: warning: format '%u' expects argument of type 'unsigned int', but argument 4 has type 'uint32_t' {aka 'long unsigned int'} [-Wformat=]
+  118 |         snprintf(buffer, sizeof(buffer), "%u Hz", prf);
+      |                                           ~^      ~~~
+      |                                            |      |
+      |                                            |      uint32_t {aka long unsigned int}
+      |                                            unsigned int
+      |                                           %lu
+../src/lvgl/my_gui.c: In function 'my_gui_update_packet_count':
+../src/lvgl/my_gui.c:149:44: warning: format '%u' expects argument of type 'unsigned int', but argument 4 has type 'uint32_t' {aka 'long unsigned int'} [-Wformat=]
+  149 |         snprintf(buffer, sizeof(buffer), "%u", count);
+      |                                           ~^   ~~~~~
+      |                                            |   |
+      |                                            |   uint32_t {aka long unsigned int}
+      |                                            unsigned int
+      |                                           %lu
+'Finished building: ../src/lvgl/my_gui.c'
+' '
+'Building file: ../src/lcd/lcd_drv.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lcd/lcd_drv.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lcd/lcd_drv.d" -MT"src/lcd/lcd_drv.o" -o "src/lcd/lcd_drv.o" "../src/lcd/lcd_drv.c"
+'Finished building: ../src/lcd/lcd_drv.c'
+' '
+'Building file: ../src/lcd/sys_timer.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/lcd/sys_timer.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/lcd/sys_timer.d" -MT"src/lcd/sys_timer.o" -o "src/lcd/sys_timer.o" "../src/lcd/sys_timer.c"
+../src/lcd/sys_timer.c: In function 'System_Timer_Init':
+../src/lcd/sys_timer.c:22:9: warning: unused variable 'Status' [-Wunused-variable]
+   22 |     int Status;
+      |         ^~~~~~
+'Finished building: ../src/lcd/sys_timer.c'
+' '
+'Building file: ../src/main.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/main.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -ID:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bspinclude/include -MMD -MP -MF"src/main.d" -MT"src/main.o" -o "src/main.o" "../src/main.c"
+'Finished building: ../src/main.c'
+' '
+'Building target: lcd_126.elf'
+'Invoking: ARM v7 gcc linker'
+arm-none-eabi-gcc -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -Wl,-build-id=none -specs=Xilinx.spec -Wl,-T -Wl,../src/lscript.ld -LD:/516/prj/zynq7020/vitis_workspace/lcd_platform/export/lcd_platform/sw/lcd_platform/standalone_domain/bsplib/lib -o "lcd_126.elf"  ./src/lvgl/src/widgets/lv_arc.o ./src/lvgl/src/widgets/lv_bar.o ./src/lvgl/src/widgets/lv_btn.o ./src/lvgl/src/widgets/lv_btnmatrix.o ./src/lvgl/src/widgets/lv_canvas.o ./src/lvgl/src/widgets/lv_checkbox.o ./src/lvgl/src/widgets/lv_dropdown.o ./src/lvgl/src/widgets/lv_img.o ./src/lvgl/src/widgets/lv_label.o ./src/lvgl/src/widgets/lv_line.o ./src/lvgl/src/widgets/lv_objx_templ.o ./src/lvgl/src/widgets/lv_roller.o ./src/lvgl/src/widgets/lv_slider.o ./src/lvgl/src/widgets/lv_switch.o ./src/lvgl/src/widgets/lv_table.o ./src/lvgl/src/widgets/lv_textarea.o  ./src/lvgl/src/misc/lv_anim.o ./src/lvgl/src/misc/lv_anim_timeline.o ./src/lvgl/src/misc/lv_area.o ./src/lvgl/src/misc/lv_async.o ./src/lvgl/src/misc/lv_bidi.o ./src/lvgl/src/misc/lv_color.o ./src/lvgl/src/misc/lv_fs.o ./src/lvgl/src/misc/lv_gc.o ./src/lvgl/src/misc/lv_ll.o ./src/lvgl/src/misc/lv_log.o ./src/lvgl/src/misc/lv_math.o ./src/lvgl/src/misc/lv_mem.o ./src/lvgl/src/misc/lv_printf.o ./src/lvgl/src/misc/lv_style.o ./src/lvgl/src/misc/lv_style_gen.o ./src/lvgl/src/misc/lv_templ.o ./src/lvgl/src/misc/lv_timer.o ./src/lvgl/src/misc/lv_tlsf.o ./src/lvgl/src/misc/lv_txt.o ./src/lvgl/src/misc/lv_txt_ap.o ./src/lvgl/src/misc/lv_utils.o  ./src/lvgl/src/hal/lv_hal_disp.o ./src/lvgl/src/hal/lv_hal_indev.o ./src/lvgl/src/hal/lv_hal_tick.o  ./src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_arc.o ./src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_blend.o ./src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_img.o ./src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_label.o ./src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_line.o ./src/lvgl/src/gpu/sdl/lv_gpu_sdl_draw_rect.o ./src/lvgl/src/gpu/sdl/lv_gpu_sdl_lru.o ./src/lvgl/src/gpu/sdl/lv_gpu_sdl_mask.o ./src/lvgl/src/gpu/sdl/lv_gpu_sdl_stack_blur.o ./src/lvgl/src/gpu/sdl/lv_gpu_sdl_texture_cache.o ./src/lvgl/src/gpu/sdl/lv_gpu_sdl_utils.o  ./src/lvgl/src/gpu/lv_gpu_nxp_pxp.o ./src/lvgl/src/gpu/lv_gpu_nxp_pxp_osa.o ./src/lvgl/src/gpu/lv_gpu_nxp_vglite.o ./src/lvgl/src/gpu/lv_gpu_sdl.o ./src/lvgl/src/gpu/lv_gpu_stm32_dma2d.o  ./src/lvgl/src/font/lv_font.o ./src/lvgl/src/font/lv_font_dejavu_16_persian_hebrew.o ./src/lvgl/src/font/lv_font_fmt_txt.o ./src/lvgl/src/font/lv_font_loader.o ./src/lvgl/src/font/lv_font_montserrat_10.o ./src/lvgl/src/font/lv_font_montserrat_12.o ./src/lvgl/src/font/lv_font_montserrat_12_subpx.o ./src/lvgl/src/font/lv_font_montserrat_14.o ./src/lvgl/src/font/lv_font_montserrat_16.o ./src/lvgl/src/font/lv_font_montserrat_18.o ./src/lvgl/src/font/lv_font_montserrat_20.o ./src/lvgl/src/font/lv_font_montserrat_22.o ./src/lvgl/src/font/lv_font_montserrat_24.o ./src/lvgl/src/font/lv_font_montserrat_26.o ./src/lvgl/src/font/lv_font_montserrat_28.o ./src/lvgl/src/font/lv_font_montserrat_28_compressed.o ./src/lvgl/src/font/lv_font_montserrat_30.o ./src/lvgl/src/font/lv_font_montserrat_32.o ./src/lvgl/src/font/lv_font_montserrat_34.o ./src/lvgl/src/font/lv_font_montserrat_36.o ./src/lvgl/src/font/lv_font_montserrat_38.o ./src/lvgl/src/font/lv_font_montserrat_40.o ./src/lvgl/src/font/lv_font_montserrat_42.o ./src/lvgl/src/font/lv_font_montserrat_44.o ./src/lvgl/src/font/lv_font_montserrat_46.o ./src/lvgl/src/font/lv_font_montserrat_48.o ./src/lvgl/src/font/lv_font_montserrat_8.o ./src/lvgl/src/font/lv_font_simsun_16_cjk.o ./src/lvgl/src/font/lv_font_unscii_16.o ./src/lvgl/src/font/lv_font_unscii_8.o  ./src/lvgl/src/extra/widgets/win/lv_win.o  ./src/lvgl/src/extra/widgets/tileview/lv_tileview.o  ./src/lvgl/src/extra/widgets/tabview/lv_tabview.o  ./src/lvgl/src/extra/widgets/spinner/lv_spinner.o  ./src/lvgl/src/extra/widgets/spinbox/lv_spinbox.o  ./src/lvgl/src/extra/widgets/span/lv_span.o  ./src/lvgl/src/extra/widgets/msgbox/lv_msgbox.o  ./src/lvgl/src/extra/widgets/meter/lv_meter.o  ./src/lvgl/src/extra/widgets/list/lv_list.o  ./src/lvgl/src/extra/widgets/led/lv_led.o  ./src/lvgl/src/extra/widgets/keyboard/lv_keyboard.o  ./src/lvgl/src/extra/widgets/imgbtn/lv_imgbtn.o  ./src/lvgl/src/extra/widgets/colorwheel/lv_colorwheel.o  ./src/lvgl/src/extra/widgets/chart/lv_chart.o  ./src/lvgl/src/extra/widgets/calendar/lv_calendar.o ./src/lvgl/src/extra/widgets/calendar/lv_calendar_header_arrow.o ./src/lvgl/src/extra/widgets/calendar/lv_calendar_header_dropdown.o  ./src/lvgl/src/extra/widgets/animimg/lv_animimg.o  ./src/lvgl/src/extra/themes/mono/lv_theme_mono.o  ./src/lvgl/src/extra/themes/default/lv_theme_default.o  ./src/lvgl/src/extra/themes/basic/lv_theme_basic.o  ./src/lvgl/src/extra/others/snapshot/lv_snapshot.o  ./src/lvgl/src/extra/layouts/grid/lv_grid.o  ./src/lvgl/src/extra/layouts/flex/lv_flex.o  ./src/lvgl/src/extra/lv_extra.o  ./src/lvgl/src/draw/lv_draw_arc.o ./src/lvgl/src/draw/lv_draw_blend.o ./src/lvgl/src/draw/lv_draw_img.o ./src/lvgl/src/draw/lv_draw_label.o ./src/lvgl/src/draw/lv_draw_line.o ./src/lvgl/src/draw/lv_draw_mask.o ./src/lvgl/src/draw/lv_draw_rect.o ./src/lvgl/src/draw/lv_draw_triangle.o ./src/lvgl/src/draw/lv_img_buf.o ./src/lvgl/src/draw/lv_img_cache.o ./src/lvgl/src/draw/lv_img_decoder.o  ./src/lvgl/src/core/lv_disp.o ./src/lvgl/src/core/lv_event.o ./src/lvgl/src/core/lv_group.o ./src/lvgl/src/core/lv_indev.o ./src/lvgl/src/core/lv_indev_scroll.o ./src/lvgl/src/core/lv_obj.o ./src/lvgl/src/core/lv_obj_class.o ./src/lvgl/src/core/lv_obj_draw.o ./src/lvgl/src/core/lv_obj_pos.o ./src/lvgl/src/core/lv_obj_scroll.o ./src/lvgl/src/core/lv_obj_style.o ./src/lvgl/src/core/lv_obj_style_gen.o ./src/lvgl/src/core/lv_obj_tree.o ./src/lvgl/src/core/lv_refr.o ./src/lvgl/src/core/lv_theme.o  ./src/lvgl/examples/porting/lv_port_disp_template.o ./src/lvgl/examples/porting/lv_port_fs_template.o ./src/lvgl/examples/porting/lv_port_indev_template.o  ./src/lvgl/my_gui.o  ./src/lcd/lcd_drv.o ./src/lcd/sys_timer.o  ./src/main.o   -Wl,--start-group,-lxil,-lgcc,-lc,--end-group
+'Finished building target: lcd_126.elf'
+' '
+'Invoking: ARM v7 Print Size'
+arm-none-eabi-size lcd_126.elf  |tee "lcd_126.elf.size"
+   text	   data	    bss	    dec	    hex	filename
+ 704740	   3564	 103840	 812144	  c6470	lcd_126.elf
+'Finished building: lcd_126.elf.size'
+' '
+
+15:44:25 Build Finished (took 13s.204ms)
+

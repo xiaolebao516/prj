@@ -1,0 +1,235 @@
+/*
+ * main.c: 稳定显示版 (保留阻塞逻辑，优化 UI 稳定性)
+ * 功能：LTC2208 ADC采集 + LwIP UDP传输 + LVGL GUI显示
+ */
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+/* LwIP */
+#include "netif/xadapter.h"
+#include "platform.h"
+#include "platform_config.h"
+#include "lwip/udp.h"
+#include "lwip/init.h"
+
+/* Xilinx 基础 */
+#include "xil_printf.h"
+#include "xil_cache.h"
+#include "xil_exception.h"
+#include "sleep.h"
+
+/* ADC/DMA 业务 */
+#include "zynq_interrupt.h"
+#include "adc_dma.h"
+#include "xaxidma.h"
+#include "dma_bd/dma_bd.h"
+#include "xil_types.h"
+#include "xscugic.h"
+
+/* LVGL & LCD 驱动 */
+#include "lv_conf.h"
+#include "lvgl/lvgl.h"
+#include "my_gui.h"
+#include "lcd/lcd_drv.h"
+#include "lcd/sys_timer.h"
+
+/* ================= 网络定义 ================= */
+#define SRC_IP_ADDR    "192.168.1.10"
+#define SRC_GW         "192.168.1.1"
+#define SRC_NETMASK    "255.255.255.0"
+#define DEST_IP_ADDR   "192.168.1.100"
+#define DEST_PORT      8080
+#define INT_DEVICE_ID  XPAR_SCUGIC_SINGLE_DEVICE_ID
+
+#ifdef XPAR_XEMACPS_0_BASEADDR
+    #define PLATFORM_EMAC_BASEADDR XPAR_XEMACPS_0_BASEADDR
+#else
+    #define PLATFORM_EMAC_BASEADDR 0xE000B000
+#endif
+
+/* ================= 全局变量 ================= */
+static XScuGic XScuGicInstance;
+static XAxiDma AxiDma;
+
+volatile u32 g_prf_hz = 10;
+volatile u32 g_prf_delay_us = 100000;
+int g_connected_once = 0; // 锁定连接状态的标志
+
+static u16 DmaRxBuffer[MAX_DMA_LEN / 2] __attribute__ ((aligned(64)));
+static u32 BdChainBuffer[BD_ALIGNMENT*16] __attribute__ ((aligned(64)));
+
+static struct netif server_netif;
+struct netif *echo_netif;
+struct udp_pcb *udp_pcb_send;
+ip_addr_t ip_dest;
+
+/* LVGL 显存缓冲区 */
+static lv_disp_draw_buf_t draw_buf;
+static lv_color_t buf1[320 * 40];
+static lv_disp_drv_t disp_drv;
+
+/* ================= 业务函数 ================= */
+
+void Set_System_PRF(u32 target_hz) {
+    // 1. 合理范围保护，防止设置非法值导致崩溃
+    if(target_hz > 500) target_hz = 100; // 如果收到乱码解析成超大数，默认退回100
+    if(target_hz < 1) target_hz = 1;
+
+    // 2. 更新内部参数
+    g_prf_hz = target_hz;
+    g_prf_delay_us = 1000000 / target_hz;
+
+    // 3. 【关键】更新屏幕 PRF 显示，此后除非再次调用此函数，否则屏幕数值固定不变
+    xil_printf("PRF Updated to: %d Hz\r\n", g_prf_hz);
+    my_gui_update_prf_value(g_prf_hz);
+}
+
+/* UDP 接收回调 - 加入数据清洗 */
+void udp_recv_callback(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *addr, u16_t port) {
+    if (p != NULL) {
+        char clean_buf[16] = {0};
+        u16 copy_len = (p->len > 15) ? 15 : p->len;
+        memcpy(clean_buf, p->payload, copy_len);
+
+        // 数据清洗：把 \r \n \t 和空格全部替换为字符串结束符，防止 atoi 解析出 1000 这种错误
+        for(int i = 0; i < 16; i++) {
+            if(clean_buf[i] == '\r' || clean_buf[i] == '\n' || clean_buf[i] == ' ' || clean_buf[i] == '\t') {
+                clean_buf[i] = '\0';
+                break; // 遇到第一个杂质就截断
+            }
+        }
+
+        int new_prf = atoi(clean_buf);
+        if (new_prf > 0) {
+            Set_System_PRF((u32)new_prf);
+        }
+
+        // 一旦收到包，永久显示 Connected
+        if (!g_connected_once) {
+            g_connected_once = 1;
+            my_gui_update_connection_status(1);
+        }
+
+        pbuf_free(p);
+    }
+}
+
+void setup_udp_connection() {
+    udp_pcb_send = udp_new();
+    udp_bind(udp_pcb_send, IP_ADDR_ANY, 8080);
+    ipaddr_aton(DEST_IP_ADDR, &ip_dest);
+    udp_connect(udp_pcb_send, &ip_dest, DEST_PORT);
+    udp_recv(udp_pcb_send, udp_recv_callback, NULL);
+}
+
+void send_adc_data_udp(u16 *data, u32 sample_num) {
+    struct pbuf *p;
+    u32 total_bytes = sample_num * sizeof(u16);
+    p = pbuf_alloc(PBUF_TRANSPORT, total_bytes, PBUF_RAM);
+    if (!p) return;
+    memcpy(p->payload, data, total_bytes);
+
+    if(udp_send(udp_pcb_send, p) == ERR_OK) {
+        // 发送成功也认为处于连接状态
+        if (!g_connected_once) {
+            g_connected_once = 1;
+            my_gui_update_connection_status(1);
+        }
+    }
+    pbuf_free(p);
+}
+
+/* ================= 主程序 ================= */
+
+int main() {
+    // 定义网络所需局部变量
+    ip_addr_t ipaddr, netmask, gw;
+    unsigned char mac_address[] = { 0x00, 0x0a, 0x35, 0x00, 0x01, 0x02 };
+    static uint32_t total_packets = 0;
+
+    init_platform();
+    xil_printf("\r\n=== System Start: Stable Display Mode ===\r\n");
+
+    // 1. 初始化 LCD 硬件和 LVGL
+    LCD_Init_Hardware();
+    XGpioPs_WritePin(&Gpio, 56, 1);
+
+    InterruptInit(INT_DEVICE_ID, &XScuGicInstance);
+    System_Timer_Init();
+
+    lv_init();
+    lv_disp_draw_buf_init(&draw_buf, buf1, NULL, 320 * 40);
+    lv_disp_drv_init(&disp_drv);
+    disp_drv.hor_res = 320;
+    disp_drv.ver_res = 172;
+    disp_drv.flush_cb = my_disp_flush;
+    disp_drv.draw_buf = &draw_buf;
+    lv_disp_drv_register(&disp_drv);
+
+    // 2. 创建 GUI 并锁定 acquisition 状态
+    my_gui_init();
+    my_gui_create_main_interface();
+
+    // 【关键】：这里初始化后直接显示 Running，且下面循环不再修改它
+    my_gui_update_acquisition_status(1);
+
+    // 3. 初始化 ADC、DMA 和网络
+    XAxiDma_Initial(DMA_DEV_ID, S2MM_INTR_ID, &AxiDma, &XScuGicInstance);
+    InterruptConnect(&XScuGicInstance, S2MM_INTR_ID, Dma_Interrupt_Handler, &AxiDma, 0, 3);
+    CreateBdChain(BdChainBuffer, BD_COUNT, ADC_SAMPLE_NUM * ADC_BYTE, (unsigned char *)DmaRxBuffer, RXPATH);
+
+    lwip_init();
+    ipaddr_aton(SRC_IP_ADDR, &ipaddr);
+    ipaddr_aton(SRC_NETMASK, &netmask);
+    ipaddr_aton(SRC_GW, &gw);
+    echo_netif = &server_netif;
+    if (!xemac_add(echo_netif, &ipaddr, &netmask, &gw, mac_address, PLATFORM_EMAC_BASEADDR)) {
+        return -1;
+    }
+    netif_set_default(echo_netif);
+    Xil_ExceptionEnable();
+    netif_set_up(echo_netif);
+    setup_udp_connection();
+
+    // 4. 设置初始 PRF 值为 30Hz 并显示在屏幕上
+    Set_System_PRF(30);
+
+    // 启动第一次 ADC 采集
+	XAxiDma_Adc(BdChainBuffer, AD9280_BASE, ADC_SAMPLE_NUM, BD_COUNT, &AxiDma);
+
+    /* ================= 核心循环 ================= */
+    while (1) {
+        // A. 处理 LwIP 任务 (接收频率指令)
+        xemacif_input(echo_netif);
+
+        // B. 处理 LVGL 渲染
+        lv_timer_handler();
+        my_gui_task_handler();
+
+        // C. 处理采集完成后的逻辑
+		if (s2mm_flag) {
+			s2mm_flag = FALSE;
+			Xil_DCacheInvalidateRange((u32) DmaRxBuffer, ADC_SAMPLE_NUM * ADC_BYTE);
+
+            // 发送数据到上位机
+            send_adc_data_udp(DmaRxBuffer, ADC_SAMPLE_NUM);
+
+            // 更新包计数显示
+            my_gui_update_packet_count(++total_packets);
+
+            // 注意：这里删除了 update_acquisition_status(0)
+            // 使得屏幕一直维持 Running 状态。
+
+            // 根据设置的 PRF 进行延时
+            if (g_prf_delay_us > 0) {
+                usleep(g_prf_delay_us);
+            }
+
+            // 重新开始下一次采集
+			XAxiDma_Adc(BdChainBuffer, AD9280_BASE, ADC_SAMPLE_NUM, BD_COUNT, &AxiDma);
+		}
+    }
+    return 0;
+}

@@ -1,0 +1,9 @@
+# 忽略编译生成的二进制文件（Vivado/C++产生的垃圾）
+*.o
+*.elf
+*.bit
+*.bin
+/build/
+/Debug/
+/Release/
+.cache/

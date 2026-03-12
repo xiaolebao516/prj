@@ -1,0 +1,62 @@
+# 
+# Usage: To re-create this platform project launch xsct with below options.
+# xsct C:\Study\ZYNQ_SG_DMA_SAMPLE_6\vitis_ws_2\my_platform\platform.tcl
+# 
+# OR launch xsct and run below command.
+# source C:\Study\ZYNQ_SG_DMA_SAMPLE_6\vitis_ws_2\my_platform\platform.tcl
+# 
+# To create the platform in a different location, modify the -out option of "platform create" command.
+# -out option specifies the output directory of the platform project.
+
+platform create -name {my_platform}\
+-hw {C:\Study\ZYNQ_SG_DMA_SAMPLE_6\design_1_wrapper.xsa}\
+-proc {ps7_cortexa9_0} -os {standalone} -fsbl-target {psu_cortexa53_0} -out {C:/Study/ZYNQ_SG_DMA_SAMPLE_6/vitis_ws_2}
+
+platform write
+platform generate -domains 
+platform active {my_platform}
+bsp reload
+bsp setlib -name lwip211 -ver 1.3
+bsp config phy_link_speed "CONFIG_LINKSPEED1000"
+bsp setdriver -ip ad9280_sample_0 -driver none -ver {}
+bsp write
+bsp reload
+catch {bsp regenerate}
+platform generate
+bsp reload
+domain active {zynq_fsbl}
+bsp reload
+bsp reload
+bsp setlib -name lwip211 -ver 1.3
+bsp config phy_link_speed "CONFIG_LINKSPEED1000"
+bsp setdriver -ip ad9280_sample_0 -driver none -ver {}
+bsp write
+bsp reload
+catch {bsp regenerate}
+platform generate -domains zynq_fsbl 
+platform active {my_platform}
+platform active {my_platform}
+platform active {my_platform}
+platform generate
+platform active {my_platform}
+platform config -updatehw {C:/Study/ZYNQ_SG_DMA_SAMPLE_6/design_1_wrapper.xsa}
+platform generate -domains 
+domain active {standalone_domain}
+bsp reload
+bsp reload
+domain active {zynq_fsbl}
+bsp reload
+bsp reload
+bsp reload
+platform clean
+platform generate
+platform clean
+bsp setlib -name xilffs -ver 4.4
+bsp setlib -name xilrsa -ver 1.6
+bsp write
+bsp reload
+catch {bsp regenerate}
+platform generate
+platform clean
+platform config -updatehw {C:/Study/ZYNQ_SG_DMA_SAMPLE_6/design_1_wrapper.xsa}
+platform generate

@@ -1,0 +1,29 @@
+// ui_main.h
+#ifndef UI_MAIN_H
+#define UI_MAIN_H
+
+#include "lvgl.h"
+#include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* GUI 生命周期管理 */
+void my_gui_init(void);
+void my_gui_deinit(void);
+
+/* 界面创建接口 */
+void my_gui_create_main_interface(void);
+
+/* 数据更新接口 (供 App 逻辑层调用) */
+void my_gui_update_connection_status(int connected);
+void my_gui_update_prf_value(uint32_t prf);
+void my_gui_update_acquisition_status(int acquiring);
+void my_gui_update_packet_count(uint32_t count);
+
+#ifdef __cplusplus
+} /*extern "C"*/
+#endif
+
+#endif /* UI_MAIN_H */

@@ -1,0 +1,16 @@
+// app_monitor.h
+#ifndef APP_MONITOR_H
+#define APP_MONITOR_H
+
+#include <stdint.h>
+
+/* 初始化业务逻辑 */
+void App_Monitor_Init(void);
+
+/* 业务逻辑轮询任务（放在 main 的 while 循环里） */
+void App_Monitor_Tick(void);
+
+/* 处理网络传来的 PRF 修改指令 */
+void App_Monitor_SetPRF(uint32_t target_hz);
+
+#endif

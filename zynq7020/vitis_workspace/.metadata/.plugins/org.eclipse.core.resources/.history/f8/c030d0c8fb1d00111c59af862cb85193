@@ -1,0 +1,66 @@
+// app/app_main.c
+#include "app_main.h"
+
+/* 包含底层所有大厨和服务员的头文件 */
+#include "platform.h"
+#include "lcd_drv.h"
+#include "sys_timer.h"
+#include "zynq_interrupt.h"
+#include "adc_dma.h"
+#include "ui_main.h"
+#include "lvgl.h"
+
+// 假设这些在你的网络文件里
+extern void setup_udp_connection(void);
+extern void xemacif_input(struct netif *netif);
+extern struct netif *echo_netif;
+
+void Hardware_Init(void) {
+    init_platform();           // 开启Cache等
+    LCD_Init_Hardware();       // 屏幕底层点亮
+    System_Timer_Init();       // 开启定时器
+
+    // 初始化中断和DMA (原 main.c 里的相关逻辑搬到这里)
+    XGpioPs_WritePin(&Gpio, 56, 1);
+
+    InterruptInit(INT_DEVICE_ID, &XScuGicInstance);
+    System_Timer_Init();
+}
+
+void UI_Init(void) {
+    lv_init();
+
+    // LVGL 的显示驱动注册
+    lv_disp_draw_buf_init(&draw_buf, buf1, NULL, 320 * 40);
+    lv_disp_drv_init(&disp_drv);
+    disp_drv.hor_res = 320;
+    disp_drv.ver_res = 172;
+    disp_drv.flush_cb = my_disp_flush;
+    disp_drv.draw_buf = &draw_buf;
+    lv_disp_drv_register(&disp_drv);
+    // 调用真正的界面绘制
+    my_gui_init();
+}
+
+void Network_Init(void) {
+    lwip_init();
+    ipaddr_aton(SRC_IP_ADDR, &ipaddr);
+    ipaddr_aton(SRC_NETMASK, &netmask);
+    ipaddr_aton(SRC_GW, &gw);
+    echo_netif = &server_netif;
+    if (!xemac_add(echo_netif, &ipaddr, &netmask, &gw, mac_address, PLATFORM_EMAC_BASEADDR)) {
+        return -1;
+    }
+    netif_set_default(echo_netif);
+    Xil_ExceptionEnable();
+    netif_set_up(echo_netif);
+    setup_udp_connection();
+}
+
+void Network_Task(void) {
+	xemacif_input(echo_netif);
+}
+
+void LVGL_Task(void) {
+    lv_timer_handler();
+}
