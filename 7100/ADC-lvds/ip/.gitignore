@@ -1,0 +1,5 @@
+*
+!adc_lvds_ip.tcl
+!generate_ip.tcl
+!.gitignore
+!Makefile

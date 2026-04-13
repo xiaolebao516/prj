@@ -1,0 +1,9 @@
+*.o
+*.elf
+*.bit
+*.bin
+/build/
+/Debug/
+/Release/
+.cache/
+7100/8.RK-ZYNQ7100-F开发板网盘资料/
