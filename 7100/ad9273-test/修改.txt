@@ -1,0 +1,53 @@
+PS:
+目标文件：oiAdc.c 和 HardwareTest.c
+修改动作：
+在 AD9670_REGS[] 初始化数组中，做以下改动：
+删除/注释掉对 0x02 的写入：AD9273 手册明确写明，寄存器 0x02 (CHIP_GRADE) 是 Read Only（只读）的，如果往里面写数据可能会导致总线挂起。
+强制注入 Test Pattern (测试码)：添加对寄存器 0x0D (TEST_IO) 的写入，并用 0xFF (DEVICE_UPDATE) 锁存。
+
+C
+static const verified_reg_t AD9273_REGS[] = {
+    // ... 前面的复位等基础配置保留 ...
+    // 【删除】 { AD9670_REG_CHIP_GRADE, AD9670_CHIP_GRADE_80_MHZ, AD9670_CHIP_GRADE_MASK },
+
+    // 【新增】配置 AD9273 内部寄存器 0x0D，写入 0x04 开启 Checkerboard (棋盘格) 测试码
+    { 0x0D, 0x04, 0xFF }, 
+
+    // 【新增】写入 DEVICE_UPDATE (0xFF) 使上述配置立即生效
+    { 0xFF, 0x01, 0xFF },
+    // ... 后面的配置 ...
+};
+
+matlab
+上位机 (MATLAB) 修改：位宽截断与偏置解码
+目标文件：openimage.m (第 128-132 行)
+修改动作：
+不能再简单粗暴地用 typecast(..., 'int16')。因为 AD9273 是 12-bit，放在 16-bit 的内存格子里，必须手动用掩码（Mask）切掉高 4 位的“垃圾数据”，并将 Offset Binary（偏移二进制）还原为有符号数。
+
+请将原来的 data = [...] 替换为以下严格的解码流程：
+
+Matlab
+% 1. 先将底层发上来的字节流当做【无符号 16 位 (uint16)】读取
+raw_data1 = typecast(blob_u8(1,:), 'uint16');
+raw_data2 = typecast(blob_u8(2,:), 'uint16');
+
+% 2. 施加 12-bit 掩码 (0x0FFF = 4095)，强行滤除高 4 位的无效垃圾比特
+valid_data1 = bitand(raw_data1, 4095); 
+valid_data2 = bitand(raw_data2, 4095);
+
+% 3. Offset Binary 解码：12-bit 的中值是 2048。减去中值使其变为有符号数
+signed_data1 = double(valid_data1) - 2048;
+signed_data2 = double(valid_data2) - 2048;
+
+% 4. 重新组装为通道矩阵 (8 通道)
+data = [
+    reshape(signed_data1, 8, []);
+    reshape(signed_data2, 8, []);
+];
+
+3. 时钟与 FPGA 降级 (极其重要的硬件防坑)
+目标文件：word_deframer.v (FPGA) 与 硬件时钟板
+
+FPGA 修改：提醒李政泽，必须把 word_deframer.v 第 59 行的 i_word_deframer_bit_sel 设置为 2'b00（代表 12-bit 模式）。
+
+时钟降频（物理风险）：原来的 oi_rx.m 里 fs = 80 (80MHz)。但是 AD9273 的物理极限是 50MHz！ 如果你们的时钟板给它灌 80MHz 的时钟，芯片会直接死机或输出乱码。你们必须把时钟板的频率降到 40MHz 或 50MHz，并在 oi_rx.m 里将 fs 改为对应的值。

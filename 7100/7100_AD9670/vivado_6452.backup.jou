@@ -1,0 +1,13 @@
+#-----------------------------------------------------------
+# Vivado v2020.2 (64-bit)
+# SW Build 3064766 on Wed Nov 18 09:12:45 MST 2020
+# IP Build 3064653 on Wed Nov 18 14:17:31 MST 2020
+# Start of session at: Sat May  9 16:23:03 2026
+# Process ID: 6452
+# Current directory: C:/Study/7100_AD9670
+# Command line: vivado.exe -gui_launcher_event rodinguilauncherevent23788 C:\Study\7100_AD9670\7100_AD9670.xpr
+# Log file: C:/Study/7100_AD9670/vivado.log
+# Journal file: C:/Study/7100_AD9670\vivado.jou
+#-----------------------------------------------------------
+start_gui
+open_project C:/Study/7100_AD9670/7100_AD9670.xpr

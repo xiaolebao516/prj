@@ -1,0 +1,23 @@
+#-----------------------------------------------------------
+# Vivado v2020.2 (64-bit)
+# SW Build 3064766 on Wed Nov 18 09:12:45 MST 2020
+# IP Build 3064653 on Wed Nov 18 14:17:31 MST 2020
+# Start of session at: Sat May  9 16:23:03 2026
+# Process ID: 6452
+# Current directory: C:/Study/7100_AD9670
+# Command line: vivado.exe -gui_launcher_event rodinguilauncherevent23788 C:\Study\7100_AD9670\7100_AD9670.xpr
+# Log file: C:/Study/7100_AD9670/vivado.log
+# Journal file: C:/Study/7100_AD9670\vivado.jou
+#-----------------------------------------------------------
+start_gui
+open_project C:/Study/7100_AD9670/7100_AD9670.xpr
+Scanning sources...
+Finished scanning sources
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1700] Loaded user IP repository 'c:/Study/7100_AD9670/ip_repo'.
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository 'D:/Xilinx/Vivado/2020.2/data/ip'.
+ERROR: [Vivado 12-106] *** Exception: java.lang.NullPointerException (See C:/Study/7100_AD9670/vivado_pid6452.debug)
+open_project: Time (s): cpu = 00:00:01 ; elapsed = 00:00:11 . Memory (MB): peak = 1140.289 ; gain = 0.000
+ERROR: [Common 17-39] 'open_project' failed due to earlier errors.
+exit
+INFO: [Common 17-206] Exiting Vivado at Sat May  9 16:23:27 2026...

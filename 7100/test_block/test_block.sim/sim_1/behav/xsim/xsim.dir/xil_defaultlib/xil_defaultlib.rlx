@@ -1,0 +1,8 @@
+0.7
+2020.2
+Nov 18 2020
+09:47:47
+D:/prj/7100/test_block/test_block.sim/sim_1/behav/xsim/glbl.v,1605673889,verilog,,,,glbl,,,,,,,,
+D:/prj/7100/test_block/test_block.srcs/sim_1/new/tb_DAS_Core.v,1778419212,verilog,,,,tb_DAS_Core,,,,,,,,
+,,,,,,tb_DAS_Core_Multi,,,,,,,,
+D:/prj/7100/test_block/test_block.srcs/sources_1/new/DAS_Core.v,1778425902,verilog,,D:/prj/7100/test_block/test_block.srcs/sim_1/new/tb_DAS_Core_Multi.v,,DAS_Core,,,,,,,,

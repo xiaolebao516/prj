@@ -1,0 +1,17 @@
+verilog xil_defaultlib --include "D:/Xilinx/Vivado/2020.2/data/xilinx_vip/include" --include "../../../../7100_AD9670.gen/sources_1/bd/design_1/ipshared/ec67/hdl" --include "../../../../7100_AD9670.gen/sources_1/bd/design_1/ipshared/34f8/hdl" \
+"../../../bd/design_1/ip/design_1_processing_system7_0_0/sim/design_1_processing_system7_0_0.v" \
+"../../../bd/design_1/ipshared/ce35/src/AdcClock.v" \
+"../../../bd/design_1/ipshared/ce35/src/AdcFrame.v" \
+"../../../bd/design_1/ipshared/ce35/src/AdcLane.v" \
+"../../../bd/design_1/ipshared/ce35/src/Serdes_1x14_DDR.v" \
+"../../../bd/design_1/ipshared/ce35/src/AdcLVDS_Top.v" \
+"../../../bd/design_1/ip/design_1_AdcLVDS_Top_0_0/sim/design_1_AdcLVDS_Top_0_0.v" \
+"../../../bd/design_1/ip/design_1_idelay_ctrl_wrapper_0_0/sim/design_1_idelay_ctrl_wrapper_0_0.v" \
+"../../../bd/design_1/ip/design_1_auto_pc_0/sim/design_1_auto_pc_0.v" \
+"../../../bd/design_1/ip/design_1_auto_ds_0/sim/design_1_auto_ds_0.v" \
+"../../../bd/design_1/ip/design_1_auto_pc_1/sim/design_1_auto_pc_1.v" \
+"../../../bd/design_1/sim/design_1.v" \
+
+verilog xil_defaultlib "glbl.v"
+
+nosort

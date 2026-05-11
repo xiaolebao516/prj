@@ -1,0 +1,4 @@
+Running: xsim.dir/tb_DAS_Core_Multi_behav/xsimk.exe -simmode gui -wdb tb_DAS_Core_Multi_behav.wdb -simrunnum 0 -socket 58002
+Design successfully loaded
+Design Loading Memory Usage: 7520 KB (Peak: 7520 KB)
+Design Loading CPU Usage: 0 ms

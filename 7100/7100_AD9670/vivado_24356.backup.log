@@ -1,0 +1,431 @@
+#-----------------------------------------------------------
+# Vivado v2020.2 (64-bit)
+# SW Build 3064766 on Wed Nov 18 09:12:45 MST 2020
+# IP Build 3064653 on Wed Nov 18 14:17:31 MST 2020
+# Start of session at: Sun Apr 19 13:52:12 2026
+# Process ID: 24356
+# Current directory: C:/Study/7100_AD9670
+# Command line: vivado.exe -gui_launcher_event rodinguilauncherevent24244 C:\Study\7100_AD9670\7100_AD9670.xpr
+# Log file: C:/Study/7100_AD9670/vivado.log
+# Journal file: C:/Study/7100_AD9670\vivado.jou
+#-----------------------------------------------------------
+start_gui
+open_project C:/Study/7100_AD9670/7100_AD9670.xpr
+Scanning sources...
+Finished scanning sources
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository 'D:/Xilinx/Vivado/2020.2/data/ip'.
+update_compile_order -fileset sources_1
+file mkdir C:/Study/7100_AD9670/7100_AD9670.srcs/constrs_1
+file mkdir C:/Study/7100_AD9670/7100_AD9670.srcs/constrs_1/new
+close [ open C:/Study/7100_AD9670/7100_AD9670.srcs/constrs_1/new/ad9670_lvds.xdc w ]
+add_files -fileset constrs_1 C:/Study/7100_AD9670/7100_AD9670.srcs/constrs_1/new/ad9670_lvds.xdc
+synth_design -rtl -rtl_skip_mlo -name rtl_1
+Command: synth_design -rtl -rtl_skip_mlo -name rtl_1
+Starting synth_design
+Using part: xc7z100ffg900-2
+Top: AdcLVDS_Top
+INFO: [Device 21-403] Loading part xc7z100ffg900-2
+---------------------------------------------------------------------------------
+Starting RTL Elaboration : Time (s): cpu = 00:00:01 ; elapsed = 00:00:02 . Memory (MB): peak = 1713.941 ; gain = 249.332
+---------------------------------------------------------------------------------
+INFO: [Synth 8-6157] synthesizing module 'AdcLVDS_Top' [C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/AdcLVDS_Top.v:23]
+INFO: [Synth 8-6157] synthesizing module 'AdcLane' [C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/AdcLane.v:23]
+	Parameter AdcBits bound to: 14 - type: integer 
+	Parameter AdcInvert bound to: 0 - type: integer 
+INFO: [Synth 8-6157] synthesizing module 'Serdes_1x14_DDR' [C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/Serdes_1x14_DDR.v:23]
+INFO: [Synth 8-6157] synthesizing module 'IBUFDS' [D:/Xilinx/Vivado/2020.2/scripts/rt/data/unisim_comp.v:32998]
+	Parameter CAPACITANCE bound to: DONT_CARE - type: string 
+	Parameter DIFF_TERM bound to: TRUE - type: string 
+	Parameter DQS_BIAS bound to: FALSE - type: string 
+	Parameter IBUF_DELAY_VALUE bound to: 0 - type: string 
+	Parameter IBUF_LOW_PWR bound to: TRUE - type: string 
+	Parameter IFD_DELAY_VALUE bound to: AUTO - type: string 
+	Parameter IOSTANDARD bound to: LVDS - type: string 
+INFO: [Synth 8-6155] done synthesizing module 'IBUFDS' (1#1) [D:/Xilinx/Vivado/2020.2/scripts/rt/data/unisim_comp.v:32998]
+INFO: [Synth 8-6157] synthesizing module 'ISERDESE2' [D:/Xilinx/Vivado/2020.2/scripts/rt/data/unisim_comp.v:38620]
+	Parameter DATA_RATE bound to: DDR - type: string 
+	Parameter DATA_WIDTH bound to: 14 - type: integer 
+	Parameter DYN_CLKDIV_INV_EN bound to: FALSE - type: string 
+	Parameter DYN_CLK_INV_EN bound to: FALSE - type: string 
+	Parameter INIT_Q1 bound to: 1'b0 
+	Parameter INIT_Q2 bound to: 1'b0 
+	Parameter INIT_Q3 bound to: 1'b0 
+	Parameter INIT_Q4 bound to: 1'b0 
+	Parameter INTERFACE_TYPE bound to: NETWORKING - type: string 
+	Parameter IOBDELAY bound to: NONE - type: string 
+	Parameter IS_CLKB_INVERTED bound to: 1'b0 
+	Parameter IS_CLKDIVP_INVERTED bound to: 1'b0 
+	Parameter IS_CLKDIV_INVERTED bound to: 1'b0 
+	Parameter IS_CLK_INVERTED bound to: 1'b0 
+	Parameter IS_D_INVERTED bound to: 1'b0 
+	Parameter IS_OCLKB_INVERTED bound to: 1'b0 
+	Parameter IS_OCLK_INVERTED bound to: 1'b0 
+	Parameter NUM_CE bound to: 2 - type: integer 
+	Parameter OFB_USED bound to: FALSE - type: string 
+	Parameter SERDES_MODE bound to: MASTER - type: string 
+	Parameter SRVAL_Q1 bound to: 1'b0 
+	Parameter SRVAL_Q2 bound to: 1'b0 
+	Parameter SRVAL_Q3 bound to: 1'b0 
+	Parameter SRVAL_Q4 bound to: 1'b0 
+INFO: [Synth 8-6155] done synthesizing module 'ISERDESE2' (2#1) [D:/Xilinx/Vivado/2020.2/scripts/rt/data/unisim_comp.v:38620]
+INFO: [Synth 8-6157] synthesizing module 'ISERDESE2__parameterized0' [D:/Xilinx/Vivado/2020.2/scripts/rt/data/unisim_comp.v:38620]
+	Parameter DATA_RATE bound to: DDR - type: string 
+	Parameter DATA_WIDTH bound to: 14 - type: integer 
+	Parameter DYN_CLKDIV_INV_EN bound to: FALSE - type: string 
+	Parameter DYN_CLK_INV_EN bound to: FALSE - type: string 
+	Parameter INIT_Q1 bound to: 1'b0 
+	Parameter INIT_Q2 bound to: 1'b0 
+	Parameter INIT_Q3 bound to: 1'b0 
+	Parameter INIT_Q4 bound to: 1'b0 
+	Parameter INTERFACE_TYPE bound to: NETWORKING - type: string 
+	Parameter IOBDELAY bound to: NONE - type: string 
+	Parameter IS_CLKB_INVERTED bound to: 1'b0 
+	Parameter IS_CLKDIVP_INVERTED bound to: 1'b0 
+	Parameter IS_CLKDIV_INVERTED bound to: 1'b0 
+	Parameter IS_CLK_INVERTED bound to: 1'b0 
+	Parameter IS_D_INVERTED bound to: 1'b0 
+	Parameter IS_OCLKB_INVERTED bound to: 1'b0 
+	Parameter IS_OCLK_INVERTED bound to: 1'b0 
+	Parameter NUM_CE bound to: 2 - type: integer 
+	Parameter OFB_USED bound to: FALSE - type: string 
+	Parameter SERDES_MODE bound to: SLAVE - type: string 
+	Parameter SRVAL_Q1 bound to: 1'b0 
+	Parameter SRVAL_Q2 bound to: 1'b0 
+	Parameter SRVAL_Q3 bound to: 1'b0 
+	Parameter SRVAL_Q4 bound to: 1'b0 
+INFO: [Synth 8-6155] done synthesizing module 'ISERDESE2__parameterized0' (2#1) [D:/Xilinx/Vivado/2020.2/scripts/rt/data/unisim_comp.v:38620]
+INFO: [Synth 8-6155] done synthesizing module 'Serdes_1x14_DDR' (3#1) [C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/Serdes_1x14_DDR.v:23]
+INFO: [Synth 8-6155] done synthesizing module 'AdcLane' (4#1) [C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/AdcLane.v:23]
+WARNING: [Synth 8-7071] port 'DatAlignDone' of module 'AdcLane' is unconnected for instance 'u_lane' [C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/AdcLVDS_Top.v:61]
+WARNING: [Synth 8-7023] instance 'u_lane' of module 'AdcLane' has 10 connections declared, but only 9 given [C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/AdcLVDS_Top.v:61]
+WARNING: [Synth 8-7071] port 'DatAlignDone' of module 'AdcLane' is unconnected for instance 'u_lane' [C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/AdcLVDS_Top.v:61]
+WARNING: [Synth 8-7023] instance 'u_lane' of module 'AdcLane' has 10 connections declared, but only 9 given [C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/AdcLVDS_Top.v:61]
+WARNING: [Synth 8-7071] port 'DatAlignDone' of module 'AdcLane' is unconnected for instance 'u_lane' [C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/AdcLVDS_Top.v:61]
+WARNING: [Synth 8-7023] instance 'u_lane' of module 'AdcLane' has 10 connections declared, but only 9 given [C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/AdcLVDS_Top.v:61]
+WARNING: [Synth 8-7071] port 'DatAlignDone' of module 'AdcLane' is unconnected for instance 'u_lane' [C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/AdcLVDS_Top.v:61]
+WARNING: [Synth 8-7023] instance 'u_lane' of module 'AdcLane' has 10 connections declared, but only 9 given [C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/AdcLVDS_Top.v:61]
+WARNING: [Synth 8-7071] port 'DatAlignDone' of module 'AdcLane' is unconnected for instance 'u_lane' [C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/AdcLVDS_Top.v:61]
+WARNING: [Synth 8-7023] instance 'u_lane' of module 'AdcLane' has 10 connections declared, but only 9 given [C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/AdcLVDS_Top.v:61]
+WARNING: [Synth 8-7071] port 'DatAlignDone' of module 'AdcLane' is unconnected for instance 'u_lane' [C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/AdcLVDS_Top.v:61]
+WARNING: [Synth 8-7023] instance 'u_lane' of module 'AdcLane' has 10 connections declared, but only 9 given [C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/AdcLVDS_Top.v:61]
+WARNING: [Synth 8-7071] port 'DatAlignDone' of module 'AdcLane' is unconnected for instance 'u_lane' [C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/AdcLVDS_Top.v:61]
+WARNING: [Synth 8-7023] instance 'u_lane' of module 'AdcLane' has 10 connections declared, but only 9 given [C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/AdcLVDS_Top.v:61]
+WARNING: [Synth 8-7071] port 'DatAlignDone' of module 'AdcLane' is unconnected for instance 'u_lane' [C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/AdcLVDS_Top.v:61]
+WARNING: [Synth 8-7023] instance 'u_lane' of module 'AdcLane' has 10 connections declared, but only 9 given [C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/AdcLVDS_Top.v:61]
+INFO: [Synth 8-6157] synthesizing module 'AdcClock' [C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/AdcClock.v:23]
+INFO: [Synth 8-6157] synthesizing module 'IBUFGDS' [D:/Xilinx/Vivado/2020.2/scripts/rt/data/unisim_comp.v:33462]
+	Parameter CAPACITANCE bound to: DONT_CARE - type: string 
+	Parameter DIFF_TERM bound to: FALSE - type: string 
+	Parameter IBUF_DELAY_VALUE bound to: 0 - type: string 
+	Parameter IBUF_LOW_PWR bound to: TRUE - type: string 
+	Parameter IOSTANDARD bound to: DEFAULT - type: string 
+INFO: [Synth 8-6155] done synthesizing module 'IBUFGDS' (5#1) [D:/Xilinx/Vivado/2020.2/scripts/rt/data/unisim_comp.v:33462]
+INFO: [Synth 8-6157] synthesizing module 'BUFIO' [D:/Xilinx/Vivado/2020.2/scripts/rt/data/unisim_comp.v:1344]
+INFO: [Synth 8-6155] done synthesizing module 'BUFIO' (6#1) [D:/Xilinx/Vivado/2020.2/scripts/rt/data/unisim_comp.v:1344]
+INFO: [Synth 8-6157] synthesizing module 'BUFR' [D:/Xilinx/Vivado/2020.2/scripts/rt/data/unisim_comp.v:1410]
+	Parameter BUFR_DIVIDE bound to: 7 - type: string 
+	Parameter SIM_DEVICE bound to: 7SERIES - type: string 
+INFO: [Synth 8-6155] done synthesizing module 'BUFR' (7#1) [D:/Xilinx/Vivado/2020.2/scripts/rt/data/unisim_comp.v:1410]
+INFO: [Synth 8-6155] done synthesizing module 'AdcClock' (8#1) [C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/AdcClock.v:23]
+INFO: [Synth 8-6157] synthesizing module 'AdcFrame' [C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/AdcFrame.v:23]
+	Parameter AdcBits bound to: 14 - type: integer 
+	Parameter FrmPattern bound to: 16'b0011111110000000 
+INFO: [Synth 8-6155] done synthesizing module 'AdcFrame' (9#1) [C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/AdcFrame.v:23]
+INFO: [Synth 8-6155] done synthesizing module 'AdcLVDS_Top' (10#1) [C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/AdcLVDS_Top.v:23]
+---------------------------------------------------------------------------------
+Finished RTL Elaboration : Time (s): cpu = 00:00:02 ; elapsed = 00:00:03 . Memory (MB): peak = 1791.059 ; gain = 326.449
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:02 ; elapsed = 00:00:03 . Memory (MB): peak = 1791.059 ; gain = 326.449
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 1 : Time (s): cpu = 00:00:02 ; elapsed = 00:00:03 . Memory (MB): peak = 1791.059 ; gain = 326.449
+---------------------------------------------------------------------------------
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.002 . Memory (MB): peak = 1791.059 ; gain = 0.000
+INFO: [Netlist 29-17] Analyzing 29 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-570] Preparing netlist for logic optimization
+
+Processing XDC Constraints
+Initializing timing engine
+Parsing XDC File [C:/Study/7100_AD9670/7100_AD9670.srcs/constrs_1/new/ad9670_lvds.xdc]
+WARNING: [Vivado 12-180] No cells matched '*idelay_inst*'. [C:/Study/7100_AD9670/7100_AD9670.srcs/constrs_1/new/ad9670_lvds.xdc:46]
+CRITICAL WARNING: [Common 17-55] 'set_property' expects at least one object. [C:/Study/7100_AD9670/7100_AD9670.srcs/constrs_1/new/ad9670_lvds.xdc:46]
+Resolution: If [get_<value>] was used to populate the object, check to make sure this command returns at least one valid object.
+Finished Parsing XDC File [C:/Study/7100_AD9670/7100_AD9670.srcs/constrs_1/new/ad9670_lvds.xdc]
+Completed Processing XDC Constraints
+
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 1866.516 ; gain = 0.000
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 1 instances were transformed.
+  IBUFGDS => IBUFDS: 1 instance 
+
+RTL Elaboration Complete:  : Time (s): cpu = 00:00:04 ; elapsed = 00:00:05 . Memory (MB): peak = 2065.191 ; gain = 600.582
+27 Infos, 17 Warnings, 1 Critical Warnings and 0 Errors encountered.
+synth_design completed successfully
+synth_design: Time (s): cpu = 00:00:07 ; elapsed = 00:00:11 . Memory (MB): peak = 2065.191 ; gain = 923.031
+set_property IOSTANDARD LVDS [get_ports [list {lvds_dat_p[7]} {lvds_dat_p[6]} {lvds_dat_p[5]} {lvds_dat_p[4]} {lvds_dat_p[3]} {lvds_dat_p[2]} {lvds_dat_p[1]} {lvds_dat_p[0]}]]
+set_property target_constrs_file C:/Study/7100_AD9670/7100_AD9670.srcs/constrs_1/new/ad9670_lvds.xdc [current_fileset -constrset]
+save_constraints -force
+launch_runs synth_1 -jobs 6
+[Sun Apr 19 14:06:02 2026] Launched synth_1...
+Run output will be captured here: C:/Study/7100_AD9670/7100_AD9670.runs/synth_1/runme.log
+launch_runs impl_1 -jobs 6
+[Sun Apr 19 14:07:45 2026] Launched impl_1...
+Run output will be captured here: C:/Study/7100_AD9670/7100_AD9670.runs/impl_1/runme.log
+reset_run synth_1
+launch_runs synth_1 -jobs 6
+[Sun Apr 19 14:10:55 2026] Launched synth_1...
+Run output will be captured here: C:/Study/7100_AD9670/7100_AD9670.runs/synth_1/runme.log
+launch_runs impl_1 -jobs 6
+[Sun Apr 19 14:11:22 2026] Launched impl_1...
+Run output will be captured here: C:/Study/7100_AD9670/7100_AD9670.runs/impl_1/runme.log
+reset_run synth_1
+launch_runs synth_1 -jobs 6
+[Sun Apr 19 14:13:42 2026] Launched synth_1...
+Run output will be captured here: C:/Study/7100_AD9670/7100_AD9670.runs/synth_1/runme.log
+reset_run synth_1
+launch_runs synth_1 -jobs 6
+[Sun Apr 19 14:15:36 2026] Launched synth_1...
+Run output will be captured here: C:/Study/7100_AD9670/7100_AD9670.runs/synth_1/runme.log
+launch_runs impl_1 -jobs 6
+[Sun Apr 19 14:16:03 2026] Launched impl_1...
+Run output will be captured here: C:/Study/7100_AD9670/7100_AD9670.runs/impl_1/runme.log
+launch_runs impl_1 -to_step write_bitstream -jobs 6
+[Sun Apr 19 14:20:43 2026] Launched impl_1...
+Run output will be captured here: C:/Study/7100_AD9670/7100_AD9670.runs/impl_1/runme.log
+open_bd_design {C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/bd/design_1/design_1.bd}
+Reading block design file <C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/bd/design_1/design_1.bd>...
+Adding component instance block -- xilinx.com:ip:processing_system7:5.5 - processing_system7_0
+Successfully read diagram <design_1> from block design file <C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/bd/design_1/design_1.bd>
+WARNING: [IP_Flow 19-474] Invalid Parameter 'Component_Name'
+startgroup
+set_property -dict [list CONFIG.PCW_FPGA1_PERIPHERAL_FREQMHZ {200} CONFIG.PCW_EN_CLK1_PORT {1}] [get_bd_cells processing_system7_0]
+endgroup
+ipx::package_project -root_dir C:/Study/7100_AD9670/ip_repo -vendor xilinx.com -library user -taxonomy /UserIP -import_files -set_current false
+WARNING: [IP_Flow 19-3833] Unreferenced file from the top module is not packaged: 'C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/bd/design_1/design_1.bd'.
+WARNING: [IP_Flow 19-3833] Unreferenced file from the top module is not packaged: 'C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/ad9670_lvds_rx_lane.v'.
+INFO: [IP_Flow 19-5107] Inferred bus interface 'm_axis' of definition 'xilinx.com:interface:axis:1.0' (from Xilinx Repository).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'sys_rst' of definition 'xilinx.com:signal:reset:1.0' (from Xilinx Repository).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'm_axis_aclk' of definition 'xilinx.com:signal:clock:1.0' (from Xilinx Repository).
+INFO: [IP_Flow 19-4728] Bus Interface 'm_axis_aclk': Added interface parameter 'ASSOCIATED_BUSIF' with value 'm_axis'.
+INFO: [IP_Flow 19-2181] Payment Required is not set for this core.
+INFO: [IP_Flow 19-2187] The Product Guide file is missing.
+ipx::unload_core c:/Study/7100_AD9670/ip_repo/component.xml
+ipx::edit_ip_in_project -upgrade true -name tmp_edit_project -directory C:/Study/7100_AD9670/ip_repo c:/Study/7100_AD9670/ip_repo/component.xml
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository 'D:/Xilinx/Vivado/2020.2/data/ip'.
+INFO: [IP_Flow 19-795] Syncing license key meta-data
+update_compile_order -fileset sources_1
+ipx::add_bus_parameter ASSOCIATED_BUSIF [ipx::get_bus_interfaces m_axis_aclk -of_objects [ipx::current_core]]
+ipx::add_bus_parameter ASSOCIATED_BUSIF [ipx::get_bus_interfaces m_axis_aclk -of_objects [ipx::current_core]]
+ipx::add_bus_interface lvds_dco [ipx::current_core]
+set_property abstraction_type_vlnv xilinx.com:interface:aximm_rtl:1.0 [ipx::get_bus_interfaces lvds_dco -of_objects [ipx::current_core]]
+set_property bus_type_vlnv xilinx.com:interface:aximm:1.0 [ipx::get_bus_interfaces lvds_dco -of_objects [ipx::current_core]]
+set_property interface_mode master [ipx::get_bus_interfaces lvds_dco -of_objects [ipx::current_core]]
+ipx::add_bus_parameter NUM_READ_OUTSTANDING [ipx::get_bus_interfaces lvds_dco -of_objects [ipx::current_core]]
+ipx::add_bus_parameter NUM_WRITE_OUTSTANDING [ipx::get_bus_interfaces lvds_dco -of_objects [ipx::current_core]]
+set_property abstraction_type_vlnv xilinx.com:interface:diff_clock_rtl:1.0 [ipx::get_bus_interfaces lvds_dco -of_objects [ipx::current_core]]
+set_property bus_type_vlnv xilinx.com:interface:diff_clock:1.0 [ipx::get_bus_interfaces lvds_dco -of_objects [ipx::current_core]]
+set_property interface_mode slave [ipx::get_bus_interfaces lvds_dco -of_objects [ipx::current_core]]
+ipx::add_port_map CLK_P [ipx::get_bus_interfaces lvds_dco -of_objects [ipx::current_core]]
+set_property physical_name lvds_dco_p [ipx::get_port_maps CLK_P -of_objects [ipx::get_bus_interfaces lvds_dco -of_objects [ipx::current_core]]]
+ipx::add_port_map CLK_N [ipx::get_bus_interfaces lvds_dco -of_objects [ipx::current_core]]
+set_property physical_name lvds_dco_n [ipx::get_port_maps CLK_N -of_objects [ipx::get_bus_interfaces lvds_dco -of_objects [ipx::current_core]]]
+ipx::add_bus_interface lvds_fco [ipx::current_core]
+set_property abstraction_type_vlnv xilinx.com:interface:diff_clock_rtl:1.0 [ipx::get_bus_interfaces lvds_fco -of_objects [ipx::current_core]]
+set_property bus_type_vlnv xilinx.com:interface:diff_clock:1.0 [ipx::get_bus_interfaces lvds_fco -of_objects [ipx::current_core]]
+ipx::add_port_map CLK_P [ipx::get_bus_interfaces lvds_fco -of_objects [ipx::current_core]]
+set_property physical_name lvds_fco_p [ipx::get_port_maps CLK_P -of_objects [ipx::get_bus_interfaces lvds_fco -of_objects [ipx::current_core]]]
+ipx::add_port_map CLK_N [ipx::get_bus_interfaces lvds_fco -of_objects [ipx::current_core]]
+set_property physical_name lvds_fco_n [ipx::get_port_maps CLK_N -of_objects [ipx::get_bus_interfaces lvds_fco -of_objects [ipx::current_core]]]
+ipx::add_bus_interface sys_rst [ipx::current_core]
+set_property abstraction_type_vlnv xilinx.com:interface:aximm_rtl:1.0 [ipx::get_bus_interfaces sys_rst -of_objects [ipx::current_core]]
+set_property bus_type_vlnv xilinx.com:interface:aximm:1.0 [ipx::get_bus_interfaces sys_rst -of_objects [ipx::current_core]]
+ipx::add_bus_parameter NUM_READ_OUTSTANDING [ipx::get_bus_interfaces sys_rst -of_objects [ipx::current_core]]
+ipx::add_bus_parameter NUM_WRITE_OUTSTANDING [ipx::get_bus_interfaces sys_rst -of_objects [ipx::current_core]]
+ipx::remove_port_map RST [ipx::get_bus_interfaces sys_rst -of_objects [ipx::current_core]]
+set_property abstraction_type_vlnv xilinx.com:signal:reset_rtl:1.0 [ipx::get_bus_interfaces sys_rst -of_objects [ipx::current_core]]
+set_property bus_type_vlnv xilinx.com:signal:reset:1.0 [ipx::get_bus_interfaces sys_rst -of_objects [ipx::current_core]]
+ipx::add_port_map RST [ipx::get_bus_interfaces sys_rst -of_objects [ipx::current_core]]
+set_property physical_name sys_rst [ipx::get_port_maps RST -of_objects [ipx::get_bus_interfaces sys_rst -of_objects [ipx::current_core]]]
+ipx::add_bus_parameter POLARITY [ipx::get_bus_interfaces sys_rst -of_objects [ipx::current_core]]
+set_property core_revision 2 [ipx::current_core]
+ipx::update_source_project_archive -component [ipx::current_core]
+ipx::create_xgui_files [ipx::current_core]
+ipx::update_checksums [ipx::current_core]
+ipx::check_integrity [ipx::current_core]
+INFO: [IP_Flow 19-2181] Payment Required is not set for this core.
+INFO: [IP_Flow 19-2187] The Product Guide file is missing.
+INFO: [Ipptcl 7-1486] check_integrity: Integrity check passed.
+ipx::save_core [ipx::current_core]
+ipx::move_temp_component_back -component [ipx::current_core]
+close_project -delete
+set_property  ip_repo_paths  c:/Study/7100_AD9670/ip_repo [current_project]
+update_ip_catalog
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1700] Loaded user IP repository 'c:/Study/7100_AD9670/ip_repo'.
+startgroup
+create_bd_cell -type ip -vlnv xilinx.com:user:AdcLVDS_Top:1.0 AdcLVDS_Top_0
+endgroup
+set_property location {0.5 -140 -214} [get_bd_cells AdcLVDS_Top_0]
+undo
+INFO: [Common 17-17] undo 'set_property location {0.5 -140 -214} [get_bd_cells AdcLVDS_Top_0]'
+startgroup
+create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dma:7.1 axi_dma_0
+endgroup
+set_property -dict [list CONFIG.c_m_axi_s2mm_data_width.VALUE_SRC USER CONFIG.c_s_axis_s2mm_tdata_width.VALUE_SRC USER] [get_bd_cells axi_dma_0]
+set_property -dict [list CONFIG.c_include_sg {0} CONFIG.c_sg_length_width {23} CONFIG.c_sg_include_stscntrl_strm {0} CONFIG.c_include_mm2s {0} CONFIG.c_include_s2mm {1} CONFIG.c_m_axi_s2mm_data_width {128} CONFIG.c_s_axis_s2mm_tdata_width {128} CONFIG.c_s2mm_burst_size {128}] [get_bd_cells axi_dma_0]
+startgroup
+apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {/processing_system7_0/FCLK_CLK0 (100 MHz)} Clk_slave {Auto} Clk_xbar {Auto} Master {/processing_system7_0/M_AXI_GP0} Slave {/axi_dma_0/S_AXI_LITE} ddr_seg {Auto} intc_ip {New AXI Interconnect} master_apm {0}}  [get_bd_intf_pins axi_dma_0/S_AXI_LITE]
+Slave segment '/axi_dma_0/S_AXI_LITE/Reg' is being assigned into address space '/processing_system7_0/Data' at <0x4040_0000 [ 64K ]>.
+apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {Auto} Clk_slave {/processing_system7_0/FCLK_CLK0 (100 MHz)} Clk_xbar {Auto} Master {/axi_dma_0/M_AXI_S2MM} Slave {/processing_system7_0/S_AXI_HP0} ddr_seg {Auto} intc_ip {New AXI Interconnect} master_apm {0}}  [get_bd_intf_pins processing_system7_0/S_AXI_HP0]
+Slave segment '/processing_system7_0/S_AXI_HP0/HP0_DDR_LOWOCM' is being assigned into address space '/axi_dma_0/Data_S2MM' at <0x0000_0000 [ 1G ]>.
+endgroup
+set_property location {0.5 -179 -201} [get_bd_cells AdcLVDS_Top_0]
+set_property location {2 229 -215} [get_bd_cells axi_dma_0]
+set_property location {1 -176 -240} [get_bd_cells AdcLVDS_Top_0]
+connect_bd_intf_net [get_bd_intf_pins AdcLVDS_Top_0/m_axis] [get_bd_intf_pins axi_dma_0/S_AXIS_S2MM]
+set_property location {1 -167 -286} [get_bd_cells AdcLVDS_Top_0]
+set_property location {1 -179 -247} [get_bd_cells AdcLVDS_Top_0]
+set_property location {1 -166 -247} [get_bd_cells AdcLVDS_Top_0]
+set_property location {1 -159 -215} [get_bd_cells AdcLVDS_Top_0]
+set_property location {1 -164 -258} [get_bd_cells AdcLVDS_Top_0]
+set_property location {1 -165 -250} [get_bd_cells AdcLVDS_Top_0]
+set_property location {1 -167 -234} [get_bd_cells AdcLVDS_Top_0]
+connect_bd_net [get_bd_pins AdcLVDS_Top_0/m_axis_aclk] [get_bd_pins processing_system7_0/FCLK_CLK0]
+startgroup
+make_bd_intf_pins_external  [get_bd_intf_pins AdcLVDS_Top_0/lvds_dco]
+endgroup
+startgroup
+make_bd_intf_pins_external  [get_bd_intf_pins AdcLVDS_Top_0/lvds_fco]
+endgroup
+startgroup
+make_bd_pins_external  [get_bd_pins AdcLVDS_Top_0/lvds_dat_p]
+endgroup
+startgroup
+make_bd_pins_external  [get_bd_pins AdcLVDS_Top_0/lvds_dat_n]
+endgroup
+close [ open C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/idelay_ctrl_wrapper.v w ]
+add_files C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/new/idelay_ctrl_wrapper.v
+update_compile_order -fileset sources_1
+create_bd_cell -type module -reference idelay_ctrl_wrapper idelay_ctrl_wrapper_0
+INFO: [IP_Flow 19-5107] Inferred bus interface 'rst' of definition 'xilinx.com:signal:reset:1.0' (from Xilinx Repository).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'ref_clk' of definition 'xilinx.com:signal:clock:1.0' (from Xilinx Repository).
+INFO: [IP_Flow 19-4728] Bus Interface 'ref_clk': Added interface parameter 'ASSOCIATED_RESET' with value 'rst'.
+WARNING: [IP_Flow 19-5661] Bus Interface 'ref_clk' does not have any bus interfaces associated with it.
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1700] Loaded user IP repository 'c:/Study/7100_AD9670/ip_repo'.
+set_property location {3 806 -337} [get_bd_cells idelay_ctrl_wrapper_0]
+connect_bd_net [get_bd_pins processing_system7_0/FCLK_CLK1] [get_bd_pins idelay_ctrl_wrapper_0/ref_clk]
+connect_bd_net [get_bd_pins rst_ps7_0_100M/peripheral_reset] [get_bd_pins idelay_ctrl_wrapper_0/rst]
+WARNING: [IP_Flow 19-474] Invalid Parameter 'Component_Name'
+startgroup
+set_property -dict [list CONFIG.PCW_USE_FABRIC_INTERRUPT {1} CONFIG.PCW_IRQ_F2P_INTR {1}] [get_bd_cells processing_system7_0]
+endgroup
+connect_bd_net [get_bd_pins axi_dma_0/s2mm_introut] [get_bd_pins processing_system7_0/IRQ_F2P]
+save_bd_design
+Wrote  : <C:\Study\7100_AD9670\7100_AD9670.srcs\sources_1\bd\design_1\design_1.bd> 
+Wrote  : <C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/bd/design_1/ui/bd_1f5defd0.ui> 
+validate_bd_design
+CRITICAL WARNING: [BD 41-1343] Reset pin /idelay_ctrl_wrapper_0/rst (associated clock /idelay_ctrl_wrapper_0/ref_clk) is connected to reset source /rst_ps7_0_100M/peripheral_reset (synchronous to clock source /processing_system7_0/FCLK_CLK0).
+This may prevent design from meeting timing. Please add Processor System Reset module to create a reset that is synchronous to the associated clock source /processing_system7_0/FCLK_CLK1.
+CRITICAL WARNING: [BD 41-759] The input pins (listed below) are either not connected or do not have a source port, and they don't have a tie-off specified. These pins are tied-off to all 0's to avoid error in Implementation flow.
+Please check your design and connect them as needed: 
+/AdcLVDS_Top_0/sys_rst
+
+connect_bd_net [get_bd_pins AdcLVDS_Top_0/sys_rst] [get_bd_pins rst_ps7_0_100M/peripheral_reset]
+startgroup
+create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 proc_sys_reset_0
+endgroup
+connect_bd_net [get_bd_pins proc_sys_reset_0/slowest_sync_clk] [get_bd_pins processing_system7_0/FCLK_CLK1]
+connect_bd_net [get_bd_pins proc_sys_reset_0/ext_reset_in] [get_bd_pins processing_system7_0/FCLK_RESET0_N]
+delete_bd_objs [get_bd_nets rst_ps7_0_100M_peripheral_reset]
+undo
+INFO: [Common 17-17] undo 'delete_bd_objs [get_bd_nets rst_ps7_0_100M_peripheral_reset]'
+delete_bd_objs [get_bd_nets rst_ps7_0_100M_peripheral_reset]
+undo
+INFO: [Common 17-17] undo 'delete_bd_objs [get_bd_nets rst_ps7_0_100M_peripheral_reset]'
+delete_bd_objs [get_bd_nets rst_ps7_0_100M_peripheral_reset]
+connect_bd_net [get_bd_pins rst_ps7_0_100M/peripheral_reset] [get_bd_pins AdcLVDS_Top_0/sys_rst]
+connect_bd_net [get_bd_pins proc_sys_reset_0/peripheral_reset] [get_bd_pins idelay_ctrl_wrapper_0/rst]
+validate_bd_design
+save_bd_design
+Wrote  : <C:\Study\7100_AD9670\7100_AD9670.srcs\sources_1\bd\design_1\design_1.bd> 
+Wrote  : <C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/bd/design_1/ui/bd_1f5defd0.ui> 
+generate_target all [get_files  C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/bd/design_1/design_1.bd]
+INFO: [BD 41-1662] The design 'design_1.bd' is already validated. Therefore parameter propagation will not be re-run.
+VHDL Output written to : c:/Study/7100_AD9670/7100_AD9670.gen/sources_1/bd/design_1/synth/design_1.v
+VHDL Output written to : c:/Study/7100_AD9670/7100_AD9670.gen/sources_1/bd/design_1/sim/design_1.v
+VHDL Output written to : c:/Study/7100_AD9670/7100_AD9670.gen/sources_1/bd/design_1/hdl/design_1_wrapper.v
+WARNING: [IP_Flow 19-5611] Unable to find an associated reset port for the interface 'M_AXI_GP0'. A default connection has been created.
+WARNING: [IP_Flow 19-5611] Unable to find an associated reset port for the interface 'S_AXI_HP0'. A default connection has been created.
+INFO: [BD 41-1029] Generation completed for the IP Integrator block processing_system7_0 .
+INFO: [BD 41-1029] Generation completed for the IP Integrator block AdcLVDS_Top_0 .
+INFO: [BD 41-1029] Generation completed for the IP Integrator block axi_dma_0 .
+INFO: [BD 41-1029] Generation completed for the IP Integrator block rst_ps7_0_100M .
+INFO: [BD 41-1029] Generation completed for the IP Integrator block idelay_ctrl_wrapper_0 .
+WARNING: [IP_Flow 19-4994] Overwriting existing constraint file 'c:/Study/7100_AD9670/7100_AD9670.gen/sources_1/bd/design_1/ip/design_1_auto_pc_0/design_1_auto_pc_0_ooc.xdc'
+INFO: [BD 41-1029] Generation completed for the IP Integrator block ps7_0_axi_periph/s00_couplers/auto_pc .
+WARNING: [IP_Flow 19-4994] Overwriting existing constraint file 'c:/Study/7100_AD9670/7100_AD9670.gen/sources_1/bd/design_1/ip/design_1_auto_ds_0/design_1_auto_ds_0_ooc.xdc'
+WARNING: [IP_Flow 19-5611] Unable to find an associated reset port for the interface 'S_AXI'. A default connection has been created.
+WARNING: [IP_Flow 19-5611] Unable to find an associated reset port for the interface 'M_AXI'. A default connection has been created.
+INFO: [BD 41-1029] Generation completed for the IP Integrator block axi_mem_intercon/s00_couplers/auto_ds .
+WARNING: [IP_Flow 19-4994] Overwriting existing constraint file 'c:/Study/7100_AD9670/7100_AD9670.gen/sources_1/bd/design_1/ip/design_1_auto_pc_1/design_1_auto_pc_1_ooc.xdc'
+INFO: [BD 41-1029] Generation completed for the IP Integrator block axi_mem_intercon/s00_couplers/auto_pc .
+INFO: [BD 41-1029] Generation completed for the IP Integrator block proc_sys_reset_0 .
+Exporting to file c:/Study/7100_AD9670/7100_AD9670.gen/sources_1/bd/design_1/hw_handoff/design_1.hwh
+Generated Block Design Tcl file c:/Study/7100_AD9670/7100_AD9670.gen/sources_1/bd/design_1/hw_handoff/design_1_bd.tcl
+Generated Hardware Definition File c:/Study/7100_AD9670/7100_AD9670.gen/sources_1/bd/design_1/synth/design_1.hwdef
+generate_target: Time (s): cpu = 00:00:04 ; elapsed = 00:00:10 . Memory (MB): peak = 2628.770 ; gain = 0.000
+catch { config_ip_cache -export [get_ips -all design_1_processing_system7_0_0] }
+catch { config_ip_cache -export [get_ips -all design_1_AdcLVDS_Top_0_0] }
+catch { config_ip_cache -export [get_ips -all design_1_axi_dma_0_0] }
+catch { config_ip_cache -export [get_ips -all design_1_rst_ps7_0_100M_0] }
+catch { config_ip_cache -export [get_ips -all design_1_auto_pc_0] }
+catch { config_ip_cache -export [get_ips -all design_1_auto_ds_0] }
+catch { config_ip_cache -export [get_ips -all design_1_auto_pc_1] }
+catch { config_ip_cache -export [get_ips -all design_1_proc_sys_reset_0_0] }
+export_ip_user_files -of_objects [get_files C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/bd/design_1/design_1.bd] -no_script -sync -force -quiet
+create_ip_run [get_files -of_objects [get_fileset sources_1] C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/bd/design_1/design_1.bd]
+launch_runs design_1_processing_system7_0_0_synth_1 design_1_AdcLVDS_Top_0_0_synth_1 design_1_axi_dma_0_0_synth_1 design_1_rst_ps7_0_100M_0_synth_1 design_1_idelay_ctrl_wrapper_0_0_synth_1 design_1_auto_pc_0_synth_1 design_1_auto_ds_0_synth_1 design_1_auto_pc_1_synth_1 design_1_proc_sys_reset_0_0_synth_1 -jobs 6
+[Sun Apr 19 15:52:28 2026] Launched design_1_processing_system7_0_0_synth_1, design_1_AdcLVDS_Top_0_0_synth_1, design_1_axi_dma_0_0_synth_1, design_1_rst_ps7_0_100M_0_synth_1, design_1_idelay_ctrl_wrapper_0_0_synth_1, design_1_auto_pc_0_synth_1, design_1_auto_ds_0_synth_1, design_1_auto_pc_1_synth_1, design_1_proc_sys_reset_0_0_synth_1...
+Run output will be captured here:
+design_1_processing_system7_0_0_synth_1: C:/Study/7100_AD9670/7100_AD9670.runs/design_1_processing_system7_0_0_synth_1/runme.log
+design_1_AdcLVDS_Top_0_0_synth_1: C:/Study/7100_AD9670/7100_AD9670.runs/design_1_AdcLVDS_Top_0_0_synth_1/runme.log
+design_1_axi_dma_0_0_synth_1: C:/Study/7100_AD9670/7100_AD9670.runs/design_1_axi_dma_0_0_synth_1/runme.log
+design_1_rst_ps7_0_100M_0_synth_1: C:/Study/7100_AD9670/7100_AD9670.runs/design_1_rst_ps7_0_100M_0_synth_1/runme.log
+design_1_idelay_ctrl_wrapper_0_0_synth_1: C:/Study/7100_AD9670/7100_AD9670.runs/design_1_idelay_ctrl_wrapper_0_0_synth_1/runme.log
+design_1_auto_pc_0_synth_1: C:/Study/7100_AD9670/7100_AD9670.runs/design_1_auto_pc_0_synth_1/runme.log
+design_1_auto_ds_0_synth_1: C:/Study/7100_AD9670/7100_AD9670.runs/design_1_auto_ds_0_synth_1/runme.log
+design_1_auto_pc_1_synth_1: C:/Study/7100_AD9670/7100_AD9670.runs/design_1_auto_pc_1_synth_1/runme.log
+design_1_proc_sys_reset_0_0_synth_1: C:/Study/7100_AD9670/7100_AD9670.runs/design_1_proc_sys_reset_0_0_synth_1/runme.log
+export_simulation -of_objects [get_files C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/bd/design_1/design_1.bd] -directory C:/Study/7100_AD9670/7100_AD9670.ip_user_files/sim_scripts -ip_user_files_dir C:/Study/7100_AD9670/7100_AD9670.ip_user_files -ipstatic_source_dir C:/Study/7100_AD9670/7100_AD9670.ip_user_files/ipstatic -lib_map_path [list {modelsim=C:/Study/7100_AD9670/7100_AD9670.cache/compile_simlib/modelsim} {questa=C:/Study/7100_AD9670/7100_AD9670.cache/compile_simlib/questa} {riviera=C:/Study/7100_AD9670/7100_AD9670.cache/compile_simlib/riviera} {activehdl=C:/Study/7100_AD9670/7100_AD9670.cache/compile_simlib/activehdl}] -use_ip_compiled_libs -force -quiet
+reset_run synth_1
+WARNING: [Vivado 12-1017] Problems encountered:
+1. Failed to delete one or more files in run directory C:/Study/7100_AD9670/7100_AD9670.runs/synth_1
+
+launch_runs impl_1 -to_step write_bitstream -jobs 6
+[Sun Apr 19 15:52:45 2026] Launched synth_1...
+Run output will be captured here: C:/Study/7100_AD9670/7100_AD9670.runs/synth_1/runme.log
+[Sun Apr 19 15:52:45 2026] Launched impl_1...
+Run output will be captured here: C:/Study/7100_AD9670/7100_AD9670.runs/impl_1/runme.log
+make_wrapper -files [get_files C:/Study/7100_AD9670/7100_AD9670.srcs/sources_1/bd/design_1/design_1.bd] -top
+add_files -norecurse c:/Study/7100_AD9670/7100_AD9670.gen/sources_1/bd/design_1/hdl/design_1_wrapper.v
+update_compile_order -fileset sources_1
+set_property top design_1_wrapper [current_fileset]
+update_compile_order -fileset sources_1
+reset_run synth_1
+launch_runs impl_1 -to_step write_bitstream -jobs 6
+[Sun Apr 19 16:04:31 2026] Launched synth_1...
+Run output will be captured here: C:/Study/7100_AD9670/7100_AD9670.runs/synth_1/runme.log
+[Sun Apr 19 16:04:31 2026] Launched impl_1...
+Run output will be captured here: C:/Study/7100_AD9670/7100_AD9670.runs/impl_1/runme.log
+exit
+INFO: [Common 17-206] Exiting Vivado at Sun Apr 19 16:09:32 2026...
