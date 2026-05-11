@@ -23,7 +23,7 @@ module DAS_Core #(
     // 内部逻辑会再将这根宽总线切片分配给各个通道。
     input  wire [CH_NUM * ADC_WIDTH - 1 : 0]    adc_data_in, // 包含所有通道ADC数据的总线
     input  wire [CH_NUM * DELAY_WIDTH - 1 : 0]  delay_in,    // 包含所有通道延迟参数的总线
-    input  wire [CH_NUM * WEIGHT_WIDTH - 1 : 0] weight_in,   // 包含所有通道权重参数的总线
+    input  wire [CH_NUM * WEIGHT_WIDTH - 1 : 0] weight_in,   // 包含所有通道权重参数的总线   
     
     // --- 输出接口 ---
     // 输出位宽在经过乘法和加法累加后会变宽，防止数据溢出。

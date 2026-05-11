@@ -1,0 +1,3 @@
+Vivado Simulator 2020.2
+Time resolution is 1 ps
+$finish called at time : 620 ns : File "D:/prj/7100/test_block/test_block.srcs/sim_1/new/tb_DAS_Core_Multi.v" Line 105
