@@ -27,8 +27,8 @@ module DAS_Core #(
     
     // --- 输出接口 ---
     // 输出位宽在经过乘法和加法累加后会变宽，防止数据溢出。
-    // 计算公式: 最终位宽 = ADC位宽 + 权重位宽 + log2(通道数)
-    output reg  [(ADC_WIDTH + WEIGHT_WIDTH + 3) - 1 : 0] beamformed_out, // 波束合成最终输出数据
+    // 计算公式: 最终位宽 = ADC位宽 + 权重位宽 + log2(通道数) 这里使用$clog2语法，这是一个编译器函数而不是运行期电路，不会消耗物理资源
+    output reg  [(ADC_WIDTH + WEIGHT_WIDTH + $clog2(CH_NUM)) - 1 : 0] beamformed_out, // 波束合成最终输出数据
     output reg                                           out_valid       // 输出数据有效标志位
 );
 
@@ -100,7 +100,7 @@ module DAS_Core #(
     // 届时必须将其替换为严格打拍的二叉树加法网络 (Pipelined Binary Adder Tree)。
     
     integer j;
-    reg [(ADC_WIDTH + WEIGHT_WIDTH + 3) - 1 : 0] sum_acc; // 累加寄存器
+    reg [(ADC_WIDTH + WEIGHT_WIDTH +  $clog2(CH_NUM)) - 1 : 0] sum_acc; // 累加寄存器
     
     always @(posedge clk) begin
         if (adc_valid) begin
