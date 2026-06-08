@@ -1,0 +1,38 @@
+#-----------------------------------------------------------
+# Vivado v2020.2 (64-bit)
+# SW Build 3064766 on Wed Nov 18 09:12:45 MST 2020
+# IP Build 3064653 on Wed Nov 18 14:17:31 MST 2020
+# Start of session at: Sun Jun  7 14:40:15 2026
+# Process ID: 26432
+# Current directory: D:/prj/7100/test_block/vivado
+# Command line: vivado.exe -gui_launcher_event rodinguilauncherevent1920 D:\prj\7100\test_block\vivado\test_block.xpr
+# Log file: D:/prj/7100/test_block/vivado/vivado.log
+# Journal file: D:/prj/7100/test_block/vivado\vivado.jou
+#-----------------------------------------------------------
+start_gui
+open_project D:/prj/7100/test_block/vivado/test_block.xpr
+Scanning sources...
+Finished scanning sources
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository 'D:/Xilinx/Vivado/2020.2/data/ip'.
+WARNING: [IP_Flow 19-3664] IP 'fir_compiler_0' generated file not found 'd:/prj/7100/test_block/vivado/test_block.gen/sources_1/ip/fir_compiler_0/fir_compiler_0.dcp'. Please regenerate to continue.
+WARNING: [IP_Flow 19-3664] IP 'fir_compiler_0' generated file not found 'd:/prj/7100/test_block/vivado/test_block.gen/sources_1/ip/fir_compiler_0/fir_compiler_0_stub.v'. Please regenerate to continue.
+WARNING: [IP_Flow 19-3664] IP 'fir_compiler_0' generated file not found 'd:/prj/7100/test_block/vivado/test_block.gen/sources_1/ip/fir_compiler_0/fir_compiler_0_stub.vhdl'. Please regenerate to continue.
+WARNING: [IP_Flow 19-3664] IP 'fir_compiler_0' generated file not found 'd:/prj/7100/test_block/vivado/test_block.gen/sources_1/ip/fir_compiler_0/fir_compiler_0_sim_netlist.v'. Please regenerate to continue.
+WARNING: [IP_Flow 19-3664] IP 'fir_compiler_0' generated file not found 'd:/prj/7100/test_block/vivado/test_block.gen/sources_1/ip/fir_compiler_0/fir_compiler_0_sim_netlist.vhdl'. Please regenerate to continue.
+update_compile_order -fileset sources_1
+close [ open D:/prj/7100/test_block/vivado/test_block.srcs/sources_1/new/Global_MUX_Controller.v w ]
+add_files D:/prj/7100/test_block/vivado/test_block.srcs/sources_1/new/Global_MUX_Controller.v
+update_compile_order -fileset sources_1
+close [ open D:/prj/7100/test_block/vivado/test_block.srcs/sources_1/new/RF_PingPong_Buffer.v w ]
+add_files D:/prj/7100/test_block/vivado/test_block.srcs/sources_1/new/RF_PingPong_Buffer.v
+update_compile_order -fileset sources_1
+reset_run fir_compiler_0_synth_1
+launch_runs synth_1 -jobs 4
+[Mon Jun  8 16:23:40 2026] Launched fir_compiler_0_synth_1...
+Run output will be captured here: D:/prj/7100/test_block/vivado/test_block.runs/fir_compiler_0_synth_1/runme.log
+[Mon Jun  8 16:23:41 2026] Launched synth_1...
+Run output will be captured here: D:/prj/7100/test_block/vivado/test_block.runs/synth_1/runme.log
+exit
+INFO: [Common 17-206] Exiting Vivado at Mon Jun  8 20:16:33 2026...
