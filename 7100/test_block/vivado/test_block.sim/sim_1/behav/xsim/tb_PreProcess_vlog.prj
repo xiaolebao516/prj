@@ -1,0 +1,12 @@
+# compile verilog/system verilog design source files
+verilog xil_defaultlib  \
+"../../../../test_block.srcs/sources_1/new/Data_Packer.v" \
+"../../../../test_block.srcs/sources_1/new/PreProcess_Top.v" \
+"../../../../test_block.srcs/sources_1/new/RF_Rectifier.v" \
+"../../../../test_block.srcs/sim_1/new/tb_PreProcess.v" \
+
+# compile glbl module
+verilog xil_defaultlib "glbl.v"
+
+# Do not sort compile order
+nosort

@@ -109,14 +109,19 @@ module Data_Packer (
                 end
 
                 STATE_DATA: begin
+                // 只有当 FIR 有新数据吐出时，才进行打包计数
+                if (fir_valid) begin
                     m_axis_tvalid <= 1'b1;
-                    // 直接透传 FIR 滤波器计算出的包络数据
                     m_axis_tdata  <= fir_data; 
                     byte_cnt      <= byte_cnt + 1'b1;
-
-                    if (next_state == STATE_PADDING)
-                        byte_cnt <= 12'h0;
+            
+                    if (byte_cnt == 12'd895) // 数满 896 字节跳出
+                        next_state <= STATE_PADDING;
+                end else begin
+                    // 没有有效数据时，暂停发送，保持等待
+                    m_axis_tvalid <= 1'b0;
                 end
+            end
 
                 STATE_PADDING: begin
                     m_axis_tvalid <= 1'b1;

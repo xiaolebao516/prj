@@ -1,35 +1,32 @@
 `timescale 1ns / 1ps
 // ============================================================================
-// 模块名称:    DAS_Core
-// 模块描述:    参数化延迟求和 (DAS) 波束合成核心模块
-//              实现了用于通道时间对齐、变迹加权 (Apodization) 和信号求和的
-//              实时硬件流水线 (Real-time Pipeline)。
+// 模块名称:    DAS_Core_32CH
+// 模块描述:    32通道全流水线延迟求和 (DAS) 波束合成核心模块
+// 架构升级:    1. 引入 5 级打拍二叉树加法网络，解决高扇入时序瓶颈
+//              2. 输出强制对齐至 32-bit (4字节) 标准总线
+//              3. 严格的 Valid 信号随流水线同步打拍延迟
 // ============================================================================
 
-module DAS_Core #(
-    // --- 系统级参数 (实例化时可自由修改) ---
-    parameter CH_NUM       = 8,      // 接收通道的总数量
-    parameter ADC_WIDTH    = 12,     // ADC 输入数据的位宽 (默认12-bit)
-    parameter DELAY_WIDTH  = 10,     // 延迟指针的位宽 (决定了最大延迟深度，必须是 log2(BRAM_DEPTH))
-    parameter BRAM_DEPTH   = 1024,   // 环形缓存的物理深度 (必须是 2 的 DELAY_WIDTH 次方)
-    parameter WEIGHT_WIDTH = 8       // 变迹权重 (抑制权重) 的位宽
+module DAS_Core_32CH #(
+    // --- 系统级参数 ---
+    parameter CH_NUM       = 32,     // 接收通道的总数量 (固定为 32)
+    parameter ADC_WIDTH    = 12,     // ADC 输入数据的位宽
+    parameter DELAY_WIDTH  = 10,     // 延迟指针的位宽
+    parameter BRAM_DEPTH   = 1024,   // 内部环形缓存的物理深度
+    parameter WEIGHT_WIDTH = 8       // 变迹权重位宽
 )(
-    input  wire clk,                 // 系统时钟 (驱动流水线运转的心脏)
-    input  wire rst_n,               // 异步复位信号 (低电平有效)
-    input  wire adc_valid,           // 数据有效标志位 (高电平时表示当前射频流数据有效)
+    input  wire clk,
+    input  wire rst_n,
+    input  wire adc_valid,           // 输入数据有效标志
     
-    // --- 展平的数据接口 (Flattened Data Interfaces) ---
-    // 注意: 为了在标准 Verilog 中支持参数化的端口，我们将多维数组"拍扁"成了单根极宽的总线。
-    // 内部逻辑会再将这根宽总线切片分配给各个通道。
-    input  wire [CH_NUM * ADC_WIDTH - 1 : 0]    adc_data_in, // 包含所有通道ADC数据的总线
-    input  wire [CH_NUM * DELAY_WIDTH - 1 : 0]  delay_in,    // 包含所有通道延迟参数的总线
-    input  wire [CH_NUM * WEIGHT_WIDTH - 1 : 0] weight_in,   // 包含所有通道权重参数的总线   
+    // 展平的 32 通道宽总线输入
+    input  wire [CH_NUM * ADC_WIDTH - 1 : 0]    adc_data_in, 
+    input  wire [CH_NUM * DELAY_WIDTH - 1 : 0]  delay_in,    
+    input  wire [CH_NUM * WEIGHT_WIDTH - 1 : 0] weight_in,   
     
-    // --- 输出接口 ---
-    // 输出位宽在经过乘法和加法累加后会变宽，防止数据溢出。
-    // 计算公式: 最终位宽 = ADC位宽 + 权重位宽 + log2(通道数) 这里使用$clog2语法，这是一个编译器函数而不是运行期电路，不会消耗物理资源
-    output reg  [(ADC_WIDTH + WEIGHT_WIDTH + $clog2(CH_NUM)) - 1 : 0] beamformed_out, // 波束合成最终输出数据
-    output reg                                           out_valid       // 输出数据有效标志位
+    // --- 升级：输出接口强制对齐 32-bit ---
+    output reg  [31:0] beamformed_out, 
+    output reg         out_valid       
 );
 
     // ========================================================================
@@ -39,83 +36,112 @@ module DAS_Core #(
     
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            wr_ptr <= {DELAY_WIDTH{1'b0}}; // 复位时，写指针清零
+            wr_ptr <= {DELAY_WIDTH{1'b0}};
         end else if (adc_valid) begin
-            wr_ptr <= wr_ptr + 1'b1;       // 数据有效时，每个时钟周期写指针加1 (溢出后自动绕回)
+            wr_ptr <= wr_ptr + 1'b1;
         end
     end
 
     // ========================================================================
-    // 2. 通道处理流水线 (利用 generate 语句根据 CH_NUM 动态批量生成)
+    // 2. 32通道独立处理流水线 (延迟提取 + 变迹乘法)
     // ========================================================================
-    // 定义一个内部数组，用于暂时存放各个通道乘法器算出来的结果，等待进入求和树
-    wire [(ADC_WIDTH + WEIGHT_WIDTH) - 1 : 0] mult_result_array [0 : CH_NUM - 1];
+    // 乘法结果位宽 = 12 + 8 = 20-bit
+    localparam MULT_WIDTH = ADC_WIDTH + WEIGHT_WIDTH;
+    wire [MULT_WIDTH - 1 : 0] mult_result_array [0 : CH_NUM - 1];
     
-    genvar i; // generate 专属的循环变量
+    genvar i;
     generate
         for (i = 0; i < CH_NUM; i = i + 1) begin : CHANNEL_PROCESS_BLOCK
             
-            // --- 从展平的宽总线中，精准切出属于当前通道(第i个)的数据 ---
-            // 语法说明: [起始位置 +: 位宽] 是 Verilog-2001 的切片语法
             wire [ADC_WIDTH - 1 : 0]    ch_adc_data = adc_data_in [i * ADC_WIDTH +: ADC_WIDTH];
             wire [DELAY_WIDTH - 1 : 0]  ch_delay    = delay_in    [i * DELAY_WIDTH +: DELAY_WIDTH];
             wire [WEIGHT_WIDTH - 1 : 0] ch_weight   = weight_in   [i * WEIGHT_WIDTH +: WEIGHT_WIDTH];
             
-            // --- 环形缓存 (综合器会自动将其推断为 FPGA 内部的 BRAM 硬核) ---
+            // 内部延时环形缓存 (推断为 BRAM)
             reg [ADC_WIDTH - 1 : 0] ring_buffer [0 : BRAM_DEPTH - 1];
-            
-            // --- 读指针计算 (利用无符号减法的自然溢出，实现固定距离的回溯) ---
             wire [DELAY_WIDTH - 1 : 0] rd_ptr = wr_ptr - ch_delay;
             
-            // --- 流水线寄存器 (用于锁定数据，满足时序要求) ---
-            reg [ADC_WIDTH - 1 : 0] delayed_data;                      // 存放对齐后的历史数据
-            reg [(ADC_WIDTH + WEIGHT_WIDTH) - 1 : 0] mult_data;        // 存放乘法结果
+            reg [ADC_WIDTH - 1 : 0] delayed_data;
+            reg [MULT_WIDTH - 1 : 0] mult_data;
             
-            // 同步的存储器读写与乘法操作
             always @(posedge clk) begin
                 if (adc_valid) begin
-                    // 步骤A: 将当前时刻的新数据写入环形缓存
                     ring_buffer[wr_ptr] <= ch_adc_data;
-                    
-                    // 步骤B: 抽出对齐后的历史数据
-                    delayed_data <= ring_buffer[rd_ptr];
-                    
-                    // 步骤C: 变迹乘法 (综合器会自动推断并调用 DSP48E 乘法器硬核)
-                    mult_data <= delayed_data * ch_weight;
+                    delayed_data        <= ring_buffer[rd_ptr];
+                    // 乘法器消耗 1 个时钟周期
+                    mult_data           <= delayed_data * ch_weight;
                 end
             end
             
-            // 将当前通道的乘法结果，通过物理连线接入到全局的求和数组中
             assign mult_result_array[i] = mult_data;
-            
         end
     endgenerate
 
     // ========================================================================
-    // 3. 通道求和逻辑 (加法树 Summation Logic)
+    // 3. 5级流水线二叉加法树 (Pipelined Binary Adder Tree)
+    // 解决 32 个数字同时相加导致的极长组合逻辑路径问题
     // ========================================================================
-    // 架构师注: 
-    // 对于较少的通道数 (如 8 通道)，使用 behavioral 的 for 循环累加，综合器能够较好地处理。
-    // 但如果要扩展到 64 或 128 通道，这种串行加法会导致极长的组合逻辑延迟，无法满足时序。
-    // 届时必须将其替换为严格打拍的二叉树加法网络 (Pipelined Binary Adder Tree)。
     
+    // 每一级加法，位宽自然增加 1 位防止溢出
+    reg [MULT_WIDTH : 0]     sum_stg1 [0 : 15]; // 32 变 16 (21-bit)
+    reg [MULT_WIDTH + 1 : 0] sum_stg2 [0 : 7];  // 16 变 8  (22-bit)
+    reg [MULT_WIDTH + 2 : 0] sum_stg3 [0 : 3];  // 8  变 4  (23-bit)
+    reg [MULT_WIDTH + 3 : 0] sum_stg4 [0 : 1];  // 4  变 2  (24-bit)
+    reg [MULT_WIDTH + 4 : 0] sum_stg5;          // 2  变 1  (25-bit)
+
     integer j;
-    reg [(ADC_WIDTH + WEIGHT_WIDTH +  $clog2(CH_NUM)) - 1 : 0] sum_acc; // 累加寄存器
-    
-    always @(posedge clk) begin
-        if (adc_valid) begin
-            sum_acc = 0; // 每次计算前，累加器清零
-            
-            // 将 8 个通道的乘法结果累加
-            for (j = 0; j < CH_NUM; j = j + 1) begin
-                sum_acc = sum_acc + mult_result_array[j];
-            end
-            
-            // 将累加结果打入最终的输出寄存器
-            beamformed_out <= sum_acc;
-            out_valid      <= 1'b1;
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            for (j = 0; j < 16; j = j + 1) sum_stg1[j] <= 0;
+            for (j = 0; j < 8;  j = j + 1) sum_stg2[j] <= 0;
+            for (j = 0; j < 4;  j = j + 1) sum_stg3[j] <= 0;
+            for (j = 0; j < 2;  j = j + 1) sum_stg4[j] <= 0;
+            sum_stg5 <= 0;
         end else begin
+            // Stage 1: 16 个加法器并行
+            for (j = 0; j < 16; j = j + 1)
+                sum_stg1[j] <= mult_result_array[2*j] + mult_result_array[2*j+1];
+                
+            // Stage 2: 8 个加法器并行
+            for (j = 0; j < 8; j = j + 1)
+                sum_stg2[j] <= sum_stg1[2*j] + sum_stg1[2*j+1];
+                
+            // Stage 3: 4 个加法器并行
+            for (j = 0; j < 4; j = j + 1)
+                sum_stg3[j] <= sum_stg2[2*j] + sum_stg2[2*j+1];
+                
+            // Stage 4: 2 个加法器并行
+            for (j = 0; j < 2; j = j + 1)
+                sum_stg4[j] <= sum_stg3[2*j] + sum_stg3[2*j+1];
+                
+            // Stage 5: 最终求和
+            sum_stg5 <= sum_stg4[0] + sum_stg4[1];
+        end
+    end
+
+    // ========================================================================
+    // 4. 数据对齐与 Valid 信号延迟同步
+    // ========================================================================
+    // 从输入到乘法器需要 1 拍，加法树需要 5 拍，总共需要延迟 6 拍的 Valid 信号
+    reg [5:0] valid_pipe;
+
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            valid_pipe     <= 6'b0;
+            beamformed_out <= 32'd0;
             out_valid      <= 1'b0;
+        end else begin
+            // Valid 信号移位寄存器
+            valid_pipe <= {valid_pipe[4:0], adc_valid};
+            out_valid  <= valid_pipe[5];
+            
+            // 将 25-bit 的最终结果填充至 32-bit 标准总线
+            // 射频回波是有符号数，使用符号位扩展 (Sign Extension)
+            if (valid_pipe[5]) begin
+                beamformed_out <= { {7{sum_stg5[24]}}, sum_stg5 }; 
+            end else begin
+                beamformed_out <= 32'd0;
+            end
         end
     end
 
