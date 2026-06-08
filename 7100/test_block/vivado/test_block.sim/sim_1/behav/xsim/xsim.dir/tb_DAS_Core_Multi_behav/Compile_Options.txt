@@ -1,1 +1,0 @@
--wto "4e9dbcf57c014c5695e935feed5f9f49" --incr --debug "typical" --relax --mt "2" -L "xil_defaultlib" -L "unisims_ver" -L "unimacro_ver" -L "secureip" --snapshot "tb_DAS_Core_Multi_behav" "xil_defaultlib.tb_DAS_Core_Multi" "xil_defaultlib.glbl" -log "elaborate.log" 

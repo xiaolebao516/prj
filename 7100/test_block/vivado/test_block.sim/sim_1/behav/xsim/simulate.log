@@ -1,5 +1,0 @@
-Vivado Simulator 2020.2
-Time resolution is 1 ps
-Simulation Start: Sending DAS Data...
-Simulation Finished.
-$stop called at time : 605210 ns : File "D:/prj/7100/test_block/vivado/test_block.srcs/sim_1/new/tb_PreProcess.v" Line 69
