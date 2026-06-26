@@ -25,6 +25,31 @@ make
 
 The `.claudignore` file is empty — add build artifact patterns there if needed.
 
+### After Clone — Quick Start
+
+1. **Prerequisites**: Qt 6.5.3 (MinGW 64-bit) + Qt Charts. On a new machine, update the qmake path below.
+2. **Open** `hhh1.pro` in Qt Creator, or build from CLI as above.
+3. **Login**: user `1`, password `1`.
+4. **Hardware**: Connect Pico/RP2040 via USB, select COM port in app (115200 baud).
+
+### Branches
+
+| Branch | Purpose |
+|--------|---------|
+| `main` | Production / stable — lean, no debug noise |
+| `feature/gate-diagnostics` | Lab debugging — gate rejection counters + UI operator guidance. Same validation logic as main, just with diagnostics added. |
+
+Use `feature/gate-diagnostics` in the lab to identify which validation gate is blocking frame acceptance.
+
+### Documentation Index
+
+| File | Content |
+|------|---------|
+| `CHANGELOG_REFACTOR.md` | Refactoring changes and diagnostic feature log |
+| `docs/debug_guide.md` | Step-by-step lab debugging procedure + parameter tuning decision table |
+| `docs/architecture_review.md` | Validation pipeline structural review (7-gate chain analysis) |
+| `docs/param_tuning_analysis.md` | Per-gate parameter analysis with modification risk assessment |
+
 ## Architecture
 
 ### Page Navigation (QStackedWidget)
