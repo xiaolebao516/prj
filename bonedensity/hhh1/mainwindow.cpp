@@ -3092,27 +3092,49 @@ void MainWindow::updateProcessPanel(double sosA,
                 failReasons << "偏离锁定簇";
         }
 
-        // 引导提示
+        // 引导提示 — 按优先级：先解决角度，再解决稳定性，最后才是信号质量
         QString guide;
         double gDev = pairMidGap - anglePairMidGapTarget;
         double dDev = signedLagDiff - angleSignedDiffTarget;
 
         if (!lastFrameAnglePairMidGapOk) {
-            if (gDev > 3.0) guide = "→ G偏大，请向右侧轻压";
-            else if (gDev < -3.0) guide = "→ G偏小，请向左侧轻压";
-            else guide = "→ G接近边界，微调探头";
+            if (gDev > 3.0)
+                guide = "→ G偏大：探头偏左侧，请向右(桡骨远端方向)轻移";
+            else if (gDev < -3.0)
+                guide = "→ G偏小：探头偏右侧，请向左(桡骨近端方向)轻移";
+            else
+                guide = "→ G接近边界，请轻微调整探头左右位置";
         } else if (!lastFrameAngleSignedDiffOk) {
-            if (dDev < -1.5) guide = "→ D偏小，请轻微回调";
-            else if (dDev > 2.0) guide = "→ D偏大，请轻微反向";
-            else guide = "→ D接近边界，微调角度";
-        } else if (lastFrameStableState == 0) {
-            guide = "→ 请保持当前角度不动，等待锁定...";
-        } else if (lastFrameStableState == 1) {
-            guide = "→ lag波动偏大，请减小手部晃动";
+            if (dDev < -1.5)
+                guide = "→ D偏小：探头倾角偏高，请稍微放平探头";
+            else if (dDev > 2.0)
+                guide = "→ D偏大：探头倾角偏低，请稍微立起探头";
+            else
+                guide = "→ D接近边界，请微调探头倾角";
         } else if (!lastFrameStableOk) {
-            guide = "→ 探头可能偏离，请回到之前的角度";
+            if (lastFrameStableState == 0) {
+                int remain = stableLagWarmupCount - recentBoneLagBList.size();
+                guide = QString("→ 预热采集中，保持当前角度不动 %1秒后锁定...")
+                    .arg(qMax(1, remain * 80 / 1000 + 1));
+            } else if (lastFrameStableState == 1) {
+                guide = "→ 波形波动偏大，请减小手部晃动或检查耦合剂";
+            } else {
+                // out of lock
+                guide = "→ 探头偏离锁定位置，请回到之前的触压角度";
+            }
+        } else if (!lastFrameCorrOk) {
+            if (!lastFrameBJumpOk || !lastFrameBoundaryOk || !lastFrameDiffOk || !lastFrameDirectionOk) {
+                // 这些是信号层面的问题，不是操作者能控制的
+                guide = "→ 信号异常(跳变/反射)，请检查耦合剂是否充足、探头是否贴紧";
+            } else {
+                guide = "→ 信号相关性偏低，请增加耦合剂并确保探头贴合皮肤";
+            }
+        } else if (!lastFrameBJumpOk) {
+            guide = "→ B通道波包跳变，请确保探头稳定贴合";
+        } else if (!lastFrameBoundaryOk) {
+            guide = "→ 疑似检测到边界反射，请调整探头位置";
         } else {
-            guide = "→ 检查串扰/波形质量";
+            guide = "→ 请检查耦合剂和探头接触状态";
         }
 
         // 拼接失败原因
