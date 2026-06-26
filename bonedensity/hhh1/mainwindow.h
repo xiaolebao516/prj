@@ -227,6 +227,35 @@ private:
     bool checkBoneLagStable(int lagB, int* centerOut = nullptr, int* countOut = nullptr);
     void resetBoneLagStability();
 
+    // ================== 门控拒绝率统计（诊断用，不改检验逻辑）==================
+    int  gateTotalFrames = 0;
+    int  gateFailBJump = 0;
+    int  gateFailBoundary = 0;
+    int  gateFailDiff = 0;
+    int  gateFailDirection = 0;
+    int  gateFailCorrA = 0;
+    int  gateFailCorrB = 0;
+    int  gateFailAngleSignedDiff = 0;
+    int  gateFailAnglePairMidGap = 0;
+    int  gateFailStableWarmup = 0;
+    int  gateFailStableNotConcentrated = 0;
+    int  gateFailStableOutOfLock = 0;
+
+    // 最近一帧各闸门状态（供 updateProcessPanel 读取）
+    bool lastFrameBJumpOk = false;
+    bool lastFrameBoundaryOk = false;
+    bool lastFrameDiffOk = false;
+    bool lastFrameDirectionOk = false;
+    bool lastFrameCorrOk = false;
+    bool lastFrameAngleSignedDiffOk = false;
+    bool lastFrameAnglePairMidGapOk = false;
+    bool lastFrameAngleOk = false;
+    bool lastFrameStableOk = false;
+    int  lastFrameStableState = 0; // 0=warmup, 1=notConcentrated, 2=locked-Ok, 3=outOfLock
+
+    void resetGateStats();
+    QString gateStatsSummary() const;
+
     // ================== 病人检测 / 调试模式控制 ==================
 
     AcquireMode acquireMode = DebugAcquireMode;

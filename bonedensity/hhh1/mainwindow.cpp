@@ -510,8 +510,9 @@ void MainWindow::resetOneRoundMeasurementState()
 
     processValidCount = 0;
 
-    // ✅ 新增：每一轮正式测量开始时，清空最近 lagB 稳定性窗口
+    // ✅ 新增：每一轮正式测量开始时，清空最近 lagB 稳定性窗口和门控统计
     resetBoneLagStability();
+    resetGateStats();
 
     ui->barPairA->setValue(500);
     ui->barPairB->setValue(500);
@@ -700,6 +701,7 @@ void MainWindow::finishOnePatientRound()
                  << "sos =" << oneRoundSos
                  << "corrA =" << oneRoundCorrA
                  << "corrB =" << oneRoundCorrB;
+        qDebug() << gateStatsSummary();
 
         currentRoundSosList.clear();
         currentRoundAList.clear();
@@ -756,6 +758,7 @@ void MainWindow::finishOnePatientRound()
              << "B =" << oneRoundB
              << "corrA =" << oneRoundCorrA
              << "corrB =" << oneRoundCorrB;
+    qDebug() << gateStatsSummary();
 
     // 当前轮清零，但不清空 roundSosList / candidateRoundList
     currentRoundSosList.clear();
@@ -2069,6 +2072,49 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
                  << "strictValid =" << strictValid;
 
 
+        // ======================================================
+        // 门控拒绝率统计（不改检验逻辑，纯诊断用）
+        // ======================================================
+        gateTotalFrames++;
+
+        // 记录当前帧各闸门状态
+        lastFrameBJumpOk = bJumpOk;
+        lastFrameBoundaryOk = notBoundary;
+        lastFrameDiffOk = diffOk;
+        lastFrameDirectionOk = directionOk;
+        lastFrameCorrOk = corrOk;
+        lastFrameAngleSignedDiffOk = angleSignedDiffOk;
+        lastFrameAnglePairMidGapOk = anglePairMidGapOk;
+        lastFrameAngleOk = angleOk;
+        lastFrameStableOk = stableOk;
+
+        // 累加各闸失败计数
+        if (!bJumpOk)             gateFailBJump++;
+        if (!notBoundary)         gateFailBoundary++;
+        if (!diffOk)              gateFailDiff++;
+        if (!directionOk)         gateFailDirection++;
+        if (bRes.corr < frameCorrBMin) gateFailCorrB++;
+        if (aRes.corr < frameCorrAMin) gateFailCorrA++;
+        if (!angleSignedDiffOk)   gateFailAngleSignedDiff++;
+        if (!anglePairMidGapOk)   gateFailAnglePairMidGap++;
+
+        // 稳定簇状态细分
+        if (!stableOk) {
+            if (boneLagLocked) {
+                gateFailStableOutOfLock++;
+                lastFrameStableState = 3;
+            } else if (recentBoneLagBList.size() < stableLagWarmupCount) {
+                gateFailStableWarmup++;
+                lastFrameStableState = 0;
+            } else {
+                gateFailStableNotConcentrated++;
+                lastFrameStableState = 1;
+            }
+        } else {
+            lastFrameStableState = 2;
+        }
+
+
         handlePatientMeasureValue(
             aRes.sos,
             bRes.sos,
@@ -2094,6 +2140,53 @@ void MainWindow::resetBoneLagStability()
     boneLagOutOfLockCount = 0;
 
     qDebug() << "Bone lag stability reset.";
+}
+
+void MainWindow::resetGateStats()
+{
+    gateTotalFrames = 0;
+    gateFailBJump = 0;
+    gateFailBoundary = 0;
+    gateFailDiff = 0;
+    gateFailDirection = 0;
+    gateFailCorrA = 0;
+    gateFailCorrB = 0;
+    gateFailAngleSignedDiff = 0;
+    gateFailAnglePairMidGap = 0;
+    gateFailStableWarmup = 0;
+    gateFailStableNotConcentrated = 0;
+    gateFailStableOutOfLock = 0;
+}
+
+QString MainWindow::gateStatsSummary() const
+{
+    if (gateTotalFrames <= 0) {
+        return "暂无统计数据";
+    }
+
+    auto pct = [&](int fail) -> QString {
+        double r = (double)fail / (double)gateTotalFrames * 100.0;
+        return QString("%1%").arg(r, 0, 'f', 1);
+    };
+
+    return QString(
+        "闸门统计(%1帧): "
+        "BJump=%2 Boundary=%3 Diff=%4 Dir=%5 "
+        "CorrA=%6 CorrB=%7 "
+        "AngDiff=%8 AngGap=%9 "
+        "StableWarmup=%10 StableConc=%11 StableLock=%12")
+        .arg(gateTotalFrames)
+        .arg(pct(gateFailBJump))
+        .arg(pct(gateFailBoundary))
+        .arg(pct(gateFailDiff))
+        .arg(pct(gateFailDirection))
+        .arg(pct(gateFailCorrA))
+        .arg(pct(gateFailCorrB))
+        .arg(pct(gateFailAngleSignedDiff))
+        .arg(pct(gateFailAnglePairMidGap))
+        .arg(pct(gateFailStableWarmup))
+        .arg(pct(gateFailStableNotConcentrated))
+        .arg(pct(gateFailStableOutOfLock));
 }
 
 bool MainWindow::checkBoneLagStable(int lagB, int* centerOut, int* countOut)
@@ -2962,47 +3055,91 @@ void MainWindow::updateProcessPanel(double sosA,
             "font-size: 12px; color: #67C23A; font-weight: bold;"
             );
     } else {
-        QString guide;
+        // ======================================================
+        // 6. 帧被拒绝：显示具体失败原因 + 门控统计
+        // ======================================================
+        QStringList failReasons;
 
+        // 从成员变量读取当前帧各闸状态（detectAndPlotSpeed 已写入）
+        if (!lastFrameBJumpOk)
+            failReasons << "B跳变";
+        if (!lastFrameBoundaryOk)
+            failReasons << "边界反射";
+        if (!lastFrameDiffOk)
+            failReasons << QString("|lagA-lagB|过大=%1").arg(signedLagDiff);
+        if (!lastFrameDirectionOk)
+            failReasons << QString("A<B方向异常=%1").arg(signedLagDiff);
+        if (!lastFrameCorrOk) {
+            // corrOk 是 corrA AND corrB，细分一下
+            if (gateFailCorrA > 0 && gateFailCorrB == 0)
+                failReasons << "CorrA偏低";
+            else if (gateFailCorrB > 0 && gateFailCorrA == 0)
+                failReasons << "CorrB偏低";
+            else
+                failReasons << "相关性偏低";
+        }
+        if (!lastFrameAngleSignedDiffOk)
+            failReasons << QString("D=%1∉[%2,%3]").arg(signedLagDiff).arg(angleSignedDiffMin,0,'f',1).arg(angleSignedDiffMax,0,'f',1);
+        if (!lastFrameAnglePairMidGapOk)
+            failReasons << QString("G=%1∉[%2,%3]").arg(pairMidGap,0,'f',1).arg(anglePairMidGapMin,0,'f',1).arg(anglePairMidGapMax,0,'f',1);
+        if (!lastFrameStableOk && lastFrameAngleOk && lastFrameCorrOk) {
+            // 角度和相关都 OK 但是稳定簇没过，说明问题在稳定性
+            if (lastFrameStableState == 0)
+                failReasons << QString("预热中(%1/%2)").arg(recentBoneLagBList.size()).arg(stableLagWarmupCount);
+            else if (lastFrameStableState == 1)
+                failReasons << "簇不够集中";
+            else if (lastFrameStableState == 3)
+                failReasons << "偏离锁定簇";
+        }
+
+        // 引导提示
+        QString guide;
         double gDev = pairMidGap - anglePairMidGapTarget;
         double dDev = signedLagDiff - angleSignedDiffTarget;
 
-        if (gDev > 3.0) {
-            guide = "G偏大：当前偏向低速/左侧方向，请向右侧轻压或反方向微调";
-        } else if (gDev < -3.0) {
-            guide = "G偏小：当前偏向高速/右侧方向，请向左侧轻压或反方向微调";
-        } else if (dDev < -1.5) {
-            guide = "D偏小：A/B延迟关系偏向高速姿态，请轻微回调角度";
-        } else if (dDev > 2.0) {
-            guide = "D偏大：A/B延迟关系偏向低速姿态，请轻微反向调整";
+        if (!lastFrameAnglePairMidGapOk) {
+            if (gDev > 3.0) guide = "→ G偏大，请向右侧轻压";
+            else if (gDev < -3.0) guide = "→ G偏小，请向左侧轻压";
+            else guide = "→ G接近边界，微调探头";
+        } else if (!lastFrameAngleSignedDiffOk) {
+            if (dDev < -1.5) guide = "→ D偏小，请轻微回调";
+            else if (dDev > 2.0) guide = "→ D偏大，请轻微反向";
+            else guide = "→ D接近边界，微调角度";
+        } else if (lastFrameStableState == 0) {
+            guide = "→ 请保持当前角度不动，等待锁定...";
+        } else if (lastFrameStableState == 1) {
+            guide = "→ lag波动偏大，请减小手部晃动";
+        } else if (!lastFrameStableOk) {
+            guide = "→ 探头可能偏离，请回到之前的角度";
         } else {
-            guide = "角度接近目标，请保持不动等待稳定";
-        }
-        QString reason;
-
-        if (!anglePairMidGapOk) {
-            reason += QString("Gap=%1 不在 [%2,%3]，目标=%4；")
-                          .arg(pairMidGap, 0, 'f', 1)
-                          .arg(anglePairMidGapMin, 0, 'f', 1)
-                          .arg(anglePairMidGapMax, 0, 'f', 1)
-                          .arg(anglePairMidGapTarget, 0, 'f', 1);
+            guide = "→ 检查串扰/波形质量";
         }
 
-        if (!angleSignedDiffOk) {
-            reason += QString("lagA-lagB=%1 不在 [%2,%3]；")
-                          .arg(signedLagDiff)
-                          .arg(angleSignedDiffMin, 0, 'f', 1)
-                          .arg(angleSignedDiffMax, 0, 'f', 1);
+        // 拼接失败原因
+        QString reasonLine;
+        if (failReasons.isEmpty()) {
+            reasonLine = "角度/稳定基本合格，其他原因未累计";
+        } else {
+            reasonLine = failReasons.join(", ");
         }
 
-        if (reason.isEmpty()) {
-            reason = "角度基本合格，但稳定性/相关性/lag窗口还未满足；";
+        // 累积统计（仅当已积累了一些数据后才显示，避免刚启动时显示 0%）
+        QString statsLine;
+        if (gateTotalFrames >= 10) {
+            statsLine = QString(" | 统计(%1帧): BJump%2% Diff%3% Corr%4% Ang%5% Stab%6%")
+                .arg(gateTotalFrames)
+                .arg((double)gateFailBJump/gateTotalFrames*100, 0, 'f', 0)
+                .arg((double)gateFailDiff/gateTotalFrames*100, 0, 'f', 0)
+                .arg((double)(gateFailCorrA+gateFailCorrB)/gateTotalFrames*100, 0, 'f', 0)
+                .arg((double)(gateFailAngleSignedDiff+gateFailAnglePairMidGap)/gateTotalFrames*100, 0, 'f', 0)
+                .arg((double)(gateFailStableWarmup+gateFailStableNotConcentrated+gateFailStableOutOfLock)/gateTotalFrames*100, 0, 'f', 0);
         }
 
         ui->lblProcessStatus->setText(
-            QString("未累计：%1\n%2")
-                .arg(reason)
+            QString("未累计：%1\n%2%3")
+                .arg(reasonLine)
                 .arg(guide)
+                .arg(statsLine)
             );
         ui->lblProcessStatus->setStyleSheet(
             "font-size: 12px; color: #F56C6C; font-weight: bold;"
