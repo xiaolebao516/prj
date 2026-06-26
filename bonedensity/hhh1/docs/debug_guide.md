@@ -12,7 +12,7 @@
    git checkout feature/gate-diagnostics
    ```
 
-2. 编译运行（用 Qt Creator 打开 `hhh1.pro`，或命令行 `qmake && mingw32-make`）
+2. 编译运行（用 Qt Creator 打开 `BoneDensity.pro`，或命令行 `qmake && mingw32-make`）
 
 3. 连接设备，进入**病人检测模式**
 

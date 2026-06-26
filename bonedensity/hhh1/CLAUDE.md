@@ -10,17 +10,17 @@ Bone densitometry (骨密度仪) desktop application — a Qt 6.5.3 C++17 app th
 
 - **Qt version**: 6.5.3 (MinGW 64-bit), installed at `D:\Qt\6.5.3\mingw_64\`
 - **Build system**: qmake (`.pro` file)
-- **IDE**: Qt Creator (`.qtcreator/hhh1.pro.user`)
+- **IDE**: Qt Creator (`.qtcreator/BoneDensity.pro.user`)
 
 ```bash
 # Configure (from build directory)
 cd build/Desktop_Qt_6_5_3_MinGW_64_bit_Debug
-D:\Qt\6.5.3\mingw_64\bin\qmake.exe -o Makefile ..\..\hhh1.pro -spec win32-g++ "CONFIG+=debug"
+D:\Qt\6.5.3\mingw_64\bin\qmake.exe -o Makefile ..\..\BoneDensity.pro -spec win32-g++ "CONFIG+=debug"
 
 # Build
 make
 
-# Or build directly with Qt Creator by opening hhh1.pro
+# Or build directly with Qt Creator by opening BoneDensity.pro
 ```
 
 The `.claudignore` file is empty — add build artifact patterns there if needed.
@@ -28,7 +28,7 @@ The `.claudignore` file is empty — add build artifact patterns there if needed
 ### After Clone — Quick Start
 
 1. **Prerequisites**: Qt 6.5.3 (MinGW 64-bit) + Qt Charts. On a new machine, update the qmake path below.
-2. **Open** `hhh1.pro` in Qt Creator, or build from CLI as above.
+2. **Open** `BoneDensity.pro` in Qt Creator, or build from CLI as above.
 3. **Login**: user `1`, password `1`.
 4. **Hardware**: Connect Pico/RP2040 via USB, select COM port in app (115200 baud).
 
