@@ -50,6 +50,33 @@ Use `feature/gate-diagnostics` in the lab to identify which validation gate is b
 | `docs/architecture_review.md` | Validation pipeline structural review (7-gate chain analysis) |
 | `docs/param_tuning_analysis.md` | Per-gate parameter analysis with modification risk assessment |
 
+## Directory Structure
+
+```
+BoneDensity/
+├── src/                        # .cpp 源文件
+│   ├── main.cpp                # 入口
+│   ├── mainwindow.cpp          # 主窗口 (~130k, UI + 串口 + 测量流程)
+│   ├── signalprocessor.cpp     # FIR滤波 / 首波检测 / 互相关 / 声速估计
+│   ├── bonehealth.cpp          # T-score / Z-score / 骨强度分级
+│   └── utils.cpp               # 统计工具 / 聚类 / 截尾均值
+├── include/                    # .h 头文件
+│   ├── mainwindow.h
+│   ├── types.h                 # 全局结构体 (WaveGroup, ArrivalResult, PairResult 等)
+│   ├── signalprocessor.h
+│   ├── bonehealth.h
+│   └── utils.h
+├── ui/                         # Qt Designer 表单
+│   └── mainwindow.ui
+├── resources/                  # Qt 资源
+│   ├── resources.qrc
+│   └── images/Radius.bmp
+├── docs/                       # 文档
+├── BoneDensity.pro             # qmake 项目文件
+├── CLAUDE.md
+└── CHANGELOG_REFACTOR.md
+```
+
 ## Architecture
 
 ### Page Navigation (QStackedWidget)
@@ -72,67 +99,128 @@ Hardware (Pico/RP2040) → Serial (115200, binary frames) → handleSerialReadyR
 
 ### Key Subsystems
 
-**Serial Protocol** (`mainwindow.cpp`, ~line 280–450):
+**Serial Protocol** (`src/mainwindow.cpp`):
 - Binary framed protocol, 4 ultrasound channels (A/B/C/D)
 - Frame format parsed in `parseIncomingData()`: gain, frame index, channel, payload length, raw samples
 - Each channel's data is assembled into `frameGroups[frameIdx].ch[0..3]`
 - Auto-trigger mode sends acquisition commands every 80ms via `autoTimer`
 
-**Signal Processing** (`mainwindow.cpp`, `designFIR()` + `applyFIR()`):
+**Signal Processing** (`src/signalprocessor.cpp`, class `SignalProcessor`):
 - FIR bandpass filter: low cutoff 1.25 MHz, high cutoff 600 kHz, sample rate 62.5 MHz
 - Filter order: 100 taps (N=101)
-- Processing chain: raw samples → baseline subtraction + gate erase → FIR → envelope detection → first-arrival picking
+- Processing chain: raw samples → baseline subtraction + gate erase → FIR → envelope detection
+- First arrival picking: `detectFirstArrivalSmart()` (noise-floor thresholding)
+- Lag refinement: `refineLagByPositiveCrossCorrelation()`
+- Pair speed estimation: `estimatePairSpeed()`, `estimatePairSpeedByValley()`
+- Valley detection: `findFirstProminentValley()`
 
-**Speed of Sound Calculation** (`detectAndPlotSpeed()` + `estimatePairSpeed()`):
-- Two probe pairs: B_pair (BD→BC) and A_pair (AD→AC), each measuring time-of-flight difference
-- Probe C-D physical spacing: 7.84 mm, sample period: 16 ns (62.5 MHz)
-- First arrival detected via noise-floor thresholding (`detectFirstArrivalSmart()`)
-- Lag refined by cross-correlation (`refineLagByPositiveCrossCorrelation()`)
-- Weighted average: `sosAvg = wB * sosB + (1-wB) * sosA` where wB typically ~0.8
-- Optional: valley-based pair speed estimation (`estimatePairSpeedByValley()`) as alternative
+**Statistics Utilities** (`src/utils.cpp`, namespace `Utils`):
+- `meanValue`, `medianValue`, `trimmedMeanValue` (20% trim), `safeRatio`
+- `findBestRoundCluster` — ±180 m/s tolerance, ≥3 rounds for main cluster
+- `rebuildAcceptedRoundsFromCandidates`
 
-**Patient Measurement Workflow**:
-- `DebugAcquireMode` — free-running acquisition for debugging
-- `PatientMeasureMode` — formal measurement with quality gates and progress tracking
-- Per-round: collect valid frames until `processValidTarget` (30) is reached, then average
-- Multi-round: typically 5 rounds, final SOS is the mean of round averages
-- Angle/pose gating: `signedLagDiff` (7–13 range) and `pairMidGap` (-4 to 4 range) filter out incorrect probe angles
-- Stability tracking: locks onto a stable `lagB` cluster before accepting frames
-- Round clustering: groups round candidates within ±180 m/s, requires ≥3 in main cluster
-
-**Patient Database** (`patientmanager.h/cpp`, XML-based):
-- Stored as `patients.xml` in the application directory
-- Fields: id, name, gender, birthDay, height, weight, diagprompt, speedOfSound
-- CRUD via QDomDocument; also inline methods in `mainwindow.cpp` (`loadPatients()`, `savePatients()`)
-
-**Bone Health Scoring** (`mainwindow.h` ~line 442–465):
+**Bone Health Scoring** (`src/bonehealth.cpp`, namespace `BoneHealth`):
 - T-score: `(SOS - age_reference_mean) / population_SD`
 - Z-score: age-matched comparison
 - Outputs: bone strength classification, relative fracture risk, estimated bone age
 
+**Patient Measurement Workflow** (`src/mainwindow.cpp`):
+- `DebugAcquireMode` — free-running acquisition for debugging
+- `PatientMeasureMode` — formal measurement with quality gates and progress tracking
+- Per-round: collect valid frames until `processValidTarget` (30) is reached, then trimmed mean
+- Multi-round: typically 5 rounds, final SOS = mean of round averages (after clustering)
+- 7-gate AND chain filters every frame (see below)
+- Round clustering → trimmed mean → final SOS
+
+**Patient Database** (inline in `src/mainwindow.cpp`, XML-based):
+- Stored as `patients.xml` in the application directory
+- Fields: id, name, gender, birthDay, height, weight, diagprompt, speedOfSound
+- CRUD via QDomDocument (`loadPatients()`, `savePatients()`)
+
+### Validation Pipeline (7-Gate AND Chain)
+
+Each frame must pass ALL gates to contribute to measurement:
+
+| # | Gate | Condition | Diagnostic Counter |
+|---|------|-----------|-------------------|
+| 1 | `bJumpOk` | B-channel onset jump ≤ 70 points | `gateFailBJump` |
+| 2 | `notBoundary` | Onset position < 260 | `gateFailBoundary` |
+| 3 | `diffOk` | abs(lagA - lagB) ≤ 18 | `gateFailDiff` |
+| 4 | `directionOk` | lagA sign check | `gateFailDirection` |
+| 5 | `corrOk` | corrA ≥ 0.78, corrB ≥ 0.55 | `gateFailCorrA/B` |
+| 6 | `angleOk` | signedLagDiff ∈ [7,13], pairMidGap ∈ [-4,4] | `gateFailAngleSignedDiff`, `gateFailAnglePairMidGap` |
+| 7 | `stableOk` | lagB stability (warmup 22 → lock ±4 pts → out-of-lock 8) | `gateFailStable*` (3 sub-states) |
+
+On `feature/gate-diagnostics` branch, each rejection is counted and displayed in real-time on the UI with operator guidance text. See `docs/debug_guide.md` for lab testing procedures.
+
+**Round-level quality check**: after 30 valid frames accumulated, `corrA ≥ 0.80`, `corrB ≥ 0.55`, `angleOk` — if failed, entire round is discarded.
+
+**Final clustering**: `findBestRoundCluster` with ±180 m/s tolerance, requires ≥3 rounds in main cluster, then 20% trimmed mean.
+
 ### UI Notes
 
-- Forms designed in Qt Designer: `mainwindow.ui`, `addpatientdialog.ui`, `PatientArchiveWindow.ui`, `PatientDetailDialog.ui`
-- Custom QSS stylesheet applied programmatically in `MainWindow` constructor (Element Plus-inspired blue theme)
+- Main form in Qt Designer: `ui/mainwindow.ui`
+- Two additional dialog forms: `addpatientdialog.ui`, `PatientDetailDialog.ui`
+- Custom QSS stylesheet (Element Plus-inspired blue theme)
 - Four QChartView widgets for real-time waveform display (channels A/B/C/D)
 - One QChartView for speed-of-sound trend line (`chartSpeed`/`seriesSpeed`)
 - Balance indicators show probe angle quality via horizontal progress bars
 
-### Code Organization Warning
+### Code Organization
 
-Most application logic lives in `mainwindow.cpp` (~157k, single massive file). The `PatientManager` and `PatientArchiveWindow` classes exist but are underused — the MainWindow duplicates much patient CRUD logic inline. When adding features, consider extracting logic into separate classes rather than expanding `mainwindow.cpp` further.
+`mainwindow.cpp` (~130k) still holds most UI/serial/measurement logic. After the 2026-06-27 refactoring, pure algorithm functions were extracted:
+
+| Module | Location | Functions |
+|--------|----------|-----------|
+| Signal DSP | `src/signalprocessor.cpp` | FIR, onset detection, cross-correlation, SOS estimation |
+| Statistics | `src/utils.cpp` | mean/median/trimmed mean, clustering |
+| Bone health | `src/bonehealth.cpp` | T-score, Z-score, fracture risk |
+
+When adding features, continue extracting logic into separate classes rather than expanding `mainwindow.cpp`.
 
 ### Important Constants & Parameters
+
+#### Core Physics
 
 | Parameter | Value | Location |
 |-----------|-------|----------|
 | Sample rate | 62.5 MHz | `samplePeriod = 16e-9` |
 | Probe C-D spacing | 7.84 mm | `probeDistanceCD` |
+| Serial baud | 115200 | `on_connectButton_clicked()` |
 | FIR low cutoff | 1.25 MHz | `designFIR()` call |
 | FIR high cutoff | 600 kHz | `designFIR()` call |
-| Serial baud | 115200 | `on_connectButton_clicked()` |
 | Min lag threshold | 100 points | `minLagThreshold` |
-| Frame corrA min | 0.78 | `frameCorrAMin` |
-| Frame corrB min | 0.55 | `frameCorrBMin` |
-| Angle signed diff range | 7.0–13.0 | `angleSignedDiffMin/Max` |
-| Pair mid gap range | -4.0–4.0 | `anglePairMidGapMin/Max` |
+
+#### Frame-Level Validation Gates
+
+| Parameter | Value | Member |
+|-----------|-------|--------|
+| B-jump threshold | 70 points | (inline in `detectAndPlotSpeed()`) |
+| Boundary onset max | 260 | (inline) |
+| A/B lag diff max | 18 | `processStrictLagTolerance` |
+| corrA min (frame) | 0.78 | `frameCorrAMin` |
+| corrB min (frame) | 0.55 | `frameCorrBMin` |
+| Angle signedLagDiff | 7.0 – 13.0 | `angleSignedDiffMin / Max` |
+| Angle pairMidGap | -4.0 – 4.0 | `anglePairMidGapMin / Max` |
+
+#### Stability Locking (stableOk)
+
+| Parameter | Value | Member |
+|-----------|-------|--------|
+| Warmup window | 22 frames | `stableLagWarmupCount` |
+| Window size | 30 frames | `stableLagWindowSize` |
+| Lock tolerance | ±4 points | `stableLagTolerance` |
+| Lock need count | 15/22 within tolerance | `stableLagLockNeedCount` |
+| Unlock threshold | 8 consecutive out-of-lock frames | `boneLagUnlockCount` |
+
+#### Round & Final Clustering
+
+| Parameter | Value | Member |
+|-----------|-------|--------|
+| Frames per round | 30 | `processValidTarget` |
+| Rounds per patient | 5 | `normalMeasureRounds` |
+| corrA min (round) | 0.80 | `roundCorrAMin` |
+| corrB min (round) | 0.55 | `roundCorrBMin` |
+| Round cluster tolerance | ±180 m/s | `roundClusterTolerance` |
+| Min rounds in cluster | 3 | `roundClusterMinCount` |
+| Trim percentage | 20% | (in `Utils::trimmedMeanValue`)
