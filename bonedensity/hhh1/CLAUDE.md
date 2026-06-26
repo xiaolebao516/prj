@@ -6,6 +6,32 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Bone densitometry (骨密度仪) desktop application — a Qt 6.5.3 C++17 app that communicates with a custom ultrasound hardware device over serial (115200 baud) to measure bone density via speed-of-sound (SOS) through the radius (桡骨).
 
+> **Note**: The project directory is still named `hhh1` (legacy). The `.pro` file and build target have been renamed to `BoneDensity`.
+
+### Project History
+
+This project was originally developed by the user's senior (学长) through iterative ChatGPT-driven development. Key characteristics inherited from that origin:
+
+- **All code was in a single file**: `mainwindow.cpp` reached ~157k chars with UI, serial, DSP, statistics, and bone health scoring all interleaved. This was produced by repeatedly appending features via chat conversation, not by architectural design.
+- **Validation parameters were empirically tuned**: The 7-gate AND chain thresholds (angle ranges, correlation minima, stability tolerances) were derived from repeated experiments comparing against a reference device (样机). The senior confirmed that loosening any gate degraded agreement with the reference.
+- **Code was flat in one directory**: No subdirectory structure, all `.cpp`/`.h`/`.ui` files in root.
+- **Project was named `hhh1`**: A placeholder name with no meaning.
+
+**2026-06-27 refactoring (current session)** addressed these issues without changing any validation logic:
+
+| Step | What | Why |
+|------|------|-----|
+| 1. Extract 19 pure functions | Moved from `mainwindow.cpp` → `signalprocessor.cpp`, `utils.cpp`, `bonehealth.cpp` | Separate UI from algorithms; enable independent testing |
+| 2. Add gate diagnostics | 12 rejection counters + real-time UI feedback on `feature/gate-diagnostics` branch | Human subjects couldn't accumulate valid frames; needed to identify which gate was the bottleneck |
+| 3. Restructure directories | Created `src/` `include/` `ui/` `resources/` subdirectories | Match normal C++ project convention |
+| 4. Rename project | `hhh1.pro` → `BoneDensity.pro`, target = `BoneDensity.exe` | Meaningful name |
+
+**Known remaining issues** (documented but not yet addressed):
+- `mainwindow.cpp` is still ~130k — the 19 extracted functions were pure algorithms; UI, serial, and measurement workflow code remain inline
+- The 7-gate chain may have redundant gates: `diffOk` is a strict subset of `angleSignedDiffOk` when angle gating is enabled
+- `stableOk` locks onto the median angle the operator settles at, not necessarily the physiologically correct angle (see `docs/architecture_review.md`)
+- Parameter tuning was done on a small sample set; angles may not generalize to all bone types (see `docs/param_tuning_analysis.md`)
+
 ## Build & Run
 
 - **Qt version**: 6.5.3 (MinGW 64-bit), installed at `D:\Qt\6.5.3\mingw_64\`
@@ -53,7 +79,7 @@ Use `feature/gate-diagnostics` in the lab to identify which validation gate is b
 ## Directory Structure
 
 ```
-BoneDensity/
+hhh1/                           # 旧目录名未改，.pro 和 target 已更名为 BoneDensity
 ├── src/                        # .cpp 源文件
 │   ├── main.cpp                # 入口
 │   ├── mainwindow.cpp          # 主窗口 (~130k, UI + 串口 + 测量流程)
