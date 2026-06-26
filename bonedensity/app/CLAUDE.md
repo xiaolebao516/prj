@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Bone densitometry (骨密度仪) desktop application — a Qt 6.5.3 C++17 app that communicates with a custom ultrasound hardware device over serial (115200 baud) to measure bone density via speed-of-sound (SOS) through the radius (桡骨).
 
-> **Note**: The project directory is still named `hhh1` (legacy). The `.pro` file and build target have been renamed to `BoneDensity`.
+> **Note**: The project root is `bonedensity/app/` (renamed from `hhh1`). The `.pro` file and build target have been renamed to `BoneDensity`.
 
 ### Project History
 
@@ -79,7 +79,7 @@ Use `feature/gate-diagnostics` in the lab to identify which validation gate is b
 ## Directory Structure
 
 ```
-hhh1/                           # 旧目录名未改，.pro 和 target 已更名为 BoneDensity
+bonedensity/app/                 # 上位机 (renamed from hhh1)
 ├── src/                        # .cpp 源文件
 │   ├── main.cpp                # 入口
 │   ├── mainwindow.cpp          # 主窗口 (~130k, UI + 串口 + 测量流程)
