@@ -3,6 +3,9 @@
 #include <algorithm>
 #include <QDebug>
 
+// 逐帧调试开关：与 mainwindow.cpp 中的 kDebugPerFrame 保持一致
+static constexpr bool kDebugPerFrame = false;
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -224,10 +227,12 @@ QVector<double> SignalProcessor::preprocessRawForFIR(const QVector<quint16>& inp
         }
     }
 
-    qDebug() << "Preprocess" << name
-             << "baseline =" << baseline
-             << "erase = [" << eraseStart << "," << eraseEnd << "]"
-             << "rampEnd =" << rampEnd;
+    if (kDebugPerFrame) {
+        qDebug() << "Preprocess" << name
+                 << "baseline =" << baseline
+                 << "erase = [" << eraseStart << "," << eraseEnd << "]"
+                 << "rampEnd =" << rampEnd;
+    }
 
     return out;
 }
@@ -569,17 +574,19 @@ int SignalProcessor::refineLagByPositiveCrossCorrelation(
         bestCorr = plateauCorrs[idx];
     }
 
-    qDebug() << "XCorrPick:"
-             << "roughLag =" << roughLag
-             << "roughOk =" << roughOk
-             << "searchRange = [" << searchLagMin << "," << searchLagMax << "]"
-             << "maxLag =" << maxLag
-             << "maxCorr =" << maxCorr
-             << "alpha =" << alpha
-             << "ratio =" << ratio
-             << "plateauSize =" << plateauLags.size()
-             << "pickedLag =" << bestLag
-             << "pickedCorr =" << bestCorr;
+    if (kDebugPerFrame) {
+        qDebug() << "XCorrPick:"
+                 << "roughLag =" << roughLag
+                 << "roughOk =" << roughOk
+                 << "searchRange = [" << searchLagMin << "," << searchLagMax << "]"
+                 << "maxLag =" << maxLag
+                 << "maxCorr =" << maxCorr
+                 << "alpha =" << alpha
+                 << "ratio =" << ratio
+                 << "plateauSize =" << plateauLags.size()
+                 << "pickedLag =" << bestLag
+                 << "pickedCorr =" << bestCorr;
+    }
 
     if (bestCorrOut) {
         *bestCorrOut = bestCorr;

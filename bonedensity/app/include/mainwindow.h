@@ -209,7 +209,7 @@ private:
 
     // 观察窗口。前 stableLagWarmupCount 个候选只用于找稳定簇，不推动进度条。
     int stableLagWindowSize = 30;        // 最近最多保留 40 个候选 lag
-    int stableLagWarmupCount = 22;       // 先观察 40 个候选，再锁定簇
+    int stableLagWarmupCount = 14;       // 先观察 40 个候选，再锁定簇
     int stableLagTolerance = 4;          // 锁定簇允许 ±4 点
 
     // 锁定簇需要足够集中。
@@ -240,6 +240,10 @@ private:
     int  gateFailStableWarmup = 0;
     int  gateFailStableNotConcentrated = 0;
     int  gateFailStableOutOfLock = 0;
+    int  gateDecoupledFrames = 0;       // 脱耦帧（corr<0.25，探头悬空），不计入统计
+    double gateCorrAMin = 0.0;           // 本轮 CorrA 最小值
+    double gateCorrAMax = 0.0;           // 本轮 CorrA 最大值
+    double gateCorrASum = 0.0;           // 本轮 CorrA 累加（用于算均值）
 
     // 最近一帧各闸门状态（供 updateProcessPanel 读取）
     bool lastFrameBJumpOk = false;
@@ -254,6 +258,7 @@ private:
     int  lastFrameStableState = 0; // 0=warmup, 1=notConcentrated, 2=locked-Ok, 3=outOfLock
 
     void resetGateStats();
+    void printGateStats() const;
     QString gateStatsSummary() const;
 
     // ================== 病人检测 / 调试模式控制 ==================
@@ -303,7 +308,7 @@ private:
     // 而 3600 / 4000 错误角度下 B_corr 可能更高。
     // 所以 B_corr 不能再作为主要姿态判据，只作为“别太差”的底线。
     double frameCorrBMin = 0.55;
-    double frameCorrAMin = 0.78;
+    double frameCorrAMin = 0.65;  // 0.78→0.65，桡骨A通道天生偏低
 
     double roundCorrBMin = 0.55;
     double roundCorrAMin = 0.80;
@@ -336,8 +341,8 @@ private:
     // pairMidGap 用于约束 A/B 回波中心位置关系。
     // 注意：pairMidGap 的目标值会随实验批次和识别策略变化，
     // 当前先恢复为 [-4, 4] 的旧标准。
-    double anglePairMidGapMin = -4.0;
-    double anglePairMidGapMax = 4.0;
+    double anglePairMidGapMin = -10.0;  // -4→-10，放宽左右位置容差
+    double anglePairMidGapMax = 10.0;   // 4→10
 
     // 竖向平衡条的目标中心。
     // 注意：不要再用 (min+max)/2 自动算。

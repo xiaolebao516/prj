@@ -173,11 +173,15 @@ Each frame must pass ALL gates to contribute to measurement:
 | 2 | `notBoundary` | Onset position < 260 | `gateFailBoundary` |
 | 3 | `diffOk` | abs(lagA - lagB) ≤ 18 | `gateFailDiff` |
 | 4 | `directionOk` | lagA sign check | `gateFailDirection` |
-| 5 | `corrOk` | corrA ≥ 0.78, corrB ≥ 0.55 | `gateFailCorrA/B` |
-| 6 | `angleOk` | signedLagDiff ∈ [7,13], pairMidGap ∈ [-4,4] | `gateFailAngleSignedDiff`, `gateFailAnglePairMidGap` |
-| 7 | `stableOk` | lagB stability (warmup 22 → lock ±4 pts → out-of-lock 8) | `gateFailStable*` (3 sub-states) |
+| 5 | `corrOk` | corrA ≥ 0.65, corrB ≥ 0.55 | `gateFailCorrA/B` |
+| 6 | `angleOk` | signedLagDiff ∈ [7,13], pairMidGap ∈ [-10,10] | `gateFailAngleSignedDiff`, `gateFailAnglePairMidGap` |
+| 7 | `stableOk` | lagB stability (warmup 14 → lock ±4 pts → out-of-lock 8) | `gateFailStable*` (3 sub-states) |
 
-On `feature/gate-diagnostics` branch, each rejection is counted and displayed in real-time on the UI with operator guidance text. See `docs/debug_guide.md` for lab testing procedures.
+**Pre-filter**: frames with `corr < 0.25` are classified as decoupled (probe in air) and excluded from all gate statistics (`gateDecoupledFrames` counter).
+
+On `feature/gate-diagnostics` branch, each rejection is counted. Gate statistics are output to **Qt Creator's "Application Output" console** (qDebug) every 50 frames and at the end of each round — they are not shown on the UI. The UI only shows concise operator guidance text (e.g. "探头偏左，请向右轻移") below the valid-frame progress bar. See `docs/debug_guide.md` for full parameter explanations and lab testing procedures.
+
+**Per-frame debug control**: set `kDebugPerFrame = true` in `mainwindow.cpp` and `signalprocessor.cpp` to restore verbose per-frame output (waveform dumps, angle features, etc.). Default is `false`.
 
 **Round-level quality check**: after 30 valid frames accumulated, `corrA ≥ 0.80`, `corrB ≥ 0.55`, `angleOk` — if failed, entire round is discarded.
 
@@ -191,6 +195,9 @@ On `feature/gate-diagnostics` branch, each rejection is counted and displayed in
 - Four QChartView widgets for real-time waveform display (channels A/B/C/D)
 - One QChartView for speed-of-sound trend line (`chartSpeed`/`seriesSpeed`)
 - Balance indicators show probe angle quality via horizontal progress bars
+- **Stop button**: "开始检测" toggles to "停止检测" during measurement — click to abort mid-round
+- **Screen resize**: app auto-scales to fit screen if smaller than 1920×1080
+- **Gate stats**: visible only in Qt Creator console (`qDebug`), printed every 50 frames + round end. Includes CorrA distribution and decoupled frame count. See `docs/debug_guide.md`
 
 ### Code Organization
 
@@ -224,16 +231,16 @@ When adding features, continue extracting logic into separate classes rather tha
 | B-jump threshold | 70 points | (inline in `detectAndPlotSpeed()`) |
 | Boundary onset max | 260 | (inline) |
 | A/B lag diff max | 18 | `processStrictLagTolerance` |
-| corrA min (frame) | 0.78 | `frameCorrAMin` |
+| corrA min (frame) | 0.65 | `frameCorrAMin` |
 | corrB min (frame) | 0.55 | `frameCorrBMin` |
 | Angle signedLagDiff | 7.0 – 13.0 | `angleSignedDiffMin / Max` |
-| Angle pairMidGap | -4.0 – 4.0 | `anglePairMidGapMin / Max` |
+| Angle pairMidGap | -10.0 – 10.0 | `anglePairMidGapMin / Max` |
 
 #### Stability Locking (stableOk)
 
 | Parameter | Value | Member |
 |-----------|-------|--------|
-| Warmup window | 22 frames | `stableLagWarmupCount` |
+| Warmup window | 14 frames | `stableLagWarmupCount` |
 | Window size | 30 frames | `stableLagWindowSize` |
 | Lock tolerance | ±4 points | `stableLagTolerance` |
 | Lock need count | 15/22 within tolerance | `stableLagLockNeedCount` |

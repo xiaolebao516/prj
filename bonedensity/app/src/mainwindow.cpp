@@ -1,3 +1,10 @@
+// ======================================================
+// 逐帧调试开关：改为 true 可恢复每帧详细 qDebug 输出
+// （波形数据、首波定位、角度特征、稳定性状态等）
+// 正常使用时保持 false，只看每轮结束的闸门统计汇总
+// ======================================================
+static constexpr bool kDebugPerFrame = false;
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "bonehealth.h"
@@ -63,7 +70,7 @@ MainWindow::MainWindow(QWidget *parent)
         border-color: #409EFF;
     }
 
-    /* 特殊按钮：比如“获取波形”、“保存”这种主要操作，可以单独设为蓝色背景 */
+    /* 特殊按钮：比如"获取波形"、"保存"这种主要操作，可以单独设为蓝色背景 */
     /* 你需要在 UI 设计器里给这些按钮的 styleSheet 属性单独加，或者用 objectName 区分 */
     QPushButton#btnAcquireWaveform, QPushButton#btnLogin {
         background-color: #409EFF;
@@ -177,8 +184,25 @@ MainWindow::MainWindow(QWidget *parent)
     autoTimer = new QTimer(this);
     connect(autoTimer,&QTimer::timeout,this,&MainWindow::sendCmd);
 
-
-
+    // 自适应屏幕分辨率：设计稿 1920x1080，按屏幕等比缩放
+    QScreen *screen = QGuiApplication::primaryScreen();
+    if (screen) {
+        QRect screenGeo = screen->availableGeometry();
+        int sw = screenGeo.width();
+        int sh = screenGeo.height();
+        if (sw > 0 && sh > 0) {
+            double scaleW = (double)sw / 1920.0;
+            double scaleH = (double)sh / 1080.0;
+            double scale = qMin(scaleW, scaleH);
+            if (scale < 1.0) {
+                this->resize(qRound(1920 * scale), qRound(1080 * scale));
+            }
+            if (scale < 1.0 || sw > 1920) {
+                this->move(screenGeo.x() + (sw - this->width()) / 2,
+                           screenGeo.y() + (sh - this->height()) / 2);
+            }
+        }
+    }
 }
 
 //先登录===============================================================================
@@ -285,9 +309,22 @@ void MainWindow::on_connectButton_clicked() {
 void MainWindow::on_triggerButton_clicked()
 {
     if (patientMeasureRunning) {
-        QMessageBox::information(this,
-                                 "正在进行病人检测",
-                                 "当前处于病人检测流程中，请等待检测完成后再使用 trigger 调试。");
+        // 检测中点击 trigger = 停止检测
+        stopPatientMeasurement();
+        resetOneRoundMeasurementState();
+        resetBoneLagStability();
+        resetGateStats();
+
+        ui->barPairA->setValue(500);
+        ui->barPairB->setValue(500);
+        ui->barMeasureProgress->setValue(0);
+        ui->barMeasureProgress->setFormat("有效值：%v / %m");
+        ui->lblPairAValue->setText("D=--\n目标=10.0");
+        ui->lblPairBValue->setText("G=--\n目标=0.0");
+        ui->lblProcessStatus->setText("检测已手动停止");
+        ui->lblProcessStatus->setStyleSheet(
+            "font-size: 12px; color: #E6A23C; font-weight: bold;"
+            );
         return;
     }
 
@@ -331,9 +368,22 @@ void MainWindow::sendCmd() {
 void MainWindow::on_btnAcquireWaveform_clicked()
 {
     if (patientMeasureRunning) {
-        QMessageBox::information(this,
-                                 "正在进行病人检测",
-                                 "当前处于病人检测流程中，不能手动获取波形。");
+        // 检测中点击"获取波形" = 停止检测
+        stopPatientMeasurement();
+        resetOneRoundMeasurementState();
+        resetBoneLagStability();
+        resetGateStats();
+
+        ui->barPairA->setValue(500);
+        ui->barPairB->setValue(500);
+        ui->barMeasureProgress->setValue(0);
+        ui->barMeasureProgress->setFormat("有效值：%v / %m");
+        ui->lblPairAValue->setText("D=--\n目标=10.0");
+        ui->lblPairBValue->setText("G=--\n目标=0.0");
+        ui->lblProcessStatus->setText("检测已手动停止");
+        ui->lblProcessStatus->setStyleSheet(
+            "font-size: 12px; color: #E6A23C; font-weight: bold;"
+            );
         return;
     }
 
@@ -417,8 +467,8 @@ void MainWindow::startPatientMeasurement(int targetRounds)
 
     int nextRound = roundSosList.size() + 1;
 
-    ui->btnPatientInfo->setText("检测中...");
-    ui->btnPatientInfo->setEnabled(false);
+    ui->btnPatientInfo->setText("停止检测");
+    ui->btnPatientInfo->setStyleSheet("");  // 恢复默认样式，确保可点击
 
     ui->lblProcessStatus->setText(
         QString("正在检测：第 %1/%2 次，请保持探头与桡骨平行")
@@ -443,7 +493,6 @@ void MainWindow::stopPatientMeasurement()
     acquireMode = DebugAcquireMode;
 
     ui->btnPatientInfo->setText("开始检测");
-    ui->btnPatientInfo->setEnabled(true);
 }
 
 void MainWindow::resetPatientMeasurementState(int targetRounds)
@@ -541,7 +590,7 @@ void MainWindow::showRoundFinishedTip(int finishedRounds, int totalRounds)
     measureTipBox->setWindowTitle("本次测量完成");
 
     measureTipBox->setText(
-        QString("第 %1/%2 次测量完成。\n\n请再次点击“开始检测”进行下一次测量。")
+        QString("第 %1/%2 次测量完成。\n\n请再次点击「开始检测」进行下一次测量。")
             .arg(finishedRounds)
             .arg(totalRounds)
         );
@@ -549,7 +598,7 @@ void MainWindow::showRoundFinishedTip(int finishedRounds, int totalRounds)
     // 关键 1：不放 OK 按钮，只作为提示窗口
     measureTipBox->setStandardButtons(QMessageBox::NoButton);
 
-    // 关键 2：必须设置为非模态，否则它可能会挡住主窗口，导致你点不了“开始检测”
+    // 关键 2：必须设置为非模态，否则它可能会挡住主窗口，导致你点不了"开始检测"
     measureTipBox->setModal(false);
     measureTipBox->setWindowModality(Qt::NonModal);
 
@@ -566,7 +615,7 @@ void MainWindow::showRoundFinishedTip(int finishedRounds, int totalRounds)
         measureTipBox = nullptr;
     });
 
-    // 显示在主窗口中间偏上位置，避免挡住“开始检测”按钮
+    // 显示在主窗口中间偏上位置，避免挡住"开始检测"按钮
     measureTipBox->show();
 
     QPoint center = this->geometry().center();
@@ -626,18 +675,20 @@ void MainWindow::handlePatientMeasureValue(double sosA,
     currentRoundPairMidGapList.append(pairMidGap);
     currentRoundSignedLagDiffList.append(lagA - lagB);
 
-    qDebug() << "Patient frame accepted:"
-             << "count =" << currentRoundSosList.size()
-             << "sosAvg =" << sosAvg
-             << "sosA =" << sosA
-             << "sosB =" << sosB
-             << "lagA =" << lagA
-             << "lagB =" << lagB
-             << "diffLag =" << diffLag
-             << "signedLagDiff =" << (lagA - lagB)
-             << "pairMidGap =" << pairMidGap
-             << "corrA =" << corrA
-             << "corrB =" << corrB;
+    if (kDebugPerFrame) {
+        qDebug() << "Patient frame accepted:"
+                 << "count =" << currentRoundSosList.size()
+                 << "sosAvg =" << sosAvg
+                 << "sosA =" << sosA
+                 << "sosB =" << sosB
+                 << "lagA =" << lagA
+                 << "lagB =" << lagB
+                 << "diffLag =" << diffLag
+                 << "signedLagDiff =" << (lagA - lagB)
+                 << "pairMidGap =" << pairMidGap
+                 << "corrA =" << corrA
+                 << "corrB =" << corrB;
+    }
 
     if (currentRoundSosList.size() >= processValidTarget) {
         finishOnePatientRound();
@@ -692,7 +743,7 @@ void MainWindow::finishOnePatientRound()
     // 目的：
     // 即使某些帧勉强通过了单帧 corrOk，
     // 如果整轮平均相关质量不够好，说明这一轮很可能是
-    // “稳定但位置不准 / 波形质量差”的测量，直接丢弃。
+    // "稳定但位置不准 / 波形质量差"的测量，直接丢弃。
     // ======================================================
     if (oneRoundCorrB < roundCorrBMin ||
         oneRoundCorrA < roundCorrAMin ||
@@ -701,7 +752,7 @@ void MainWindow::finishOnePatientRound()
                  << "sos =" << oneRoundSos
                  << "corrA =" << oneRoundCorrA
                  << "corrB =" << oneRoundCorrB;
-        qDebug() << gateStatsSummary();
+        printGateStats();
 
         currentRoundSosList.clear();
         currentRoundAList.clear();
@@ -716,7 +767,7 @@ void MainWindow::finishOnePatientRound()
         ui->barMeasureProgress->setFormat("有效值：%v / %m");
         ui->barMeasureProgress->setTextVisible(true);
 
-        // 本轮失败后，停止采集，让用户重新点“开始检测”并重新调整探头
+        // 本轮失败后，停止采集，让用户重新点"开始检测"并重新调整探头
         stopPatientMeasurement();
 
         ui->lblProcessStatus->setText(
@@ -743,7 +794,7 @@ void MainWindow::finishOnePatientRound()
 
     candidateRoundList.append(cand);
 
-    // 从所有候选小测量中，重建“最大一致簇”。
+    // 从所有候选小测量中，重建"最大一致簇"。
     // 离群小测量不会进入 roundSosList。
     Utils::rebuildAcceptedRoundsFromCandidates(candidateRoundList, roundSosList,
         roundAList, roundBList, roundClusterTolerance);
@@ -758,7 +809,7 @@ void MainWindow::finishOnePatientRound()
              << "B =" << oneRoundB
              << "corrA =" << oneRoundCorrA
              << "corrB =" << oneRoundCorrB;
-    qDebug() << gateStatsSummary();
+    printGateStats();
 
     // 当前轮清零，但不清空 roundSosList / candidateRoundList
     currentRoundSosList.clear();
@@ -773,7 +824,7 @@ void MainWindow::finishOnePatientRound()
     ui->barMeasureProgress->setValue(0);
     ui->barMeasureProgress->setFormat("有效值：%v / %m");
 
-    // 本轮完成后立刻停止采集，恢复“开始检测”按钮
+    // 本轮完成后立刻停止采集，恢复"开始检测"按钮
     stopPatientMeasurement();
 
     // 如果已经完成 5 次，直接生成最终结果
@@ -782,9 +833,9 @@ void MainWindow::finishOnePatientRound()
         return;
     }
 
-    // 还没满 5 次：停住，等待再次点击“开始检测”
+    // 还没满 5 次：停住，等待再次点击「开始检测」
     ui->lblProcessStatus->setText(
-        QString("本次小测量完成。有效主簇：%1/%2，候选次数：%3。请再次点击“开始检测”。")
+        QString("本次小测量完成。有效主簇：%1/%2，候选次数：%3。请再次点击「开始检测」。")
             .arg(finished)
             .arg(normalMeasureRounds)
             .arg(candidateRoundList.size())
@@ -1108,11 +1159,13 @@ void MainWindow::plotSamples()
 
     if (n <= 0) return;
 
-    // 4. 打印滤波后数据。这里仍然加 2048 打印，方便看图
-    printRangeFormatted("B->C / filBC", filBC, 0, 1499);
-    printRangeFormatted("B->D / filBD", filBD, 0, 1499);
-    printRangeFormatted("A->C / filAC", filAC, 0, 1499);
-    printRangeFormatted("A->D / filAD", filAD, 0, 1499);
+    // 4. 打印滤波后数据（逐帧大流量，默认关闭）
+    // if (kDebugPerFrame) {
+    //     printRangeFormatted("B->C / filBC", filBC, 0, 1499);
+    //     printRangeFormatted("B->D / filBD", filBD, 0, 1499);
+    //     printRangeFormatted("A->C / filAC", filAC, 0, 1499);
+    //     printRangeFormatted("A->D / filAD", filAD, 0, 1499);
+    // }
 
     // 5. 声速检测
     detectAndPlotSpeed(filBC, filBD, filAC, filAD);
@@ -1349,7 +1402,7 @@ void MainWindow::printAngleFeatureDebug(const QVector<double>& filBC,
     }
 
     // ======================================================
-    // 1. 四路统一找“第一个明显波谷”
+    // 1. 四路统一找"第一个明显波谷"
     //
     // 注意：这里暂时只用于调试，不参与正式结果。
     // 搜索范围先用 620~1400，覆盖铜块、塑料、桡骨主要第一波区域。
@@ -1687,11 +1740,13 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
         kSigma, runLen, envWin, onsetRatio, peakLookAhead
         );
 
-    qDebug() << "FirstArrivalSmart:"
-             << "BC.onset =" << pickBC.onset << "BC.peak =" << pickBC.peak
-             << "BD.onset =" << pickBD.onset << "BD.peak =" << pickBD.peak
-             << "AC.onset =" << pickAC.onset << "AC.peak =" << pickAC.peak
-             << "AD.onset =" << pickAD.onset << "AD.peak =" << pickAD.peak;
+    if (kDebugPerFrame) {
+        qDebug() << "FirstArrivalSmart:"
+                 << "BC.onset =" << pickBC.onset << "BC.peak =" << pickBC.peak
+                 << "BD.onset =" << pickBD.onset << "BD.peak =" << pickBD.peak
+                 << "AC.onset =" << pickAC.onset << "AC.peak =" << pickAC.peak
+                 << "AD.onset =" << pickAD.onset << "AD.peak =" << pickAD.peak;
+    }
 
     double vMin = 1800.0;
     double vMax = 5000.0;
@@ -1873,43 +1928,44 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
     sosPatient += patientSosOffset;
 
     // 为了尽量少改后面的代码，继续用 sosAvg 这个变量名，
-    // 但它现在表示“正式采用的 SOS”。
+    // 但它现在表示"正式采用的 SOS"。
     double sosAvg = sosPatient;
 
-    qDebug() << "SpeedFinal:"
-             << "sosA =" << aRes.sos
-             << "sosB =" << bRes.sos
-             << "weighted =" << sosWeighted
-             << "patient =" << sosPatient
-             << "useBOnly =" << useBOnlyForPatientSos
-             << "offset =" << patientSosOffset
-             << "lagA =" << aRes.refinedLag
-             << "lagB =" << bRes.refinedLag
-             << "diffLag =" << diffLag
-             << "wB =" << wB
-             << "mode =" << (acquireMode == PatientMeasureMode ? "Patient" : "Debug");
+    if (kDebugPerFrame) {
+        qDebug() << "SpeedFinal:"
+                 << "sosA =" << aRes.sos
+                 << "sosB =" << bRes.sos
+                 << "weighted =" << sosWeighted
+                 << "patient =" << sosPatient
+                 << "useBOnly =" << useBOnlyForPatientSos
+                 << "offset =" << patientSosOffset
+                 << "lagA =" << aRes.refinedLag
+                 << "lagB =" << bRes.refinedLag
+                 << "diffLag =" << diffLag
+                 << "wB =" << wB
+                 << "mode =" << (acquireMode == PatientMeasureMode ? "Patient" : "Debug");
+    }
 
     // ======================================================
-    // 新增：角度/姿态特征调试输出
-    //
+    // 角度/姿态特征调试输出（逐帧大流量，默认关闭）
     // 只用于研究 A/B 绝对位置关系，不影响正式测量结果。
-    // 后面我们要用这些数据判断：
-    // 3600、3800、4000 三种桡骨角度状态到底有什么区别。
     // ======================================================
-    printAngleFeatureDebug(
-        filBC,
-        filBD,
-        filAC,
-        filAD,
-        pickBC,
-        pickBD,
-        pickAC,
-        pickAD,
-        bRes,
-        aRes,
-        sosAvg,
-        wB
-        );
+    if (kDebugPerFrame) {
+        printAngleFeatureDebug(
+            filBC,
+            filBD,
+            filAC,
+            filAD,
+            pickBC,
+            pickBD,
+            pickAC,
+            pickAD,
+            bRes,
+            aRes,
+            sosAvg,
+            wB
+            );
+    }
 
     // ======================================================
     // 6. 声速调试值显示：调试模式和病人模式都显示
@@ -2009,19 +2065,21 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
                 );
 
         } else {
-            qDebug() << "BoneLagStable: current frame not added because pre-check failed"
-                     << "bJumpOk =" << bJumpOk
-                     << "notBoundary =" << notBoundary
-                     << "diffOk =" << diffOk
-                     << "directionOk =" << directionOk
-                     << "corrOk =" << corrOk
-                     << "angleOk =" << angleOk
-                     << "angleSignedDiffOk =" << angleSignedDiffOk
-                     << "anglePairMidGapOk =" << anglePairMidGapOk
-                     << "signedLagDiff =" << signedLagDiff
-                     << "pairMidGap =" << pairMidGap
-                     << "corrA =" << aRes.corr
-                     << "corrB =" << bRes.corr;
+            if (kDebugPerFrame) {
+                qDebug() << "BoneLagStable: current frame not added because pre-check failed"
+                         << "bJumpOk =" << bJumpOk
+                         << "notBoundary =" << notBoundary
+                         << "diffOk =" << diffOk
+                         << "directionOk =" << directionOk
+                         << "corrOk =" << corrOk
+                         << "angleOk =" << angleOk
+                         << "angleSignedDiffOk =" << angleSignedDiffOk
+                         << "anglePairMidGapOk =" << anglePairMidGapOk
+                         << "signedLagDiff =" << signedLagDiff
+                         << "pairMidGap =" << pairMidGap
+                         << "corrA =" << aRes.corr
+                         << "corrB =" << bRes.corr;
+            }
         }
 
 
@@ -2038,23 +2096,24 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
             stableOk;
 
 
-        qDebug() << "PatientValidCheck:"
-                 << "lagA =" << aRes.refinedLag
-                 << "lagB =" << bRes.refinedLag
-                 << "diffLag =" << diffLagForCheck
-                 << "signedLagDiff =" << signedLagDiff
-                 << "pairMidB =" << pairMidB
-                 << "pairMidA =" << pairMidA
-                 << "pairMidGap =" << pairMidGap
-                 << "angleSignedDiffRange = ["
-                 << angleSignedDiffMin << "," << angleSignedDiffMax << "]"
-                 << "anglePairMidGapRange = ["
-                 << anglePairMidGapMin << "," << anglePairMidGapMax << "]"
-                 << "bRoughLag =" << bRes.roughLag
-                 << "bJump =" << bLagJump
-                 << "corrA =" << aRes.corr
-                 << "corrB =" << bRes.corr
-                 << "frameCorrAMin =" << frameCorrAMin
+        if (kDebugPerFrame) {
+            qDebug() << "PatientValidCheck:"
+                     << "lagA =" << aRes.refinedLag
+                     << "lagB =" << bRes.refinedLag
+                     << "diffLag =" << diffLagForCheck
+                     << "signedLagDiff =" << signedLagDiff
+                     << "pairMidB =" << pairMidB
+                     << "pairMidA =" << pairMidA
+                     << "pairMidGap =" << pairMidGap
+                     << "angleSignedDiffRange = ["
+                     << angleSignedDiffMin << "," << angleSignedDiffMax << "]"
+                     << "anglePairMidGapRange = ["
+                     << anglePairMidGapMin << "," << anglePairMidGapMax << "]"
+                     << "bRoughLag =" << bRes.roughLag
+                     << "bJump =" << bLagJump
+                     << "corrA =" << aRes.corr
+                     << "corrB =" << bRes.corr
+                     << "frameCorrAMin =" << frameCorrAMin
                  << "frameCorrBMin =" << frameCorrBMin
                  << "bJumpOk =" << bJumpOk
                  << "notBoundary =" << notBoundary
@@ -2070,50 +2129,71 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
                  << "lockedBoneLagCenter =" << lockedBoneLagCenter
                  << "stableOk =" << stableOk
                  << "strictValid =" << strictValid;
+        }
 
 
         // ======================================================
         // 门控拒绝率统计（不改检验逻辑，纯诊断用）
         // ======================================================
-        gateTotalFrames++;
-
-        // 记录当前帧各闸门状态
-        lastFrameBJumpOk = bJumpOk;
-        lastFrameBoundaryOk = notBoundary;
-        lastFrameDiffOk = diffOk;
-        lastFrameDirectionOk = directionOk;
-        lastFrameCorrOk = corrOk;
-        lastFrameAngleSignedDiffOk = angleSignedDiffOk;
-        lastFrameAnglePairMidGapOk = anglePairMidGapOk;
-        lastFrameAngleOk = angleOk;
-        lastFrameStableOk = stableOk;
-
-        // 累加各闸失败计数
-        if (!bJumpOk)             gateFailBJump++;
-        if (!notBoundary)         gateFailBoundary++;
-        if (!diffOk)              gateFailDiff++;
-        if (!directionOk)         gateFailDirection++;
-        if (bRes.corr < frameCorrBMin) gateFailCorrB++;
-        if (aRes.corr < frameCorrAMin) gateFailCorrA++;
-        if (!angleSignedDiffOk)   gateFailAngleSignedDiff++;
-        if (!anglePairMidGapOk)   gateFailAnglePairMidGap++;
-
-        // 稳定簇状态细分
-        if (!stableOk) {
-            if (boneLagLocked) {
-                gateFailStableOutOfLock++;
-                lastFrameStableState = 3;
-            } else if (recentBoneLagBList.size() < stableLagWarmupCount) {
-                gateFailStableWarmup++;
-                lastFrameStableState = 0;
-            } else {
-                gateFailStableNotConcentrated++;
-                lastFrameStableState = 1;
-            }
+        // 脱耦过滤：corr<0.25 认为探头悬空/无耦合，不计入闸门统计
+        if (bRes.corr < 0.25) {
+            gateDecoupledFrames++;
         } else {
-            lastFrameStableState = 2;
+            gateTotalFrames++;
+
+            // 跟踪 CorrA 分布（诊断用）
+            if (gateTotalFrames == 1) {
+                gateCorrAMin = aRes.corr;
+                gateCorrAMax = aRes.corr;
+                gateCorrASum = aRes.corr;
+            } else {
+                if (aRes.corr < gateCorrAMin) gateCorrAMin = aRes.corr;
+                if (aRes.corr > gateCorrAMax) gateCorrAMax = aRes.corr;
+                gateCorrASum += aRes.corr;
+            }
+
+            // 记录当前帧各闸门状态
+            lastFrameBJumpOk = bJumpOk;
+            lastFrameBoundaryOk = notBoundary;
+            lastFrameDiffOk = diffOk;
+            lastFrameDirectionOk = directionOk;
+            lastFrameCorrOk = corrOk;
+            lastFrameAngleSignedDiffOk = angleSignedDiffOk;
+            lastFrameAnglePairMidGapOk = anglePairMidGapOk;
+            lastFrameAngleOk = angleOk;
+            lastFrameStableOk = stableOk;
+
+            // 累加各闸失败计数
+            if (!bJumpOk)             gateFailBJump++;
+            if (!notBoundary)         gateFailBoundary++;
+            if (!diffOk)              gateFailDiff++;
+            if (!directionOk)         gateFailDirection++;
+            if (bRes.corr < frameCorrBMin) gateFailCorrB++;
+            if (aRes.corr < frameCorrAMin) gateFailCorrA++;
+            if (!angleSignedDiffOk)   gateFailAngleSignedDiff++;
+            if (!anglePairMidGapOk)   gateFailAnglePairMidGap++;
+
+            // 稳定簇状态细分
+            if (!stableOk) {
+                if (boneLagLocked) {
+                    gateFailStableOutOfLock++;
+                    lastFrameStableState = 3;
+                } else if (recentBoneLagBList.size() < stableLagWarmupCount) {
+                    gateFailStableWarmup++;
+                    lastFrameStableState = 0;
+                } else {
+                    gateFailStableNotConcentrated++;
+                    lastFrameStableState = 1;
+                }
+            } else {
+                lastFrameStableState = 2;
+            }
         }
 
+        // 每 50 帧自动输出一次当前统计（不需要等有效帧攒满）
+        if (gateTotalFrames % 50 == 0) {
+            printGateStats();
+        }
 
         handlePatientMeasureValue(
             aRes.sos,
@@ -2139,7 +2219,9 @@ void MainWindow::resetBoneLagStability()
 
     boneLagOutOfLockCount = 0;
 
-    qDebug() << "Bone lag stability reset.";
+    if (kDebugPerFrame) {
+        qDebug() << "Bone lag stability reset.";
+    }
 }
 
 void MainWindow::resetGateStats()
@@ -2156,12 +2238,17 @@ void MainWindow::resetGateStats()
     gateFailStableWarmup = 0;
     gateFailStableNotConcentrated = 0;
     gateFailStableOutOfLock = 0;
+    gateDecoupledFrames = 0;
+    gateCorrAMin = 0.0;
+    gateCorrAMax = 0.0;
+    gateCorrASum = 0.0;
 }
 
-QString MainWindow::gateStatsSummary() const
+void MainWindow::printGateStats() const
 {
     if (gateTotalFrames <= 0) {
-        return "暂无统计数据";
+        qDebug() << "[闸门统计] 暂无数据";
+        return;
     }
 
     auto pct = [&](int fail) -> QString {
@@ -2169,13 +2256,57 @@ QString MainWindow::gateStatsSummary() const
         return QString("%1%").arg(r, 0, 'f', 1);
     };
 
+    // 分两行短输出，避免 Qt Creator 截断长行
+    qDebug().noquote()
+        << QString("[闸门统计 共%1帧] BJump=%2 Boundary=%3 Diff=%4 Dir=%5")
+               .arg(gateTotalFrames)
+               .arg(pct(gateFailBJump))
+               .arg(pct(gateFailBoundary))
+               .arg(pct(gateFailDiff))
+               .arg(pct(gateFailDirection));
+
+    qDebug().noquote()
+        << QString("[闸门统计] CorrA=%1 CorrB=%2 AngDiff=%3 AngGap=%4 StabWarm=%5 StabConc=%6 StabLock=%7")
+               .arg(pct(gateFailCorrA))
+               .arg(pct(gateFailCorrB))
+               .arg(pct(gateFailAngleSignedDiff))
+               .arg(pct(gateFailAnglePairMidGap))
+               .arg(pct(gateFailStableWarmup))
+               .arg(pct(gateFailStableNotConcentrated))
+               .arg(pct(gateFailStableOutOfLock));
+
+    if (gateDecoupledFrames > 0) {
+        qDebug().noquote()
+            << QString("  (另有 %1 帧因脱耦被忽略，corr<0.25)")
+                   .arg(gateDecoupledFrames);
+    }
+
+    if (gateTotalFrames > 0) {
+        double corrAMean = gateCorrASum / gateTotalFrames;
+        qDebug().noquote()
+            << QString("[CorrA分布] 最小=%1  平均=%2  最大=%3  门槛=%4")
+                   .arg(gateCorrAMin, 0, 'f', 3)
+                   .arg(corrAMean, 0, 'f', 3)
+                   .arg(gateCorrAMax, 0, 'f', 3)
+                   .arg(frameCorrAMin, 0, 'f', 2);
+    }
+}
+
+QString MainWindow::gateStatsSummary() const
+{
+    // 保留旧接口兼容，但调用方应改用 printGateStats()
+    if (gateTotalFrames <= 0) return QString();
+
+    auto pct = [&](int fail) -> QString {
+        double r = (double)fail / (double)gateTotalFrames * 100.0;
+        return QString("%1%").arg(r, 0, 'f', 1);
+    };
+
     return QString(
-        "闸门统计(%1帧): "
-        "BJump=%2 Boundary=%3 Diff=%4 Dir=%5 "
-        "CorrA=%6 CorrB=%7 "
-        "AngDiff=%8 AngGap=%9 "
-        "StableWarmup=%10 StableConc=%11 StableLock=%12")
-        .arg(gateTotalFrames)
+        "BJump=%1 Boundary=%2 Diff=%3 Dir=%4 | "
+        "CorrA=%5 CorrB=%6 | "
+        "AngDiff=%7 AngGap=%8 | "
+        "StabWarm=%9 StabConc=%10 StabLock=%11")
         .arg(pct(gateFailBJump))
         .arg(pct(gateFailBoundary))
         .arg(pct(gateFailDiff))
@@ -2209,12 +2340,14 @@ bool MainWindow::checkBoneLagStable(int lagB, int* centerOut, int* countOut)
             if (centerOut) *centerOut = lagB;
             if (countOut) *countOut = recentBoneLagBList.size();
 
-            qDebug() << "BoneLagStable:"
-                     << "lagB =" << lagB
-                     << "recentCount =" << recentBoneLagBList.size()
-                     << "warmupNeed =" << stableLagWarmupCount
-                     << "locked = false"
-                     << "stable = false, warmup";
+            if (kDebugPerFrame) {
+                qDebug() << "BoneLagStable:"
+                         << "lagB =" << lagB
+                         << "recentCount =" << recentBoneLagBList.size()
+                         << "warmupNeed =" << stableLagWarmupCount
+                         << "locked = false"
+                         << "stable = false, warmup";
+            }
 
             return false;
         }
@@ -2238,15 +2371,17 @@ bool MainWindow::checkBoneLagStable(int lagB, int* centerOut, int* countOut)
 
         // 候选还不够集中，不锁定，不让进度条动。
         if (countAroundCenter < stableLagLockNeedCount) {
-            qDebug() << "BoneLagStable:"
-                     << "lagB =" << lagB
-                     << "window =" << recentBoneLagBList
-                     << "candidateCenter =" << center
-                     << "countAroundCenter =" << countAroundCenter
-                     << "need =" << stableLagLockNeedCount
-                     << "tolerance =" << stableLagTolerance
-                     << "locked = false"
-                     << "stable = false, not concentrated";
+            if (kDebugPerFrame) {
+                qDebug() << "BoneLagStable:"
+                         << "lagB =" << lagB
+                         << "window =" << recentBoneLagBList
+                         << "candidateCenter =" << center
+                         << "countAroundCenter =" << countAroundCenter
+                         << "need =" << stableLagLockNeedCount
+                         << "tolerance =" << stableLagTolerance
+                         << "locked = false"
+                         << "stable = false, not concentrated";
+            }
 
             return false;
         }
@@ -2259,12 +2394,14 @@ bool MainWindow::checkBoneLagStable(int lagB, int* centerOut, int* countOut)
         bool currentInCluster =
             (std::abs(lagB - lockedBoneLagCenter) <= stableLagTolerance);
 
-        qDebug() << "BoneLagStable:"
-                 << "LOCKED"
-                 << "lockedCenter =" << lockedBoneLagCenter
-                 << "countAroundCenter =" << countAroundCenter
-                 << "currentLagB =" << lagB
-                 << "currentInCluster =" << currentInCluster;
+        if (kDebugPerFrame) {
+            qDebug() << "BoneLagStable:"
+                     << "LOCKED"
+                     << "lockedCenter =" << lockedBoneLagCenter
+                     << "countAroundCenter =" << countAroundCenter
+                     << "currentLagB =" << lagB
+                     << "currentInCluster =" << currentInCluster;
+        }
 
         // 锁定这一帧，如果当前点也在簇内，就允许有效。
         return currentInCluster;
@@ -2289,13 +2426,15 @@ bool MainWindow::checkBoneLagStable(int lagB, int* centerOut, int* countOut)
     if (currentInCluster) {
         boneLagOutOfLockCount = 0;
 
-        qDebug() << "BoneLagStable:"
-                 << "lagB =" << lagB
-                 << "lockedCenter =" << lockedBoneLagCenter
-                 << "countAroundLocked =" << countAroundLocked
-                 << "tolerance =" << stableLagTolerance
-                 << "currentInCluster = true"
-                 << "stable = true";
+        if (kDebugPerFrame) {
+            qDebug() << "BoneLagStable:"
+                     << "lagB =" << lagB
+                     << "lockedCenter =" << lockedBoneLagCenter
+                     << "countAroundLocked =" << countAroundLocked
+                     << "tolerance =" << stableLagTolerance
+                     << "currentInCluster = true"
+                     << "stable = true";
+        }
 
         return true;
     }
@@ -2303,23 +2442,27 @@ bool MainWindow::checkBoneLagStable(int lagB, int* centerOut, int* countOut)
     // 当前帧偏离锁定簇，不计入。
     boneLagOutOfLockCount++;
 
-    qDebug() << "BoneLagStable:"
-             << "lagB =" << lagB
-             << "lockedCenter =" << lockedBoneLagCenter
-             << "countAroundLocked =" << countAroundLocked
-             << "tolerance =" << stableLagTolerance
-             << "currentInCluster = false"
-             << "outOfLockCount =" << boneLagOutOfLockCount
-             << "unlockNeed =" << boneLagUnlockCount
-             << "stable = false";
+    if (kDebugPerFrame) {
+        qDebug() << "BoneLagStable:"
+                 << "lagB =" << lagB
+                 << "lockedCenter =" << lockedBoneLagCenter
+                 << "countAroundLocked =" << countAroundLocked
+                 << "tolerance =" << stableLagTolerance
+                 << "currentInCluster = false"
+                 << "outOfLockCount =" << boneLagOutOfLockCount
+                 << "unlockNeed =" << boneLagUnlockCount
+                 << "stable = false";
+    }
 
     // 如果连续多帧都偏离锁定簇，说明探头已经移到别的位置了。
     // 这时重新寻找稳定簇。注意：这里不清空已累计的有效值，
     // 只是停止让当前帧推动进度条；如果你希望更严格，也可以在这里清空当前轮。
     if (boneLagOutOfLockCount >= boneLagUnlockCount) {
-        qDebug() << "BoneLagStable:"
-                 << "unlock because too many out-of-cluster frames"
-                 << "oldLockedCenter =" << lockedBoneLagCenter;
+        if (kDebugPerFrame) {
+            qDebug() << "BoneLagStable:"
+                     << "unlock because too many out-of-cluster frames"
+                     << "oldLockedCenter =" << lockedBoneLagCenter;
+        }
 
         recentBoneLagBList.clear();
         boneLagLocked = false;
@@ -2512,14 +2655,29 @@ void MainWindow::onGainSliderChanged(int value)
 
 void MainWindow::on_btnPatientInfo_clicked()
 {
-    // 这个按钮现在 UI 显示为“开始检测”，objectName 仍然是 btnPatientInfo
+    // 这个按钮现在 UI 显示为"开始检测"或"停止检测"，objectName 仍然是 btnPatientInfo
 
     if (patientMeasureRunning) {
-        // 正在检测中，不重复启动
+        // 正在检测中 → 停止检测
+        stopPatientMeasurement();
+        resetOneRoundMeasurementState();
+        resetBoneLagStability();
+        resetGateStats();
+
+        ui->barPairA->setValue(500);
+        ui->barPairB->setValue(500);
+        ui->barMeasureProgress->setValue(0);
+        ui->barMeasureProgress->setFormat("有效值：%v / %m");
+        ui->lblPairAValue->setText("D=--\n目标=10.0");
+        ui->lblPairBValue->setText("G=--\n目标=0.0");
+        ui->lblProcessStatus->setText("检测已手动停止");
+        ui->lblProcessStatus->setStyleSheet(
+            "font-size: 12px; color: #E6A23C; font-weight: bold;"
+            );
         return;
     }
 
-    // 关键：如果上一轮测完后弹了提示框，点击“开始检测”时先自动关掉
+    // 关键：如果上一轮测完后弹了提示框，点击"开始检测"时先自动关掉
     closeRoundFinishedTip();
 
     // 没有当前病人信息：直接进入病人信息填写/导入页面
@@ -2537,11 +2695,11 @@ void MainWindow::on_btnPatientInfo_clicked()
         QMessageBox::information(this,
                                  "检测已完成",
                                  "当前被检者已经完成 5 次测量。\n"
-                                 "如需重新测量，请在报表页面选择“重新测量”，或重新选择被检者。");
+                                 "如需重新测量，请在报表页面选择「重新测量」，或重新选择被检者。");
         return;
     }
 
-    // 每次点击“开始检测”只测 1 次；
+    // 每次点击"开始检测"只测 1 次；
     // 前面完成的第 1 次、第 2 次……保存在 roundSosList 里，不会清空。
     startPatientMeasurement(normalMeasureRounds);
 }
@@ -2569,7 +2727,7 @@ void MainWindow::on_btnPatientNewSave_clicked()
 
     pendingStartAfterPatientInfo = false;
 
-    // 只回到主界面，等待你再次点击“开始检测”
+    // 只回到主界面，等待你再次点击"开始检测"
     ui->stackedWidget->setCurrentWidget(ui->pageMain);
 }
 
@@ -2714,8 +2872,8 @@ void MainWindow::setupSpeedDebugPanel()
     QFrame *panel = new QFrame(host);
     panel->setObjectName("speedDebugPanel");
     panel->setFrameShape(QFrame::StyledPanel);
-    panel->setMaximumHeight(48);
-    panel->setMinimumHeight(42);
+    panel->setMaximumHeight(60);
+    panel->setMinimumHeight(52);
 
     panel->setStyleSheet(R"(
         QFrame#speedDebugPanel {
@@ -2736,18 +2894,18 @@ void MainWindow::setupSpeedDebugPanel()
     grid->setVerticalSpacing(1);
 
     QLabel *title = new QLabel("声速调试值");
-    title->setStyleSheet("font-size: 11px; font-weight: bold; color: #409EFF;");
+    title->setStyleSheet("font-size: 13px; font-weight: bold; color: #409EFF;");
 
     lblSosA = new QLabel("A：-- m/s");
     lblSosB = new QLabel("B：-- m/s");
     lblSosAvg = new QLabel("平均：-- m/s");
     lblSosInfo = new QLabel("等待测量...");
 
-    QString valueStyle = "font-size: 11px; font-weight: bold; color: #303133;";
+    QString valueStyle = "font-size: 12px; font-weight: bold; color: #303133;";
     lblSosA->setStyleSheet(valueStyle);
     lblSosB->setStyleSheet(valueStyle);
     lblSosAvg->setStyleSheet(valueStyle);
-    lblSosInfo->setStyleSheet("font-size: 10px; color: #606266;");
+    lblSosInfo->setStyleSheet("font-size: 11px; color: #606266;");
 
     grid->addWidget(title,     0, 0);
     grid->addWidget(lblSosA,   1, 0);
@@ -2816,7 +2974,7 @@ void MainWindow::updateSpeedDebugPanel(double sosA,
             .arg(corrB, 0, 'f', 2)
         );
 
-    lblSosInfo->setStyleSheet("font-size: 10px; color: #67C23A;");
+    lblSosInfo->setStyleSheet("font-size: 11px; color: #67C23A;");
 }
 
 void MainWindow::setSpeedDebugInvalid(const QString& reason)
@@ -2826,7 +2984,7 @@ void MainWindow::setSpeedDebugInvalid(const QString& reason)
     }
 
     lblSosInfo->setText("无效：" + reason);
-    lblSosInfo->setStyleSheet("font-size: 10px; color: #F56C6C;");
+    lblSosInfo->setStyleSheet("font-size: 11px; color: #F56C6C;");
 }
 
 void MainWindow::initProcessPanel()
@@ -2861,6 +3019,10 @@ void MainWindow::initProcessPanel()
     ui->lblPairAValue->setText("D=--\n目标=10.0");
     ui->lblPairBValue->setText("G=--\n目标=0.0");
     ui->lblProcessStatus->setText("等待开始测量");
+    ui->lblProcessStatus->setWordWrap(true);
+    ui->lblProcessStatus->setMinimumHeight(60);
+    ui->lblGateStats->setText("");
+    ui->lblGateStats->setWordWrap(true);
 
     // ======================================================
     // 4. 进度条样式
@@ -3099,73 +3261,49 @@ void MainWindow::updateProcessPanel(double sosA,
 
         if (!lastFrameAnglePairMidGapOk) {
             if (gDev > 3.0)
-                guide = "→ G偏大：探头偏左侧，请向右(桡骨远端方向)轻移";
+                guide = "探头偏左，请向右(桡骨远端)轻移";
             else if (gDev < -3.0)
-                guide = "→ G偏小：探头偏右侧，请向左(桡骨近端方向)轻移";
+                guide = "探头偏右，请向左(桡骨近端)轻移";
             else
-                guide = "→ G接近边界，请轻微调整探头左右位置";
+                guide = "G值接近边界，请微调探头左右位置";
         } else if (!lastFrameAngleSignedDiffOk) {
             if (dDev < -1.5)
-                guide = "→ D偏小：探头倾角偏高，请稍微放平探头";
+                guide = "倾角偏高，请放平探头";
             else if (dDev > 2.0)
-                guide = "→ D偏大：探头倾角偏低，请稍微立起探头";
+                guide = "倾角偏低，请立起探头";
             else
-                guide = "→ D接近边界，请微调探头倾角";
+                guide = "D值接近边界，请微调探头倾角";
         } else if (!lastFrameStableOk) {
             if (lastFrameStableState == 0) {
                 int remain = stableLagWarmupCount - recentBoneLagBList.size();
-                guide = QString("→ 预热采集中，保持当前角度不动 %1秒后锁定...")
+                guide = QString("预热中，请保持不动 %1 秒")
                     .arg(qMax(1, remain * 80 / 1000 + 1));
             } else if (lastFrameStableState == 1) {
-                guide = "→ 波形波动偏大，请减小手部晃动或检查耦合剂";
+                guide = "波形波动大，请减小手部晃动";
             } else {
-                // out of lock
-                guide = "→ 探头偏离锁定位置，请回到之前的触压角度";
+                guide = "探头偏离锁定位置，请回到之前的触压角度";
             }
         } else if (!lastFrameCorrOk) {
-            if (!lastFrameBJumpOk || !lastFrameBoundaryOk || !lastFrameDiffOk || !lastFrameDirectionOk) {
-                // 这些是信号层面的问题，不是操作者能控制的
-                guide = "→ 信号异常(跳变/反射)，请检查耦合剂是否充足、探头是否贴紧";
-            } else {
-                guide = "→ 信号相关性偏低，请增加耦合剂并确保探头贴合皮肤";
-            }
+            guide = "信号异常，请检查耦合剂是否充足、探头是否贴紧";
         } else if (!lastFrameBJumpOk) {
-            guide = "→ B通道波包跳变，请确保探头稳定贴合";
+            guide = "B通道波包跳变，请确保探头稳定贴合";
         } else if (!lastFrameBoundaryOk) {
-            guide = "→ 疑似检测到边界反射，请调整探头位置";
+            guide = "疑似边界反射，请调整探头位置";
         } else {
-            guide = "→ 请检查耦合剂和探头接触状态";
+            guide = "请检查耦合剂和探头接触状态";
         }
 
-        // 拼接失败原因
-        QString reasonLine;
-        if (failReasons.isEmpty()) {
-            reasonLine = "角度/稳定基本合格，其他原因未累计";
-        } else {
-            reasonLine = failReasons.join(", ");
-        }
-
-        // 累积统计（仅当已积累了一些数据后才显示，避免刚启动时显示 0%）
-        QString statsLine;
-        if (gateTotalFrames >= 10) {
-            statsLine = QString(" | 统计(%1帧): BJump%2% Diff%3% Corr%4% Ang%5% Stab%6%")
-                .arg(gateTotalFrames)
-                .arg((double)gateFailBJump/gateTotalFrames*100, 0, 'f', 0)
-                .arg((double)gateFailDiff/gateTotalFrames*100, 0, 'f', 0)
-                .arg((double)(gateFailCorrA+gateFailCorrB)/gateTotalFrames*100, 0, 'f', 0)
-                .arg((double)(gateFailAngleSignedDiff+gateFailAnglePairMidGap)/gateTotalFrames*100, 0, 'f', 0)
-                .arg((double)(gateFailStableWarmup+gateFailStableNotConcentrated+gateFailStableOutOfLock)/gateTotalFrames*100, 0, 'f', 0);
-        }
-
+        // lblProcessStatus 只显示简洁的操作建议
         ui->lblProcessStatus->setText(
-            QString("未累计：%1\n%2%3")
-                .arg(reasonLine)
+            QString("%1\n【闸门统计请看 Qt Creator 控制台输出】")
                 .arg(guide)
-                .arg(statsLine)
             );
         ui->lblProcessStatus->setStyleSheet(
-            "font-size: 12px; color: #F56C6C; font-weight: bold;"
+            "font-size: 14px; color: #E6A23C; font-weight: bold;"
             );
+
+        // lblGateStats 清空（闸门统计走 qDebug）
+        ui->lblGateStats->setText("");
     }
 }
 
@@ -3399,7 +3537,7 @@ void MainWindow::on_btnDeleteSelected_clicked()
     }
 
     // 3. 开始删除
-    // 我们采用“标记删除法”：先找出所有要删除的目标特征，再从列表中移除
+    // 我们采用"标记删除法"：先找出所有要删除的目标特征，再从列表中移除
 
     // 定义一个结构体来暂存要删除的人的特征
     struct DeleteTarget {
@@ -3520,7 +3658,7 @@ void MainWindow::on_table_cellDoubleClicked(int row, int)
         archiveMode = NormalMode;
 
         // 注意：这里不再自动 startPatientMeasurement()
-        // 等你回到主界面后，再手动点击“开始检测”
+        // 等你回到主界面后，再手动点击"开始检测"
         break;
 
     case PrintMode:
@@ -3655,7 +3793,7 @@ void MainWindow::on_btnDetailSave_clicked() {
     p.diagprompt= ui->dDiag->text().trimmed();
 
 
-    // 你可以选择不改检查时间，也可以在每次保存时更新“最后修改”：
+    // 你可以选择不改检查时间，也可以在每次保存时更新"最后修改"：
     // p.checkTime = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
 
     savePatients();
