@@ -123,6 +123,8 @@ Hardware (Pico/RP2040) → Serial (115200, binary frames) → handleSerialReadyR
   → Patient measure workflow OR debug display → Charts update
 ```
 
+**SOS Output Strategy** (`useBOnlyForPatientSos = true`): Since 2026-06-30, final SOS uses **B-channel only**. Testing on phantom blocks showed B-channel error ≤1% while A-channel was unstable with large systematic deviations — likely a hardware issue with the A-channel transducer. A phantom calibration offset mechanism is planned to align A-channel before re-enabling it. See [[CHANGELOG_REFACTOR.md]] for history.
+
 ### Key Subsystems
 
 **Serial Protocol** (`src/mainwindow.cpp`):
@@ -173,9 +175,9 @@ Each frame must pass ALL gates to contribute to measurement:
 | 2 | `notBoundary` | Onset position < 260 | `gateFailBoundary` |
 | 3 | `diffOk` | abs(lagA - lagB) ≤ 18 | `gateFailDiff` |
 | 4 | `directionOk` | lagA sign check | `gateFailDirection` |
-| 5 | `corrOk` | corrA ≥ 0.65, corrB ≥ 0.55 | `gateFailCorrA/B` |
-| 6 | `angleOk` | signedLagDiff ∈ [7,13], pairMidGap ∈ [-10,10] | `gateFailAngleSignedDiff`, `gateFailAnglePairMidGap` |
-| 7 | `stableOk` | lagB stability (warmup 14 → lock ±4 pts → out-of-lock 8) | `gateFailStable*` (3 sub-states) |
+| 5 | `corrOk` | corrA ≥ 0.78, corrB ≥ 0.55 | `gateFailCorrA/B` |
+| 6 | `angleOk` | signedLagDiff ∈ [5,15], pairMidGap ∈ [-6,6] | `gateFailAngleSignedDiff`, `gateFailAnglePairMidGap` |
+| 7 | `stableOk` | lagB stability (warmup 14 → lock ±5 pts, need 10/20 → out-of-lock 10) | `gateFailStable*` (3 sub-states) |
 
 **Pre-filter**: frames with `corr < 0.25` are classified as decoupled (probe in air) and excluded from all gate statistics (`gateDecoupledFrames` counter).
 
@@ -231,20 +233,20 @@ When adding features, continue extracting logic into separate classes rather tha
 | B-jump threshold | 70 points | (inline in `detectAndPlotSpeed()`) |
 | Boundary onset max | 260 | (inline) |
 | A/B lag diff max | 18 | `processStrictLagTolerance` |
-| corrA min (frame) | 0.65 | `frameCorrAMin` |
+| corrA min (frame) | 0.78 | `frameCorrAMin` |
 | corrB min (frame) | 0.55 | `frameCorrBMin` |
-| Angle signedLagDiff | 7.0 – 13.0 | `angleSignedDiffMin / Max` |
-| Angle pairMidGap | -10.0 – 10.0 | `anglePairMidGapMin / Max` |
+| Angle signedLagDiff | 5.0 – 15.0 | `mCfg.angleSignedDiffMin / Max` |
+| Angle pairMidGap | -6.0 – 6.0 | `mCfg.anglePairMidGapMin / Max` |
 
 #### Stability Locking (stableOk)
 
 | Parameter | Value | Member |
 |-----------|-------|--------|
-| Warmup window | 14 frames | `stableLagWarmupCount` |
-| Window size | 30 frames | `stableLagWindowSize` |
-| Lock tolerance | ±4 points | `stableLagTolerance` |
-| Lock need count | 15/22 within tolerance | `stableLagLockNeedCount` |
-| Unlock threshold | 8 consecutive out-of-lock frames | `boneLagUnlockCount` |
+| Warmup window | 14 frames | `mCfg.stableLagWarmupCount` |
+| Window size | 20 frames | `stableLagWindowSize` |
+| Lock tolerance | ±5 points | `mCfg.stableLagTolerance` |
+| Lock need count | 10/20 within tolerance | `mCfg.stableLagLockNeedCount` |
+| Unlock threshold | 10 consecutive out-of-lock frames | `mCfg.boneLagUnlockCount` |
 
 #### Round & Final Clustering
 

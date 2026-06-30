@@ -207,14 +207,8 @@ private:
     // 锁定一个稳定的 lagB 中位簇。之后只有当前帧仍属于这个稳定簇，进度条才动。
     QVector<int> recentBoneLagBList;     // 最近若干个通过初筛的 B_pair lag
 
-    // 观察窗口。前 stableLagWarmupCount 个候选只用于找稳定簇，不推动进度条。
-    int stableLagWindowSize = 30;        // 最近最多保留 40 个候选 lag
-    int stableLagWarmupCount = 14;       // 先观察 40 个候选，再锁定簇
-    int stableLagTolerance = 4;          // 锁定簇允许 ±4 点
-
-    // 锁定簇需要足够集中。
-    // 例如 40 个候选里至少 24 个落在中心 ±4 点内，才认为位置稳定。
-    int stableLagLockNeedCount = 15;
+    // 观察窗口。前 mCfg.stableLagWarmupCount 个候选只用于找稳定簇，不推动进度条。
+    int stableLagWindowSize = 20;        // 最近最多保留 40 个候选 lag
 
     // 当前本轮正式测量锁定的 lagB 中心
     bool boneLagLocked = false;
@@ -222,7 +216,6 @@ private:
 
     // 如果已经锁定，但连续很多帧偏离锁定簇，说明探头位置变了，重新寻找稳定簇。
     int boneLagOutOfLockCount = 0;
-    int boneLagUnlockCount = 8;
 
     bool checkBoneLagStable(int lagB, int* centerOut = nullptr, int* countOut = nullptr);
     void resetBoneLagStability();
@@ -303,16 +296,13 @@ private:
 
     // ================== 正式测量质量门槛 ==================
     //
+    // ================== 测量配置（统一管理所有可调参数）==================
+    MeasureConfig mCfg;
+
     // 重要修正：
     // 这次 CSV 说明，桡骨 3800 正确角度下 B_corr 反而不高，
     // 而 3600 / 4000 错误角度下 B_corr 可能更高。
-    // 所以 B_corr 不能再作为主要姿态判据，只作为“别太差”的底线。
-    double frameCorrBMin = 0.55;
-    double frameCorrAMin = 0.65;  // 0.78→0.65，桡骨A通道天生偏低
-
-    double roundCorrBMin = 0.55;
-    double roundCorrAMin = 0.80;
-
+    // 所以 B_corr 不能再作为主要姿态判据，只作为”别太差”的底线。
 
     // ================== 桡骨角度 / 姿态判定门槛 ==================
     //
@@ -325,31 +315,6 @@ private:
     // 才允许进度条前进。
     bool enablePatientAngleGate = true;
 
-    // lagA - lagB 的合理范围
-    //
-    // 新一轮 CSV 里，3800 左右的正确姿态大多在 8~12 左右。
-    // 3500 多的低值姿态里，signedLagDiff 有不少落在 4~7。
-    // 所以下限从 7.0 略微提高到 8.0，减少低速姿态混入。
-    double angleSignedDiffMin = 7.0;
-    double angleSignedDiffMax = 13.0;
-
-
-    // pairMidGap = B组中心位置 - A组中心位置
-    //
-    // 这里采用较早一版正式测量门槛：
-    // signedLagDiff 用于约束 A/B 延迟一致性；
-    // pairMidGap 用于约束 A/B 回波中心位置关系。
-    // 注意：pairMidGap 的目标值会随实验批次和识别策略变化，
-    // 当前先恢复为 [-4, 4] 的旧标准。
-    double anglePairMidGapMin = -10.0;  // -4→-10，放宽左右位置容差
-    double anglePairMidGapMax = 10.0;   // 4→10
-
-    // 竖向平衡条的目标中心。
-    // 注意：不要再用 (min+max)/2 自动算。
-    // 现在明确让 pairMidGap=0 时两个竖条在 50%左右。
-    double anglePairMidGapTarget = 0.0;
-    double angleSignedDiffTarget = 9.0;
-
     double balanceFullScaleGap = 35.0;   // pairMidGap 偏离多少点时接近打满
     double balanceMaxOffset = 320.0;     // 最大偏离 500 的距离
     double balanceCurvePower = 1.7;      // >1：中线附近刻度更细
@@ -358,7 +323,7 @@ private:
     //
     // 现在 A 通道主要用于姿态门控，不建议继续直接参与最终 SOS 平均。
     // 因为桡骨上 A 通道系统性低于 B 通道，继续 0.8B+0.2A 会把最终值拉低。
-    bool useBOnlyForPatientSos = false;
+    bool useBOnlyForPatientSos = true;
 
     // 最终 SOS 校准偏移，先设为 0。
     // 如果后续大量对比参考仪器后发现整体偏低/偏高，再用它微调。

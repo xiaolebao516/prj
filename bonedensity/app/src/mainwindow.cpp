@@ -712,12 +712,12 @@ void MainWindow::finishOnePatientRound()
         Utils::trimmedMeanValue(currentRoundSignedLagDiffList, 0.2);
 
     bool oneRoundAngleSignedDiffOk =
-        (oneRoundSignedLagDiff >= angleSignedDiffMin &&
-         oneRoundSignedLagDiff <= angleSignedDiffMax);
+        (oneRoundSignedLagDiff >= mCfg.angleSignedDiffMin &&
+         oneRoundSignedLagDiff <= mCfg.angleSignedDiffMax);
 
     bool oneRoundPairMidGapOk =
-        (oneRoundPairMidGap >= anglePairMidGapMin &&
-         oneRoundPairMidGap <= anglePairMidGapMax);
+        (oneRoundPairMidGap >= mCfg.anglePairMidGapMin &&
+         oneRoundPairMidGap <= mCfg.anglePairMidGapMax);
 
     bool oneRoundAngleOk =
         (!enablePatientAngleGate) ||
@@ -734,8 +734,8 @@ void MainWindow::finishOnePatientRound()
              << "oneRoundAngleSignedDiffOk =" << oneRoundAngleSignedDiffOk
              << "oneRoundPairMidGapOk =" << oneRoundPairMidGapOk
              << "oneRoundAngleOk =" << oneRoundAngleOk
-             << "roundCorrAMin =" << roundCorrAMin
-             << "roundCorrBMin =" << roundCorrBMin;
+             << "mCfg.roundCorrAMin =" << mCfg.roundCorrAMin
+             << "mCfg.roundCorrBMin =" << mCfg.roundCorrBMin;
 
     // ======================================================
     // 新增：整轮质量门槛
@@ -745,8 +745,8 @@ void MainWindow::finishOnePatientRound()
     // 如果整轮平均相关质量不够好，说明这一轮很可能是
     // "稳定但位置不准 / 波形质量差"的测量，直接丢弃。
     // ======================================================
-    if (oneRoundCorrB < roundCorrBMin ||
-        oneRoundCorrA < roundCorrAMin ||
+    if (oneRoundCorrB < mCfg.roundCorrBMin ||
+        oneRoundCorrA < mCfg.roundCorrAMin ||
         !oneRoundAngleOk) {
         qDebug() << "One patient round rejected by quality:"
                  << "sos =" << oneRoundSos
@@ -2009,7 +2009,7 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
 
         // 注意：
         // B_corr 现在只作为底线，不再作为主要姿态判据。
-        bool corrOk = (bRes.corr >= frameCorrBMin && aRes.corr >= frameCorrAMin);
+        bool corrOk = (bRes.corr >= mCfg.frameCorrBMin && aRes.corr >= mCfg.frameCorrAMin);
 
 
         // ======================================================
@@ -2029,12 +2029,12 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
         double pairMidGap = pairMidB - pairMidA;
 
         bool angleSignedDiffOk =
-            (signedLagDiff >= angleSignedDiffMin &&
-             signedLagDiff <= angleSignedDiffMax);
+            (signedLagDiff >= mCfg.angleSignedDiffMin &&
+             signedLagDiff <= mCfg.angleSignedDiffMax);
 
         bool anglePairMidGapOk =
-            (pairMidGap >= anglePairMidGapMin &&
-             pairMidGap <= anglePairMidGapMax);
+            (pairMidGap >= mCfg.anglePairMidGapMin &&
+             pairMidGap <= mCfg.anglePairMidGapMax);
 
         bool angleOk =
             (!enablePatientAngleGate) ||
@@ -2106,15 +2106,15 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
                      << "pairMidA =" << pairMidA
                      << "pairMidGap =" << pairMidGap
                      << "angleSignedDiffRange = ["
-                     << angleSignedDiffMin << "," << angleSignedDiffMax << "]"
+                     << mCfg.angleSignedDiffMin << "," << mCfg.angleSignedDiffMax << "]"
                      << "anglePairMidGapRange = ["
-                     << anglePairMidGapMin << "," << anglePairMidGapMax << "]"
+                     << mCfg.anglePairMidGapMin << "," << mCfg.anglePairMidGapMax << "]"
                      << "bRoughLag =" << bRes.roughLag
                      << "bJump =" << bLagJump
                      << "corrA =" << aRes.corr
                      << "corrB =" << bRes.corr
-                     << "frameCorrAMin =" << frameCorrAMin
-                 << "frameCorrBMin =" << frameCorrBMin
+                     << "mCfg.frameCorrAMin =" << mCfg.frameCorrAMin
+                 << "mCfg.frameCorrBMin =" << mCfg.frameCorrBMin
                  << "bJumpOk =" << bJumpOk
                  << "notBoundary =" << notBoundary
                  << "diffOk =" << diffOk
@@ -2168,8 +2168,8 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
             if (!notBoundary)         gateFailBoundary++;
             if (!diffOk)              gateFailDiff++;
             if (!directionOk)         gateFailDirection++;
-            if (bRes.corr < frameCorrBMin) gateFailCorrB++;
-            if (aRes.corr < frameCorrAMin) gateFailCorrA++;
+            if (bRes.corr < mCfg.frameCorrBMin) gateFailCorrB++;
+            if (aRes.corr < mCfg.frameCorrAMin) gateFailCorrA++;
             if (!angleSignedDiffOk)   gateFailAngleSignedDiff++;
             if (!anglePairMidGapOk)   gateFailAnglePairMidGap++;
 
@@ -2178,7 +2178,7 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
                 if (boneLagLocked) {
                     gateFailStableOutOfLock++;
                     lastFrameStableState = 3;
-                } else if (recentBoneLagBList.size() < stableLagWarmupCount) {
+                } else if (recentBoneLagBList.size() < mCfg.stableLagWarmupCount) {
                     gateFailStableWarmup++;
                     lastFrameStableState = 0;
                 } else {
@@ -2288,7 +2288,7 @@ void MainWindow::printGateStats() const
                    .arg(gateCorrAMin, 0, 'f', 3)
                    .arg(corrAMean, 0, 'f', 3)
                    .arg(gateCorrAMax, 0, 'f', 3)
-                   .arg(frameCorrAMin, 0, 'f', 2);
+                   .arg(mCfg.frameCorrAMin, 0, 'f', 2);
     }
 }
 
@@ -2336,7 +2336,7 @@ bool MainWindow::checkBoneLagStable(int lagB, int* centerOut, int* countOut)
     // ======================================================
     if (!boneLagLocked) {
 
-        if (recentBoneLagBList.size() < stableLagWarmupCount) {
+        if (recentBoneLagBList.size() < mCfg.stableLagWarmupCount) {
             if (centerOut) *centerOut = lagB;
             if (countOut) *countOut = recentBoneLagBList.size();
 
@@ -2344,7 +2344,7 @@ bool MainWindow::checkBoneLagStable(int lagB, int* centerOut, int* countOut)
                 qDebug() << "BoneLagStable:"
                          << "lagB =" << lagB
                          << "recentCount =" << recentBoneLagBList.size()
-                         << "warmupNeed =" << stableLagWarmupCount
+                         << "warmupNeed =" << mCfg.stableLagWarmupCount
                          << "locked = false"
                          << "stable = false, warmup";
             }
@@ -2352,7 +2352,7 @@ bool MainWindow::checkBoneLagStable(int lagB, int* centerOut, int* countOut)
             return false;
         }
 
-        // 用最近 stableLagWarmupCount 个候选的中位数作为锁定中心。
+        // 用最近 mCfg.stableLagWarmupCount 个候选的中位数作为锁定中心。
         // 注意：这里不再选择最小 lag，也就是不再追逐最高声速簇。
         QVector<int> sorted = recentBoneLagBList;
         std::sort(sorted.begin(), sorted.end());
@@ -2361,7 +2361,7 @@ bool MainWindow::checkBoneLagStable(int lagB, int* centerOut, int* countOut)
 
         int countAroundCenter = 0;
         for (int v : recentBoneLagBList) {
-            if (std::abs(v - center) <= stableLagTolerance) {
+            if (std::abs(v - center) <= mCfg.stableLagTolerance) {
                 countAroundCenter++;
             }
         }
@@ -2370,15 +2370,15 @@ bool MainWindow::checkBoneLagStable(int lagB, int* centerOut, int* countOut)
         if (countOut) *countOut = countAroundCenter;
 
         // 候选还不够集中，不锁定，不让进度条动。
-        if (countAroundCenter < stableLagLockNeedCount) {
+        if (countAroundCenter < mCfg.stableLagLockNeedCount) {
             if (kDebugPerFrame) {
                 qDebug() << "BoneLagStable:"
                          << "lagB =" << lagB
                          << "window =" << recentBoneLagBList
                          << "candidateCenter =" << center
                          << "countAroundCenter =" << countAroundCenter
-                         << "need =" << stableLagLockNeedCount
-                         << "tolerance =" << stableLagTolerance
+                         << "need =" << mCfg.stableLagLockNeedCount
+                         << "tolerance =" << mCfg.stableLagTolerance
                          << "locked = false"
                          << "stable = false, not concentrated";
             }
@@ -2392,7 +2392,7 @@ bool MainWindow::checkBoneLagStable(int lagB, int* centerOut, int* countOut)
         boneLagOutOfLockCount = 0;
 
         bool currentInCluster =
-            (std::abs(lagB - lockedBoneLagCenter) <= stableLagTolerance);
+            (std::abs(lagB - lockedBoneLagCenter) <= mCfg.stableLagTolerance);
 
         if (kDebugPerFrame) {
             qDebug() << "BoneLagStable:"
@@ -2411,11 +2411,11 @@ bool MainWindow::checkBoneLagStable(int lagB, int* centerOut, int* countOut)
     // 3. 已经锁定稳定簇：只接受锁定簇附近的帧
     // ======================================================
     bool currentInCluster =
-        (std::abs(lagB - lockedBoneLagCenter) <= stableLagTolerance);
+        (std::abs(lagB - lockedBoneLagCenter) <= mCfg.stableLagTolerance);
 
     int countAroundLocked = 0;
     for (int v : recentBoneLagBList) {
-        if (std::abs(v - lockedBoneLagCenter) <= stableLagTolerance) {
+        if (std::abs(v - lockedBoneLagCenter) <= mCfg.stableLagTolerance) {
             countAroundLocked++;
         }
     }
@@ -2431,7 +2431,7 @@ bool MainWindow::checkBoneLagStable(int lagB, int* centerOut, int* countOut)
                      << "lagB =" << lagB
                      << "lockedCenter =" << lockedBoneLagCenter
                      << "countAroundLocked =" << countAroundLocked
-                     << "tolerance =" << stableLagTolerance
+                     << "tolerance =" << mCfg.stableLagTolerance
                      << "currentInCluster = true"
                      << "stable = true";
         }
@@ -2447,17 +2447,17 @@ bool MainWindow::checkBoneLagStable(int lagB, int* centerOut, int* countOut)
                  << "lagB =" << lagB
                  << "lockedCenter =" << lockedBoneLagCenter
                  << "countAroundLocked =" << countAroundLocked
-                 << "tolerance =" << stableLagTolerance
+                 << "tolerance =" << mCfg.stableLagTolerance
                  << "currentInCluster = false"
                  << "outOfLockCount =" << boneLagOutOfLockCount
-                 << "unlockNeed =" << boneLagUnlockCount
+                 << "unlockNeed =" << mCfg.boneLagUnlockCount
                  << "stable = false";
     }
 
     // 如果连续多帧都偏离锁定簇，说明探头已经移到别的位置了。
     // 这时重新寻找稳定簇。注意：这里不清空已累计的有效值，
     // 只是停止让当前帧推动进度条；如果你希望更严格，也可以在这里清空当前轮。
-    if (boneLagOutOfLockCount >= boneLagUnlockCount) {
+    if (boneLagOutOfLockCount >= mCfg.boneLagUnlockCount) {
         if (kDebugPerFrame) {
             qDebug() << "BoneLagStable:"
                      << "unlock because too many out-of-cluster frames"
@@ -3128,7 +3128,7 @@ void MainWindow::updateProcessPanel(double sosA,
     // 左竖条：D = lagA - lagB
     int dBar = mapToBar(
         lagA - lagB,
-        angleSignedDiffTarget,
+        mCfg.angleSignedDiffTarget,
         6.0,
         320.0,
         1.4
@@ -3137,7 +3137,7 @@ void MainWindow::updateProcessPanel(double sosA,
     // 右竖条：G = pairMidGap
     int gBar = mapToBar(
         pairMidGap,
-        anglePairMidGapTarget,
+        mCfg.anglePairMidGapTarget,
         12.0,
         320.0,
         1.4
@@ -3154,13 +3154,13 @@ void MainWindow::updateProcessPanel(double sosA,
     ui->lblPairAValue->setText(
         QString("D=%1\n目标=%2")
             .arg(signedLagDiff)
-            .arg(angleSignedDiffTarget, 0, 'f', 1)
+            .arg(mCfg.angleSignedDiffTarget, 0, 'f', 1)
         );
 
     ui->lblPairBValue->setText(
         QString("G=%1\n目标=%2")
             .arg(pairMidGap, 0, 'f', 1)
-            .arg(anglePairMidGapTarget, 0, 'f', 1)
+            .arg(mCfg.anglePairMidGapTarget, 0, 'f', 1)
         );
 
     // ======================================================
@@ -3176,12 +3176,12 @@ void MainWindow::updateProcessPanel(double sosA,
     // 4. 计算当前姿态是否在允许范围内
     // ======================================================
     bool angleSignedDiffOk =
-        (signedLagDiff >= angleSignedDiffMin &&
-         signedLagDiff <= angleSignedDiffMax);
+        (signedLagDiff >= mCfg.angleSignedDiffMin &&
+         signedLagDiff <= mCfg.angleSignedDiffMax);
 
     bool anglePairMidGapOk =
-        (pairMidGap >= anglePairMidGapMin &&
-         pairMidGap <= anglePairMidGapMax);
+        (pairMidGap >= mCfg.anglePairMidGapMin &&
+         pairMidGap <= mCfg.anglePairMidGapMax);
 
     bool angleOk =
         (!enablePatientAngleGate) ||
@@ -3207,7 +3207,7 @@ void MainWindow::updateProcessPanel(double sosA,
         ui->lblProcessStatus->setText(
             QString("姿态有效：Gap=%1，目标=%2，lagA-lagB=%3，进度 %4/%5")
                 .arg(pairMidGap, 0, 'f', 1)
-                .arg(anglePairMidGapTarget, 0, 'f', 1)
+                .arg(mCfg.anglePairMidGapTarget, 0, 'f', 1)
                 .arg(signedLagDiff)
                 .arg(processValidCount)
                 .arg(processValidTarget)
@@ -3241,13 +3241,13 @@ void MainWindow::updateProcessPanel(double sosA,
                 failReasons << "相关性偏低";
         }
         if (!lastFrameAngleSignedDiffOk)
-            failReasons << QString("D=%1∉[%2,%3]").arg(signedLagDiff).arg(angleSignedDiffMin,0,'f',1).arg(angleSignedDiffMax,0,'f',1);
+            failReasons << QString("D=%1∉[%2,%3]").arg(signedLagDiff).arg(mCfg.angleSignedDiffMin,0,'f',1).arg(mCfg.angleSignedDiffMax,0,'f',1);
         if (!lastFrameAnglePairMidGapOk)
-            failReasons << QString("G=%1∉[%2,%3]").arg(pairMidGap,0,'f',1).arg(anglePairMidGapMin,0,'f',1).arg(anglePairMidGapMax,0,'f',1);
+            failReasons << QString("G=%1∉[%2,%3]").arg(pairMidGap,0,'f',1).arg(mCfg.anglePairMidGapMin,0,'f',1).arg(mCfg.anglePairMidGapMax,0,'f',1);
         if (!lastFrameStableOk && lastFrameAngleOk && lastFrameCorrOk) {
             // 角度和相关都 OK 但是稳定簇没过，说明问题在稳定性
             if (lastFrameStableState == 0)
-                failReasons << QString("预热中(%1/%2)").arg(recentBoneLagBList.size()).arg(stableLagWarmupCount);
+                failReasons << QString("预热中(%1/%2)").arg(recentBoneLagBList.size()).arg(mCfg.stableLagWarmupCount);
             else if (lastFrameStableState == 1)
                 failReasons << "簇不够集中";
             else if (lastFrameStableState == 3)
@@ -3256,8 +3256,8 @@ void MainWindow::updateProcessPanel(double sosA,
 
         // 引导提示 — 按优先级：先解决角度，再解决稳定性，最后才是信号质量
         QString guide;
-        double gDev = pairMidGap - anglePairMidGapTarget;
-        double dDev = signedLagDiff - angleSignedDiffTarget;
+        double gDev = pairMidGap - mCfg.anglePairMidGapTarget;
+        double dDev = signedLagDiff - mCfg.angleSignedDiffTarget;
 
         if (!lastFrameAnglePairMidGapOk) {
             if (gDev > 3.0)
@@ -3275,7 +3275,7 @@ void MainWindow::updateProcessPanel(double sosA,
                 guide = "D值接近边界，请微调探头倾角";
         } else if (!lastFrameStableOk) {
             if (lastFrameStableState == 0) {
-                int remain = stableLagWarmupCount - recentBoneLagBList.size();
+                int remain = mCfg.stableLagWarmupCount - recentBoneLagBList.size();
                 guide = QString("预热中，请保持不动 %1 秒")
                     .arg(qMax(1, remain * 80 / 1000 + 1));
             } else if (lastFrameStableState == 1) {

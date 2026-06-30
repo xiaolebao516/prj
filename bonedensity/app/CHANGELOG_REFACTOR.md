@@ -205,3 +205,84 @@ StableWarmup=18.4% StableConc=11.5% StableLock=5.7%
 | `anglePairMidGapMin/Max` | [-4, 4] | **[-10, 10]** | 真人左右手感波动大，±4 导致 ~50% 帧被卡 |
 
 > **结论**：从日志分析来看，提升最大的是热身帧数（22→14），CorrA 和 AngGap 的放宽对速度改善有限——瓶颈主要在探头摆放手法，不是参数。
+
+---
+
+## 参数回退（2026-06-30）
+
+### 背景
+
+0.65 CorrA + AngGap ±10 的配置虽然有效帧推进快，但测量结果不准：测完一轮经常没算进轮次（round-level 质量检查失败），最终 SOS 偏离参考值。
+
+### 回退内容
+
+| 参数 | 回退前 | 回退后 | 原因 |
+|------|--------|--------|------|
+| `frameCorrAMin` | 0.65 | **0.78** | 放宽后低相关帧混入，导致轮级 CorrA 均值 (≥0.80) 难以达标 |
+| `anglePairMidGapMin/Max` | [-10, 10] | **[-4, 4]** | 放宽后姿态错误的帧混入，轮级一致性变差 |
+
+### 保留
+
+| 参数 | 值 | 原因 |
+|------|-----|------|
+| `stableLagWarmupCount` | **14**（不改回22） | 唯一明确有效的改动，显著加快进度条启动 |
+
+---
+
+## 参数集中管理 + EMA 尝试与回退（2026-06-30 round 2）
+
+### 1. 提取 MeasureConfig 结构体
+
+**目的**：14 个散落在 `mainwindow.h` 中的可调参数（质量底线 ×4、姿态门控 ×6、稳定性 ×4）集中到 `types.h` 的 `struct MeasureConfig`，便于批量调整和版本对比。
+
+**改动**：
+- `include/types.h` — 新增 `struct MeasureConfig { ... }`，含全部默认值
+- `include/mainwindow.h` — 删除所有零散成员变量，替换为 `MeasureConfig mCfg;`
+- `src/mainwindow.cpp` — 50+ 处引用全部加 `mCfg.` 前缀（`frameCorrAMin` → `mCfg.frameCorrAMin` 等）
+
+> **注意**：`stableLagWindowSize`、`boneLagLocked` 等运行时状态变量**未**移入 MeasureConfig，它们不属于可调参数。
+
+### 2. EMA 平滑滤波（已撤销）
+
+尝试在 `detectAndPlotSpeed()` 中对 `pairMidGap` 应用 EMA（α=0.20）抑制 UI 平衡条跳变。实测发现平滑引入的相位延迟导致探头定位滞后，用户体验反而下降，随后完全撤销。
+
+**撤销范围**：`smoothedPairMidGap` 成员变量、EMA 计算逻辑、重置代码——全局搜索 **0 残留**。
+
+---
+
+## 试块校准 + 参数精调 + B通道优先（2026-06-30 round 3）
+
+### 关键发现
+
+在试块（phantom）上测试发现：
+
+- **B 通道**：误差在 1% 以内，稳定可靠
+- **A 通道**：表现不稳定，偏差较大，疑似 A 通道探头硬件问题
+
+### 改动
+
+#### 1. SOS 输出策略：纯 B 通道
+
+`useBOnlyForPatientSos`：`false` → **`true`**
+
+最终 SOS 不再使用 A/B 加权平均，完全依赖 B 通道。A 通道仅保留姿态门控功能（`signedLagDiff`、`angleSignedDiffOk`）。
+
+#### 2. MeasureConfig 参数精调
+
+基于试块测试结果进一步放宽：
+
+| 参数 | 改前 | 改后 | 原因 |
+|------|------|------|------|
+| `angleSignedDiffMin` | 7.0 | **5.0** | 试块上 D 值分布更宽 |
+| `angleSignedDiffMax` | 13.0 | **15.0** | 同上 |
+| `anglePairMidGapMin` | -4.0 | **-6.0** | 左右手感容差 |
+| `anglePairMidGapMax` | 4.0 | **6.0** | 同上 |
+| `stableLagLockNeedCount` | 15 | **10** | 降低锁定门槛，配合窗口缩小 |
+| `stableLagTolerance` | 4 | **5** | 放宽锁定簇范围 |
+| `boneLagUnlockCount` | 8 | **10** | 减少误脱锁 |
+| `stableLagWindowSize` | 30 | **20** | 更快响应位置变化 |
+
+#### 3. 下一步
+
+- 加入**试块校准机制**：用已知 SOS 的试块测量各通道偏移量，存入校准参数自动补偿
+- A 通道修复后可通过 `useBOnlyForPatientSos` 一键切回双通道模式

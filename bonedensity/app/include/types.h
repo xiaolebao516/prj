@@ -30,6 +30,27 @@ struct RoundCandidate {
     double corrB = 0.0;
 };
 
+// ==================== Measurement Configuration ====================
+struct MeasureConfig {
+    // 质量底线
+    double frameCorrBMin = 0.55;
+    double frameCorrAMin = 0.78;
+    double roundCorrBMin = 0.55;
+    double roundCorrAMin = 0.80;
+    // 姿态门控
+    double angleSignedDiffMin = 5.0;
+    double angleSignedDiffMax = 15.0;
+    double anglePairMidGapMin = -6.0;
+    double anglePairMidGapMax = 6.0;
+    double anglePairMidGapTarget = 0.0;
+    double angleSignedDiffTarget = 9.0;
+    // 稳定性门控
+    int stableLagWarmupCount = 14;
+    int stableLagLockNeedCount = 10;
+    int stableLagTolerance = 5;
+    int boneLagUnlockCount = 10;
+};
+
 // ==================== Signal Processing ====================
 struct GateConfig {
     int baselineStart;
