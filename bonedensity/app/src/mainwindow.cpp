@@ -196,9 +196,11 @@ MainWindow::MainWindow(QWidget *parent)
     // ✅ 档案管理按钮连接
 
     ui->dateBirth->setDisplayFormat("yyyy-MM-dd");
-    ui->dateCheck->setDisplayFormat("yyyy-MM-dd");
     ui->dBirth->setDisplayFormat("yyyy-MM-dd");
-    ui->dCheck->setDisplayFormat("yyyy-MM-dd");
+    ui->dateCheck->setVisible(false);
+    ui->editDiag->setVisible(false);
+    ui->dCheck->setVisible(false);
+    ui->dDiag->setVisible(false);
 
     initSearchControls(); // ✅ 初始化下拉框
 
@@ -3842,11 +3844,9 @@ void MainWindow::clearNewForm() {
     ui->editID->clear();
     ui->comboGender->setCurrentIndex(0);
     ui->dateBirth->setDate(QDate::currentDate());
-    ui->dateCheck->setDate(QDate::currentDate());
     //ui->comboPart->setCurrentIndex(-1);
     ui->editHeight->clear();
     ui->editWeight->clear();
-    ui->editDiag->clear();
 
 }
 
@@ -3866,10 +3866,8 @@ void MainWindow::on_btnFormSave_clicked() {
     p.id        = ui->editID->text().trimmed();
     p.gender    = ui->comboGender->currentText();
     p.birthDay  = ui->dateBirth->date().toString("yyyy-MM-dd");
-    p.checkDate = ui->dateCheck->date().toString("yyyy-MM-dd");
     p.height    = ui->editHeight->text().trimmed();
     p.weight    = ui->editWeight->text().trimmed();
-    p.diagprompt= ui->editDiag->text().trimmed();
 
 
     // 2) 基本校验
@@ -3911,10 +3909,8 @@ void MainWindow::fillDetailPage(const PatientInfo& p, int index) {
     ui->dID->setText(p.id);
     ui->dGender->setCurrentText(p.gender);
     ui->dBirth->setDate(QDate::fromString(p.birthDay, "yyyy-MM-dd"));
-    ui->dCheck->setDate(QDate::fromString(p.checkDate, "yyyy-MM-dd"));
     ui->dHeight->setText(p.height);
     ui->dWeight->setText(p.weight);
-    ui->dDiag->setText(p.diagprompt);
 }
 
 void MainWindow::on_btnDetailBack_clicked() {

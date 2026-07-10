@@ -20,10 +20,17 @@ QString nextBackupPath(const QString& path)
     return backupPath;
 }
 
-bool hasEnabledAdmin(const QList<AccountInfo>& accounts)
+bool hasValidEnabledAdmin(const QList<AccountInfo>& accounts)
 {
     for (const AccountInfo& account : accounts) {
-        if (account.role == "admin" && account.enabled) return true;
+        if (account.role != "admin" || !account.enabled || account.username.trimmed().isEmpty() ||
+            account.salt.isEmpty() || account.passwordHash.isEmpty()) {
+            continue;
+        }
+        const QByteArray salt = QByteArray::fromBase64(account.salt.toLatin1());
+        const QByteArray passwordHash = QByteArray::fromBase64(account.passwordHash.toLatin1());
+        if (!salt.isEmpty() &&
+            passwordHash.size() == QCryptographicHash::hashLength(QCryptographicHash::Sha256)) return true;
     }
     return false;
 }
@@ -65,7 +72,7 @@ bool AccountStore::loadOrInitialize(const QString& path, QString* errorMessage)
         }
     }
 
-    if (!parsed || !hasEnabledAdmin(loaded)) {
+    if (!parsed || !hasValidEnabledAdmin(loaded)) {
         if (!QFile::copy(path_, nextBackupPath(path_))) {
             if (errorMessage) *errorMessage = "accounts.xml 异常且备份失败";
             return false;

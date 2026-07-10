@@ -55,7 +55,7 @@ The `.claudignore` file is empty — add build artifact patterns there if needed
 
 1. **Prerequisites**: Qt 6.5.3 (MinGW 64-bit) + Qt Charts. On a new machine, update the qmake path below.
 2. **Open** `BoneDensity.pro` in Qt Creator, or build from CLI as above.
-3. **Login**: user `1`, password `1`.
+3. **Login**: username `admin`, password `1`.
 4. **Hardware**: Connect Pico/RP2040 via USB, select COM port in app (115200 baud).
 
 ### Branches
@@ -108,7 +108,7 @@ bonedensity/app/                 # 上位机 (renamed from hhh1)
 ### Page Navigation (QStackedWidget)
 
 The app uses a single `QStackedWidget` in `MainWindow` with these pages:
-- **pageLogin** — simple hardcoded login (user/pass = "1"/"1")
+- **pageLogin** — local XML login (default user/pass = `admin`/`1`)
 - **pageMain** — 4-channel waveform display + speed trend chart + measurement controls
 - **pagePatientInfo** — patient data entry/selection form
 - **pageArchive** — patient archive table with search/filter/CRUD
