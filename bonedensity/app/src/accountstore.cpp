@@ -27,10 +27,12 @@ bool hasValidEnabledAdmin(const QList<AccountInfo>& accounts)
             account.salt.isEmpty() || account.passwordHash.isEmpty()) {
             continue;
         }
-        const QByteArray salt = QByteArray::fromBase64(account.salt.toLatin1());
-        const QByteArray passwordHash = QByteArray::fromBase64(account.passwordHash.toLatin1());
-        if (!salt.isEmpty() &&
-            passwordHash.size() == QCryptographicHash::hashLength(QCryptographicHash::Sha256)) return true;
+        const auto saltResult = QByteArray::fromBase64Encoding(
+            account.salt.toLatin1(), QByteArray::AbortOnBase64DecodingErrors);
+        const auto hashResult = QByteArray::fromBase64Encoding(
+            account.passwordHash.toLatin1(), QByteArray::AbortOnBase64DecodingErrors);
+        if (saltResult && !saltResult.decoded.isEmpty() && hashResult &&
+            hashResult.decoded.size() == QCryptographicHash::hashLength(QCryptographicHash::Sha256)) return true;
     }
     return false;
 }

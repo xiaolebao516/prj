@@ -201,6 +201,11 @@ MainWindow::MainWindow(QWidget *parent)
     ui->editDiag->setVisible(false);
     ui->dCheck->setVisible(false);
     ui->dDiag->setVisible(false);
+    ui->label_7->setVisible(false);
+    ui->label_8->setVisible(false);
+    ui->label_9->setVisible(false);
+    ui->label_11->setVisible(false);
+    ui->dID->setReadOnly(true);
 
     initSearchControls(); // ✅ 初始化下拉框
 
