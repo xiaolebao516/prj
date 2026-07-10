@@ -17,6 +17,7 @@
 #include <QProgressBar>
 #include <QtCharts/QScatterSeries>
 #include "types.h"
+#include "patientstore.h"
 #include "signalprocessor.h"
 QT_USE_NAMESPACE
 
@@ -118,13 +119,17 @@ private:
     QLineSeries *seriesA, *seriesB, *seriesC, *seriesD;
     QChartView *viewA, *viewB, *viewC, *viewD;
 
-    QTimer *autoTimer;
+    QTimer *autoTimer = nullptr;
     bool autoRunning = false;
+    bool serialDisconnectHandled = false;
     quint16 globalGain = 1024;  //统一的增益值
     uint8_t frameIdx = 0;      // 帧计数，用于命令区分
 
     QString xmlFilePath;
+    QString measurementsFilePath;
     QList<PatientInfo> patientList;   // ✅ 用于管理XML数据
+    QList<MeasurementRecord> measurementList;
+    PatientStore patientStore;
 
     PatientInfo currentPatient;   // 当前正在测量的患者
 
@@ -132,6 +137,8 @@ private:
 
     void setupChart();
     void plotSamples();
+    void resetSerialRuntimeState();
+    void handleSerialDisconnected(const QString& reason, bool notifyUser);
 
 
 

@@ -15,6 +15,18 @@ struct PatientInfo {
     QString speedOfSound;
 };
 
+struct MeasurementRecord {
+    QString id;
+    QString patientId;
+    QString measuredAt;
+    QString operatorName;
+    QString part;
+    QString sos;
+    QString tScore;
+    QString zScore;
+    QString diagnosis;
+};
+
 // ==================== Serial / Waveform ====================
 struct WaveGroup {
     bool has[4] = {false, false, false, false};

@@ -148,7 +148,7 @@ MainWindow::MainWindow(QWidget *parent)
     scanTimer.start(1000);
     scanPorts();
 
-    //connect(serial, &QSerialPort::readyRead, this, &MainWindow::handleSerialReadyRead);
+    connect(serial, &QSerialPort::readyRead, this, &MainWindow::handleSerialReadyRead);
     connect(serial, &QSerialPort::errorOccurred, this, &MainWindow::handleSerialError);
 
     setupChart();
@@ -166,6 +166,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // ✅ 加载患者数据库
     xmlFilePath = QCoreApplication::applicationDirPath() + "/patients.xml";
+    measurementsFilePath = QCoreApplication::applicationDirPath() + "/measurements.xml";
     loadPatients();
     //ui->comboPart->setCurrentIndex(-1);
     //ui->dPartCombo->setCurrentIndex(-1);
@@ -226,6 +227,59 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
+void MainWindow::resetSerialRuntimeState()
+{
+    if (autoTimer && autoTimer->isActive()) {
+        autoTimer->stop();
+    }
+
+    autoRunning = false;
+    patientMeasureRunning = false;
+    acquireMode = DebugAcquireMode;
+
+    rxBuffer.clear();
+    frameGroups.clear();
+    samplesA.clear();
+    samplesB.clear();
+    samplesC.clear();
+    samplesD.clear();
+    chReceived[0] = chReceived[1] = chReceived[2] = chReceived[3] = false;
+
+    closeRoundFinishedTip();
+
+    ui->connectButton->setText("Connect");
+    ui->triggerButton->setText("trigger");
+    ui->btnPatientInfo->setText("开始检测");
+}
+
+void MainWindow::handleSerialDisconnected(const QString& reason, bool notifyUser)
+{
+    if (serialDisconnectHandled) {
+        return;
+    }
+
+    serialDisconnectHandled = true;
+
+    resetSerialRuntimeState();
+
+    if (serial->isOpen()) {
+        serial->close();
+    }
+
+    const QString message = reason.isEmpty()
+                                ? QStringLiteral("串口已断开")
+                                : reason;
+
+    statusBar()->showMessage(message, 5000);
+
+    if (notifyUser) {
+        ui->lblProcessStatus->setText(message);
+        ui->lblProcessStatus->setStyleSheet(
+            "font-size: 12px; color: #F56C6C; font-weight: bold;"
+            );
+    }
+}
+
 // ================= 串口扫描等原有代码 =======================================================================================
 void MainWindow::scanPorts() {
     QString current = ui->comboPort->currentData().toString();
@@ -268,6 +322,8 @@ void MainWindow::on_connectButton_clicked() {
         serial->setTextModeEnabled(false);   // ⭐⭐ 最关键！！！
 
         if (serial->open(QIODevice::ReadWrite)) {
+            serialDisconnectHandled = false;
+
             serial->setDataTerminalReady(true); // 拉高 DTR，告诉 Pico "我准备好了"
             serial->setRequestToSend(false);     // 拉高 RTS (部分固件也需要这个)
 
@@ -288,10 +344,7 @@ void MainWindow::on_connectButton_clicked() {
             qDebug() << "Error:" << serial->error();
 
             ui->connectButton->setText("Disconnect");
-
-            // ★★ 放在这里确保连接成功后 readyRead 才被连接
-            connect(serial, &QSerialPort::readyRead,
-                    this, &MainWindow::handleSerialReadyRead);
+            statusBar()->showMessage(QString("串口已连接：%1").arg(portName), 3000);
 
         } else {
             QMessageBox::critical(this, "Open failed", serial->errorString());
@@ -299,8 +352,7 @@ void MainWindow::on_connectButton_clicked() {
         }
 
     } else {
-        serial->close();
-        ui->connectButton->setText("Connect");
+        handleSerialDisconnected("串口已断开", false);
     }
 }
 
@@ -977,6 +1029,10 @@ void MainWindow::showPatientMeasureFinishedDialog(double sos,
 
 
 void MainWindow::handleSerialReadyRead() {
+    if (serialDisconnectHandled || !serial->isOpen()) {
+        return;
+    }
+
     QByteArray chunk = serial->readAll();
 
     //qDebug() << "RX chunk" << chunk.size() << chunk.toHex(' ');
@@ -2475,9 +2531,11 @@ bool MainWindow::checkBoneLagStable(int lagB, int* centerOut, int* countOut)
 
 void MainWindow::handleSerialError(QSerialPort::SerialPortError error) {
     if (error == QSerialPort::ResourceError) {
-        QMessageBox::critical(this, "Serial Error", serial->errorString());
-        serial->close();
-        ui->connectButton->setText("Connect");
+        const QString reason = serial->errorString().isEmpty()
+                                   ? QStringLiteral("设备已断开，请重新连接")
+                                   : QString("设备已断开：%1").arg(serial->errorString());
+
+        handleSerialDisconnected(reason, true);
     }
 }
 
@@ -3339,54 +3397,17 @@ void MainWindow::on_btnBackFromArchive_clicked() {
 }
 
 void MainWindow::loadPatients() {
-    patientList.clear();
-    QFile file(xmlFilePath);
-    if (!file.open(QIODevice::ReadOnly)) return;
-    QDomDocument doc;
-    if (!doc.setContent(&file)) { file.close(); return; }
-    QDomElement root = doc.documentElement();
-    QDomNodeList nodes = root.elementsByTagName("patient");
-    for (int i = 0; i < nodes.count(); ++i) {
-        QDomElement e = nodes.at(i).toElement();
-        PatientInfo p;
-        p.id        = e.attribute("id");
-        p.name      = e.attribute("name");
-        p.gender    = e.attribute("gender");
-        p.birthDay  = e.attribute("birth");
-        p.checkDate = e.attribute("checkDate");
-        //p.checkPart = e.attribute("part");
-        p.height    = e.attribute("height");
-        p.weight    = e.attribute("weight");
-        p.diagprompt= e.attribute("diag");
-        p.speedOfSound = e.attribute("sos");
-        patientList << p;
+    QString errorMessage;
+    if (!patientStore.load(xmlFilePath, measurementsFilePath,
+                           &patientList, &measurementList, &errorMessage)) {
+        QMessageBox::warning(this, "档案加载失败", errorMessage);
     }
-    file.close();
 }
 
 void MainWindow::savePatients() {
-    QDomDocument doc;
-    QDomElement root = doc.createElement("patients");
-    doc.appendChild(root);
-    for (auto &p : patientList) {
-        QDomElement e = doc.createElement("patient");
-        e.setAttribute("id", p.id);
-        e.setAttribute("name", p.name);
-        e.setAttribute("gender", p.gender);
-        e.setAttribute("birth", p.birthDay);
-        e.setAttribute("checkDate", p.checkDate);
-        e.setAttribute("part", "桡骨");
-        e.setAttribute("height", p.height);
-        e.setAttribute("weight", p.weight);
-        e.setAttribute("diag", p.diagprompt);
-        e.setAttribute("sos", p.speedOfSound);
-        root.appendChild(e);
-    }
-    QFile file(xmlFilePath);
-    if (file.open(QIODevice::WriteOnly)) {
-        QTextStream out(&file);
-        doc.save(out, 4);
-        file.close();
+    QString errorMessage;
+    if (!patientStore.savePatients(xmlFilePath, patientList, &errorMessage)) {
+        QMessageBox::warning(this, "档案保存失败", errorMessage);
     }
 }
 
