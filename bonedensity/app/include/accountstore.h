@@ -24,5 +24,6 @@ private:
     QString path_;
     QList<AccountInfo> accounts_;
     QString hashPassword(const QString& salt, const QString& password) const;
-    bool save(QString* errorMessage = nullptr) const;
+    bool save(const QList<AccountInfo>& accounts, QString* errorMessage = nullptr) const;
+    bool resetToDefault(QString* errorMessage = nullptr);
 };
