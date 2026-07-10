@@ -25,6 +25,13 @@ static constexpr bool kDebugPerFrame = false;
 #include <QGridLayout>
 #include <QBoxLayout>
 #include <QPointer>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QTableWidget>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QUuid>
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -954,6 +961,17 @@ void MainWindow::finishAllPatientRounds()
     currentPatient.diagprompt = strength;
 
     updateLatestResultPanel(finalSos, tScore, zScore, strength, risk, boneAge);
+
+    pendingMeasurement = MeasurementRecord();
+    pendingMeasurement.id = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    pendingMeasurement.patientId = currentPatient.id;
+    pendingMeasurement.measuredAt = QDateTime::currentDateTime().toString(Qt::ISODate);
+    pendingMeasurement.part = QString::fromUtf8("桡骨");
+    pendingMeasurement.sos = QString::number(finalSos, 'f', 1);
+    pendingMeasurement.tScore = QString::number(tScore, 'f', 2);
+    pendingMeasurement.zScore = QString::number(zScore, 'f', 2);
+    pendingMeasurement.diagnosis = strength;
+    hasPendingMeasurement = true;
 
     ui->lblProcessStatus->setText(
         QString("5 次测量完成：最终 SOS=%1 m/s")
@@ -2831,6 +2849,20 @@ void MainWindow::updateCurrentPatientUI() {
 
 
 void MainWindow::on_btnSaveResult_clicked() {
+    if (!hasPendingMeasurement) {
+        QMessageBox::information(this, "提示", "当前没有可保存的新检测结果。");
+        return;
+    }
+    measurementList.append(pendingMeasurement);
+    if (!saveMeasurements()) {
+        measurementList.removeLast();
+        return;
+    }
+    hasPendingMeasurement = false;
+    pendingMeasurement = MeasurementRecord();
+    QMessageBox::information(this, "成功", "测量结果已保存。");
+    return;
+
     if (currentPatient.id.isEmpty()) {
         QMessageBox::warning(this, "错误", "请先录入患者信息");
         return;
@@ -3426,7 +3458,13 @@ void MainWindow::loadPatients() {
 void MainWindow::selectCurrentPatient(const PatientInfo& patient)
 {
     if (patientMeasureRunning) return;
+    if (hasPendingMeasurement && currentPatient.id != patient.id &&
+        QMessageBox::question(this, "放弃未保存结果", "当前结果尚未保存，是否放弃并更换患者？") != QMessageBox::Yes) {
+        return;
+    }
     currentPatient = patient;
+    hasPendingMeasurement = false;
+    pendingMeasurement = MeasurementRecord();
     pendingStartAfterPatientInfo = false;
     resetAllPatientMeasurementData();
     initLatestResultPanel();
@@ -3441,6 +3479,78 @@ void MainWindow::updatePatientSelectionUi()
     ui->btnPatientInfo->setEnabled(!patientMeasureRunning);
     ui->btnStartMeasurement->setEnabled(selected);
     ui->btnStartMeasurement->setText(patientMeasureRunning ? "停止检测" : "开始检测");
+    ui->btnPatientHistory->setEnabled(selected && !patientMeasureRunning);
+}
+
+bool MainWindow::saveMeasurements()
+{
+    QString errorMessage;
+    if (!patientStore.saveMeasurements(measurementsFilePath, measurementList, &errorMessage)) {
+        QMessageBox::warning(this, "结果保存失败", errorMessage);
+        return false;
+    }
+    return true;
+}
+
+void MainWindow::showPatientHistory(const QString& patientId)
+{
+    QDialog dialog(this);
+    dialog.setWindowTitle("检测历史");
+    dialog.resize(860, 420);
+    QVBoxLayout* layout = new QVBoxLayout(&dialog);
+    QTableWidget* table = new QTableWidget(&dialog);
+    table->setColumnCount(6);
+    table->setHorizontalHeaderLabels({"检测时间", "SOS", "T 值", "Z 值", "诊断", "操作员"});
+    QList<MeasurementRecord> records;
+    for (const MeasurementRecord& record : measurementList) {
+        if (record.patientId == patientId) records.append(record);
+    }
+    std::sort(records.begin(), records.end(), [](const MeasurementRecord& a, const MeasurementRecord& b) {
+        return a.measuredAt > b.measuredAt;
+    });
+    table->setRowCount(records.size());
+    for (int row = 0; row < records.size(); ++row) {
+        const MeasurementRecord& record = records[row];
+        QTableWidgetItem* timeItem = new QTableWidgetItem(record.measuredAt);
+        timeItem->setData(Qt::UserRole, record.id);
+        table->setItem(row, 0, timeItem);
+        table->setItem(row, 1, new QTableWidgetItem(record.sos));
+        table->setItem(row, 2, new QTableWidgetItem(record.tScore));
+        table->setItem(row, 3, new QTableWidgetItem(record.zScore));
+        table->setItem(row, 4, new QTableWidgetItem(record.diagnosis));
+        table->setItem(row, 5, new QTableWidgetItem(record.operatorName));
+    }
+    table->horizontalHeader()->setStretchLastSection(true);
+    layout->addWidget(table);
+    QHBoxLayout* buttons = new QHBoxLayout();
+    QPushButton* deleteButton = new QPushButton("删除本条记录", &dialog);
+    QPushButton* closeButton = new QPushButton("关闭", &dialog);
+    buttons->addWidget(deleteButton);
+    buttons->addStretch();
+    buttons->addWidget(closeButton);
+    layout->addLayout(buttons);
+    connect(closeButton, &QPushButton::clicked, &dialog, &QDialog::accept);
+    connect(deleteButton, &QPushButton::clicked, &dialog, [this, table, patientId, &dialog]() {
+        const int row = table->currentRow();
+        if (row < 0 || !table->item(row, 0)) return;
+        const QString recordId = table->item(row, 0)->data(Qt::UserRole).toString();
+        if (QMessageBox::question(&dialog, "确认删除", "确定删除这条检测记录？") != QMessageBox::Yes) return;
+        for (int i = 0; i < measurementList.size(); ++i) {
+            if (measurementList[i].id == recordId) {
+                measurementList.removeAt(i);
+                if (!saveMeasurements()) return;
+                dialog.accept();
+                showPatientHistory(patientId);
+                return;
+            }
+        }
+    });
+    dialog.exec();
+}
+
+void MainWindow::on_btnPatientHistory_clicked()
+{
+    if (hasCurrentPatient()) showPatientHistory(currentPatient.id);
 }
 
 void MainWindow::savePatients() {
@@ -3637,7 +3747,13 @@ void MainWindow::on_btnDeleteSelected_clicked()
                 p.checkDate == targets[j].checkDate &&
                 p.name == targets[j].name) {
 
+                const QString deletedPatientId = patientList[i].id;
                 patientList.removeAt(i); // 从数据库列表中移除
+                for (int recordIndex = measurementList.size() - 1; recordIndex >= 0; --recordIndex) {
+                    if (measurementList[recordIndex].patientId == deletedPatientId) {
+                        measurementList.removeAt(recordIndex);
+                    }
+                }
                 targets.removeAt(j);     // 把这个目标标记为已处理，提高效率
                 deletedRealCount++;
                 break; // 跳出内层循环，继续检查下一条数据库记录
@@ -3647,6 +3763,7 @@ void MainWindow::on_btnDeleteSelected_clicked()
 
     // 5. 保存并刷新界面
     savePatients(); // 保存到 XML
+    saveMeasurements();
 
     // 刷新表格显示（为了保持当前的搜索状态，建议重新触发一次搜索，或者直接刷新全部）
     // 这里简单起见，直接调用当前的搜索逻辑，如果没搜索就是显示全部
@@ -3823,6 +3940,10 @@ void MainWindow::on_btnDetailSave_clicked() {
     // 读回编辑后的内容
     PatientInfo& p = patientList[editingIndex];
     QString newId = ui->dID->text().trimmed();
+    if (newId != p.id) {
+        QMessageBox::warning(this, "不允许修改", "为保持检测历史关联，本版本不允许修改患者 ID。");
+        return;
+    }
     if (ui->dName->text().trimmed().isEmpty() || newId.isEmpty()) {
         QMessageBox::warning(this, "缺少信息", "姓名和编号(ID)不能为空");
         return;
@@ -3861,8 +3982,15 @@ void MainWindow::on_btnDetailDelete_clicked() {
     if (QMessageBox::question(this, "确认删除", "确定删除该病人信息？此操作不可恢复") != QMessageBox::Yes)
         return;
 
+    const QString deletedPatientId = patientList[editingIndex].id;
     patientList.removeAt(editingIndex);
+    for (int i = measurementList.size() - 1; i >= 0; --i) {
+        if (measurementList[i].patientId == deletedPatientId) {
+            measurementList.removeAt(i);
+        }
+    }
     savePatients();
+    saveMeasurements();
     refreshTable(patientList);
 
     editingIndex = -1;

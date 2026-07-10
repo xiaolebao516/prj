@@ -57,6 +57,7 @@ private slots:
     void on_btnImportFromDB_clicked();
     void updateCurrentPatientUI();
     void on_btnSaveResult_clicked();
+    void on_btnPatientHistory_clicked();
 
     // ✅ 档案管理逻辑
     void on_btnShowAll_clicked();
@@ -131,6 +132,8 @@ private:
     QList<PatientInfo> patientList;   // ✅ 用于管理XML数据
     QList<MeasurementRecord> measurementList;
     PatientStore patientStore;
+    MeasurementRecord pendingMeasurement;
+    bool hasPendingMeasurement = false;
 
     PatientInfo currentPatient;   // 当前正在测量的患者
 
@@ -348,6 +351,8 @@ private:
     void resetOneRoundMeasurementState();
     void selectCurrentPatient(const PatientInfo& patient);
     void updatePatientSelectionUi();
+    void showPatientHistory(const QString& patientId);
+    bool saveMeasurements();
 
     void showRoundFinishedTip(int finishedRounds, int totalRounds);
     void closeRoundFinishedTip();
