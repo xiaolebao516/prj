@@ -18,6 +18,7 @@
 #include <QtCharts/QScatterSeries>
 #include "types.h"
 #include "patientstore.h"
+#include "accountstore.h"
 #include "signalprocessor.h"
 QT_USE_NAMESPACE
 
@@ -35,6 +36,7 @@ public:
 
 private slots:
     void on_btnLogin_clicked();
+    void manageAccounts();
 
     // 串口与绘图相关
     void scanPorts();
@@ -132,6 +134,9 @@ private:
     QList<PatientInfo> patientList;   // ✅ 用于管理XML数据
     QList<MeasurementRecord> measurementList;
     PatientStore patientStore;
+    AccountStore accountStore;
+    QString accountsFilePath;
+    AccountInfo currentAccount;
     MeasurementRecord pendingMeasurement;
     bool hasPendingMeasurement = false;
 

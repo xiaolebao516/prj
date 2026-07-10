@@ -32,6 +32,8 @@ static constexpr bool kDebugPerFrame = false;
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QUuid>
+#include <QAction>
+#include <QMenuBar>
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -42,6 +44,15 @@ MainWindow::MainWindow(QWidget *parent)
     serial(new QSerialPort(this))
 {
     ui->setupUi(this);
+    accountsFilePath = QCoreApplication::applicationDirPath() + "/accounts.xml";
+    QString accountError;
+    if (!accountStore.loadOrInitialize(accountsFilePath, &accountError)) {
+        QMessageBox::warning(this, "账号初始化失败", accountError);
+    }
+    QAction* manageAccountsAction = ui->menubar->addAction("账号管理");
+    manageAccountsAction->setObjectName("manageAccountsAction");
+    manageAccountsAction->setVisible(false);
+    connect(manageAccountsAction, &QAction::triggered, this, &MainWindow::manageAccounts);
 
     // ------------------- 开始美化代码 -------------------
 
@@ -221,6 +232,19 @@ void MainWindow::on_btnLogin_clicked() {
 
     ui->lblLoginMsg->clear();
 
+    AccountInfo account;
+    if (accountStore.authenticate(user, pass, &account)) {
+        currentAccount = account;
+        ui->editPassword->clear();
+        if (QAction* action = findChild<QAction*>("manageAccountsAction")) {
+            action->setVisible(currentAccount.role == "admin");
+        }
+        ui->stackedWidget->setCurrentWidget(ui->pageMain);
+        return;
+    }
+    ui->lblLoginMsg->setText("账号或密码错误，请重试");
+    return;
+
     // 简单验证，后续可以改成读文件或数据库
     if (user == "1" && pass == "1") {
         ui->stackedWidget->setCurrentWidget(ui->pageMain); // 登录成功进入主界面
@@ -233,6 +257,25 @@ void MainWindow::on_btnLogin_clicked() {
 MainWindow::~MainWindow() {
     if (serial->isOpen()) serial->close();
     delete ui;
+}
+
+void MainWindow::manageAccounts()
+{
+    if (currentAccount.role != "admin") return;
+    QDialog dialog(this); dialog.setWindowTitle("账号管理"); dialog.resize(600, 360);
+    QVBoxLayout layout(&dialog); QTableWidget table(&dialog); table.setColumnCount(3);
+    table.setHorizontalHeaderLabels({"账号", "状态", "角色"});
+    const QList<AccountInfo>& accounts = accountStore.accounts(); table.setRowCount(accounts.size());
+    for (int i=0;i<accounts.size();++i) { table.setItem(i,0,new QTableWidgetItem(accounts[i].username)); table.setItem(i,1,new QTableWidgetItem(accounts[i].enabled?"启用":"停用")); table.setItem(i,2,new QTableWidgetItem(accounts[i].role)); }
+    layout.addWidget(&table); QHBoxLayout buttons; QPushButton add("创建",&dialog), toggle("启用/停用",&dialog), reset("重置密码",&dialog), remove("删除",&dialog), close("关闭",&dialog);
+    buttons.addWidget(&add);buttons.addWidget(&toggle);buttons.addWidget(&reset);buttons.addWidget(&remove);buttons.addStretch();buttons.addWidget(&close);layout.addLayout(&buttons);
+    auto selected = [&table](){ return table.currentRow() >= 0 ? table.item(table.currentRow(),0)->text() : QString(); };
+    connect(&close,&QPushButton::clicked,&dialog,&QDialog::accept);
+    connect(&add,&QPushButton::clicked,&dialog,[this,&dialog](){ bool ok=false; QString name=QInputDialog::getText(&dialog,"创建账号","账号：",QLineEdit::Normal,QString(),&ok); if(!ok)return; QString pass=QInputDialog::getText(&dialog,"创建账号","密码：",QLineEdit::Password,QString(),&ok); QString error; if(ok&&!accountStore.createUser(name,pass,&error))QMessageBox::warning(&dialog,"失败",error); dialog.accept(); });
+    connect(&toggle,&QPushButton::clicked,&dialog,[this,&dialog,selected](){QString name=selected();if(name.isEmpty())return;for(const AccountInfo&a:accountStore.accounts())if(a.username==name){QString e;if(!accountStore.setEnabled(name,!a.enabled,&e))QMessageBox::warning(&dialog,"失败",e);break;}dialog.accept();});
+    connect(&reset,&QPushButton::clicked,&dialog,[this,&dialog,selected](){bool ok=false;QString name=selected();if(name.isEmpty())return;QString pass=QInputDialog::getText(&dialog,"重置密码","新密码：",QLineEdit::Password,QString(),&ok);QString e;if(ok&&!accountStore.resetPassword(name,pass,&e))QMessageBox::warning(&dialog,"失败",e);dialog.accept();});
+    connect(&remove,&QPushButton::clicked,&dialog,[this,&dialog,selected](){QString name=selected();if(name.isEmpty()||QMessageBox::question(&dialog,"确认删除","确定删除账号？")!=QMessageBox::Yes)return;QString e;if(!accountStore.deleteUser(name,&e))QMessageBox::warning(&dialog,"失败",e);dialog.accept();});
+    dialog.exec();
 }
 
 void MainWindow::resetSerialRuntimeState()
@@ -966,6 +1009,7 @@ void MainWindow::finishAllPatientRounds()
     pendingMeasurement.id = QUuid::createUuid().toString(QUuid::WithoutBraces);
     pendingMeasurement.patientId = currentPatient.id;
     pendingMeasurement.measuredAt = QDateTime::currentDateTime().toString(Qt::ISODate);
+    pendingMeasurement.operatorName = currentAccount.username;
     pendingMeasurement.part = QString::fromUtf8("桡骨");
     pendingMeasurement.sos = QString::number(finalSos, 'f', 1);
     pendingMeasurement.tScore = QString::number(tScore, 'f', 2);

@@ -13,6 +13,7 @@ INCLUDEPATH += include
 SOURCES += \
     src/main.cpp \
     src/mainwindow.cpp \
+    src/accountstore.cpp \
     src/patientstore.cpp \
     src/signalprocessor.cpp \
     src/bonehealth.cpp \
@@ -20,6 +21,7 @@ SOURCES += \
 
 HEADERS += \
     include/mainwindow.h \
+    include/accountstore.h \
     include/patientstore.h \
     include/types.h \
     include/signalprocessor.h \
