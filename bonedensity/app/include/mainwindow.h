@@ -123,9 +123,8 @@ private:
     QLineSeries *seriesA, *seriesB, *seriesC, *seriesD;
     QChartView *viewA, *viewB, *viewC, *viewD;
 
-    QTimer *autoTimer = nullptr;
+    QTimer *autoTimer;
     bool autoRunning = false;
-    bool serialDisconnectHandled = false;
     quint16 globalGain = 1024;  //统一的增益值
     uint8_t frameIdx = 0;      // 帧计数，用于命令区分
 
@@ -146,14 +145,12 @@ private:
 
     void setupChart();
     void plotSamples();
-    void resetSerialRuntimeState();
-    void handleSerialDisconnected(const QString& reason, bool notifyUser);
 
 
 
     // ✅ XML相关
     void loadPatients();
-    void savePatients();
+    bool savePatients(const QList<PatientInfo>& patients);
     void refreshTable(const QList<PatientInfo> &list);
     int editingIndex = -1;
     // ✅ 新增：表单/详情页填充 & 查找
@@ -355,9 +352,14 @@ private:
     void resetAllPatientMeasurementData();
     void resetOneRoundMeasurementState();
     void selectCurrentPatient(const PatientInfo& patient);
+    void clearCurrentPatient();
     void updatePatientSelectionUi();
     void showPatientHistory(const QString& patientId);
-    bool saveMeasurements();
+    bool saveMeasurements(const QList<MeasurementRecord>& measurements);
+    bool savePatientData(const QList<PatientInfo>& patients,
+                         const QList<MeasurementRecord>& measurements);
+    QList<MeasurementRecord> measurementsForPatient(const QString& patientId) const;
+    const MeasurementRecord* latestMeasurementForPatient(const QString& patientId) const;
 
     void showRoundFinishedTip(int finishedRounds, int totalRounds);
     void closeRoundFinishedTip();

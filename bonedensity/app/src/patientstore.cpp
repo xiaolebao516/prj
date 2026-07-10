@@ -1,11 +1,11 @@
 #include "patientstore.h"
 
-#include <QDateTime>
 #include <QDomDocument>
 #include <QFile>
 #include <QFileInfo>
 #include <QHash>
 #include <QSaveFile>
+#include <QSet>
 #include <QTextStream>
 #include <QUuid>
 
@@ -39,6 +39,21 @@ PatientInfo patientFromElement(const QDomElement& element)
     return patient;
 }
 
+MeasurementRecord recordFromElement(const QDomElement& element)
+{
+    MeasurementRecord record;
+    record.id = element.attribute("id");
+    record.patientId = element.attribute("patientId");
+    record.measuredAt = element.attribute("measuredAt");
+    record.operatorName = element.attribute("operator");
+    record.part = element.attribute("part");
+    record.sos = element.attribute("sos");
+    record.tScore = element.attribute("tScore");
+    record.zScore = element.attribute("zScore");
+    record.diagnosis = element.attribute("diagnosis");
+    return record;
+}
+
 MeasurementRecord legacyRecordFromElement(const QDomElement& element)
 {
     MeasurementRecord record;
@@ -52,6 +67,48 @@ MeasurementRecord legacyRecordFromElement(const QDomElement& element)
     return record;
 }
 
+QString recordKey(const MeasurementRecord& record)
+{
+    return QStringList{record.patientId, record.measuredAt, record.part,
+                       record.sos, record.diagnosis}.join(QChar(0x1f));
+}
+
+void appendUniqueRecord(QList<MeasurementRecord>* records, QSet<QString>* keys,
+                        const MeasurementRecord& record)
+{
+    if (record.patientId.isEmpty()) return;
+    const QString key = recordKey(record);
+    if (keys->contains(key)) return;
+    keys->insert(key);
+    records->append(record);
+}
+
+bool loadMeasurementsFile(const QString& path, QList<MeasurementRecord>* records,
+                          QString* errorMessage)
+{
+    if (!QFileInfo::exists(path)) return true;
+
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        if (errorMessage) *errorMessage = file.errorString();
+        return false;
+    }
+    QDomDocument document;
+    const bool parsed = static_cast<bool>(document.setContent(&file));
+    file.close();
+    if (!parsed || document.documentElement().tagName() != "measurements") {
+        if (errorMessage) *errorMessage = QString::fromUtf8("无法读取 measurements.xml");
+        return false;
+    }
+
+    const QDomNodeList nodes = document.documentElement().elementsByTagName("measurement");
+    for (int i = 0; i < nodes.count(); ++i) {
+        const MeasurementRecord record = recordFromElement(nodes.at(i).toElement());
+        if (!record.id.isEmpty() && !record.patientId.isEmpty()) records->append(record);
+    }
+    return true;
+}
+
 } // namespace
 
 bool PatientStore::load(const QString& patientsPath,
@@ -60,8 +117,9 @@ bool PatientStore::load(const QString& patientsPath,
                         QList<MeasurementRecord>* measurements,
                         QString* errorMessage) const
 {
-    patients->clear();
-    measurements->clear();
+    QList<PatientInfo> loadedPatients;
+    QList<MeasurementRecord> legacyRecords;
+    bool legacy = false;
 
     QFile patientFile(patientsPath);
     if (patientFile.exists()) {
@@ -70,76 +128,68 @@ bool PatientStore::load(const QString& patientsPath,
             return false;
         }
         QDomDocument patientDocument;
-        if (!patientDocument.setContent(&patientFile)) {
+        const bool parsed = static_cast<bool>(patientDocument.setContent(&patientFile));
+        patientFile.close();
+        if (!parsed || patientDocument.documentElement().tagName() != "patients") {
             if (errorMessage) *errorMessage = QString::fromUtf8("无法读取 patients.xml");
             return false;
         }
+
         const QDomElement root = patientDocument.documentElement();
-        const bool legacy = root.attribute("version") != "2";
+        legacy = root.attribute("version") != "2";
         QHash<QString, int> patientIndexes;
+        QSet<QString> legacyKeys;
         const QDomNodeList nodes = root.elementsByTagName("patient");
         for (int i = 0; i < nodes.count(); ++i) {
             const QDomElement element = nodes.at(i).toElement();
             const PatientInfo patient = patientFromElement(element);
             if (patient.id.isEmpty()) continue;
             if (!patientIndexes.contains(patient.id)) {
-                patientIndexes.insert(patient.id, patients->size());
-                patients->append(patient);
+                patientIndexes.insert(patient.id, loadedPatients.size());
+                loadedPatients.append(patient);
             }
             if (legacy && (!element.attribute("sos").isEmpty() ||
                            !element.attribute("diag").isEmpty() ||
                            !element.attribute("checkDate").isEmpty())) {
-                measurements->append(legacyRecordFromElement(element));
-            }
-        }
-
-        if (legacy && !QFileInfo::exists(measurementsPath)) {
-            const QString backupPath = patientsPath + ".bak";
-            if (!QFileInfo::exists(backupPath) && !QFile::copy(patientsPath, backupPath)) {
-                if (errorMessage) *errorMessage = QString::fromUtf8("旧 patients.xml 备份失败，已取消迁移");
-                patients->clear();
-                measurements->clear();
-                return false;
-            }
-            QString saveError;
-            if (!saveMeasurements(measurementsPath, *measurements, &saveError) ||
-                !savePatients(patientsPath, *patients, &saveError)) {
-                if (errorMessage) *errorMessage = QString::fromUtf8("旧数据迁移失败：") + saveError;
-                patients->clear();
-                measurements->clear();
-                return false;
+                appendUniqueRecord(&legacyRecords, &legacyKeys, legacyRecordFromElement(element));
             }
         }
     }
 
-    QFile measurementFile(measurementsPath);
-    if (measurementFile.exists()) {
-        if (!measurementFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            if (errorMessage) *errorMessage = measurementFile.errorString();
+    QList<MeasurementRecord> existingMeasurements;
+    if (!loadMeasurementsFile(measurementsPath, &existingMeasurements, errorMessage)) return false;
+
+    QList<MeasurementRecord> loadedMeasurements = existingMeasurements;
+    if (legacy) {
+        const QString backupPath = patientsPath + ".bak";
+        if (!QFileInfo::exists(backupPath) && !QFile::copy(patientsPath, backupPath)) {
+            if (errorMessage) *errorMessage = QString::fromUtf8("旧 patients.xml 备份失败，已取消迁移");
             return false;
         }
-        QDomDocument measurementDocument;
-        if (!measurementDocument.setContent(&measurementFile)) {
-            if (errorMessage) *errorMessage = QString::fromUtf8("无法读取 measurements.xml");
+
+        QSet<QString> keys;
+        for (const MeasurementRecord& record : loadedMeasurements) keys.insert(recordKey(record));
+        for (const MeasurementRecord& record : legacyRecords) {
+            appendUniqueRecord(&loadedMeasurements, &keys, record);
+        }
+
+        QString saveError;
+        if (!saveMeasurements(measurementsPath, loadedMeasurements, &saveError)) {
+            if (errorMessage) *errorMessage = QString::fromUtf8("旧数据迁移失败：") + saveError;
             return false;
         }
-        measurements->clear();
-        const QDomNodeList nodes = measurementDocument.documentElement().elementsByTagName("measurement");
-        for (int i = 0; i < nodes.count(); ++i) {
-            const QDomElement element = nodes.at(i).toElement();
-            MeasurementRecord record;
-            record.id = element.attribute("id");
-            record.patientId = element.attribute("patientId");
-            record.measuredAt = element.attribute("measuredAt");
-            record.operatorName = element.attribute("operator");
-            record.part = element.attribute("part");
-            record.sos = element.attribute("sos");
-            record.tScore = element.attribute("tScore");
-            record.zScore = element.attribute("zScore");
-            record.diagnosis = element.attribute("diagnosis");
-            if (!record.id.isEmpty() && !record.patientId.isEmpty()) measurements->append(record);
+        if (!savePatients(patientsPath, loadedPatients, &saveError)) {
+            QString rollbackError;
+            if (!saveMeasurements(measurementsPath, existingMeasurements, &rollbackError)) {
+                saveError += QString::fromUtf8("；检测记录恢复失败：") + rollbackError;
+            }
+            if (errorMessage) *errorMessage = QString::fromUtf8("旧数据迁移失败：") + saveError;
+            return false;
         }
     }
+
+    *patients = loadedPatients;
+    *measurements = loadedMeasurements;
     return true;
 }
 

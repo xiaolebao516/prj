@@ -34,6 +34,7 @@ static constexpr bool kDebugPerFrame = false;
 #include <QUuid>
 #include <QAction>
 #include <QMenuBar>
+#include <QSet>
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -166,7 +167,7 @@ MainWindow::MainWindow(QWidget *parent)
     scanTimer.start(1000);
     scanPorts();
 
-    connect(serial, &QSerialPort::readyRead, this, &MainWindow::handleSerialReadyRead);
+    //connect(serial, &QSerialPort::readyRead, this, &MainWindow::handleSerialReadyRead);
     connect(serial, &QSerialPort::errorOccurred, this, &MainWindow::handleSerialError);
 
     setupChart();
@@ -243,14 +244,6 @@ void MainWindow::on_btnLogin_clicked() {
         return;
     }
     ui->lblLoginMsg->setText("账号或密码错误，请重试");
-    return;
-
-    // 简单验证，后续可以改成读文件或数据库
-    if (user == "1" && pass == "1") {
-        ui->stackedWidget->setCurrentWidget(ui->pageMain); // 登录成功进入主界面
-    } else {
-        ui->lblLoginMsg->setText("账号或密码错误，请重试");
-    }
 }
 //====================================================================================
 
@@ -264,6 +257,7 @@ void MainWindow::manageAccounts()
     if (currentAccount.role != "admin") return;
     QDialog dialog(this); dialog.setWindowTitle("账号管理"); dialog.resize(600, 360);
     QVBoxLayout layout(&dialog); QTableWidget table(&dialog); table.setColumnCount(3);
+    table.setEditTriggers(QAbstractItemView::NoEditTriggers);
     table.setHorizontalHeaderLabels({"账号", "状态", "角色"});
     const QList<AccountInfo>& accounts = accountStore.accounts(); table.setRowCount(accounts.size());
     for (int i=0;i<accounts.size();++i) { table.setItem(i,0,new QTableWidgetItem(accounts[i].username)); table.setItem(i,1,new QTableWidgetItem(accounts[i].enabled?"启用":"停用")); table.setItem(i,2,new QTableWidgetItem(accounts[i].role)); }
@@ -271,64 +265,11 @@ void MainWindow::manageAccounts()
     buttons.addWidget(&add);buttons.addWidget(&toggle);buttons.addWidget(&reset);buttons.addWidget(&remove);buttons.addStretch();buttons.addWidget(&close);layout.addLayout(&buttons);
     auto selected = [&table](){ return table.currentRow() >= 0 ? table.item(table.currentRow(),0)->text() : QString(); };
     connect(&close,&QPushButton::clicked,&dialog,&QDialog::accept);
-    connect(&add,&QPushButton::clicked,&dialog,[this,&dialog](){ bool ok=false; QString name=QInputDialog::getText(&dialog,"创建账号","账号：",QLineEdit::Normal,QString(),&ok); if(!ok)return; QString pass=QInputDialog::getText(&dialog,"创建账号","密码：",QLineEdit::Password,QString(),&ok); QString error; if(ok&&!accountStore.createUser(name,pass,&error))QMessageBox::warning(&dialog,"失败",error); dialog.accept(); });
-    connect(&toggle,&QPushButton::clicked,&dialog,[this,&dialog,selected](){QString name=selected();if(name.isEmpty())return;for(const AccountInfo&a:accountStore.accounts())if(a.username==name){QString e;if(!accountStore.setEnabled(name,!a.enabled,&e))QMessageBox::warning(&dialog,"失败",e);break;}dialog.accept();});
-    connect(&reset,&QPushButton::clicked,&dialog,[this,&dialog,selected](){bool ok=false;QString name=selected();if(name.isEmpty())return;QString pass=QInputDialog::getText(&dialog,"重置密码","新密码：",QLineEdit::Password,QString(),&ok);QString e;if(ok&&!accountStore.resetPassword(name,pass,&e))QMessageBox::warning(&dialog,"失败",e);dialog.accept();});
-    connect(&remove,&QPushButton::clicked,&dialog,[this,&dialog,selected](){QString name=selected();if(name.isEmpty()||QMessageBox::question(&dialog,"确认删除","确定删除账号？")!=QMessageBox::Yes)return;QString e;if(!accountStore.deleteUser(name,&e))QMessageBox::warning(&dialog,"失败",e);dialog.accept();});
+    connect(&add,&QPushButton::clicked,&dialog,[this,&dialog](){ bool ok=false; QString name=QInputDialog::getText(&dialog,"创建账号","账号：",QLineEdit::Normal,QString(),&ok); if(!ok)return; QString pass=QInputDialog::getText(&dialog,"创建账号","密码：",QLineEdit::Password,QString(),&ok); if(!ok)return; QString error; if(!accountStore.createUser(name,pass,&error)){QMessageBox::warning(&dialog,"失败",error);return;} dialog.accept(); });
+    connect(&toggle,&QPushButton::clicked,&dialog,[this,&dialog,selected](){QString name=selected();if(name.isEmpty())return;for(const AccountInfo&a:accountStore.accounts())if(a.username==name){QString e;if(!accountStore.setEnabled(name,!a.enabled,&e)){QMessageBox::warning(&dialog,"失败",e);return;}dialog.accept();return;}});
+    connect(&reset,&QPushButton::clicked,&dialog,[this,&dialog,selected](){bool ok=false;QString name=selected();if(name.isEmpty())return;QString pass=QInputDialog::getText(&dialog,"重置密码","新密码：",QLineEdit::Password,QString(),&ok);if(!ok)return;QString e;if(!accountStore.resetPassword(name,pass,&e)){QMessageBox::warning(&dialog,"失败",e);return;}dialog.accept();});
+    connect(&remove,&QPushButton::clicked,&dialog,[this,&dialog,selected](){QString name=selected();if(name.isEmpty()||QMessageBox::question(&dialog,"确认删除","确定删除账号？")!=QMessageBox::Yes)return;QString e;if(!accountStore.deleteUser(name,&e)){QMessageBox::warning(&dialog,"失败",e);return;}dialog.accept();});
     dialog.exec();
-}
-
-void MainWindow::resetSerialRuntimeState()
-{
-    if (autoTimer && autoTimer->isActive()) {
-        autoTimer->stop();
-    }
-
-    autoRunning = false;
-    patientMeasureRunning = false;
-    acquireMode = DebugAcquireMode;
-
-    rxBuffer.clear();
-    frameGroups.clear();
-    samplesA.clear();
-    samplesB.clear();
-    samplesC.clear();
-    samplesD.clear();
-    chReceived[0] = chReceived[1] = chReceived[2] = chReceived[3] = false;
-
-    closeRoundFinishedTip();
-
-    ui->connectButton->setText("Connect");
-    ui->triggerButton->setText("trigger");
-    updatePatientSelectionUi();
-}
-
-void MainWindow::handleSerialDisconnected(const QString& reason, bool notifyUser)
-{
-    if (serialDisconnectHandled) {
-        return;
-    }
-
-    serialDisconnectHandled = true;
-
-    resetSerialRuntimeState();
-
-    if (serial->isOpen()) {
-        serial->close();
-    }
-
-    const QString message = reason.isEmpty()
-                                ? QStringLiteral("串口已断开")
-                                : reason;
-
-    statusBar()->showMessage(message, 5000);
-
-    if (notifyUser) {
-        ui->lblProcessStatus->setText(message);
-        ui->lblProcessStatus->setStyleSheet(
-            "font-size: 12px; color: #F56C6C; font-weight: bold;"
-            );
-    }
 }
 
 // ================= 串口扫描等原有代码 =======================================================================================
@@ -373,8 +314,6 @@ void MainWindow::on_connectButton_clicked() {
         serial->setTextModeEnabled(false);   // ⭐⭐ 最关键！！！
 
         if (serial->open(QIODevice::ReadWrite)) {
-            serialDisconnectHandled = false;
-
             serial->setDataTerminalReady(true); // 拉高 DTR，告诉 Pico "我准备好了"
             serial->setRequestToSend(false);     // 拉高 RTS (部分固件也需要这个)
 
@@ -395,7 +334,10 @@ void MainWindow::on_connectButton_clicked() {
             qDebug() << "Error:" << serial->error();
 
             ui->connectButton->setText("Disconnect");
-            statusBar()->showMessage(QString("串口已连接：%1").arg(portName), 3000);
+
+            // ★★ 放在这里确保连接成功后 readyRead 才被连接
+            connect(serial, &QSerialPort::readyRead,
+                    this, &MainWindow::handleSerialReadyRead);
 
         } else {
             QMessageBox::critical(this, "Open failed", serial->errorString());
@@ -403,7 +345,8 @@ void MainWindow::on_connectButton_clicked() {
         }
 
     } else {
-        handleSerialDisconnected("串口已断开", false);
+        serial->close();
+        ui->connectButton->setText("Connect");
     }
 }
 
@@ -610,6 +553,12 @@ void MainWindow::resetPatientMeasurementState(int targetRounds)
 
 void MainWindow::resetAllPatientMeasurementData()
 {
+    if (autoTimer && autoTimer->isActive()) {
+        autoTimer->stop();
+    }
+    autoRunning = false;
+    acquireMode = DebugAcquireMode;
+
     currentRoundSosList.clear();
     currentRoundAList.clear();
     currentRoundBList.clear();
@@ -627,6 +576,17 @@ void MainWindow::resetAllPatientMeasurementData()
 
     // ✅ 新增：清空正式测量稳定 lag 窗口
     resetBoneLagStability();
+    resetGateStats();
+    lastFrameBJumpOk = false;
+    lastFrameBoundaryOk = false;
+    lastFrameDiffOk = false;
+    lastFrameDirectionOk = false;
+    lastFrameCorrOk = false;
+    lastFrameAngleSignedDiffOk = false;
+    lastFrameAnglePairMidGapOk = false;
+    lastFrameAngleOk = false;
+    lastFrameStableOk = false;
+    lastFrameStableState = 0;
 
     closeRoundFinishedTip();
 
@@ -652,6 +612,7 @@ void MainWindow::resetAllPatientMeasurementData()
     }
 
     speedPointIndex = 0;
+    updatePatientSelectionUi();
 }
 
 void MainWindow::resetOneRoundMeasurementState()
@@ -1016,6 +977,7 @@ void MainWindow::finishAllPatientRounds()
     pendingMeasurement.zScore = QString::number(zScore, 'f', 2);
     pendingMeasurement.diagnosis = strength;
     hasPendingMeasurement = true;
+    updatePatientSelectionUi();
 
     ui->lblProcessStatus->setText(
         QString("5 次测量完成：最终 SOS=%1 m/s")
@@ -1098,10 +1060,6 @@ void MainWindow::showPatientMeasureFinishedDialog(double sos,
 
 
 void MainWindow::handleSerialReadyRead() {
-    if (serialDisconnectHandled || !serial->isOpen()) {
-        return;
-    }
-
     QByteArray chunk = serial->readAll();
 
     //qDebug() << "RX chunk" << chunk.size() << chunk.toHex(' ');
@@ -2600,11 +2558,9 @@ bool MainWindow::checkBoneLagStable(int lagB, int* centerOut, int* countOut)
 
 void MainWindow::handleSerialError(QSerialPort::SerialPortError error) {
     if (error == QSerialPort::ResourceError) {
-        const QString reason = serial->errorString().isEmpty()
-                                   ? QStringLiteral("设备已断开，请重新连接")
-                                   : QString("设备已断开：%1").arg(serial->errorString());
-
-        handleSerialDisconnected(reason, true);
+        QMessageBox::critical(this, "Serial Error", serial->errorString());
+        serial->close();
+        ui->connectButton->setText("Connect");
     }
 }
 
@@ -2864,8 +2820,10 @@ void MainWindow::on_btnPatientNewSave_clicked()
             return;
         }
     }
-    patientList.append(p);
-    savePatients();
+    QList<PatientInfo> candidate = patientList;
+    candidate.append(p);
+    if (!savePatients(candidate)) return;
+    patientList = candidate;
     selectCurrentPatient(p);
     ui->stackedWidget->setCurrentWidget(ui->pageMain);
 }
@@ -2875,18 +2833,23 @@ void MainWindow::on_btnBackToMain_clicked() {
 }
 
 void MainWindow::on_btnImportFromDB_clicked() {
+    if (patientMeasureRunning) {
+        QMessageBox::warning(this, "检测进行中", "检测进行中不能切换患者。");
+        return;
+    }
     archiveMode = ImportMode;        // 标记为导入模式
     refreshTable(patientList);
     ui->stackedWidget->setCurrentWidget(ui->pageArchive);
 }
 
 void MainWindow::updateCurrentPatientUI() {
-    ui->labelName->setText("姓名: " + currentPatient.name);
-    ui->labelID->setText("ID: " + currentPatient.id);
-    ui->labelGender->setText("性别: " + currentPatient.gender);
-    ui->labelBirth->setText("出生日期: " + currentPatient.birthDay);
-    ui->labelHeight->setText("身高: " + currentPatient.height);
-    ui->labelWeight->setText("体重: " + currentPatient.weight);
+    const QString empty = "--";
+    ui->labelName->setText("姓名: " + (currentPatient.name.isEmpty() ? empty : currentPatient.name));
+    ui->labelID->setText("ID: " + (currentPatient.id.isEmpty() ? empty : currentPatient.id));
+    ui->labelGender->setText("性别: " + (currentPatient.gender.isEmpty() ? empty : currentPatient.gender));
+    ui->labelBirth->setText("出生日期: " + (currentPatient.birthDay.isEmpty() ? empty : currentPatient.birthDay));
+    ui->labelHeight->setText("身高: " + (currentPatient.height.isEmpty() ? empty : currentPatient.height));
+    ui->labelWeight->setText("体重: " + (currentPatient.weight.isEmpty() ? empty : currentPatient.weight));
 
 }
 
@@ -2897,42 +2860,27 @@ void MainWindow::on_btnSaveResult_clicked() {
         QMessageBox::information(this, "提示", "当前没有可保存的新检测结果。");
         return;
     }
-    measurementList.append(pendingMeasurement);
-    if (!saveMeasurements()) {
-        measurementList.removeLast();
-        return;
-    }
-    hasPendingMeasurement = false;
-    pendingMeasurement = MeasurementRecord();
-    QMessageBox::information(this, "成功", "测量结果已保存。");
-    return;
-
-    if (currentPatient.id.isEmpty()) {
-        QMessageBox::warning(this, "错误", "请先录入患者信息");
-        return;
-    }
-
-    // ✅ 更新检查日期
-    currentPatient.checkDate = QDate::currentDate().toString("yyyy-MM-dd");
-
-    // ❗ 这里是未来你计算出声速后赋值的地方
-    // currentPatient.speedOfSound = QString::number(calculatedSpeed);
-
-    // ✅ 如果 ID 和检查部位都相同 → 覆盖，否则新建
-    bool found = false;
-    for (int i = 0; i < patientList.size(); ++i) {
-        if (patientList[i].id == currentPatient.id) {
-            patientList[i] = currentPatient; // 覆盖同一个人同一个部位
-            found = true;
+    bool patientExists = false;
+    for (const PatientInfo& patient : patientList) {
+        if (patient.id == currentPatient.id) {
+            patientExists = true;
             break;
         }
     }
-    if (!found) {
-        patientList.push_back(currentPatient); // 新建另一行（相同人不同部位）
+    if (!patientExists) {
+        QMessageBox::warning(this, "错误", "当前患者已不存在，不能保存检测结果。");
+        clearCurrentPatient();
+        return;
     }
-
-    savePatients();
-    QMessageBox::information(this, "成功", "测量结果已保存");
+    QList<MeasurementRecord> candidate = measurementList;
+    candidate.append(pendingMeasurement);
+    if (!saveMeasurements(candidate)) return;
+    measurementList = candidate;
+    hasPendingMeasurement = false;
+    pendingMeasurement = MeasurementRecord();
+    updatePatientSelectionUi();
+    QMessageBox::information(this, "成功", "测量结果已保存。");
+    return;
 }
 
 void MainWindow::setupSpeedChart()
@@ -3482,6 +3430,10 @@ void MainWindow::on_btnShowResult_clicked() {
 
 // ==================== 档案管理 ===============================================================================================
 void MainWindow::on_btnArchive_clicked() {
+    if (patientMeasureRunning) {
+        QMessageBox::warning(this, "检测进行中", "检测进行中不能编辑或删除患者。");
+        return;
+    }
     refreshTable(patientList);   // ✅ 进入档案页时刷新表格
     ui->stackedWidget->setCurrentWidget(ui->pageArchive);
 }
@@ -3497,6 +3449,60 @@ void MainWindow::loadPatients() {
                            &patientList, &measurementList, &errorMessage)) {
         QMessageBox::warning(this, "档案加载失败", errorMessage);
     }
+}
+
+QList<MeasurementRecord> MainWindow::measurementsForPatient(const QString& patientId) const
+{
+    QList<MeasurementRecord> records;
+    for (const MeasurementRecord& record : measurementList) {
+        if (record.patientId == patientId) records.append(record);
+    }
+    return records;
+}
+
+const MeasurementRecord* MainWindow::latestMeasurementForPatient(const QString& patientId) const
+{
+    const MeasurementRecord* latest = nullptr;
+    for (const MeasurementRecord& record : measurementList) {
+        if (record.patientId == patientId &&
+            (!latest || record.measuredAt > latest->measuredAt)) {
+            latest = &record;
+        }
+    }
+    return latest;
+}
+
+bool MainWindow::savePatients(const QList<PatientInfo>& patients)
+{
+    QString errorMessage;
+    if (!patientStore.savePatients(xmlFilePath, patients, &errorMessage)) {
+        QMessageBox::warning(this, "档案保存失败", errorMessage);
+        return false;
+    }
+    return true;
+}
+
+bool MainWindow::saveMeasurements(const QList<MeasurementRecord>& measurements)
+{
+    QString errorMessage;
+    if (!patientStore.saveMeasurements(measurementsFilePath, measurements, &errorMessage)) {
+        QMessageBox::warning(this, "结果保存失败", errorMessage);
+        return false;
+    }
+    return true;
+}
+
+bool MainWindow::savePatientData(const QList<PatientInfo>& patients,
+                                 const QList<MeasurementRecord>& measurements)
+{
+    if (!saveMeasurements(measurements)) return false;
+    if (savePatients(patients)) return true;
+
+    QString rollbackError;
+    if (!patientStore.saveMeasurements(measurementsFilePath, measurementList, &rollbackError)) {
+        QMessageBox::critical(this, "数据恢复失败", "患者保存失败，检测记录恢复失败：" + rollbackError);
+    }
+    return false;
 }
 
 void MainWindow::selectCurrentPatient(const PatientInfo& patient)
@@ -3516,6 +3522,18 @@ void MainWindow::selectCurrentPatient(const PatientInfo& patient)
     updatePatientSelectionUi();
 }
 
+void MainWindow::clearCurrentPatient()
+{
+    currentPatient = PatientInfo();
+    hasPendingMeasurement = false;
+    pendingMeasurement = MeasurementRecord();
+    pendingStartAfterPatientInfo = false;
+    resetAllPatientMeasurementData();
+    initLatestResultPanel();
+    updateCurrentPatientUI();
+    updatePatientSelectionUi();
+}
+
 void MainWindow::updatePatientSelectionUi()
 {
     const bool selected = hasCurrentPatient();
@@ -3524,16 +3542,8 @@ void MainWindow::updatePatientSelectionUi()
     ui->btnStartMeasurement->setEnabled(selected);
     ui->btnStartMeasurement->setText(patientMeasureRunning ? "停止检测" : "开始检测");
     ui->btnPatientHistory->setEnabled(selected && !patientMeasureRunning);
-}
-
-bool MainWindow::saveMeasurements()
-{
-    QString errorMessage;
-    if (!patientStore.saveMeasurements(measurementsFilePath, measurementList, &errorMessage)) {
-        QMessageBox::warning(this, "结果保存失败", errorMessage);
-        return false;
-    }
-    return true;
+    ui->btnSaveResult->setEnabled(hasPendingMeasurement);
+    ui->btnArchive->setEnabled(!patientMeasureRunning);
 }
 
 void MainWindow::showPatientHistory(const QString& patientId)
@@ -3543,12 +3553,10 @@ void MainWindow::showPatientHistory(const QString& patientId)
     dialog.resize(860, 420);
     QVBoxLayout* layout = new QVBoxLayout(&dialog);
     QTableWidget* table = new QTableWidget(&dialog);
+    table->setEditTriggers(QAbstractItemView::NoEditTriggers);
     table->setColumnCount(6);
     table->setHorizontalHeaderLabels({"检测时间", "SOS", "T 值", "Z 值", "诊断", "操作员"});
-    QList<MeasurementRecord> records;
-    for (const MeasurementRecord& record : measurementList) {
-        if (record.patientId == patientId) records.append(record);
-    }
+    QList<MeasurementRecord> records = measurementsForPatient(patientId);
     std::sort(records.begin(), records.end(), [](const MeasurementRecord& a, const MeasurementRecord& b) {
         return a.measuredAt > b.measuredAt;
     });
@@ -3581,10 +3589,11 @@ void MainWindow::showPatientHistory(const QString& patientId)
         if (QMessageBox::question(&dialog, "确认删除", "确定删除这条检测记录？") != QMessageBox::Yes) return;
         for (int i = 0; i < measurementList.size(); ++i) {
             if (measurementList[i].id == recordId) {
-                measurementList.removeAt(i);
-                if (!saveMeasurements()) return;
+                QList<MeasurementRecord> candidate = measurementList;
+                candidate.removeAt(i);
+                if (!saveMeasurements(candidate)) return;
+                measurementList = candidate;
                 dialog.accept();
-                showPatientHistory(patientId);
                 return;
             }
         }
@@ -3595,13 +3604,6 @@ void MainWindow::showPatientHistory(const QString& patientId)
 void MainWindow::on_btnPatientHistory_clicked()
 {
     if (hasCurrentPatient()) showPatientHistory(currentPatient.id);
-}
-
-void MainWindow::savePatients() {
-    QString errorMessage;
-    if (!patientStore.savePatients(xmlFilePath, patientList, &errorMessage)) {
-        QMessageBox::warning(this, "档案保存失败", errorMessage);
-    }
 }
 
 void MainWindow::refreshTable(const QList<PatientInfo> &list) {
@@ -3631,9 +3633,10 @@ void MainWindow::refreshTable(const QList<PatientInfo> &list) {
         ui->table->setItem(i, 1, new QTableWidgetItem(p.name));
         ui->table->setItem(i, 2, new QTableWidgetItem(p.gender));
         ui->table->setItem(i, 3, new QTableWidgetItem(p.birthDay));
-        ui->table->setItem(i, 4, new QTableWidgetItem(p.checkDate));
-
-        QString sosStr = p.speedOfSound.isEmpty() ? "-" : p.speedOfSound;
+        const MeasurementRecord* latest = latestMeasurementForPatient(p.id);
+        const QString date = latest ? latest->measuredAt.left(10) : "--";
+        const QString sosStr = latest ? latest->sos : "--";
+        ui->table->setItem(i, 4, new QTableWidgetItem(date));
         ui->table->setItem(i, 5, new QTableWidgetItem(sosStr));
     }
 
@@ -3713,10 +3716,12 @@ void MainWindow::on_btnSearchDate_clicked() {
     qDebug() << "Searching date:" << searchDate;
 
     QList<PatientInfo> result;
-    for (auto &p : patientList) {
-        // 假设你的 p.checkDate 也是 "yyyy-MM-dd" 格式
-        if (p.checkDate == searchDate) {
-            result << p;
+    for (const PatientInfo& patient : patientList) {
+        for (const MeasurementRecord& record : measurementsForPatient(patient.id)) {
+            if (record.measuredAt.left(10) == searchDate) {
+                result << patient;
+                break;
+            }
         }
     }
     refreshTable(result);
@@ -3728,135 +3733,73 @@ void MainWindow::on_btnSearchDate_clicked() {
 
 void MainWindow::on_btnDeleteSelected_clicked()
 {
+    if (patientMeasureRunning) {
+        QMessageBox::warning(this, "检测进行中", "检测进行中不能删除患者。");
+        return;
+    }
     int rowCount = ui->table->rowCount();
-    int checkedCount = 0;
-
-    // 1. 先统计选中了多少个，如果没有选则提示
+    QSet<QString> patientIds;
     for (int i = 0; i < rowCount; ++i) {
         QTableWidgetItem *item = ui->table->item(i, 0);
         if (item && item->checkState() == Qt::Checked) {
-            checkedCount++;
+            patientIds.insert(item->text());
         }
     }
 
-    if (checkedCount == 0) {
+    if (patientIds.isEmpty()) {
         QMessageBox::information(this, "提示", "请先勾选需要删除的病人记录");
         return;
     }
 
-    // 2. 二次确认
-    QString msg = QString("确定要删除选中的 %1 条记录吗？\n此操作不可恢复！").arg(checkedCount);
+    QString msg = QString("确定要删除选中的 %1 条记录吗？\n此操作不可恢复！").arg(patientIds.size());
     if (QMessageBox::question(this, "确认删除", msg) != QMessageBox::Yes) {
         return;
     }
 
-    // 3. 开始删除
-    // 我们采用"标记删除法"：先找出所有要删除的目标特征，再从列表中移除
-
-    // 定义一个结构体来暂存要删除的人的特征
-    struct DeleteTarget {
-        QString id;
-        QString checkDate;
-        QString name;
-    };
-    QList<DeleteTarget> targets;
-
-    for (int i = 0; i < rowCount; ++i) {
-        QTableWidgetItem *itemID = ui->table->item(i, 0); // 第0列 ID
-
-        // 只有打了勾的行才处理
-        if (itemID && itemID->checkState() == Qt::Checked) {
-            DeleteTarget t;
-            t.id = itemID->text();
-            // 第4列是检查日期，第1列是姓名
-            if (ui->table->item(i, 4)) t.checkDate = ui->table->item(i, 4)->text();
-            if (ui->table->item(i, 1)) t.name = ui->table->item(i, 1)->text();
-
-            targets.append(t);
-        }
+    QList<PatientInfo> patientCandidate;
+    for (const PatientInfo& patient : patientList) {
+        if (!patientIds.contains(patient.id)) patientCandidate.append(patient);
     }
-
-    // 4. 从总数据库(patientList)中移除
-    // 使用倒序遍历，防止删除元素后索引错位
-    int deletedRealCount = 0;
-
-    for (int i = patientList.size() - 1; i >= 0; --i) {
-        const PatientInfo &p = patientList[i];
-
-        // 遍历我们要删除的目标列表
-        for (int j = 0; j < targets.size(); ++j) {
-            // ⭐⭐⭐ 核心修改：ID、检查日期、姓名 必须全部匹配才删除 ⭐⭐⭐
-            // 这样即使 ID 重复，只要日期或姓名不一样，就不会误删
-            if (p.id == targets[j].id &&
-                p.checkDate == targets[j].checkDate &&
-                p.name == targets[j].name) {
-
-                const QString deletedPatientId = patientList[i].id;
-                patientList.removeAt(i); // 从数据库列表中移除
-                for (int recordIndex = measurementList.size() - 1; recordIndex >= 0; --recordIndex) {
-                    if (measurementList[recordIndex].patientId == deletedPatientId) {
-                        measurementList.removeAt(recordIndex);
-                    }
-                }
-                targets.removeAt(j);     // 把这个目标标记为已处理，提高效率
-                deletedRealCount++;
-                break; // 跳出内层循环，继续检查下一条数据库记录
-            }
-        }
+    QList<MeasurementRecord> measurementCandidate;
+    for (const MeasurementRecord& record : measurementList) {
+        if (!patientIds.contains(record.patientId)) measurementCandidate.append(record);
     }
+    if (!savePatientData(patientCandidate, measurementCandidate)) return;
 
-    // 5. 保存并刷新界面
-    savePatients(); // 保存到 XML
-    saveMeasurements();
-
-    // 刷新表格显示（为了保持当前的搜索状态，建议重新触发一次搜索，或者直接刷新全部）
-    // 这里简单起见，直接调用当前的搜索逻辑，如果没搜索就是显示全部
-    QString key = ui->editSearchKeyword->text();
-    if (key.isEmpty()) {
-        refreshTable(patientList); // 显示全部
-    } else {
-        // 如果用户正在搜索状态下删除，保持搜索结果刷新会比较友好
-        // 简单处理：直接调用显示全部即可，用户体验差别不大
-        refreshTable(patientList);
-    }
-
-    QMessageBox::information(this, "成功", QString("已成功删除 %1 条记录").arg(deletedRealCount));
+    const bool removedCurrent = patientIds.contains(currentPatient.id);
+    patientList = patientCandidate;
+    measurementList = measurementCandidate;
+    if (removedCurrent) clearCurrentPatient();
+    refreshTable(patientList);
+    QMessageBox::information(this, "成功", QString("已成功删除 %1 条记录").arg(patientIds.size()));
 }
 
 void MainWindow::on_btnAdd_clicked() {
+    if (patientMeasureRunning) {
+        QMessageBox::warning(this, "检测进行中", "检测进行中不能编辑患者。");
+        return;
+    }
     clearNewForm();
     ui->stackedWidget->setCurrentWidget(ui->pagePatientForm);
 }
 
 void MainWindow::on_table_cellDoubleClicked(int row, int)
 {
+    if (patientMeasureRunning) {
+        QMessageBox::warning(this, "检测进行中", "检测进行中不能切换或编辑患者。");
+        return;
+    }
     if (row < 0 || row >= ui->table->rowCount()) return;
 
     QTableWidgetItem* idItem   = ui->table->item(row, 0);
-    QTableWidgetItem* dateItem = ui->table->item(row, 4);
-
     if (!idItem) return;
 
     QString id = idItem->text();
-    QString date = dateItem ? dateItem->text() : "";
-
     int idx = -1;
-
-    // 优先匹配 ID + 检查日期
     for (int i = 0; i < patientList.size(); ++i) {
-        if (patientList[i].id == id && patientList[i].checkDate == date) {
+        if (patientList[i].id == id) {
             idx = i;
             break;
-        }
-    }
-
-    // 如果没找到，再只按 ID 匹配
-    if (idx == -1) {
-        for (int i = 0; i < patientList.size(); ++i) {
-            if (patientList[i].id == id) {
-                idx = i;
-                break;
-            }
         }
     }
 
@@ -3913,6 +3856,10 @@ void MainWindow::on_btnFormBack_clicked() {
 }
 
 void MainWindow::on_btnFormSave_clicked() {
+    if (patientMeasureRunning) {
+        QMessageBox::warning(this, "检测进行中", "检测进行中不能编辑患者。");
+        return;
+    }
     // 1) 从新增表单页面采集数据（注意这些控件名都是 pagePatientForm 上的）
     PatientInfo p;
     p.name      = ui->editName->text().trimmed();
@@ -3932,6 +3879,7 @@ void MainWindow::on_btnFormSave_clicked() {
     }
 
     // 3) 新增 / 编辑 分支
+    QList<PatientInfo> candidate = patientList;
     if (editingIndex == -1) {
         // 新增：校验 ID 唯一
         for (const auto &it : patientList) {
@@ -3940,14 +3888,13 @@ void MainWindow::on_btnFormSave_clicked() {
                 return;
             }
         }
-        patientList.push_back(p);
+        candidate.push_back(p);
     } else {
-        // 编辑
-        patientList[editingIndex] = p;
+        candidate[editingIndex] = p;
     }
 
-    // 4) 落盘并刷新
-    savePatients();
+    if (!savePatients(candidate)) return;
+    patientList = candidate;
     refreshTable(patientList);
 
     // 5) 复位状态并返回档案页
@@ -3976,13 +3923,17 @@ void MainWindow::on_btnDetailBack_clicked() {
 }
 
 void MainWindow::on_btnDetailSave_clicked() {
+    if (patientMeasureRunning) {
+        QMessageBox::warning(this, "检测进行中", "检测进行中不能编辑患者。");
+        return;
+    }
     if (editingIndex < 0 || editingIndex >= patientList.size()) {
         QMessageBox::warning(this, "错误", "没有选中的病人记录");
         return;
     }
 
     // 读回编辑后的内容
-    PatientInfo& p = patientList[editingIndex];
+    const PatientInfo& p = patientList[editingIndex];
     QString newId = ui->dID->text().trimmed();
     if (newId != p.id) {
         QMessageBox::warning(this, "不允许修改", "为保持检测历史关联，本版本不允许修改患者 ID。");
@@ -4002,39 +3953,48 @@ void MainWindow::on_btnDetailSave_clicked() {
         }
     }
 
-    p.name      = ui->dName->text().trimmed();
-    p.id        = newId;
-    p.gender    = ui->dGender->currentText();
-    p.birthDay  = ui->dBirth->date().toString("yyyy-MM-dd");
-    p.checkDate = ui->dCheck->date().toString("yyyy-MM-dd");
-    p.height    = ui->dHeight->text().trimmed();
-    p.weight    = ui->dWeight->text().trimmed();
-    p.diagprompt= ui->dDiag->text().trimmed();
+    QList<PatientInfo> candidate = patientList;
+    PatientInfo& updated = candidate[editingIndex];
+    updated.name      = ui->dName->text().trimmed();
+    updated.id        = newId;
+    updated.gender    = ui->dGender->currentText();
+    updated.birthDay  = ui->dBirth->date().toString("yyyy-MM-dd");
+    updated.height    = ui->dHeight->text().trimmed();
+    updated.weight    = ui->dWeight->text().trimmed();
 
-
-    // 你可以选择不改检查时间，也可以在每次保存时更新"最后修改"：
-    // p.checkTime = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
-
-    savePatients();
+    if (!savePatients(candidate)) return;
+    patientList = candidate;
+    if (currentPatient.id == updated.id) {
+        currentPatient = updated;
+        updateCurrentPatientUI();
+    }
     refreshTable(patientList);
     QMessageBox::information(this, "成功", "已保存修改");
 }
 
 void MainWindow::on_btnDetailDelete_clicked() {
+    if (patientMeasureRunning) {
+        QMessageBox::warning(this, "检测进行中", "检测进行中不能删除患者。");
+        return;
+    }
     if (editingIndex < 0 || editingIndex >= patientList.size()) return;
 
     if (QMessageBox::question(this, "确认删除", "确定删除该病人信息？此操作不可恢复") != QMessageBox::Yes)
         return;
 
     const QString deletedPatientId = patientList[editingIndex].id;
-    patientList.removeAt(editingIndex);
-    for (int i = measurementList.size() - 1; i >= 0; --i) {
-        if (measurementList[i].patientId == deletedPatientId) {
-            measurementList.removeAt(i);
-        }
+    QList<PatientInfo> patientCandidate = patientList;
+    patientCandidate.removeAt(editingIndex);
+    QList<MeasurementRecord> measurementCandidate;
+    for (const MeasurementRecord& record : measurementList) {
+        if (record.patientId != deletedPatientId) measurementCandidate.append(record);
     }
-    savePatients();
-    saveMeasurements();
+    if (!savePatientData(patientCandidate, measurementCandidate)) return;
+
+    const bool removedCurrent = currentPatient.id == deletedPatientId;
+    patientList = patientCandidate;
+    measurementList = measurementCandidate;
+    if (removedCurrent) clearCurrentPatient();
     refreshTable(patientList);
 
     editingIndex = -1;
