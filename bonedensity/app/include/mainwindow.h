@@ -49,6 +49,7 @@ private slots:
     void on_btnArchive_clicked();   // 切换到档案管理
     void on_btnBackFromArchive_clicked();      // 从档案返回主页面
     void on_btnPatientInfo_clicked(); //主界面进入选择患者信息
+    void on_btnStartMeasurement_clicked();
     void on_btnBackToMain_clicked(); //选择患者信息进入主界面
 
     // 患者信息页面
@@ -345,6 +346,8 @@ private:
 
     void resetAllPatientMeasurementData();
     void resetOneRoundMeasurementState();
+    void selectCurrentPatient(const PatientInfo& patient);
+    void updatePatientSelectionUi();
 
     void showRoundFinishedTip(int finishedRounds, int totalRounds);
     void closeRoundFinishedTip();

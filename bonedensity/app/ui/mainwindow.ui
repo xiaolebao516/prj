@@ -772,7 +772,7 @@
              <widget class="QPushButton" name="btnPatientInfo">
               <property name="geometry">
                <rect>
-                <x>220</x>
+                <x>210</x>
                 <y>270</y>
                 <width>131</width>
                 <height>60</height>
@@ -797,11 +797,24 @@
                </size>
               </property>
               <property name="text">
+               <string>建立档案</string>
+              </property>
+             </widget>
+             <widget class="QPushButton" name="btnStartMeasurement">
+              <property name="geometry">
+               <rect>
+                <x>20</x>
+                <y>270</y>
+                <width>170</width>
+                <height>60</height>
+               </rect>
+              </property>
+              <property name="text">
                <string>开始检测</string>
               </property>
              </widget>
             </widget>
-            <widget class="QGroupBox" name="grpLatestResultRight">
+             <widget class="QGroupBox" name="grpLatestResultRight">
              <property name="geometry">
               <rect>
                <x>0</x>

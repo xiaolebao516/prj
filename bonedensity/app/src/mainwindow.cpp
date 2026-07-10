@@ -157,7 +157,7 @@ MainWindow::MainWindow(QWidget *parent)
     initProcessPanel();       // 初始化检查过程示意区
     initLatestResultPanel();  // 初始化右侧最近一次测量结果区
 
-    ui->btnPatientInfo->setText("开始检测");
+    updatePatientSelectionUi();
 
     connect(ui->pushButton, &QPushButton::clicked,
             this, &MainWindow::on_btnAcquireWaveform_clicked);
@@ -171,6 +171,7 @@ MainWindow::MainWindow(QWidget *parent)
     //ui->comboPart->setCurrentIndex(-1);
     //ui->dPartCombo->setCurrentIndex(-1);
     refreshTable(patientList);
+    updatePatientSelectionUi();
 
 
     // ✅ 档案管理按钮连接
@@ -249,7 +250,7 @@ void MainWindow::resetSerialRuntimeState()
 
     ui->connectButton->setText("Connect");
     ui->triggerButton->setText("trigger");
-    ui->btnPatientInfo->setText("开始检测");
+    updatePatientSelectionUi();
 }
 
 void MainWindow::handleSerialDisconnected(const QString& reason, bool notifyUser)
@@ -512,6 +513,7 @@ void MainWindow::startPatientMeasurement(int targetRounds)
 
     acquireMode = PatientMeasureMode;
     patientMeasureRunning = true;
+    updatePatientSelectionUi();
     currentMeasureTargetRounds = qMax(1, targetRounds);
 
     // 只重置当前这一轮，不清空 roundSosList
@@ -519,7 +521,7 @@ void MainWindow::startPatientMeasurement(int targetRounds)
 
     int nextRound = roundSosList.size() + 1;
 
-    ui->btnPatientInfo->setText("停止检测");
+    updatePatientSelectionUi();
     ui->btnPatientInfo->setStyleSheet("");  // 恢复默认样式，确保可点击
 
     ui->lblProcessStatus->setText(
@@ -533,6 +535,7 @@ void MainWindow::startPatientMeasurement(int targetRounds)
         );
 
     autoTimer->start(80);
+    updatePatientSelectionUi();
 }
 
 void MainWindow::stopPatientMeasurement()
@@ -543,10 +546,12 @@ void MainWindow::stopPatientMeasurement()
 
     patientMeasureRunning = false;
     acquireMode = DebugAcquireMode;
+    updatePatientSelectionUi();
 
-    ui->btnPatientInfo->setText("开始检测");
+    updatePatientSelectionUi();
 }
 
+// Keep the dedicated measurement button synchronized after the legacy reset.
 void MainWindow::resetPatientMeasurementState(int targetRounds)
 {
     currentMeasureTargetRounds = qMax(1, targetRounds);
@@ -601,6 +606,7 @@ void MainWindow::resetAllPatientMeasurementData()
 
 void MainWindow::resetOneRoundMeasurementState()
 {
+    updatePatientSelectionUi();
     currentRoundSosList.clear();
     currentRoundAList.clear();
     currentRoundBList.clear();
@@ -633,6 +639,7 @@ void MainWindow::resetOneRoundMeasurementState()
     speedPointIndex = 0;
 }
 
+// The caller may have stopped a measurement before resetting this round.
 void MainWindow::showRoundFinishedTip(int finishedRounds, int totalRounds)
 {
     closeRoundFinishedTip();
@@ -2713,6 +2720,18 @@ void MainWindow::onGainSliderChanged(int value)
 
 void MainWindow::on_btnPatientInfo_clicked()
 {
+    if (patientMeasureRunning) return;
+    ui->eName->clear();
+    ui->eID->clear();
+    ui->eGender->setCurrentIndex(0);
+    ui->eBirth->setDate(QDate::currentDate());
+    ui->eHeight->clear();
+    ui->eWeight->clear();
+    ui->stackedWidget->setCurrentWidget(ui->pagePatientSelect);
+}
+
+void MainWindow::on_btnStartMeasurement_clicked()
+{
     // 这个按钮现在 UI 显示为"开始检测"或"停止检测"，objectName 仍然是 btnPatientInfo
 
     if (patientMeasureRunning) {
@@ -2777,15 +2796,15 @@ void MainWindow::on_btnPatientNewSave_clicked()
         return;
     }
 
-    currentPatient = p;
-    updateCurrentPatientUI();
-
-    // 新病人开始，清空之前累计的 5 次测量数据
-    resetAllPatientMeasurementData();
-
-    pendingStartAfterPatientInfo = false;
-
-    // 只回到主界面，等待你再次点击"开始检测"
+    for (const PatientInfo& existing : patientList) {
+        if (existing.id == p.id) {
+            QMessageBox::warning(this, "重复 ID", "该编号已存在，请从档案中选择患者。");
+            return;
+        }
+    }
+    patientList.append(p);
+    savePatients();
+    selectCurrentPatient(p);
     ui->stackedWidget->setCurrentWidget(ui->pageMain);
 }
 
@@ -3404,6 +3423,26 @@ void MainWindow::loadPatients() {
     }
 }
 
+void MainWindow::selectCurrentPatient(const PatientInfo& patient)
+{
+    if (patientMeasureRunning) return;
+    currentPatient = patient;
+    pendingStartAfterPatientInfo = false;
+    resetAllPatientMeasurementData();
+    initLatestResultPanel();
+    updateCurrentPatientUI();
+    updatePatientSelectionUi();
+}
+
+void MainWindow::updatePatientSelectionUi()
+{
+    const bool selected = hasCurrentPatient();
+    ui->btnPatientInfo->setText(selected ? "更换患者" : "建立档案");
+    ui->btnPatientInfo->setEnabled(!patientMeasureRunning);
+    ui->btnStartMeasurement->setEnabled(selected);
+    ui->btnStartMeasurement->setText(patientMeasureRunning ? "停止检测" : "开始检测");
+}
+
 void MainWindow::savePatients() {
     QString errorMessage;
     if (!patientStore.savePatients(xmlFilePath, patientList, &errorMessage)) {
@@ -3667,13 +3706,7 @@ void MainWindow::on_table_cellDoubleClicked(int row, int)
 
     switch (archiveMode) {
     case ImportMode:
-        currentPatient = patientList[idx];
-        updateCurrentPatientUI();
-
-        // 导入新病人后，清空之前累计的测量数据
-        resetAllPatientMeasurementData();
-
-        pendingStartAfterPatientInfo = false;
+        selectCurrentPatient(patientList[idx]);
 
         ui->stackedWidget->setCurrentWidget(ui->pageMain);
         archiveMode = NormalMode;
