@@ -12,6 +12,7 @@ static constexpr bool kDebugPerFrame = false;
 
 #include <QtSerialPort/QSerialPortInfo>
 #include <QMessageBox>
+#include <QResizeEvent>
 #include <QtCharts/QValueAxis>
 #include <QRegularExpression>
 #include <QInputDialog>
@@ -282,6 +283,46 @@ void MainWindow::manageAccounts()
 }
 
 // ================= 串口扫描等原有代码 =======================================================================================
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    QMainWindow::resizeEvent(event);
+
+    if (!ui || !ui->pageMain || !ui->mainBodyWidget) return;
+
+    const int pageWidth = ui->pageMain->width();
+    const int pageHeight = ui->pageMain->height();
+    if (pageWidth <= 0 || pageHeight <= 0) return;
+
+    const int margin = 10;
+    const int toolbarHeight = 62;
+    const int bodyTop = toolbarHeight + 10;
+    const int bodyHeight = qMax(1, pageHeight - bodyTop - margin);
+    const int bodyWidth = qMax(1, pageWidth - margin * 2);
+
+    ui->layoutWidget_2->setGeometry(margin, 0, bodyWidth, toolbarHeight);
+    ui->mainBodyWidget->setGeometry(margin, bodyTop, bodyWidth, bodyHeight);
+    ui->layoutWidget->setGeometry(ui->mainBodyWidget->rect());
+
+    // Keep the chart widgets inside their resizable group boxes.
+    ui->layoutWidget_3->setGeometry(ui->grpWaveArea->contentsRect());
+    ui->chartViewSpeed->setGeometry(ui->grpSpeedArea->contentsRect());
+
+    // The right column contains fixed-position child widgets in the .ui file.
+    // Recalculate their vertical areas so the image remains visible at smaller heights.
+    const QRect rightRect = ui->rightColumnWidget->rect();
+    const int rightWidth = qMax(1, rightRect.width());
+    const int rightHeight = qMax(1, rightRect.height());
+    const int infoHeight = qMin(341, qMax(300, rightHeight * 38 / 100));
+    const int resultHeight = qMin(331, qMax(260, rightHeight * 34 / 100));
+    const int imageY = infoHeight + resultHeight;
+    const int imageHeight = qMax(1, rightHeight - imageY);
+
+    ui->grpPatientInfoRight->setGeometry(0, 0, rightWidth, infoHeight);
+    ui->grpLatestResultRight->setGeometry(0, infoHeight, rightWidth, resultHeight);
+    ui->grpPartImageRight->setGeometry(0, imageY, rightWidth, imageHeight);
+    ui->label_32->setGeometry(ui->grpPartImageRight->contentsRect());
+}
+
 void MainWindow::scanPorts() {
     QString current = ui->comboPort->currentData().toString();
     ui->comboPort->blockSignals(true);
@@ -396,7 +437,7 @@ void MainWindow::on_triggerButton_clicked()
         autoRunning = true;
     } else {
         autoTimer->stop();
-        ui->triggerButton->setText("获取波形");
+        ui->triggerButton->setText("自动采集");
         autoRunning = false;
     }
 }
@@ -518,7 +559,7 @@ void MainWindow::startPatientMeasurement(int targetRounds)
     if (autoRunning) {
         autoTimer->stop();
         autoRunning = false;
-        ui->triggerButton->setText("获取波形");
+        ui->triggerButton->setText("自动采集");
     }
 
     acquireMode = PatientMeasureMode;
@@ -2602,7 +2643,7 @@ void MainWindow::handleSerialError(QSerialPort::SerialPortError error) {
 
     serial->close();
     ui->connectButton->setText("连接");
-    ui->triggerButton->setText("获取波形");
+    ui->triggerButton->setText("自动采集");
     statusBar()->showMessage("设备连接已断开，请检查 USB 连接和设备电源。重新插入后点击“连接”。", 10000);
 
     QMessageBox::warning(this,
@@ -2882,7 +2923,7 @@ void MainWindow::on_btnImportFromDB_clicked() {
     }
     archiveMode = ImportMode;        // 标记为导入模式
     ui->btnSelectPatient->setVisible(true);
-    ui->btnViewHistory->setVisible(true);
+    ui->btnViewHistory->setVisible(false);
     statusBar()->showMessage("请单击选中患者，再点击“选择患者”；也可以双击患者行直接导入", 5000);
     refreshTable(patientList);
     ui->stackedWidget->setCurrentWidget(ui->pageArchive);

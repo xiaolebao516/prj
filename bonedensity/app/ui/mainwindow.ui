@@ -178,7 +178,7 @@
           </widget>
          </item>
          <item row="0" column="8">
-          <widget class="QPushButton" name="triggerButton">
+           <widget class="QPushButton" name="triggerButton">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
@@ -198,12 +198,12 @@
             </size>
            </property>
            <property name="text">
-            <string>获取波形</string>
+             <string>自动采集</string>
            </property>
           </widget>
          </item>
          <item row="0" column="7">
-          <widget class="QPushButton" name="pushButton">
+           <widget class="QPushButton" name="pushButton">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
@@ -223,7 +223,7 @@
             </size>
            </property>
            <property name="text">
-            <string>获取波形</string>
+             <string>获取一帧</string>
            </property>
           </widget>
          </item>
@@ -769,12 +769,12 @@
                <string>出生日期：</string>
               </property>
              </widget>
-             <widget class="QPushButton" name="btnPatientInfo">
+           <widget class="QPushButton" name="btnPatientInfo">
               <property name="geometry">
                <rect>
-                <x>210</x>
-                <y>270</y>
-                <width>131</width>
+               <x>291</x>
+               <y>270</y>
+               <width>170</width>
                 <height>60</height>
                </rect>
               </property>
@@ -792,7 +792,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>140</width>
+                <width>170</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -800,10 +800,10 @@
                <string>建立档案</string>
               </property>
              </widget>
-             <widget class="QPushButton" name="btnStartMeasurement">
+           <widget class="QPushButton" name="btnStartMeasurement">
               <property name="geometry">
-               <rect>
-                <x>20</x>
+                 <rect>
+                 <x>100</x>
                 <y>270</y>
                 <width>170</width>
                 <height>60</height>
@@ -1284,11 +1284,11 @@
        </widget>
        <widget class="QPushButton" name="btnPatientNewSave">
         <property name="geometry">
-         <rect>
-          <x>690</x>
-          <y>860</y>
-          <width>191</width>
-          <height>71</height>
+          <rect>
+          <x>750</x>
+          <y>820</y>
+          <width>170</width>
+          <height>60</height>
          </rect>
         </property>
         <property name="text">
@@ -1297,11 +1297,11 @@
        </widget>
        <widget class="QPushButton" name="btnImportFromDB">
         <property name="geometry">
-         <rect>
-          <x>950</x>
-          <y>860</y>
-          <width>181</width>
-          <height>71</height>
+          <rect>
+          <x>960</x>
+          <y>820</y>
+          <width>170</width>
+          <height>60</height>
          </rect>
         </property>
         <property name="text">
@@ -1310,11 +1310,11 @@
        </widget>
        <widget class="QPushButton" name="btnBackToMain">
         <property name="geometry">
-         <rect>
-          <x>1210</x>
-          <y>860</y>
-          <width>181</width>
-          <height>71</height>
+          <rect>
+          <x>1170</x>
+          <y>820</y>
+          <width>170</width>
+          <height>60</height>
          </rect>
         </property>
         <property name="text">

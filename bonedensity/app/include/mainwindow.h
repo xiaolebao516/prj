@@ -27,6 +27,7 @@ namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
 class QMessageBox;
+class QResizeEvent;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -73,7 +74,6 @@ private slots:
     // ✅ 新增：日期级联更新槽函数
     void updateDayCombo();
 
-
     // ✅ 新增页和详情页的交互
     void on_btnFormSave_clicked();
     void on_btnFormBack_clicked();
@@ -83,6 +83,9 @@ private slots:
 
     // ✅ 新增：处理“显示结果”按钮点击
     void on_btnShowResult_clicked();
+
+protected:
+    void resizeEvent(QResizeEvent *event) override;
 
 private:
     Ui::MainWindow *ui;
