@@ -303,24 +303,41 @@ void MainWindow::resizeEvent(QResizeEvent *event)
     ui->mainBodyWidget->setGeometry(margin, bodyTop, bodyWidth, bodyHeight);
     ui->layoutWidget->setGeometry(ui->mainBodyWidget->rect());
 
-    // Keep the chart widgets inside their resizable group boxes.
-    ui->layoutWidget_3->setGeometry(ui->grpWaveArea->contentsRect());
-    ui->chartViewSpeed->setGeometry(ui->grpSpeedArea->contentsRect());
+    // The child layouts are updated by Qt after this event. Adjust them once more
+    // on the next event-loop turn so the first display uses final parent sizes.
+    QTimer::singleShot(0, this, [this]() {
+        if (!ui || !ui->mainBodyWidget) return;
 
-    // The right column contains fixed-position child widgets in the .ui file.
-    // Recalculate their vertical areas so the image remains visible at smaller heights.
-    const QRect rightRect = ui->rightColumnWidget->rect();
-    const int rightWidth = qMax(1, rightRect.width());
-    const int rightHeight = qMax(1, rightRect.height());
-    const int infoHeight = qMin(341, qMax(300, rightHeight * 38 / 100));
-    const int resultHeight = qMin(331, qMax(260, rightHeight * 34 / 100));
-    const int imageY = infoHeight + resultHeight;
-    const int imageHeight = qMax(1, rightHeight - imageY);
+        ui->layoutWidget_3->setGeometry(ui->grpWaveArea->contentsRect());
 
-    ui->grpPatientInfoRight->setGeometry(0, 0, rightWidth, infoHeight);
-    ui->grpLatestResultRight->setGeometry(0, infoHeight, rightWidth, resultHeight);
-    ui->grpPartImageRight->setGeometry(0, imageY, rightWidth, imageHeight);
-    ui->label_32->setGeometry(ui->grpPartImageRight->contentsRect());
+        const QRect speedRect = ui->grpSpeedArea->contentsRect();
+        QFrame *speedPanel = ui->grpSpeedArea->findChild<QFrame*>("speedDebugPanel");
+        const int panelHeight = speedPanel ? 52 : 0;
+        const int panelGap = speedPanel ? 4 : 0;
+        if (speedPanel) {
+            speedPanel->setGeometry(speedRect.x(), speedRect.y(),
+                                    speedRect.width(), panelHeight);
+        }
+        ui->chartViewSpeed->setGeometry(speedRect.x(),
+                                        speedRect.y() + panelHeight + panelGap,
+                                        speedRect.width(),
+                                        qMax(1, speedRect.height() - panelHeight - panelGap));
+
+        // The right column contains fixed-position child widgets in the .ui file.
+        // Recalculate their vertical areas so the image remains visible at smaller heights.
+        const QRect rightRect = ui->rightColumnWidget->rect();
+        const int rightWidth = qMax(1, rightRect.width());
+        const int rightHeight = qMax(1, rightRect.height());
+        const int infoHeight = qMin(341, qMax(341, rightHeight * 38 / 100));
+        const int resultHeight = qMin(331, qMax(260, rightHeight * 34 / 100));
+        const int imageY = infoHeight + resultHeight;
+        const int imageHeight = qMax(1, rightHeight - imageY);
+
+        ui->grpPatientInfoRight->setGeometry(0, 0, rightWidth, infoHeight);
+        ui->grpLatestResultRight->setGeometry(0, infoHeight, rightWidth, resultHeight);
+        ui->grpPartImageRight->setGeometry(0, imageY, rightWidth, imageHeight);
+        ui->label_32->setGeometry(ui->grpPartImageRight->contentsRect());
+    });
 }
 
 void MainWindow::scanPorts() {

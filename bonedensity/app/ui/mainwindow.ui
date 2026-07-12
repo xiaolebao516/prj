@@ -223,7 +223,7 @@
             </size>
            </property>
            <property name="text">
-             <string>获取一帧</string>
+             <string>获取波形</string>
            </property>
           </widget>
          </item>
