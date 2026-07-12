@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(D:/Qt/6.5.3/mingw_64/bin/qmake.exe -o \"build/Desktop_Qt_6_5_3_MinGW_64_bit_Debug/Makefile\" hhh1.pro -spec win32-g++ \"CONFIG+=debug\")",
+      "Bash(D:/Qt/6.5.3/mingw_64/bin/qmake.exe *)",
+      "Bash(make)",
+      "Bash(D:/Qt/6.5.3/mingw_64/bin/mingw32-make.exe *)",
+      "Read(//d/Qt/6.5.3/mingw_64/bin/**)",
+      "Read(//d/Qt/6.5.3/**)",
+      "Bash(/c/msys64/ucrt64/bin/mingw32-make *)"
+    ]
+  }
+}
