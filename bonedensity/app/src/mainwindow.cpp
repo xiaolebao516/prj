@@ -3736,6 +3736,13 @@ void MainWindow::on_btnSelectPatient_clicked()
             return;
         }
     }
+
+    // The first maximize can happen before all runtime chart widgets are added.
+    // Re-run the responsive geometry after construction and the first layout pass.
+    QTimer::singleShot(0, this, [this]() {
+        QResizeEvent event(size(), size());
+        resizeEvent(&event);
+    });
 }
 
 void MainWindow::on_btnViewHistory_clicked()
