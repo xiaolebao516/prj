@@ -59,7 +59,8 @@ private slots:
     void on_btnImportFromDB_clicked();
     void updateCurrentPatientUI();
     void on_btnSaveResult_clicked();
-    void on_btnPatientHistory_clicked();
+    void on_btnSelectPatient_clicked();
+    void on_btnViewHistory_clicked();
 
     // ✅ 档案管理逻辑
     void on_btnShowAll_clicked();

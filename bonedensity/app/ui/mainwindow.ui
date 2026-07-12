@@ -813,19 +813,6 @@
                <string>开始检测</string>
               </property>
              </widget>
-             <widget class="QPushButton" name="btnPatientHistory">
-              <property name="geometry">
-               <rect>
-                <x>370</x>
-                <y>270</y>
-                <width>170</width>
-                <height>60</height>
-               </rect>
-              </property>
-              <property name="text">
-               <string>检测历史</string>
-              </property>
-             </widget>
             </widget>
              <widget class="QGroupBox" name="grpLatestResultRight">
              <property name="geometry">
@@ -1967,6 +1954,20 @@
            <widget class="QPushButton" name="btnAdd">
             <property name="text">
              <string>添加</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="11">
+           <widget class="QPushButton" name="btnSelectPatient">
+            <property name="text">
+             <string>选择患者</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="12">
+           <widget class="QPushButton" name="btnViewHistory">
+            <property name="text">
+             <string>查看历史</string>
             </property>
            </widget>
           </item>

@@ -206,6 +206,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->label_9->setVisible(false);
     ui->label_11->setVisible(false);
     ui->dID->setReadOnly(true);
+    ui->btnSelectPatient->setVisible(false);
+    ui->btnViewHistory->setVisible(false);
 
     initSearchControls(); // ✅ 初始化下拉框
 
@@ -494,6 +496,9 @@ void MainWindow::startPatientMeasurement(int targetRounds)
         return;
     }
 
+    if (roundSosList.size() >= normalMeasureRounds) {
+        resetPatientMeasurementState(normalMeasureRounds);
+    }
     if (roundSosList.size() >= normalMeasureRounds) {
         QMessageBox::information(this,
                                  "检测已完成",
@@ -984,6 +989,14 @@ void MainWindow::finishAllPatientRounds()
     pendingMeasurement.zScore = QString::number(zScore, 'f', 2);
     pendingMeasurement.diagnosis = strength;
     hasPendingMeasurement = true;
+    QList<MeasurementRecord> savedMeasurements = measurementList;
+    savedMeasurements.append(pendingMeasurement);
+    if (saveMeasurements(savedMeasurements)) {
+        measurementList = savedMeasurements;
+        hasPendingMeasurement = false;
+        pendingMeasurement = MeasurementRecord();
+        refreshTable(patientList);
+    }
     updatePatientSelectionUi();
 
     ui->lblProcessStatus->setText(
@@ -1057,7 +1070,10 @@ void MainWindow::showPatientMeasureFinishedDialog(double sos,
     msg += QString("相对骨折风险：%1\n").arg(risk, 0, 'f', 1);
     msg += QString("相对骨龄：%1 岁\n").arg(boneAge);
 
-    QMessageBox::information(this, "检测结果", msg);
+    msg += hasPendingMeasurement
+        ? "\n结果自动保存失败，请重新保存。"
+        : "\n本次检测结果已自动保存，可在档案中查看。";
+    QMessageBox::information(this, "检测完成", msg);
 
     // 等你后面在 .ui 里新增 pageReport 后，
     // 可以把这里改成：
@@ -2782,6 +2798,11 @@ void MainWindow::on_btnStartMeasurement_clicked()
     // 关键：如果上一轮测完后弹了提示框，点击"开始检测"时先自动关掉
     closeRoundFinishedTip();
 
+    // 已完成上一组五轮测量时，开始按钮直接开启同一患者的新一组测量。
+    if (roundSosList.size() >= normalMeasureRounds) {
+        resetPatientMeasurementState(normalMeasureRounds);
+    }
+
     // 没有当前病人信息：直接进入病人信息填写/导入页面
     // 不弹 OK 小窗口，也不自动开始测量
     if (!hasCurrentPatient()) {
@@ -2789,15 +2810,6 @@ void MainWindow::on_btnStartMeasurement_clicked()
 
         clearNewForm();
         ui->stackedWidget->setCurrentWidget(ui->pagePatientSelect);
-        return;
-    }
-
-    // 如果已经完成 5 次，再点开始检测就不继续测了
-    if (roundSosList.size() >= normalMeasureRounds) {
-        QMessageBox::information(this,
-                                 "检测已完成",
-                                 "当前被检者已经完成 5 次测量。\n"
-                                 "如需重新测量，请在报表页面选择「重新测量」，或重新选择被检者。");
         return;
     }
 
@@ -2845,6 +2857,9 @@ void MainWindow::on_btnImportFromDB_clicked() {
         return;
     }
     archiveMode = ImportMode;        // 标记为导入模式
+    ui->btnSelectPatient->setVisible(true);
+    ui->btnViewHistory->setVisible(true);
+    statusBar()->showMessage("请单击选中患者，再点击“选择患者”；也可以双击患者行直接导入", 5000);
     refreshTable(patientList);
     ui->stackedWidget->setCurrentWidget(ui->pageArchive);
 }
@@ -3441,11 +3456,14 @@ void MainWindow::on_btnArchive_clicked() {
         QMessageBox::warning(this, "检测进行中", "检测进行中不能编辑或删除患者。");
         return;
     }
+    ui->btnViewHistory->setVisible(true);
     refreshTable(patientList);   // ✅ 进入档案页时刷新表格
     ui->stackedWidget->setCurrentWidget(ui->pageArchive);
 }
 
 void MainWindow::on_btnBackFromArchive_clicked() {
+    ui->btnSelectPatient->setVisible(false);
+    ui->btnViewHistory->setVisible(false);
     ui->stackedWidget->setCurrentWidget(ui->pageMain);
     archiveMode = NormalMode;
 }
@@ -3548,8 +3566,8 @@ void MainWindow::updatePatientSelectionUi()
     ui->btnPatientInfo->setEnabled(!patientMeasureRunning);
     ui->btnStartMeasurement->setEnabled(selected);
     ui->btnStartMeasurement->setText(patientMeasureRunning ? "停止检测" : "开始检测");
-    ui->btnPatientHistory->setEnabled(selected && !patientMeasureRunning);
-    ui->btnSaveResult->setEnabled(hasPendingMeasurement);
+    // 正常完成时结果已自动保存；仅在自动保存失败时保留重试入口。
+    ui->btnSaveResult->setVisible(hasPendingMeasurement);
     ui->btnArchive->setEnabled(!patientMeasureRunning);
 }
 
@@ -3608,9 +3626,45 @@ void MainWindow::showPatientHistory(const QString& patientId)
     dialog.exec();
 }
 
-void MainWindow::on_btnPatientHistory_clicked()
+void MainWindow::on_btnSelectPatient_clicked()
 {
-    if (hasCurrentPatient()) showPatientHistory(currentPatient.id);
+    if (patientMeasureRunning || archiveMode != ImportMode) return;
+    int row = ui->table->currentRow();
+    if (row < 0) {
+        for (int i = 0; i < ui->table->rowCount(); ++i) {
+            QTableWidgetItem* item = ui->table->item(i, 0);
+            if (item && item->checkState() == Qt::Checked) {
+                row = i;
+                break;
+            }
+        }
+    }
+    if (row < 0 || !ui->table->item(row, 0)) {
+        QMessageBox::information(this, "提示", "请先选中一位患者，再点击“选择患者”。");
+        return;
+    }
+    const QString id = ui->table->item(row, 0)->text();
+    for (const PatientInfo& patient : patientList) {
+        if (patient.id == id) {
+            selectCurrentPatient(patient);
+            archiveMode = NormalMode;
+            ui->btnSelectPatient->setVisible(false);
+            ui->btnViewHistory->setVisible(false);
+            ui->stackedWidget->setCurrentWidget(ui->pageMain);
+            return;
+        }
+    }
+}
+
+void MainWindow::on_btnViewHistory_clicked()
+{
+    if (patientMeasureRunning) return;
+    const int row = ui->table->currentRow();
+    if (row < 0 || !ui->table->item(row, 0)) {
+        QMessageBox::information(this, "提示", "请先选中一位患者，再点击“查看历史”。");
+        return;
+    }
+    showPatientHistory(ui->table->item(row, 0)->text());
 }
 
 void MainWindow::refreshTable(const QList<PatientInfo> &list) {
@@ -3821,6 +3875,8 @@ void MainWindow::on_table_cellDoubleClicked(int row, int)
 
         ui->stackedWidget->setCurrentWidget(ui->pageMain);
         archiveMode = NormalMode;
+        ui->btnSelectPatient->setVisible(false);
+        ui->btnViewHistory->setVisible(false);
 
         // 注意：这里不再自动 startPatientMeasurement()
         // 等你回到主界面后，再手动点击"开始检测"
