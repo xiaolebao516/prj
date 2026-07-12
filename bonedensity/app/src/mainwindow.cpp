@@ -306,7 +306,7 @@ void MainWindow::on_connectButton_clicked() {
 
         QString portName = ui->comboPort->currentData().toString();
         if (portName.isEmpty()) {
-            QMessageBox::warning(this, "Error", "Select a serial port first");
+            QMessageBox::warning(this, "无法连接设备", "请先选择设备端口，再点击“连接”。");
             return;
         }
 
@@ -337,25 +337,30 @@ void MainWindow::on_connectButton_clicked() {
 
             rxBuffer.clear();
             chReceived[0] = chReceived[1] = chReceived[2] = chReceived[3] = false;
+            serialErrorHandled = false;
 
             qDebug() << "Serial opened on" << portName;
             qDebug() << "Serial actually opened:" << serial->isOpen();
             qDebug() << "Error:" << serial->error();
 
-            ui->connectButton->setText("Disconnect");
+            ui->connectButton->setText("断开连接");
 
-            // ★★ 放在这里确保连接成功后 readyRead 才被连接
+            // 允许重复连接流程，但同一串口只保留一个 readyRead 连接。
             connect(serial, &QSerialPort::readyRead,
-                    this, &MainWindow::handleSerialReadyRead);
+                    this, &MainWindow::handleSerialReadyRead,
+                    Qt::UniqueConnection);
 
         } else {
-            QMessageBox::critical(this, "Open failed", serial->errorString());
+            QMessageBox::warning(this,
+                                 "无法连接设备",
+                                 "设备连接失败。\n请检查 USB 是否插好、设备是否被其他程序占用，然后重试。");
             return;
         }
 
     } else {
         serial->close();
-        ui->connectButton->setText("Connect");
+        serialErrorHandled = false;
+        ui->connectButton->setText("连接");
     }
 }
 
@@ -364,7 +369,7 @@ void MainWindow::on_connectButton_clicked() {
 void MainWindow::on_triggerButton_clicked()
 {
     if (patientMeasureRunning) {
-        // 检测中点击 trigger = 停止检测
+        // 检测中点击“获取波形”按钮 = 停止检测
         stopPatientMeasurement();
         resetOneRoundMeasurementState();
         resetBoneLagStability();
@@ -391,7 +396,7 @@ void MainWindow::on_triggerButton_clicked()
         autoRunning = true;
     } else {
         autoTimer->stop();
-        ui->triggerButton->setText("trigger");
+        ui->triggerButton->setText("获取波形");
         autoRunning = false;
     }
 }
@@ -445,7 +450,7 @@ void MainWindow::on_btnAcquireWaveform_clicked()
     acquireMode = DebugAcquireMode;
 
     if (!serial->isOpen()) {
-        QMessageBox::warning(this, "Not connected", "请先连接串口");
+        QMessageBox::warning(this, "设备未连接", "请先点击“连接”，连接设备后再获取波形。");
         return;
     }
 
@@ -513,7 +518,7 @@ void MainWindow::startPatientMeasurement(int targetRounds)
     if (autoRunning) {
         autoTimer->stop();
         autoRunning = false;
-        ui->triggerButton->setText("trigger");
+        ui->triggerButton->setText("获取波形");
     }
 
     acquireMode = PatientMeasureMode;
@@ -2580,11 +2585,30 @@ bool MainWindow::checkBoneLagStable(int lagB, int* centerOut, int* countOut)
 }
 
 void MainWindow::handleSerialError(QSerialPort::SerialPortError error) {
-    if (error == QSerialPort::ResourceError) {
-        QMessageBox::critical(this, "Serial Error", serial->errorString());
-        serial->close();
-        ui->connectButton->setText("Connect");
-    }
+    if (error != QSerialPort::ResourceError || serialErrorHandled) return;
+
+    serialErrorHandled = true;
+
+    if (autoTimer && autoTimer->isActive()) autoTimer->stop();
+    autoRunning = false;
+    if (patientMeasureRunning) stopPatientMeasurement();
+
+    rxBuffer.clear();
+    samplesA.clear();
+    samplesB.clear();
+    samplesC.clear();
+    samplesD.clear();
+    chReceived[0] = chReceived[1] = chReceived[2] = chReceived[3] = false;
+
+    serial->close();
+    ui->connectButton->setText("连接");
+    ui->triggerButton->setText("获取波形");
+    statusBar()->showMessage("设备连接已断开，请检查 USB 连接和设备电源。重新插入后点击“连接”。", 10000);
+
+    QMessageBox::warning(this,
+                         "设备已断开",
+                         "设备连接已断开，可能是 USB 被拔出或连接不稳定。\n"
+                         "请检查 USB 线和设备电源，重新插入后点击“连接”。");
 }
 
 

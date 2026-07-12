@@ -87,6 +87,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QSerialPort *serial;
+    bool serialErrorHandled = false;
     QTimer scanTimer;
 
 
