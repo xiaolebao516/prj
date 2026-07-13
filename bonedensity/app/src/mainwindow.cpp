@@ -234,6 +234,8 @@ MainWindow::MainWindow(QWidget *parent)
             }
         }
     }
+
+    scheduleResponsiveLayout();
 }
 
 //先登录===============================================================================
@@ -251,6 +253,7 @@ void MainWindow::on_btnLogin_clicked() {
             action->setVisible(currentAccount.role == "admin");
         }
         ui->stackedWidget->setCurrentWidget(ui->pageMain);
+        scheduleResponsiveLayout();
         return;
     }
     ui->lblLoginMsg->setText("账号或密码错误，请重试");
@@ -337,6 +340,15 @@ void MainWindow::resizeEvent(QResizeEvent *event)
         ui->grpLatestResultRight->setGeometry(0, infoHeight, rightWidth, resultHeight);
         ui->grpPartImageRight->setGeometry(0, imageY, rightWidth, imageHeight);
         ui->label_32->setGeometry(ui->grpPartImageRight->contentsRect());
+    });
+}
+
+void MainWindow::scheduleResponsiveLayout()
+{
+    QTimer::singleShot(0, this, [this]() {
+        if (!ui) return;
+        QResizeEvent event(size(), size());
+        resizeEvent(&event);
     });
 }
 
@@ -2927,10 +2939,12 @@ void MainWindow::on_btnPatientNewSave_clicked()
     patientList = candidate;
     selectCurrentPatient(p);
     ui->stackedWidget->setCurrentWidget(ui->pageMain);
+    scheduleResponsiveLayout();
 }
 
 void MainWindow::on_btnBackToMain_clicked() {
     ui->stackedWidget->setCurrentWidget(ui->pageMain);
+    scheduleResponsiveLayout();
 }
 
 void MainWindow::on_btnImportFromDB_clicked() {
@@ -3547,6 +3561,7 @@ void MainWindow::on_btnBackFromArchive_clicked() {
     ui->btnSelectPatient->setVisible(false);
     ui->btnViewHistory->setVisible(false);
     ui->stackedWidget->setCurrentWidget(ui->pageMain);
+    scheduleResponsiveLayout();
     archiveMode = NormalMode;
 }
 
@@ -3733,16 +3748,11 @@ void MainWindow::on_btnSelectPatient_clicked()
             ui->btnSelectPatient->setVisible(false);
             ui->btnViewHistory->setVisible(false);
             ui->stackedWidget->setCurrentWidget(ui->pageMain);
+            scheduleResponsiveLayout();
             return;
         }
     }
 
-    // The first maximize can happen before all runtime chart widgets are added.
-    // Re-run the responsive geometry after construction and the first layout pass.
-    QTimer::singleShot(0, this, [this]() {
-        QResizeEvent event(size(), size());
-        resizeEvent(&event);
-    });
 }
 
 void MainWindow::on_btnViewHistory_clicked()

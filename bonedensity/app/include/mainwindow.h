@@ -73,6 +73,7 @@ private slots:
     void on_btnDeleteSelected_clicked();
     // ✅ 新增：日期级联更新槽函数
     void updateDayCombo();
+    void scheduleResponsiveLayout();
 
     // ✅ 新增页和详情页的交互
     void on_btnFormSave_clicked();
