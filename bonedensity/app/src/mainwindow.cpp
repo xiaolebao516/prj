@@ -8,6 +8,7 @@ static constexpr bool kDebugPerFrame = false;
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "bonehealth.h"
+#include "agesoschartwidget.h"
 #include "reportwidget.h"
 #include "utils.h"
 
@@ -43,6 +44,20 @@ static constexpr bool kDebugPerFrame = false;
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
+
+namespace {
+
+int ageOnDate(const QString& birthDay, const QDate& date)
+{
+    const QDate birth = QDate::fromString(birthDay, QStringLiteral("yyyy-MM-dd"));
+    if (!birth.isValid() || !date.isValid() || date < birth) return -1;
+
+    int age = date.year() - birth.year();
+    if (birth.addYears(age) > date) --age;
+    return age;
+}
+
+} // namespace
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
@@ -342,6 +357,8 @@ void MainWindow::resizeEvent(QResizeEvent *event)
                                         speedRect.y() + panelHeight + panelGap,
                                         speedRect.width(),
                                         qMax(1, speedRect.height() - panelHeight - panelGap));
+
+        ui->chartViewReference->setGeometry(ui->grpReferenceCurveArea->contentsRect());
 
         // The right column contains fixed-position child widgets in the .ui file.
         // Recalculate their vertical areas so the image remains visible at smaller heights.
@@ -3801,6 +3818,7 @@ void MainWindow::selectCurrentPatient(const PatientInfo& patient)
     initLatestResultPanel();
     updateCurrentPatientUI();
     updatePatientSelectionUi();
+    updateAgeSosReference();
 }
 
 void MainWindow::clearCurrentPatient()
@@ -3813,6 +3831,40 @@ void MainWindow::clearCurrentPatient()
     initLatestResultPanel();
     updateCurrentPatientUI();
     updatePatientSelectionUi();
+    updateAgeSosReference();
+}
+
+void MainWindow::updateAgeSosReference()
+{
+    if (!ui || !ui->chartViewReference) return;
+    if (!hasCurrentPatient()) {
+        ui->chartViewReference->clearReferenceData();
+        return;
+    }
+
+    const MeasurementRecord* latest = latestMeasurementForPatient(currentPatient.id);
+    if (!latest) {
+        const int age = ageOnDate(currentPatient.birthDay, QDate::currentDate());
+        ui->chartViewReference->setReferenceData(currentPatient.gender, age, false);
+        return;
+    }
+
+    const QString gender = latest->patientGender.trimmed().isEmpty()
+        ? currentPatient.gender : latest->patientGender;
+
+    bool ageOk = false;
+    int age = latest->patientAge.trimmed().toInt(&ageOk);
+    if (!ageOk) {
+        QDate measuredDate = QDateTime::fromString(latest->measuredAt, Qt::ISODate).date();
+        if (!measuredDate.isValid()) {
+            measuredDate = QDate::fromString(latest->measuredAt.left(10), QStringLiteral("yyyy-MM-dd"));
+        }
+        const QString birthDay = latest->patientBirthDay.trimmed().isEmpty()
+            ? currentPatient.birthDay : latest->patientBirthDay;
+        age = ageOnDate(birthDay, measuredDate);
+    }
+
+    ui->chartViewReference->setReferenceData(gender, age, true, latest->sos);
 }
 
 void MainWindow::updatePatientSelectionUi()
@@ -3909,6 +3961,7 @@ void MainWindow::showPatientHistory(const QString& patientId)
                 candidate.removeAt(i);
                 if (!saveMeasurements(candidate)) return;
                 measurementList = candidate;
+                refreshTable(patientList);
                 dialog.accept();
                 return;
             }
@@ -4017,6 +4070,7 @@ void MainWindow::refreshTable(const QList<PatientInfo> &list) {
     ui->table->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->table->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->table->horizontalHeader()->setStretchLastSection(true);
+    updateAgeSosReference();
 }
 
 

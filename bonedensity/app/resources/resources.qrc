@@ -2,5 +2,9 @@
     <qresource prefix="/">
         <file>images/Radius.bmp</file>
         <file>images/report.bmp</file>
+        <file>images/age_sos_woman.bmp</file>
+        <file>images/age_sos_girl.bmp</file>
+        <file>images/age_sos_man.bmp</file>
+        <file>images/age_sos_boy.bmp</file>
     </qresource>
 </RCC>

@@ -15,6 +15,7 @@ SOURCES += \
     src/mainwindow.cpp \
     src/accountstore.cpp \
     src/patientstore.cpp \
+    src/agesoschartwidget.cpp \
     src/reportwidget.cpp \
     src/signalprocessor.cpp \
     src/bonehealth.cpp \
@@ -24,6 +25,7 @@ HEADERS += \
     include/mainwindow.h \
     include/accountstore.h \
     include/patientstore.h \
+    include/agesoschartwidget.h \
     include/reportwidget.h \
     include/types.h \
     include/signalprocessor.h \

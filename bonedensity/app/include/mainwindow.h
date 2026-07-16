@@ -362,6 +362,7 @@ private:
     void selectCurrentPatient(const PatientInfo& patient);
     void clearCurrentPatient();
     void updatePatientSelectionUi();
+    void updateAgeSosReference();
     void showPatientHistory(const QString& patientId);
     void setupReportPage();
     void showReport(const PatientInfo& patient, const MeasurementRecord& measurement);

@@ -342,9 +342,9 @@
              <item>
               <widget class="QGroupBox" name="grpReferenceCurveArea">
                <property name="title">
-                <string>GroupBox</string>
+                <string>年龄-SOS参考</string>
                </property>
-               <widget class="QChartView" name="chartViewReference">
+               <widget class="AgeSosChartWidget" name="chartViewReference">
                 <property name="geometry">
                  <rect>
                   <x>0</x>
@@ -2046,6 +2046,11 @@
    <class>QChartView</class>
    <extends>QGraphicsView</extends>
    <header location="global">qchartview.h</header>
+  </customwidget>
+  <customwidget>
+   <class>AgeSosChartWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">agesoschartwidget.h</header>
   </customwidget>
  </customwidgets>
  <resources>
