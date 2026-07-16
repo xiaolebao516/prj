@@ -38,6 +38,13 @@ This project was originally developed by the user's senior (学长) through iter
 - **Build system**: qmake (`.pro` file)
 - **IDE**: Qt Creator (`.qtcreator/BoneDensity.pro.user`)
 
+For command-line builds, always use the pinned project script. It prevents the
+MSYS2 GCC on the system `PATH` from being mixed with Qt's MinGW 11.2 runtime.
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\build-debug.ps1
+```
+
 ```bash
 # Configure (from build directory)
 cd build/Desktop_Qt_6_5_3_MinGW_64_bit_Debug

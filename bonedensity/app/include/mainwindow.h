@@ -19,6 +19,7 @@
 #include "types.h"
 #include "patientstore.h"
 #include "accountstore.h"
+#include "reportwidget.h"
 #include "signalprocessor.h"
 QT_USE_NAMESPACE
 
@@ -28,6 +29,7 @@ QT_END_NAMESPACE
 
 class QMessageBox;
 class QResizeEvent;
+class QPrinter;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -361,9 +363,15 @@ private:
     void clearCurrentPatient();
     void updatePatientSelectionUi();
     void showPatientHistory(const QString& patientId);
+    void setupReportPage();
+    void showReport(const PatientInfo& patient, const MeasurementRecord& measurement);
+    ReportData buildReportData(const PatientInfo& patient,
+                               const MeasurementRecord& measurement) const;
+    bool renderReportToPrinter(QPrinter* printer);
     bool saveMeasurements(const QList<MeasurementRecord>& measurements);
     bool savePatientData(const QList<PatientInfo>& patients,
                          const QList<MeasurementRecord>& measurements);
+    ReportWidget* reportWidget = nullptr;
     QList<MeasurementRecord> measurementsForPatient(const QString& patientId) const;
     const MeasurementRecord* latestMeasurementForPatient(const QString& patientId) const;
 

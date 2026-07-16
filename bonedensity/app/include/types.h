@@ -25,6 +25,15 @@ struct MeasurementRecord {
     QString tScore;
     QString zScore;
     QString diagnosis;
+    QString patientName;
+    QString patientGender;
+    QString patientBirthDay;
+    QString patientHeight;
+    QString patientWeight;
+    QString patientAge;
+    QString boneStrength;
+    QString fractureRisk;
+    QString boneAge;
 };
 
 // ==================== Serial / Waveform ====================

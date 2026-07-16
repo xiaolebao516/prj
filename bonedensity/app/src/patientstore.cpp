@@ -51,6 +51,15 @@ MeasurementRecord recordFromElement(const QDomElement& element)
     record.tScore = element.attribute("tScore");
     record.zScore = element.attribute("zScore");
     record.diagnosis = element.attribute("diagnosis");
+    record.patientName = element.attribute("patientName");
+    record.patientGender = element.attribute("patientGender");
+    record.patientBirthDay = element.attribute("patientBirthDay");
+    record.patientHeight = element.attribute("patientHeight");
+    record.patientWeight = element.attribute("patientWeight");
+    record.patientAge = element.attribute("patientAge");
+    record.boneStrength = element.attribute("boneStrength");
+    record.fractureRisk = element.attribute("fractureRisk");
+    record.boneAge = element.attribute("boneAge");
     return record;
 }
 
@@ -233,6 +242,15 @@ bool PatientStore::saveMeasurements(const QString& measurementsPath,
         element.setAttribute("tScore", record.tScore);
         element.setAttribute("zScore", record.zScore);
         element.setAttribute("diagnosis", record.diagnosis);
+        element.setAttribute("patientName", record.patientName);
+        element.setAttribute("patientGender", record.patientGender);
+        element.setAttribute("patientBirthDay", record.patientBirthDay);
+        element.setAttribute("patientHeight", record.patientHeight);
+        element.setAttribute("patientWeight", record.patientWeight);
+        element.setAttribute("patientAge", record.patientAge);
+        element.setAttribute("boneStrength", record.boneStrength);
+        element.setAttribute("fractureRisk", record.fractureRisk);
+        element.setAttribute("boneAge", record.boneAge);
         root.appendChild(element);
     }
     return writeDocument(measurementsPath, document, errorMessage);

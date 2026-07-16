@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>images/Radius.bmp</file>
+        <file>images/report.bmp</file>
     </qresource>
 </RCC>

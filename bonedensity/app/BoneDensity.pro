@@ -1,5 +1,5 @@
     QT       += core gui
-QT += core gui widgets serialport charts
+QT += core gui widgets serialport charts printsupport
 QT += xml
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -15,6 +15,7 @@ SOURCES += \
     src/mainwindow.cpp \
     src/accountstore.cpp \
     src/patientstore.cpp \
+    src/reportwidget.cpp \
     src/signalprocessor.cpp \
     src/bonehealth.cpp \
     src/utils.cpp
@@ -23,6 +24,7 @@ HEADERS += \
     include/mainwindow.h \
     include/accountstore.h \
     include/patientstore.h \
+    include/reportwidget.h \
     include/types.h \
     include/signalprocessor.h \
     include/bonehealth.h \

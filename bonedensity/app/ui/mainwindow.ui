@@ -148,7 +148,7 @@
             </size>
            </property>
            <property name="text">
-            <string>打印</string>
+            <string>报表</string>
            </property>
           </widget>
          </item>

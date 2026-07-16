@@ -8,6 +8,7 @@ static constexpr bool kDebugPerFrame = false;
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "bonehealth.h"
+#include "reportwidget.h"
 #include "utils.h"
 
 #include <QtSerialPort/QSerialPortInfo>
@@ -36,6 +37,9 @@ static constexpr bool kDebugPerFrame = false;
 #include <QAction>
 #include <QMenuBar>
 #include <QSet>
+#include <QStandardPaths>
+#include <QtPrintSupport/QPrintDialog>
+#include <QtPrintSupport/QPrinter>
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -176,11 +180,24 @@ MainWindow::MainWindow(QWidget *parent)
     setupSpeedDebugPanel();  // ✅ 初始化声速调试显示区域
     initProcessPanel();       // 初始化检查过程示意区
     initLatestResultPanel();  // 初始化右侧最近一次测量结果区
+    setupReportPage();
 
     updatePatientSelectionUi();
 
     connect(ui->pushButton, &QPushButton::clicked,
             this, &MainWindow::on_btnAcquireWaveform_clicked);
+    connect(ui->btnReport, &QPushButton::clicked, this, [this]() {
+        if (!hasCurrentPatient()) {
+            QMessageBox::information(this, "报表", "请先选择患者。");
+            return;
+        }
+        const MeasurementRecord* latest = latestMeasurementForPatient(currentPatient.id);
+        if (!latest) {
+            QMessageBox::information(this, "报表", "当前患者还没有已保存的检测结果。");
+            return;
+        }
+        showReport(currentPatient, *latest);
+    });
     // ✅ 初始化滤波器
     signalProcessor.designFIR(1250000.0, 600000.0, 62500000.0);
 
@@ -1063,6 +1080,15 @@ void MainWindow::finishAllPatientRounds()
     pendingMeasurement.tScore = QString::number(tScore, 'f', 2);
     pendingMeasurement.zScore = QString::number(zScore, 'f', 2);
     pendingMeasurement.diagnosis = strength;
+    pendingMeasurement.patientName = currentPatient.name;
+    pendingMeasurement.patientGender = currentPatient.gender;
+    pendingMeasurement.patientBirthDay = currentPatient.birthDay;
+    pendingMeasurement.patientHeight = currentPatient.height;
+    pendingMeasurement.patientWeight = currentPatient.weight;
+    pendingMeasurement.patientAge = QString::number(age);
+    pendingMeasurement.boneStrength = strength;
+    pendingMeasurement.fractureRisk = QString::number(risk, 'f', 1);
+    pendingMeasurement.boneAge = QString::number(boneAge);
     hasPendingMeasurement = true;
     QList<MeasurementRecord> savedMeasurements = measurementList;
     savedMeasurements.append(pendingMeasurement);
@@ -1131,29 +1157,162 @@ void MainWindow::showPatientMeasureFinishedDialog(double sos,
                                                   double risk,
                                                   int boneAge)
 {
-    QString msg;
-    msg += "病人检测完成。\n\n";
-    msg += QString("姓名：%1\n").arg(currentPatient.name);
-    msg += QString("ID：%1\n").arg(currentPatient.id);
-    msg += QString("测量部位：桡骨\n");
-    msg += QString("测量次数：%1 次\n\n").arg(currentMeasureTargetRounds);
+    Q_UNUSED(sos)
+    Q_UNUSED(tScore)
+    Q_UNUSED(zScore)
+    Q_UNUSED(strength)
+    Q_UNUSED(risk)
+    Q_UNUSED(boneAge)
 
-    msg += QString("SOS：%1 m/s\n").arg(sos, 0, 'f', 1);
-    msg += QString("T值：%1\n").arg(tScore, 0, 'f', 2);
-    msg += QString("Z值：%1\n").arg(zScore, 0, 'f', 2);
-    msg += QString("骨强度：%1\n").arg(strength);
-    msg += QString("相对骨折风险：%1\n").arg(risk, 0, 'f', 1);
-    msg += QString("相对骨龄：%1 岁\n").arg(boneAge);
+    const MeasurementRecord* reportRecord = hasPendingMeasurement
+        ? &pendingMeasurement
+        : latestMeasurementForPatient(currentPatient.id);
+    if (hasPendingMeasurement) {
+        QMessageBox::warning(this, "结果保存失败",
+                             "本次报表已经生成，但检测结果尚未保存，请返回主界面后重试保存。");
+    }
+    if (reportRecord) {
+        showReport(currentPatient, *reportRecord);
+    }
+}
 
-    msg += hasPendingMeasurement
-        ? "\n结果自动保存失败，请重新保存。"
-        : "\n本次检测结果已自动保存，可在档案中查看。";
-    QMessageBox::information(this, "检测完成", msg);
+void MainWindow::setupReportPage()
+{
+    QVBoxLayout* pageLayout = new QVBoxLayout(ui->pageReport);
+    pageLayout->setContentsMargins(16, 12, 16, 12);
+    pageLayout->setSpacing(10);
 
-    // 等你后面在 .ui 里新增 pageReport 后，
-    // 可以把这里改成：
-    // updateReportPageUi();
-    // ui->stackedWidget->setCurrentWidget(ui->pageReport);
+    QHBoxLayout* toolbar = new QHBoxLayout();
+    QPushButton* backButton = new QPushButton("返回主界面", ui->pageReport);
+    QPushButton* exportButton = new QPushButton("导出 PDF", ui->pageReport);
+    QPushButton* printButton = new QPushButton("打印", ui->pageReport);
+    toolbar->addWidget(backButton);
+    toolbar->addStretch();
+    toolbar->addWidget(exportButton);
+    toolbar->addWidget(printButton);
+    pageLayout->addLayout(toolbar);
+
+    reportWidget = new ReportWidget(ui->pageReport);
+    pageLayout->addWidget(reportWidget, 1);
+
+    connect(backButton, &QPushButton::clicked, this, [this]() {
+        ui->stackedWidget->setCurrentWidget(ui->pageMain);
+        scheduleResponsiveLayout();
+    });
+    connect(printButton, &QPushButton::clicked, this, [this]() {
+        QPrinter printer(QPrinter::HighResolution);
+        printer.setPageSize(QPageSize(QPageSize::A4));
+        printer.setPageOrientation(QPageLayout::Portrait);
+        printer.setPageMargins(QMarginsF(8, 8, 8, 8), QPageLayout::Millimeter);
+        QPrintDialog dialog(&printer, this);
+        dialog.setWindowTitle("打印检测报表");
+        if (dialog.exec() == QDialog::Accepted && !renderReportToPrinter(&printer)) {
+            QMessageBox::warning(this, "打印失败", "无法生成打印内容，请检查打印机设置后重试。");
+        }
+    });
+    connect(exportButton, &QPushButton::clicked, this, [this]() {
+        const ReportData& data = reportWidget->reportData();
+        QString fileName = QString("%1_%2_%3.pdf")
+                               .arg(data.patientName, data.patientId,
+                                    data.measuredAt.left(10));
+        fileName.replace(QRegularExpression(R"([\\/:*?\"<>|])"), "_");
+        const QString defaultPath = QStandardPaths::writableLocation(
+                                        QStandardPaths::DocumentsLocation)
+                                    + "/" + fileName;
+        QString outputPath = QFileDialog::getSaveFileName(
+            this, "导出检测报表", defaultPath, "PDF 文件 (*.pdf)");
+        if (outputPath.isEmpty()) return;
+        if (!outputPath.endsWith(".pdf", Qt::CaseInsensitive)) outputPath += ".pdf";
+
+        QPrinter printer(QPrinter::HighResolution);
+        printer.setOutputFormat(QPrinter::PdfFormat);
+        printer.setOutputFileName(outputPath);
+        printer.setPageSize(QPageSize(QPageSize::A4));
+        printer.setPageOrientation(QPageLayout::Portrait);
+        printer.setPageMargins(QMarginsF(8, 8, 8, 8), QPageLayout::Millimeter);
+        if (!renderReportToPrinter(&printer)) {
+            QMessageBox::warning(this, "导出失败", "无法写入 PDF 文件，请检查保存位置后重试。");
+            return;
+        }
+        QMessageBox::information(this, "导出完成", "检测报表已保存为 PDF 文件。");
+    });
+}
+
+ReportData MainWindow::buildReportData(const PatientInfo& patient,
+                                       const MeasurementRecord& measurement) const
+{
+    auto fallback = [](const QString& snapshot, const QString& current) {
+        return snapshot.trimmed().isEmpty() ? current : snapshot;
+    };
+    auto withUnit = [](const QString& value, const QString& unit) {
+        return value.trimmed().isEmpty() ? QString() : value + " " + unit;
+    };
+
+    ReportData data;
+    data.patientName = fallback(measurement.patientName, patient.name);
+    data.patientId = measurement.patientId.isEmpty() ? patient.id : measurement.patientId;
+    data.gender = fallback(measurement.patientGender, patient.gender);
+    data.birthDay = fallback(measurement.patientBirthDay, patient.birthDay);
+    data.height = withUnit(fallback(measurement.patientHeight, patient.height), "cm");
+    data.weight = withUnit(fallback(measurement.patientWeight, patient.weight), "kg");
+    data.part = measurement.part;
+    data.sos = withUnit(measurement.sos, "m/s");
+    data.tScore = measurement.tScore;
+    data.zScore = measurement.zScore;
+    data.boneStrength = measurement.boneStrength.isEmpty()
+        ? measurement.diagnosis : measurement.boneStrength;
+    data.operatorName = measurement.operatorName;
+
+    const QDateTime measuredDateTime = QDateTime::fromString(measurement.measuredAt, Qt::ISODate);
+    data.measuredAt = measuredDateTime.isValid()
+        ? measuredDateTime.toString("yyyy-MM-dd HH:mm") : measurement.measuredAt;
+
+    data.age = measurement.patientAge;
+    if (data.age.isEmpty()) {
+        const QDate birthDate = QDate::fromString(data.birthDay, "yyyy-MM-dd");
+        const QDate measureDate = measuredDateTime.isValid()
+            ? measuredDateTime.date() : QDate::currentDate();
+        if (birthDate.isValid()) {
+            int age = measureDate.year() - birthDate.year();
+            if (measureDate < birthDate.addYears(age)) --age;
+            data.age = QString::number(qMax(0, age));
+        }
+    }
+
+    QStringList diagnosisParts;
+    if (!data.boneStrength.isEmpty()) {
+        diagnosisParts << "骨强度评估：" + data.boneStrength;
+    }
+    diagnosisParts << "相对骨折风险："
+                          + (measurement.fractureRisk.trimmed().isEmpty()
+                                 ? QStringLiteral("--")
+                                 : measurement.fractureRisk);
+    diagnosisParts << (measurement.boneAge.isEmpty()
+                           ? QStringLiteral("相对骨龄：--")
+                           : QStringLiteral("相对骨龄：%1 岁").arg(measurement.boneAge));
+    if (!measurement.diagnosis.isEmpty() && measurement.diagnosis != data.boneStrength) {
+        diagnosisParts << measurement.diagnosis;
+    }
+    data.diagnosis = diagnosisParts.join("；");
+    return data;
+}
+
+void MainWindow::showReport(const PatientInfo& patient,
+                            const MeasurementRecord& measurement)
+{
+    reportWidget->setReportData(buildReportData(patient, measurement));
+    ui->stackedWidget->setCurrentWidget(ui->pageReport);
+}
+
+bool MainWindow::renderReportToPrinter(QPrinter* printer)
+{
+    if (!printer || !reportWidget) return false;
+    QPainter painter;
+    if (!painter.begin(printer)) return false;
+    const QRect pageRect = printer->pageLayout().paintRectPixels(printer->resolution());
+    reportWidget->renderReport(&painter, pageRect);
+    painter.end();
+    return true;
 }
 
 
@@ -3697,13 +3856,48 @@ void MainWindow::showPatientHistory(const QString& patientId)
     table->horizontalHeader()->setStretchLastSection(true);
     layout->addWidget(table);
     QHBoxLayout* buttons = new QHBoxLayout();
+    QPushButton* reportButton = new QPushButton("查看报表", &dialog);
     QPushButton* deleteButton = new QPushButton("删除本条记录", &dialog);
     QPushButton* closeButton = new QPushButton("关闭", &dialog);
+    buttons->addWidget(reportButton);
     buttons->addWidget(deleteButton);
     buttons->addStretch();
     buttons->addWidget(closeButton);
     layout->addLayout(buttons);
     connect(closeButton, &QPushButton::clicked, &dialog, &QDialog::accept);
+    auto openSelectedReport = [this, table, patientId, &dialog]() {
+        const int row = table->currentRow();
+        if (row < 0 || !table->item(row, 0)) {
+            QMessageBox::information(&dialog, "提示", "请先选择一条检测记录。");
+            return;
+        }
+        const QString recordId = table->item(row, 0)->data(Qt::UserRole).toString();
+        const PatientInfo* patient = nullptr;
+        const MeasurementRecord* measurement = nullptr;
+        for (const PatientInfo& item : patientList) {
+            if (item.id == patientId) {
+                patient = &item;
+                break;
+            }
+        }
+        for (const MeasurementRecord& item : measurementList) {
+            if (item.id == recordId) {
+                measurement = &item;
+                break;
+            }
+        }
+        if (!patient || !measurement) {
+            QMessageBox::warning(&dialog, "报表", "无法找到这条检测记录对应的报表数据。");
+            return;
+        }
+        const PatientInfo patientCopy = *patient;
+        const MeasurementRecord measurementCopy = *measurement;
+        dialog.accept();
+        showReport(patientCopy, measurementCopy);
+    };
+    connect(reportButton, &QPushButton::clicked, &dialog, openSelectedReport);
+    connect(table, &QTableWidget::cellDoubleClicked, &dialog,
+            [openSelectedReport](int, int) { openSelectedReport(); });
     connect(deleteButton, &QPushButton::clicked, &dialog, [this, table, patientId, &dialog]() {
         const int row = table->currentRow();
         if (row < 0 || !table->item(row, 0)) return;
@@ -3758,7 +3952,16 @@ void MainWindow::on_btnSelectPatient_clicked()
 void MainWindow::on_btnViewHistory_clicked()
 {
     if (patientMeasureRunning) return;
-    const int row = ui->table->currentRow();
+    int row = ui->table->currentRow();
+    if (row < 0) {
+        for (int i = 0; i < ui->table->rowCount(); ++i) {
+            QTableWidgetItem* item = ui->table->item(i, 0);
+            if (item && item->checkState() == Qt::Checked) {
+                row = i;
+                break;
+            }
+        }
+    }
     if (row < 0 || !ui->table->item(row, 0)) {
         QMessageBox::information(this, "提示", "请先选中一位患者，再点击“查看历史”。");
         return;
