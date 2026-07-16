@@ -10,6 +10,7 @@ static constexpr bool kDebugPerFrame = false;
 #include "bonehealth.h"
 #include "agesoschartwidget.h"
 #include "reportwidget.h"
+#include "calibrationdialog.h"
 #include "utils.h"
 
 #include <QtSerialPort/QSerialPortInfo>
@@ -70,6 +71,15 @@ MainWindow::MainWindow(QWidget *parent)
     if (!accountStore.loadOrInitialize(accountsFilePath, &accountError)) {
         QMessageBox::warning(this, "账号初始化失败", accountError);
     }
+    calibrationFilePath = QCoreApplication::applicationDirPath() + "/calibration.xml";
+    QString calibrationError;
+    if (!calibrationStore.loadOrInitialize(calibrationFilePath, &calibrationError)) {
+        QMessageBox::warning(this, QStringLiteral("校准参数加载失败"), calibrationError);
+    } else if (!calibrationError.isEmpty()) {
+        QMessageBox::warning(this, QStringLiteral("校准参数已恢复"), calibrationError);
+    }
+    signalProcessor.probeDistanceCD = calibrationStore.parameters().activeD;
+    calibrationSignalProcessor.probeDistanceCD = calibrationStore.parameters().activeD;
     QAction* manageAccountsAction = ui->menubar->addAction("账号管理");
     manageAccountsAction->setObjectName("manageAccountsAction");
     manageAccountsAction->setVisible(false);
@@ -213,6 +223,8 @@ MainWindow::MainWindow(QWidget *parent)
         }
         showReport(currentPatient, *latest);
     });
+    connect(ui->pushButton_2, &QPushButton::clicked,
+            this, &MainWindow::openCalibrationDialog);
     // ✅ 初始化滤波器
     signalProcessor.designFIR(1250000.0, 600000.0, 62500000.0);
 
@@ -315,6 +327,71 @@ void MainWindow::manageAccounts()
     connect(&reset,&QPushButton::clicked,&dialog,[this,&dialog,selected](){bool ok=false;QString name=selected();if(name.isEmpty())return;QString pass=QInputDialog::getText(&dialog,"重置密码","新密码：",QLineEdit::Password,QString(),&ok);if(!ok)return;QString e;if(!accountStore.resetPassword(name,pass,&e)){QMessageBox::warning(&dialog,"失败",e);return;}dialog.accept();});
     connect(&remove,&QPushButton::clicked,&dialog,[this,&dialog,selected](){QString name=selected();if(name.isEmpty()||QMessageBox::question(&dialog,"确认删除","确定删除账号？")!=QMessageBox::Yes)return;QString e;if(!accountStore.deleteUser(name,&e)){QMessageBox::warning(&dialog,"失败",e);return;}dialog.accept();});
     dialog.exec();
+}
+
+void MainWindow::openCalibrationDialog()
+{
+    if (patientMeasureRunning) {
+        QMessageBox::information(this,
+                                 QStringLiteral("正在检测"),
+                                 QStringLiteral("请先停止当前患者检测，再进入探头校准。"));
+        return;
+    }
+
+    if (autoRunning) {
+        autoTimer->stop();
+        autoRunning = false;
+        ui->triggerButton->setText(QStringLiteral("自动采集"));
+    }
+
+    CalibrationDialog dialog(&calibrationStore, currentAccount.username, this);
+    calibrationDialog = &dialog;
+    connect(&dialog, &CalibrationDialog::acquisitionStartRequested,
+            this, &MainWindow::startCalibrationAcquisition);
+    connect(&dialog, &CalibrationDialog::acquisitionStopRequested,
+            this, &MainWindow::stopCalibrationAcquisition);
+    connect(&dialog, &CalibrationDialog::activeDChanged, this, [this](double activeD) {
+        signalProcessor.probeDistanceCD = activeD;
+        calibrationSignalProcessor.probeDistanceCD = activeD;
+    });
+    dialog.exec();
+    stopCalibrationAcquisition();
+    calibrationDialog = nullptr;
+}
+
+void MainWindow::startCalibrationAcquisition(double processingD)
+{
+    if (!serial->isOpen()) {
+        if (calibrationDialog) {
+            calibrationDialog->notifyAcquisitionUnavailable(
+                QStringLiteral("设备未连接。请先连接骨密度仪，再重新开始本次采集。"));
+        }
+        return;
+    }
+
+    rxBuffer.clear();
+    frameGroups.clear();
+    samplesA.clear();
+    samplesB.clear();
+    samplesC.clear();
+    samplesD.clear();
+    chReceived[0] = chReceived[1] = chReceived[2] = chReceived[3] = false;
+    serial->readAll();
+    calibrationSignalProcessor.probeDistanceCD = processingD;
+    acquireMode = CalibrationAcquireMode;
+    autoTimer->start(80);
+}
+
+void MainWindow::stopCalibrationAcquisition()
+{
+    if (autoTimer && autoTimer->isActive() && acquireMode == CalibrationAcquireMode) {
+        autoTimer->stop();
+    }
+    if (acquireMode == CalibrationAcquireMode) acquireMode = DebugAcquireMode;
+    rxBuffer.clear();
+    frameGroups.clear();
+    chReceived[0] = chReceived[1] = chReceived[2] = chReceived[3] = false;
+    calibrationSignalProcessor.probeDistanceCD = calibrationStore.parameters().activeD;
 }
 
 // ================= 串口扫描等原有代码 =======================================================================================
@@ -2105,6 +2182,12 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
                  << "AD.onset =" << pickAD.onset << "AD.peak =" << pickAD.peak;
     }
 
+    if (acquireMode == CalibrationAcquireMode) {
+        processCalibrationFrame(filBC, filBD, filAC, filAD,
+                                pickBC, pickBD, pickAC, pickAD);
+        return;
+    }
+
     double vMin = 1800.0;
     double vMax = 5000.0;
 
@@ -2567,6 +2650,81 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
     }
 }
 
+void MainWindow::processCalibrationFrame(const QVector<double>& filBC,
+                                         const QVector<double>& filBD,
+                                         const QVector<double>& filAC,
+                                         const QVector<double>& filAD,
+                                         const ArrivalResult& pickBC,
+                                         const ArrivalResult& pickBD,
+                                         const ArrivalResult& pickAC,
+                                         const ArrivalResult& pickAD)
+{
+    if (!calibrationDialog) return;
+
+    constexpr double vMin = 1800.0;
+    constexpr double vMax = 5000.0;
+    constexpr int lagToleranceAB = 20;
+
+    CalibrationFrame frame;
+    const PairResult bRes = calibrationSignalProcessor.estimatePairSpeed(
+        filBD, filBC, pickBD, pickBC, vMin, vMax,
+        QStringLiteral("Calibration B_pair / BD->BC"));
+
+    if (!bRes.valid) {
+        calibrationDialog->submitFrame(frame);
+        return;
+    }
+
+    const int bLagJump = std::abs(bRes.refinedLag - bRes.roughLag);
+    const int lagMin = qMax(1, static_cast<int>(std::floor(
+        calibrationSignalProcessor.probeDistanceCD
+        / (vMax * calibrationSignalProcessor.samplePeriod))) - 5);
+    const int lagMax = qMax(lagMin + 1, static_cast<int>(std::ceil(
+        calibrationSignalProcessor.probeDistanceCD
+        / (vMin * calibrationSignalProcessor.samplePeriod))) + 5);
+
+    frame.bValid = bLagJump <= 70 && bRes.corr >= mCfg.frameCorrBMin;
+    frame.boundaryPeak = std::abs(bRes.refinedLag) <= lagMin + 2
+        || std::abs(bRes.refinedLag) >= lagMax - 2;
+    frame.sosB = bRes.sos;
+    frame.corrB = bRes.corr;
+    frame.lagB = bRes.refinedLag;
+
+    PairResult aRes = calibrationSignalProcessor.estimatePairSpeedByValley(
+        filAD, filAC, pickAD, bRes.refinedLag, lagToleranceAB,
+        QStringLiteral("Calibration A_pair / AD->AC / valley"));
+    if (!aRes.valid) {
+        aRes = calibrationSignalProcessor.estimatePairSpeed(
+            filAD, filAC, pickAD, pickAC, vMin, vMax,
+            QStringLiteral("Calibration A_pair / AD->AC / constrained"),
+            qMax(1, bRes.refinedLag - lagToleranceAB),
+            bRes.refinedLag + lagToleranceAB);
+    }
+    frame.aValid = aRes.valid && aRes.corr >= 0.25;
+    if (aRes.valid) {
+        frame.sosA = aRes.sos;
+        frame.corrA = aRes.corr;
+        frame.lagA = aRes.refinedLag;
+    }
+
+    const PairResult auditB = signalProcessor.estimatePairSpeed(
+        filBD, filBC, pickBD, pickBC, vMin, vMax,
+        QStringLiteral("Calibration active-D peak audit"));
+    frame.peakConsistent = auditB.valid
+        && std::abs(auditB.refinedLag - bRes.refinedLag) <= 3;
+
+    if (aRes.valid) {
+        updateSpeedDebugPanel(aRes.sos, bRes.sos, bRes.sos,
+                              aRes.refinedLag, bRes.refinedLag,
+                              std::abs(aRes.refinedLag - bRes.refinedLag),
+                              aRes.corr, bRes.corr);
+    } else {
+        updateSpeedDebugPanel(0.0, bRes.sos, bRes.sos,
+                              0, bRes.refinedLag, 0, 0.0, bRes.corr);
+    }
+    calibrationDialog->submitFrame(frame);
+}
+
 void MainWindow::resetBoneLagStability()
 {
     recentBoneLagBList.clear();
@@ -2835,6 +2993,11 @@ void MainWindow::handleSerialError(QSerialPort::SerialPortError error) {
 
     serialErrorHandled = true;
 
+    if (acquireMode == CalibrationAcquireMode && calibrationDialog) {
+        calibrationDialog->notifyAcquisitionUnavailable(
+            QStringLiteral("设备连接已断开，本次独立测量已取消。请检查USB和设备电源，重新连接后再采集。"));
+        stopCalibrationAcquisition();
+    }
     if (autoTimer && autoTimer->isActive()) autoTimer->stop();
     autoRunning = false;
     if (patientMeasureRunning) stopPatientMeasurement();

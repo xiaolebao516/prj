@@ -21,6 +21,7 @@
 #include "accountstore.h"
 #include "reportwidget.h"
 #include "signalprocessor.h"
+#include "calibrationstore.h"
 QT_USE_NAMESPACE
 
     QT_BEGIN_NAMESPACE
@@ -30,6 +31,7 @@ QT_END_NAMESPACE
 class QMessageBox;
 class QResizeEvent;
 class QPrinter;
+class CalibrationDialog;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -143,6 +145,7 @@ private:
     PatientStore patientStore;
     AccountStore accountStore;
     QString accountsFilePath;
+    QString calibrationFilePath;
     AccountInfo currentAccount;
     MeasurementRecord pendingMeasurement;
     bool hasPendingMeasurement = false;
@@ -211,6 +214,14 @@ private:
                             const QVector<double>& filB,
                             const QVector<double>& filC,
                             const QVector<double>& filD);
+    void processCalibrationFrame(const QVector<double>& filBC,
+                                 const QVector<double>& filBD,
+                                 const QVector<double>& filAC,
+                                 const QVector<double>& filAD,
+                                 const ArrivalResult& pickBC,
+                                 const ArrivalResult& pickBD,
+                                 const ArrivalResult& pickAC,
+                                 const ArrivalResult& pickAD);
 
     void appendSpeedPoint(double speedAvg);
 
@@ -423,6 +434,13 @@ private:
 
     // ================== FIR / DSP (delegated to SignalProcessor) ==================
     SignalProcessor signalProcessor;
+    SignalProcessor calibrationSignalProcessor;
+    CalibrationStore calibrationStore;
+    CalibrationDialog* calibrationDialog = nullptr;
+
+    void openCalibrationDialog();
+    void startCalibrationAcquisition(double processingD);
+    void stopCalibrationAcquisition();
 
     // ================== Debug output helpers ==================
     void printRangeFormatted(const QString& name,

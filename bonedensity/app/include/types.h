@@ -117,5 +117,6 @@ enum ArchiveMode {
 
 enum AcquireMode {
     DebugAcquireMode,       // trigger / 获取波形：只调试，不走病人测量流程
-    PatientMeasureMode      // 开始检测：走病人测量流程
+    PatientMeasureMode,     // 开始检测：走病人测量流程
+    CalibrationAcquireMode  // 标准试块校准：使用独立校准处理器
 };

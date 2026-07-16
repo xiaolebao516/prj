@@ -14,6 +14,9 @@ SOURCES += \
     src/main.cpp \
     src/mainwindow.cpp \
     src/accountstore.cpp \
+    src/calibration.cpp \
+    src/calibrationdialog.cpp \
+    src/calibrationstore.cpp \
     src/patientstore.cpp \
     src/agesoschartwidget.cpp \
     src/reportwidget.cpp \
@@ -24,6 +27,9 @@ SOURCES += \
 HEADERS += \
     include/mainwindow.h \
     include/accountstore.h \
+    include/calibration.h \
+    include/calibrationdialog.h \
+    include/calibrationstore.h \
     include/patientstore.h \
     include/agesoschartwidget.h \
     include/reportwidget.h \
