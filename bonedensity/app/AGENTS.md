@@ -1,64 +1,163 @@
-# 项目执行规则
+# BoneDensity Ultrasonic Bone Densitometer Agent Guide
 
-## 开始任务
+## Project Map
 
-1. 先读 `REQUIREMENTS.md`、`PROJECT_CONTEXT.md` 和 `tasks.md`。
-2. 运行 `git status --short --branch`；有上游时先获取远程状态。分支落后或分叉时停止，不自动拉取、合并、变基、暂存或丢弃修改。
-3. 发现现有修改时先确认归属。与当前任务无关的用户修改必须保留且不得纳入提交。
-4. 非简单修复必须先把需求整理到 `REQUIREMENTS.md`，与用户确认范围和预期后，再在 `tasks.md` 拆分实施、测试和验收步骤。
-5. 如果实施中需要改变已确认的产品行为，先更新需求并重新确认，不得只改代码或任务来绕过需求。
+- Project root: `D:/Repository/prj/bonedensity/app`
+- Key implementation directories: `src/`, `include/`, `ui/`, `resources/`, `tests/`, and `testdata/`
+- Product specification: `.agent/reference/product-spec.md`
+- Code/data map: `.agent/reference/project-map.md`
+- Architecture reference: `.agent/reference/architecture.md`
+- Verification reference: `.agent/reference/validation.md`
+- Domain and operation references: `.agent/reference/domains/` and `.agent/reference/operations/`
+- Human documents: `docs/reports/`, `docs/research/`, `docs/guides/`, `docs/evidence/`, and `docs/archive/`
+- Loop contract: `.agent/LOOP.md`
+- Current execution state: `.agent/STATE.md`
+- Completed task log: `.agent/LOG.md`
+- Model recommendation policy: `.agent/MODEL_POLICY.md`
+- Standard state-machine protocol: `.agent/STATE_MACHINE.md`
+- Workflow skills: `.agents/skills/`
 
-## 项目边界
+## Command Entry Points
 
-- 未经用户明确批准，不得修改 `src/signalprocessor.cpp`、`src/bonehealth.cpp`、`src/utils.cpp` 中的算法，以及声速计算、检测门限、经验参数、相关系数、稳定性判断、串口协议和采集时序。
-- 采用最小可靠修改，不因 `mainwindow.cpp` 较大或局部代码较乱而进行无关重构。
-- 测试账号、患者和检测记录必须使用隔离目录或临时副本，不得覆盖真实实验数据。
-- 不得编造程序没有计算的数据、硬件测试结果或未执行的验收结论。
+| Action | Command |
+| --- | --- |
+| Build | `powershell -ExecutionPolicy Bypass -File ./build-debug.ps1` |
+| Run | No unattended run command; after Build, manually launch `build/debug/debug/BoneDensity.exe` |
+| Test | `powershell -ExecutionPolicy Bypass -File ./test-calibration.ps1` (calibration scope only) |
+| Verify | No single command; use task-specific tests plus required human or laboratory acceptance |
 
-## 构建与验证
+## Golden Rules
 
-- 命令行Debug构建统一运行 `powershell -ExecutionPolicy Bypass -File .\build-debug.ps1`。
-- 固定工具链为Qt 6.5.3 `D:\Qt\6.5.3\mingw_64` 和MinGW 11.2 `D:\Qt\Tools\mingw1120_64`。
-- 不得裸跑系统 `qmake`、`mingw32-make` 或 `g++`；系统PATH中的MSYS2 GCC会造成不兼容运行库和 `__glibcxx_assert_fail` 入口点错误。
-- 根据任务选择最小但充分的验证。编译通过不等于功能验收；纯文档修改无需Qt构建，但必须检查内容、引用和Git差异。
-- 验证结论必须区分“实际运行验证”“代码路径检查”“需要实验室硬件验证”。没有连接设备时不得声称真实五轮检测、USB热拔插或硬件数据正确性已经通过。
+1. Preserve user changes and avoid unrelated modifications.
+2. Ask the user when a critical requirement has multiple reasonable interpretations.
+3. Stay within the approved scope; do not change core requirements or weaken success criteria.
+4. Treat compilation and test results as evidence, not as completion. Complete work against the Loop success criteria and observable behavior.
+5. Diagnose ordinary implementation and execution problems autonomously.
+6. Obtain user confirmation before high-impact decisions, public interface changes, irreversible operations, or changes to core algorithms, architecture, or dependencies.
 
-## 闭环迭代
+## Workflow Selection
 
-1. 按“定义或复现 → 最小修改 → 验证 → 修正”循环处理问题，并及时更新 `tasks.md` 检查点。
-2. 在要求用户验收前，先完成当前环境中所有可执行的测试，修复已观察到的问题，并确认达到 `tasks.md` 的验收标准。
-3. 同一未解决失败最多连续调试五轮。第五轮后仍不能解决时，立即停止循环，保留原始现象和日志，在 `tasks.md` 记录已尝试内容、当前判断和缺少条件，并向用户说明需要的帮助。
-4. 硬件、实体打印机或人工视觉判断无法自动完成时可以请求用户验收，但必须明确说明Agent已验证和未验证的边界。
+Before execution, recommend one workflow and load only its Skill. State the Recommended Workflow, Confidence, Triggered Conditions, Why not the other Workflow, and Whether user confirmation is required.
 
-## 文档职责
+### Lite Basis Conditions
 
-- `REQUIREMENTS.md`：产品需求的唯一长期记录，保存背景、确认后的预期、范围、非目标和状态；不写底层实现。
-- `tasks.md`：当前执行记忆，保存任务步骤、测试、验收、状态、最近检查点和阻塞；同一时间只维护一个主要任务。
-- `PROJECT_CONTEXT.md`：当前有效的项目事实、架构、数据、关键决策、风险和验证边界；不写调试流水账。
-- `PROJECT_PROGRESS.md`：面向人的简短周报，按周从近到远记录重要成果。默认只写已完成并验证的内容，未验收项必须明确标记。
-- `docs/`：专项架构、调试和调研资料，可按需要引用，不承担进度记录。
-- 不再创建其他周报、阶段日志、临时计划或重复的进度Markdown。
+Recommend Lite only when all of the following hold: the requirement is clear; the work is local, low-risk, and easily reversible; it does not need formal plan approval, sustained state, external research, or complex real-operation verification; and it does not affect core algorithms, architecture, public interfaces, important technical parameters, or a formal delivery.
 
-## 文档更新流程
+### Strong Triggers
 
-1. 用户提出非简单需求后，先写入 `REQUIREMENTS.md` 并确认。
-2. 需求确认后，在 `tasks.md` 使用需求编号拆分步骤、测试和验收标准。
-3. 执行期间持续更新 `tasks.md` 状态和最近检查点。
-4. 验收完成后，将长期有效结论同步到 `PROJECT_CONTEXT.md`，将重要用户可见成果简短写入 `PROJECT_PROGRESS.md`。
-5. 新任务开始时替换 `tasks.md` 的当前任务；旧任务只保留简短索引，详细过程由Git历史保存。
+Recommend Standard when any one of these conditions applies:
 
-## 验收证据
+- formal plan approval is required;
+- sustained state or cross-context recovery is required;
+- external research or a repository-constraint audit will affect the approach;
+- the work affects a core algorithm, architecture, public interface, or important technical parameter;
+- rollback is difficult or the error cost is high;
+- complex real-operation verification is required;
+- the result affects an important experiment, report, or formal delivery;
+- the root cause is unknown; or
+- failures have repeated without a new diagnosis.
 
-- 每个功能完成Agent自测后，保留能够证明关键流程和边界条件的最小证据集；不为每个普通步骤重复截图。
-- 界面布局或视觉结果优先保留少量关键截图；案例较多时优先保留匿名、可复现的测试数据；非界面问题可保留精简日志或自动测试结果。
-- 匿名测试数据统一放在 `testdata/<feature>/`，关键截图统一放在 `docs/evidence/<date>-<feature>/`。不得保存真实患者资料、真实账号密码、设备隐私数据、可执行文件、DLL或完整运行目录。
-- `tasks.md` 记录测试数据、边界案例、操作步骤和实际结果；`PROJECT_PROGRESS.md` 只记录汇报需要的关键证据、简短复现方法和未验证边界，不展开测试流水账。
-- 证据必须能够区分Agent实际运行、代码检查和实验室验证，且必须与提交版本对应；无法复现或来源不明的截图不得作为通过依据。
-- 验收数据可以长期保留，但运行时临时副本不得纳入Git；提交前仍需精确检查证据文件，防止混入真实数据或无关产物。
+### Weak Signals
 
-## Git交付
+Do not let any one of these signals force Standard by itself:
 
-- 一个可以独立验收的功能、修复或文档任务对应一个提交；不得为了小步骤制造多个无意义提交。
-- 提交前检查最终差异和临时产物，只精确暂存当前任务文件，禁止使用 `git add .`。
-- 完成充分验证、更新文档后再提交；存在上游且项目规则允许时自动执行 `git push origin HEAD`。
-- 禁止自动执行pull、merge、rebase、reset、stash、强制推送或丢弃用户修改。
+- multiple files change, but the change is clear and low-coupling;
+- minor ambiguity does not affect the core approach;
+- some codebase understanding is needed; or
+- the work has several clear, low-risk, reversible steps.
+
+### Selection and Override
+
+1. Any Strong Trigger recommends Standard.
+2. With no Strong Trigger, recommend Standard only when multiple Weak Signals together materially increase planning, risk, or recovery cost.
+3. Otherwise recommend Lite only if every Lite Basis Condition holds. Multiple files alone are not sufficient to require Standard.
+4. When evidence is insufficient, make a low-confidence recommendation and ask the user to confirm the workflow before execution.
+5. The user may select Lite or Standard explicitly. A Lite task that later needs Standard pauses for an approved upgrade; an established Standard task never automatically downgrades to Lite.
+
+A workflow override never waives confirmation for high-impact or irreversible work, a material Goal / Scope / Success Criteria change, or a core algorithm, architecture, public interface, or important parameter change. It also never waives necessary real-operation verification or any other Golden Rule in this file or `.agent/LOOP.md`. When the user selects Lite while such a gate applies, explain the gate that remains in force.
+
+Load `.agents/skills/workflow-lite/SKILL.md` only for Lite and `.agents/skills/workflow-standard/SKILL.md` only for Standard.
+
+## Operating Context
+
+After selecting a workflow, load only the files required by that workflow.
+
+- **Inactive bootstrap:** `inactive` means no Standard Loop or recoverable Standard draft is active. Lite does not activate it; Standard initializes a fresh instance under `.agent/STATE_MACHINE.md`.
+- **Lite:** Read `.agent/LOOP.md` only when the task belongs to that Loop, then load the Lite Skill. Lite does not normally read `.agent/STATE_MACHINE.md` or maintain `.agent/STATE.md`; an independent Lite task has no state-machine context cost.
+- **Standard:** Read in this order: `.agent/LOOP.md` → `.agent/STATE_MACHINE.md` → `.agent/STATE.md` → Standard Skill. The state-machine protocol defines Standard stages, legal transitions, recovery, and State update requirements; the Skill executes the current stage.
+- **Lite upgrade:** Load the state-machine protocol and initialize the relevant Standard State only after the user approves the upgrade.
+
+Read `.agent/MODEL_POLICY.md` at its defined recommendation checkpoints. It recommends capability and reasoning effort only; it never switches a model automatically.
+
+Use `.agent/LOG.md` only for completed-task records as defined there.
+
+After the workflow control files are loaded, read Agent references only by the precise task route below; never recursively load `.agent/reference/` or `docs/`:
+
+- Product behavior, requirement status, backlog, or acceptance boundary → `.agent/reference/product-spec.md`
+- Code/data ownership or repository navigation → `.agent/reference/project-map.md`
+- Measurement architecture, persistence invariants, or cross-component impact → `.agent/reference/architecture.md`
+- Durable verification evidence or reproduction entry points → `.agent/reference/validation.md`
+- Calibration implementation or claims → `.agent/reference/domains/calibration.md`
+- Gate-diagnostic investigation → `.agent/reference/operations/debugging.md`
+
+Human documents under `docs/` are not default Agent context. Read an exact human file only when the task needs its research rationale, report, operating guide, evidence, or history. Do not store current task progress or extensive project knowledge in this file.
+
+## Project Documentation Ownership
+
+- `.agent/reference/product-spec.md`: passive source for long-term product requirements, durable product facts, backlog, evidence entry points, and external-acceptance boundaries. It does not define workflow or current task state.
+- `.agent/reference/`: concise, durable Agent facts and task-triggered technical references. Files must declare authority and must not duplicate long-form human rationale.
+- `.agent/LOOP.md`: active Standard Loop contract. Reference applicable `REQ-*` entries without copying or weakening them.
+- `.agent/STATE.md`: current Standard plan, progress, judgment, and verification state as required by `.agent/STATE_MACHINE.md`; inactive state contains no fabricated task.
+- `.agent/LOG.md`: minimal completed-task records according to its logging policy.
+- `.agent/work/<loop-id>/`: optional temporary working material for one Loop. Route durable results and remove the Loop directory before delivery.
+- `docs/reports/project-progress.md`: formal concise weekly report for mentors and project members. Record only verified results; label unaccepted work explicitly.
+- `docs/research/`: human rationale, source analysis, and exploratory review; non-normative unless a canonical Agent reference explicitly adopts a settled conclusion.
+- `docs/guides/`: human operating aids; they do not authorize algorithm, parameter, product, or acceptance changes.
+- `docs/evidence/`: minimal reproducible human-facing evidence when a task actually needs it.
+- `docs/archive/`: historical, superseded, or unsafe material retained for traceability and explicitly non-authoritative.
+- `docs/param_tuning_analysis.md`: protected pre-existing human research exception. It remains in place, is default-unread, and must not be modified, moved, deleted, formatted, staged, or treated as parameter authority without new explicit user approval.
+- Framework installation or migration never becomes a Loop instance and is not recorded in `.agent/LOOP.md`, `.agent/STATE.md`, or `.agent/LOG.md`.
+
+For durable research: define the decision question, prefer primary/official sources, keep source links and reasoning in one focused `docs/research/` file, and distill only settled operational conclusions into the exact Agent reference. Label assumptions, conflicting evidence, and external-verification limits; do not copy the same long-form analysis into both layers.
+
+## Fixed Toolchain and Commands
+
+- Use only Qt 6.5.3 at `D:\\Qt\\6.5.3\\mingw_64` with MinGW 11.2 at `D:\\Qt\\Tools\\mingw1120_64` for command-line builds.
+- Do not invoke an unqualified system `qmake`, `mingw32-make`, or `g++`. Mixing the system MSYS2 toolchain with the Qt runtime can produce incompatible binaries.
+- `build-debug.ps1` is the canonical clean Debug build and deployment entry point.
+- `test-calibration.ps1` is a focused calibration suite, not a whole-project test or final acceptance command.
+- Qt Creator may open `BoneDensity.pro` for interactive runs. Hardware acquisition, physical printing, and qualified-phantom calibration require supervised real-operation checks.
+
+## Protected Engineering Boundaries
+
+Obtain explicit user approval before changing any of the following:
+
+- measurement algorithms or constants in `src/signalprocessor.cpp`, `src/bonehealth.cpp`, or `src/utils.cpp`;
+- SOS calculation, gating thresholds, empirical parameters, correlation or stability rules, the active probe baseline D, or channel-selection policy;
+- serial framing, 115200-baud configuration, acquisition commands, or the 80 ms acquisition timing;
+- persistent data schemas, migration semantics, authentication behavior, architecture, public interfaces, or dependencies.
+
+Treat `src/mainwindow.cpp` as a high-coupling orchestration hotspot. Make localized changes and do not refactor it merely for tidiness.
+
+## Data and Safety Rules
+
+- Runtime `accounts.xml`, `patients.xml`, `measurements.xml`, and `calibration.xml` live beside the executable and may contain real operational or patient data.
+- Never use a real executable directory for automated tests. Use an isolated temporary directory or committed anonymous fixtures under `testdata/`.
+- Preserve atomic-write, backup, corruption-recovery, and historical-patient-snapshot behavior when touching storage.
+- Do not claim medical, metrological, DICOM, hospital-system, printer, USB, or hardware acceptance beyond the evidence actually obtained.
+
+## Verification Expectations
+
+- Map verification to the applicable `REQ-*` or Loop `SC-*`; a successful build proves only compilation and deployment.
+- Run `test-calibration.ps1` for calibration changes, plus the canonical Debug build when the application is affected.
+- Use anonymous fixtures for age-SOS and persistence demonstrations. Keep visual evidence minimal and reproducible.
+- Store reusable boundary fixtures under `testdata/<feature>/`; keep only a few decisive visual artifacts under `docs/evidence/<date>-<feature>/`. Record case-to-operation mappings in the active verification plan or delivery evidence, not in parallel progress files.
+- Mark device acquisition, five-round hardware flow, USB hot-unplug/reconnection, physical print output, coupling repeatability, temperature truth, and qualified-phantom accuracy as external acceptance unless they were actually exercised.
+- For the same stable failure, allow at most five meaningful repair iterations as defined by the state-machine protocol.
+
+## Git and Scope Discipline
+
+- Start by inspecting `git status --short --branch`; preserve pre-existing modified and untracked files.
+- Do not discard, overwrite, stage, or include unrelated user work.
+- Do not commit, push, merge, rebase, or modify remote state unless the user explicitly authorizes it.
+- Before delivery, run `git diff --check`, inspect the path-level diff, and report which checks were actually run and which acceptance remains external.

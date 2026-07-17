@@ -1,10 +1,8 @@
-# Claude入口
+# Claude 入口
 
-开始任何工作前，按顺序阅读：
+- 首先遵守 `AGENTS.md`。
+- 项目工作流由 `AGENTS.md`、`.agent/` 和对应的 Workflow Skill 管理。
+- 长期产品规格按需读取 `.agent/reference/product-spec.md`。
+- 面向导师和项目成员的人类周报为 `docs/reports/project-progress.md`。
 
-1. `AGENTS.md`：项目执行、验证、文档和Git规则。
-2. `REQUIREMENTS.md`：已经确认的产品需求。
-3. `PROJECT_CONTEXT.md`：当前架构、数据、行为、风险和验证边界。
-4. `tasks.md`：当前任务、测试、验收和最近检查点。
-
-面向人的每周进度在 `PROJECT_PROGRESS.md`；专项技术资料在 `docs/`。不要在本文件复制项目上下文或进度，以免多份记录产生冲突。
+不要在本文件复制项目上下文、工作流规则或进度，以免形成重复事实源。
