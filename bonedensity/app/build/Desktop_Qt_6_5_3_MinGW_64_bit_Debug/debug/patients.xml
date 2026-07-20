@@ -1,0 +1,10 @@
+<patients version="2">
+    <patient birth="2026-07-12" gender="男" height="1" id="1" name="1" weight="1"/>
+    <patient birth="2007-08-01" gender="女" height="165" id="G19" name="【测试】十九岁女童" weight="52"/>
+    <patient birth="2006-01-01" gender="女" height="166" id="W20" name="【测试】二十岁女性" weight="54"/>
+    <patient birth="2014-03-01" gender="男" height="150" id="B12" name="【测试】十二岁男童" weight="42"/>
+    <patient birth="1981-02-01" gender="男" height="175" id="M45" name="【测试】成年男性多记录" weight="70"/>
+    <patient birth="2010-07-17" gender="男" height="168" id="OLD16" name="【测试】旧记录年龄回算" weight="58"/>
+    <patient birth="1996-04-10" gender="女" height="163" id="EMPTY" name="【测试】无检测记录女性" weight="50"/>
+    <patient birth="1986-05-20" gender="男" height="172" id="OUTSIDE" name="【测试】超范围结果" weight="68"/>
+</patients>
