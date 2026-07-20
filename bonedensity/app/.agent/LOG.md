@@ -33,3 +33,29 @@ Do not store complete terminal output, long reasoning traces, every minor action
 - **Problems encountered:** A temporary Codex write-quota interruption delayed the final State transition; recovery found no repository divergence or content loss.
 - **Learnings:** Precise non-recursive routing and explicit Agent-versus-human authority labels prevent mixed documents from becoming accidental implementation sources.
 - **Follow-up:** `none`
+
+### 2026-07-20 - AGE-SOS-DEMO-001 - Correct runtime placement and GUI acceptance
+
+- **Milestone:** `AGE-SOS-DEMO-001 - Verified group-meeting age-SOS demonstration runtime`
+- **Workflow:** `standard`
+- **Task objective:** Place anonymous age-SOS demonstration archives beside the exact executable used by the user and verify the visible archive list.
+- **Key decisions:** Match the runtime by the screenshot's existing `ID=1` record; preserve the existing XML through same-directory backups; mark every fixture with `【测试】` and `测试数据`.
+- **Actual changes:** Added seven anonymous patients and seven measurements to `build/Desktop_Qt_6_5_3_MinGW_64_bit_Debug/debug/`; corrected the weekly report and Standard State.
+- **Verification and result:** XML parsing and counts passed; SHA-256 backups matched originals; the exact Qt Creator runtime showed all eight archive rows, including G19/W20/M45/EMPTY/OUTSIDE; the user confirmed visibility.
+- **Final status:** `completed; committed locally and unpushed`
+- **Problems encountered:** Fixtures were initially placed in a different Debug runtime; matching the screenshot's `ID=1` record identified the actual Qt Creator directory.
+- **Learnings:** Runtime-data verification must use the executable's `applicationDirPath()` and an observable record from the user's running instance, not a presumed build folder.
+- **Follow-up:** `none`
+
+### 2026-07-18 - PORT-001 - Portable Windows handoff
+
+- **Milestone:** `PORT-001 - Portable Windows distribution and data-preserving computer handoff`
+- **Workflow:** `standard`
+- **Task objective:** Deliver a fast, one-click U-disk handoff for a portable Windows runtime without changing local XML storage formats.
+- **Key decisions:** Use a strict runtime whitelist and timestamped whole-folder package rather than application-level import/overwrite; support Windows 10/11 x64 only.
+- **Actual changes:** Added handoff scripts, Chinese operator guidance, isolated script tests, and Debug-deployment asset copying.
+- **Verification and result:** Isolated package/failure tests, deployed-runtime rehearsal, PowerShell syntax checks, Debug build, calibration suite, protected-file fingerprint, and diff check passed.
+- **Final status:** `completed; uncommitted and unpushed`
+- **Problems encountered:** Windows PowerShell 5.1 initially misread UTF-8 Chinese script text without a BOM; UTF-8 BOM markers and a path-independent launcher resolved it.
+- **Learnings:** A runtime whitelist plus Windows-native copy and a package manifest provides fast handoff while excluding Agent and development content; no new generic Skill or system rule is justified yet.
+- **Follow-up:** `none`
