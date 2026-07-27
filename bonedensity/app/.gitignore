@@ -1,3 +1,5 @@
 .qtcreator/
 /build/
 .qtcreator/
+/delivery/
+/tmp/

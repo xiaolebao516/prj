@@ -27,6 +27,321 @@ bool writeDocument(const QString& path, const QDomDocument& document, QString* e
     return true;
 }
 
+QString transactionMarkerPath(const QString& patientsPath)
+{
+    return patientsPath + ".txn";
+}
+
+QString transactionBackupPath(const QString& path)
+{
+    return path + ".txn.bak";
+}
+
+QString nextBadBackupPath(const QString& path)
+{
+    QString backupPath = path + ".bad.bak";
+    int suffix = 1;
+    while (QFileInfo::exists(backupPath)) {
+        backupPath = path + QString(".bad.%1.bak").arg(suffix++);
+    }
+    return backupPath;
+}
+
+void setBadFileError(const QString& path, const QString& reason, QString* errorMessage)
+{
+    const QString backupPath = nextBadBackupPath(path);
+    QFile source(path);
+    if (!source.copy(backupPath)) {
+        if (errorMessage) {
+            *errorMessage = reason + QString::fromUtf8("；异常文件备份失败：") + source.errorString();
+        }
+        return;
+    }
+    if (errorMessage) {
+        *errorMessage = reason + QString::fromUtf8("；异常文件已备份到：") + backupPath;
+    }
+}
+
+bool validatePatientsDocument(const QDomDocument& document,
+                              QSet<QString>* patientIds,
+                              bool* legacy,
+                              QString* errorMessage)
+{
+    const QDomElement root = document.documentElement();
+    if (root.tagName() != "patients") {
+        if (errorMessage) *errorMessage = QString::fromUtf8("根节点不是 patients");
+        return false;
+    }
+
+    const QString version = root.attribute("version").trimmed();
+    if (!version.isEmpty() && version != "2") {
+        if (errorMessage) {
+            *errorMessage = QString::fromUtf8("不支持的 patients.xml 版本：") + version;
+        }
+        return false;
+    }
+    const bool isLegacy = version.isEmpty();
+    QSet<QString> ids;
+    const QDomNodeList nodes = root.elementsByTagName("patient");
+    for (int i = 0; i < nodes.count(); ++i) {
+        const QString id = nodes.at(i).toElement().attribute("id");
+        if (id.trimmed().isEmpty()) {
+            if (errorMessage) *errorMessage = QString::fromUtf8("患者编号为空");
+            return false;
+        }
+        if (!isLegacy && ids.contains(id)) {
+            if (errorMessage) *errorMessage = QString::fromUtf8("患者编号重复：") + id;
+            return false;
+        }
+        ids.insert(id);
+    }
+    if (patientIds) *patientIds = ids;
+    if (legacy) *legacy = isLegacy;
+    return true;
+}
+
+bool validateMeasurementsDocument(const QDomDocument& document,
+                                  const QSet<QString>& patientIds,
+                                  QString* errorMessage)
+{
+    const QDomElement root = document.documentElement();
+    if (root.tagName() != "measurements") {
+        if (errorMessage) *errorMessage = QString::fromUtf8("根节点不是 measurements");
+        return false;
+    }
+    const QString version = root.attribute("version").trimmed();
+    if (version != "1") {
+        if (errorMessage) {
+            *errorMessage = QString::fromUtf8("不支持的 measurements.xml 版本：")
+                + (version.isEmpty() ? QString::fromUtf8("空") : version);
+        }
+        return false;
+    }
+
+    QSet<QString> measurementIds;
+    const QDomNodeList nodes = root.elementsByTagName("measurement");
+    for (int i = 0; i < nodes.count(); ++i) {
+        const QDomElement element = nodes.at(i).toElement();
+        const QString id = element.attribute("id");
+        const QString patientId = element.attribute("patientId");
+        if (id.trimmed().isEmpty()) {
+            if (errorMessage) *errorMessage = QString::fromUtf8("检测记录编号为空");
+            return false;
+        }
+        if (patientId.trimmed().isEmpty()) {
+            if (errorMessage) *errorMessage = QString::fromUtf8("检测记录患者编号为空");
+            return false;
+        }
+        if (measurementIds.contains(id)) {
+            if (errorMessage) *errorMessage = QString::fromUtf8("检测记录编号重复：") + id;
+            return false;
+        }
+        if (!patientIds.contains(patientId)) {
+            if (errorMessage) {
+                *errorMessage = QString::fromUtf8("检测记录找不到对应患者：") + patientId;
+            }
+            return false;
+        }
+        measurementIds.insert(id);
+    }
+    return true;
+}
+
+bool readFileBytes(const QString& path, QByteArray* data, QString* errorMessage)
+{
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly)) {
+        if (errorMessage) *errorMessage = file.errorString();
+        return false;
+    }
+    *data = file.readAll();
+    if (file.error() != QFileDevice::NoError) {
+        if (errorMessage) *errorMessage = file.errorString();
+        return false;
+    }
+    return true;
+}
+
+bool writeFileBytes(const QString& path, const QByteArray& data, QString* errorMessage)
+{
+    QSaveFile file(path);
+    if (!file.open(QIODevice::WriteOnly)) {
+        if (errorMessage) *errorMessage = file.errorString();
+        return false;
+    }
+    if (file.write(data) != data.size()) {
+        if (errorMessage) *errorMessage = file.errorString();
+        file.cancelWriting();
+        return false;
+    }
+    if (!file.commit()) {
+        if (errorMessage) *errorMessage = file.errorString();
+        return false;
+    }
+    return true;
+}
+
+bool removeIfPresent(const QString& path, QString* errorMessage)
+{
+    if (!QFileInfo::exists(path)) return true;
+    QFile file(path);
+    if (file.remove()) return true;
+    if (errorMessage) *errorMessage = file.errorString();
+    return false;
+}
+
+bool copyTransactionBackup(const QString& sourcePath,
+                           const QString& backupPath,
+                           QString* errorMessage)
+{
+    QString removeError;
+    if (!removeIfPresent(backupPath, &removeError)) {
+        if (errorMessage) *errorMessage = QString::fromUtf8("无法清理旧事务备份：") + removeError;
+        return false;
+    }
+    if (!QFileInfo::exists(sourcePath)) return true;
+
+    QFile source(sourcePath);
+    if (!source.copy(backupPath)) {
+        if (errorMessage) *errorMessage = source.errorString();
+        return false;
+    }
+    return true;
+}
+
+bool markerFlag(const QDomElement& root, const QString& name, bool* value)
+{
+    const QString text = root.attribute(name);
+    if (text == "1") {
+        *value = true;
+        return true;
+    }
+    if (text == "0") {
+        *value = false;
+        return true;
+    }
+    return false;
+}
+
+bool recoverPendingTransaction(const QString& patientsPath,
+                               const QString& measurementsPath,
+                               QString* errorMessage)
+{
+    const QString markerPath = transactionMarkerPath(patientsPath);
+    if (!QFileInfo::exists(markerPath)) return true;
+
+    QFile markerFile(markerPath);
+    if (!markerFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        if (errorMessage) {
+            *errorMessage = QString::fromUtf8("无法读取未完成的数据事务标记：") + markerFile.errorString();
+        }
+        return false;
+    }
+    QDomDocument markerDocument;
+    const bool parsed = static_cast<bool>(markerDocument.setContent(&markerFile));
+    markerFile.close();
+    const QDomElement root = markerDocument.documentElement();
+    bool patientsExisted = false;
+    bool measurementsExisted = false;
+    if (!parsed || root.tagName() != "patientDataTransaction" ||
+        root.attribute("version") != "1" ||
+        !markerFlag(root, "patientsExisted", &patientsExisted) ||
+        !markerFlag(root, "measurementsExisted", &measurementsExisted)) {
+        if (errorMessage) *errorMessage = QString::fromUtf8("未完成的数据事务标记无效，已拒绝加载档案");
+        return false;
+    }
+
+    const QString patientsBackup = transactionBackupPath(patientsPath);
+    const QString measurementsBackup = transactionBackupPath(measurementsPath);
+    QByteArray patientBytes;
+    QByteArray measurementBytes;
+    QString ioError;
+    if (patientsExisted && !readFileBytes(patientsBackup, &patientBytes, &ioError)) {
+        if (errorMessage) {
+            *errorMessage = QString::fromUtf8("患者事务备份缺失或不可读，已拒绝加载档案：") + ioError;
+        }
+        return false;
+    }
+    if (measurementsExisted && !readFileBytes(measurementsBackup, &measurementBytes, &ioError)) {
+        if (errorMessage) {
+            *errorMessage = QString::fromUtf8("检测记录事务备份缺失或不可读，已拒绝加载档案：") + ioError;
+        }
+        return false;
+    }
+
+    QSet<QString> backupPatientIds;
+    if (patientsExisted) {
+        QDomDocument patientDocument;
+        QString validationError;
+        const bool parsed = static_cast<bool>(patientDocument.setContent(patientBytes));
+        if (!parsed) validationError = QString::fromUtf8("XML格式损坏");
+        if (!parsed || !validatePatientsDocument(patientDocument, &backupPatientIds, nullptr,
+                                                 &validationError)) {
+            if (errorMessage) {
+                *errorMessage = QString::fromUtf8(
+                    "患者事务备份内容无效，已保留当前文件和事务现场：") + validationError;
+            }
+            return false;
+        }
+    }
+    if (measurementsExisted) {
+        QDomDocument measurementDocument;
+        QString validationError;
+        const bool parsed = static_cast<bool>(measurementDocument.setContent(measurementBytes));
+        if (!parsed) validationError = QString::fromUtf8("XML格式损坏");
+        if (!parsed || !validateMeasurementsDocument(measurementDocument, backupPatientIds,
+                                                     &validationError)) {
+            if (errorMessage) {
+                *errorMessage = QString::fromUtf8(
+                    "检测记录事务备份内容无效，已保留当前文件和事务现场：") + validationError;
+            }
+            return false;
+        }
+    }
+
+    if (patientsExisted) {
+        if (!writeFileBytes(patientsPath, patientBytes, &ioError)) {
+            if (errorMessage) *errorMessage = QString::fromUtf8("患者事务恢复失败：") + ioError;
+            return false;
+        }
+    } else if (!removeIfPresent(patientsPath, &ioError)) {
+        if (errorMessage) *errorMessage = QString::fromUtf8("患者事务恢复失败：") + ioError;
+        return false;
+    }
+
+    if (measurementsExisted) {
+        if (!writeFileBytes(measurementsPath, measurementBytes, &ioError)) {
+            if (errorMessage) *errorMessage = QString::fromUtf8("检测记录事务恢复失败：") + ioError;
+            return false;
+        }
+    } else if (!removeIfPresent(measurementsPath, &ioError)) {
+        if (errorMessage) *errorMessage = QString::fromUtf8("检测记录事务恢复失败：") + ioError;
+        return false;
+    }
+
+    if (!removeIfPresent(markerPath, &ioError)) {
+        if (errorMessage) *errorMessage = QString::fromUtf8("数据已恢复，但无法清理事务标记：") + ioError;
+        return false;
+    }
+    removeIfPresent(patientsBackup, nullptr);
+    removeIfPresent(measurementsBackup, nullptr);
+    return true;
+}
+
+bool writeTransactionMarker(const QString& markerPath,
+                            bool patientsExisted,
+                            bool measurementsExisted,
+                            QString* errorMessage)
+{
+    QDomDocument document;
+    QDomElement root = document.createElement("patientDataTransaction");
+    root.setAttribute("version", "1");
+    root.setAttribute("patientsExisted", patientsExisted ? "1" : "0");
+    root.setAttribute("measurementsExisted", measurementsExisted ? "1" : "0");
+    document.appendChild(root);
+    return writeDocument(markerPath, document, errorMessage);
+}
+
 PatientInfo patientFromElement(const QDomElement& element)
 {
     PatientInfo patient;
@@ -99,14 +414,16 @@ bool loadMeasurementsFile(const QString& path, QList<MeasurementRecord>* records
 
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        if (errorMessage) *errorMessage = file.errorString();
+        setBadFileError(path,
+                        QString::fromUtf8("无法读取 measurements.xml：") + file.errorString(),
+                        errorMessage);
         return false;
     }
     QDomDocument document;
     const bool parsed = static_cast<bool>(document.setContent(&file));
     file.close();
     if (!parsed || document.documentElement().tagName() != "measurements") {
-        if (errorMessage) *errorMessage = QString::fromUtf8("无法读取 measurements.xml");
+        setBadFileError(path, QString::fromUtf8("无法读取 measurements.xml"), errorMessage);
         return false;
     }
 
@@ -126,6 +443,8 @@ bool PatientStore::load(const QString& patientsPath,
                         QList<MeasurementRecord>* measurements,
                         QString* errorMessage) const
 {
+    if (!recoverPendingTransaction(patientsPath, measurementsPath, errorMessage)) return false;
+
     QList<PatientInfo> loadedPatients;
     QList<MeasurementRecord> legacyRecords;
     bool legacy = false;
@@ -133,14 +452,16 @@ bool PatientStore::load(const QString& patientsPath,
     QFile patientFile(patientsPath);
     if (patientFile.exists()) {
         if (!patientFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            if (errorMessage) *errorMessage = patientFile.errorString();
+            setBadFileError(patientsPath,
+                            QString::fromUtf8("无法读取 patients.xml：") + patientFile.errorString(),
+                            errorMessage);
             return false;
         }
         QDomDocument patientDocument;
         const bool parsed = static_cast<bool>(patientDocument.setContent(&patientFile));
         patientFile.close();
         if (!parsed || patientDocument.documentElement().tagName() != "patients") {
-            if (errorMessage) *errorMessage = QString::fromUtf8("无法读取 patients.xml");
+            setBadFileError(patientsPath, QString::fromUtf8("无法读取 patients.xml"), errorMessage);
             return false;
         }
 
@@ -254,4 +575,62 @@ bool PatientStore::saveMeasurements(const QString& measurementsPath,
         root.appendChild(element);
     }
     return writeDocument(measurementsPath, document, errorMessage);
+}
+
+bool PatientStore::savePatientData(const QString& patientsPath,
+                                   const QString& measurementsPath,
+                                   const QList<PatientInfo>& patients,
+                                   const QList<MeasurementRecord>& measurements,
+                                   QString* errorMessage) const
+{
+    QString transactionError;
+    if (!recoverPendingTransaction(patientsPath, measurementsPath, &transactionError)) {
+        if (errorMessage) *errorMessage = transactionError;
+        return false;
+    }
+
+    const QString markerPath = transactionMarkerPath(patientsPath);
+    const QString patientsBackup = transactionBackupPath(patientsPath);
+    const QString measurementsBackup = transactionBackupPath(measurementsPath);
+    const bool patientsExisted = QFileInfo::exists(patientsPath);
+    const bool measurementsExisted = QFileInfo::exists(measurementsPath);
+
+    if (!copyTransactionBackup(patientsPath, patientsBackup, &transactionError)) {
+        if (errorMessage) *errorMessage = QString::fromUtf8("患者事务备份失败：") + transactionError;
+        return false;
+    }
+    if (!copyTransactionBackup(measurementsPath, measurementsBackup, &transactionError)) {
+        removeIfPresent(patientsBackup, nullptr);
+        if (errorMessage) *errorMessage = QString::fromUtf8("检测记录事务备份失败：") + transactionError;
+        return false;
+    }
+    if (!writeTransactionMarker(markerPath, patientsExisted, measurementsExisted, &transactionError)) {
+        removeIfPresent(patientsBackup, nullptr);
+        removeIfPresent(measurementsBackup, nullptr);
+        if (errorMessage) *errorMessage = QString::fromUtf8("数据事务标记创建失败：") + transactionError;
+        return false;
+    }
+
+    QString saveError;
+    if (!savePatients(patientsPath, patients, &saveError) ||
+        !saveMeasurements(measurementsPath, measurements, &saveError)) {
+        QString recoveryError;
+        if (!recoverPendingTransaction(patientsPath, measurementsPath, &recoveryError)) {
+            saveError += QString::fromUtf8("；事务恢复失败：") + recoveryError;
+        }
+        if (errorMessage) *errorMessage = saveError;
+        return false;
+    }
+
+    if (!removeIfPresent(markerPath, &transactionError)) {
+        QString recoveryError;
+        if (!recoverPendingTransaction(patientsPath, measurementsPath, &recoveryError)) {
+            transactionError += QString::fromUtf8("；事务恢复失败：") + recoveryError;
+        }
+        if (errorMessage) *errorMessage = QString::fromUtf8("数据已写入但事务无法完成：") + transactionError;
+        return false;
+    }
+    removeIfPresent(patientsBackup, nullptr);
+    removeIfPresent(measurementsBackup, nullptr);
+    return true;
 }

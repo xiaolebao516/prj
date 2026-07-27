@@ -6,7 +6,9 @@
 namespace {
 
 constexpr int kReportWidth = 795;
-constexpr int kReportHeight = 1513;
+constexpr int kReportHeight = 1124;
+constexpr int kReportBodyCutY = 846;
+constexpr int kTemplateFooterY = 1235;
 
 QString shown(const QString& value)
 {
@@ -20,7 +22,7 @@ ReportWidget::ReportWidget(QWidget* parent)
       template_(QStringLiteral(":/images/report.bmp"))
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    setMinimumSize(380, 620);
+    setMinimumSize(380, 540);
 }
 
 void ReportWidget::setReportData(const ReportData& data)
@@ -36,7 +38,7 @@ const ReportData& ReportWidget::reportData() const
 
 QSize ReportWidget::sizeHint() const
 {
-    return QSize(540, 900);
+    return QSize(560, 792);
 }
 
 void ReportWidget::paintEvent(QPaintEvent* event)
@@ -69,38 +71,55 @@ void ReportWidget::renderReport(QPainter* painter, const QRectF& targetRect) con
 
 void ReportWidget::drawLogicalPage(QPainter* painter) const
 {
-    painter->drawPixmap(QRect(0, 0, kReportWidth, kReportHeight), template_);
+    painter->drawPixmap(QRect(0, 0, kReportWidth, kReportBodyCutY),
+                        template_,
+                        QRect(0, 0, template_.width(), kReportBodyCutY));
+    painter->drawPixmap(QRect(0,
+                              kReportBodyCutY,
+                              kReportWidth,
+                              kReportHeight - kReportBodyCutY),
+                        template_,
+                        QRect(0,
+                              kTemplateFooterY,
+                              template_.width(),
+                              kReportHeight - kReportBodyCutY));
+    // The source template contains a small isolated dark artifact in this blank area.
+    painter->fillRect(QRectF(170, 822, 7, 7), Qt::white);
 
     QFont valueFont(QStringLiteral("Microsoft YaHei"));
-    valueFont.setPixelSize(14);
+    valueFont.setPixelSize(16);
     painter->setFont(valueFont);
     painter->setPen(QColor(65, 65, 65));
 
-    painter->drawText(QPointF(95, 319), shown(data_.patientName));
-    painter->drawText(QPointF(95, 352), shown(data_.age));
-    painter->drawText(QPointF(112, 386), shown(data_.birthDay));
-    painter->drawText(QPointF(95, 419), shown(data_.height));
+    const auto drawValue = [painter](const QRectF& rect, const QString& value) {
+        painter->drawText(rect, Qt::AlignLeft | Qt::AlignVCenter, shown(value));
+    };
 
-    painter->drawText(QPointF(445, 319), shown(data_.patientId));
-    painter->drawText(QPointF(465, 352), shown(data_.gender));
-    painter->drawText(QPointF(485, 386), shown(data_.measuredAt));
-    painter->drawText(QPointF(465, 419), shown(data_.weight));
+    drawValue(QRectF(95, 299, 285, 28), data_.patientName);
+    drawValue(QRectF(95, 332, 285, 28), data_.age);
+    drawValue(QRectF(120, 366, 260, 28), data_.birthDay);
+    drawValue(QRectF(95, 399, 285, 28), data_.height);
 
-    painter->drawText(QPointF(125, 526), shown(data_.part));
-    painter->drawText(QPointF(95, 560), shown(data_.sos));
-    painter->drawText(QPointF(95, 593), shown(data_.tScore));
-    painter->drawText(QPointF(490, 526), shown(data_.boneStrength));
-    painter->drawText(QPointF(465, 560), shown(data_.zScore));
+    drawValue(QRectF(445, 299, 305, 28), data_.patientId);
+    drawValue(QRectF(465, 332, 285, 28), data_.gender);
+    drawValue(QRectF(485, 366, 265, 28), data_.measuredAt);
+    drawValue(QRectF(465, 399, 285, 28), data_.weight);
+
+    drawValue(QRectF(125, 506, 255, 28), data_.part);
+    drawValue(QRectF(95, 540, 285, 28), data_.sos);
+    drawValue(QRectF(95, 573, 285, 28), data_.tScore);
+    drawValue(QRectF(490, 506, 260, 28), data_.boneStrength);
+    drawValue(QRectF(465, 540, 285, 28), data_.zScore);
 
     QFont diagnosisFont(QStringLiteral("Microsoft YaHei"));
-    diagnosisFont.setPixelSize(13);
+    diagnosisFont.setPixelSize(15);
     painter->setFont(diagnosisFont);
-    painter->drawText(QRectF(45, 1300, 700, 78),
+    painter->drawText(QRectF(45, 907, 700, 82),
                       Qt::TextWordWrap | Qt::AlignLeft | Qt::AlignTop,
                       shown(data_.diagnosis));
 
     painter->setFont(valueFont);
-    painter->drawText(QRectF(500, 1390, 260, 34),
+    painter->drawText(QRectF(510, 995, 240, 34),
                       Qt::AlignLeft | Qt::AlignVCenter,
                       shown(data_.operatorName));
 }

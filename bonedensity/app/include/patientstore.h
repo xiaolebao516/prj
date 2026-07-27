@@ -18,4 +18,9 @@ public:
     bool saveMeasurements(const QString& measurementsPath,
                           const QList<MeasurementRecord>& measurements,
                           QString* errorMessage = nullptr) const;
+    bool savePatientData(const QString& patientsPath,
+                         const QString& measurementsPath,
+                         const QList<PatientInfo>& patients,
+                         const QList<MeasurementRecord>& measurements,
+                         QString* errorMessage = nullptr) const;
 };

@@ -1,7 +1,9 @@
 @echo off
 setlocal
 chcp 65001 >nul
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$handoff = Get-ChildItem -LiteralPath '%~dp0' -Filter '*.ps1' | Select-Object -First 1; if ($null -eq $handoff) { exit 1 }; & $handoff.FullName; exit $LASTEXITCODE"
+set "HANDOFF_SCRIPT=%~dp0运行组件\一键换机备份.ps1"
+if not exist "%HANDOFF_SCRIPT%" set "HANDOFF_SCRIPT=%~dp0一键换机备份.ps1"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%HANDOFF_SCRIPT%"
 set "EXIT_CODE=%ERRORLEVEL%"
 if not "%EXIT_CODE%"=="0" (
     echo.

@@ -154,6 +154,9 @@
          </item>
          <item row="0" column="3">
           <widget class="QPushButton" name="wifi_button">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
@@ -174,6 +177,9 @@
            </property>
            <property name="text">
             <string>WIFI</string>
+           </property>
+           <property name="toolTip">
+            <string>功能尚未开放</string>
            </property>
           </widget>
          </item>
@@ -301,7 +307,7 @@
              <item>
               <widget class="QGroupBox" name="grpWaveArea">
                <property name="title">
-                <string>GroupBox</string>
+                <string>四通道波形</string>
                </property>
                <widget class="QWidget" name="layoutWidget_3">
                 <property name="geometry">
@@ -319,7 +325,7 @@
              <item>
               <widget class="QGroupBox" name="grpSpeedArea">
                <property name="title">
-                <string>GroupBox</string>
+                <string>声速趋势</string>
                </property>
                <widget class="QChartView" name="chartViewSpeed">
                 <property name="geometry">
@@ -359,7 +365,7 @@
              <item>
               <widget class="QGroupBox" name="grpProcessArea">
                <property name="title">
-                <string>GroupBox</string>
+                <string>检测过程</string>
                </property>
                <widget class="QLabel" name="lblProcessTitle">
                 <property name="geometry">
@@ -1099,7 +1105,7 @@
               </font>
              </property>
              <property name="title">
-              <string>GroupBox</string>
+              <string>测量部位</string>
              </property>
              <widget class="QLabel" name="label_32">
               <property name="geometry">
@@ -1261,12 +1267,12 @@
          <rect>
           <x>560</x>
           <y>610</y>
-          <width>91</width>
+          <width>111</width>
           <height>41</height>
          </rect>
         </property>
         <property name="text">
-         <string>身高</string>
+         <string>身高(cm)</string>
         </property>
        </widget>
        <widget class="QLabel" name="label_26">
@@ -1274,12 +1280,12 @@
          <rect>
           <x>560</x>
           <y>740</y>
-          <width>71</width>
+          <width>111</width>
           <height>41</height>
          </rect>
         </property>
         <property name="text">
-         <string>体重</string>
+         <string>体重(kg)</string>
         </property>
        </widget>
        <widget class="QPushButton" name="btnPatientNewSave">
@@ -1362,7 +1368,7 @@
         <property name="geometry">
          <rect>
           <x>700</x>
-          <y>600</y>
+          <y>440</y>
           <width>611</width>
           <height>41</height>
          </rect>
@@ -1372,7 +1378,7 @@
         <property name="geometry">
          <rect>
           <x>700</x>
-          <y>520</y>
+          <y>360</y>
           <width>611</width>
           <height>41</height>
          </rect>
@@ -1412,7 +1418,7 @@
         <property name="geometry">
          <rect>
           <x>790</x>
-          <y>870</y>
+          <y>560</y>
           <width>171</width>
           <height>71</height>
          </rect>
@@ -1425,7 +1431,7 @@
         <property name="geometry">
          <rect>
           <x>1050</x>
-          <y>870</y>
+          <y>560</y>
           <width>171</width>
           <height>71</height>
          </rect>
@@ -1490,26 +1496,26 @@
         <property name="geometry">
          <rect>
           <x>550</x>
-          <y>520</y>
-          <width>91</width>
+          <y>360</y>
+          <width>121</width>
           <height>41</height>
          </rect>
         </property>
         <property name="text">
-         <string>身高</string>
+         <string>身高(cm)</string>
         </property>
        </widget>
        <widget class="QLabel" name="label_6">
         <property name="geometry">
          <rect>
           <x>550</x>
-          <y>600</y>
-          <width>101</width>
+          <y>440</y>
+          <width>121</width>
           <height>41</height>
          </rect>
         </property>
         <property name="text">
-         <string>体重</string>
+         <string>体重(kg)</string>
         </property>
        </widget>
        <widget class="QLabel" name="label_7">
@@ -1559,20 +1565,20 @@
         <property name="geometry">
          <rect>
           <x>630</x>
-          <y>590</y>
-          <width>91</width>
+          <y>430</y>
+          <width>121</width>
           <height>41</height>
          </rect>
         </property>
         <property name="text">
-         <string>体重</string>
+         <string>体重(kg)</string>
         </property>
        </widget>
        <widget class="QPushButton" name="btnDetailSave">
         <property name="geometry">
          <rect>
           <x>790</x>
-          <y>870</y>
+          <y>550</y>
           <width>161</width>
           <height>71</height>
          </rect>
@@ -1613,20 +1619,20 @@
         <property name="geometry">
          <rect>
           <x>630</x>
-          <y>510</y>
-          <width>91</width>
+          <y>350</y>
+          <width>121</width>
           <height>41</height>
          </rect>
         </property>
         <property name="text">
-         <string>身高</string>
+         <string>身高(cm)</string>
         </property>
        </widget>
        <widget class="QLineEdit" name="dWeight">
         <property name="geometry">
          <rect>
           <x>770</x>
-          <y>590</y>
+          <y>430</y>
           <width>611</width>
           <height>41</height>
          </rect>
@@ -1646,7 +1652,7 @@
         <property name="geometry">
          <rect>
           <x>770</x>
-          <y>510</y>
+          <y>350</y>
           <width>611</width>
           <height>41</height>
          </rect>
@@ -1676,7 +1682,7 @@
         <property name="geometry">
          <rect>
           <x>1000</x>
-          <y>870</y>
+          <y>550</y>
           <width>151</width>
           <height>71</height>
          </rect>
@@ -1761,7 +1767,7 @@
         <property name="geometry">
          <rect>
           <x>1210</x>
-          <y>870</y>
+          <y>550</y>
           <width>151</width>
           <height>71</height>
          </rect>
@@ -1929,10 +1935,10 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="9">
+          <item row="0" column="13">
            <widget class="QPushButton" name="btnDeleteSelected">
             <property name="text">
-             <string>删除</string>
+             <string>删除勾选项</string>
             </property>
            </widget>
           </item>
@@ -1984,7 +1990,7 @@
           <item row="0" column="8">
            <widget class="QPushButton" name="btnSearchName">
             <property name="text">
-             <string>按姓名查找</string>
+             <string>查找</string>
             </property>
            </widget>
           </item>
@@ -1995,7 +2001,7 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0" colspan="11">
+          <item row="2" column="0" colspan="14">
            <widget class="QTableWidget" name="table"/>
           </item>
           <item row="1" column="6">
@@ -2006,6 +2012,9 @@
           </item>
           <item row="0" column="9">
            <widget class="QPushButton" name="btnSearchID">
+            <property name="visible">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>按编号查找</string>
             </property>

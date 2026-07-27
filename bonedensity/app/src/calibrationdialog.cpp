@@ -186,14 +186,75 @@ void CalibrationDialog::notifyAcquisitionUnavailable(const QString& reason)
 
 void CalibrationDialog::closeEvent(QCloseEvent* event)
 {
+    if (!closeApproved_ && !prepareToClose()) {
+        event->ignore();
+        return;
+    }
+
+    closeApproved_ = true;
+    QDialog::closeEvent(event);
+    closeApproved_ = false;
+}
+
+void CalibrationDialog::reject()
+{
+    if (!closeApproved_ && !prepareToClose()) return;
+
+    closeApproved_ = true;
+    QDialog::reject();
+    closeApproved_ = false;
+}
+
+bool CalibrationDialog::prepareToClose()
+{
+    const bool collectionWasRunning = session_.isCollecting();
+    if (collectionWasRunning) emit acquisitionStopRequested();
+
+    const auto resumeCollection = [this, collectionWasRunning]() {
+        if (collectionWasRunning && session_.isCollecting()) {
+            emit acquisitionStartRequested(session_.processingD());
+        }
+    };
+
+    if (session_.validationComplete() && !recordSaved_) {
+        while (!recordSaved_) {
+            if (saveCurrentRecord(false)) break;
+            const QMessageBox::StandardButton choice = QMessageBox::warning(
+                this,
+                QStringLiteral("校准结果尚未保存"),
+                QStringLiteral("完整校准记录仍未保存。请选择“重试”再次保存，"
+                               "或明确放弃后关闭。"),
+                QMessageBox::Retry | QMessageBox::Discard | QMessageBox::Cancel,
+                QMessageBox::Retry);
+            if (choice == QMessageBox::Retry) continue;
+            if (choice == QMessageBox::Cancel) {
+                resumeCollection();
+                return false;
+            }
+            break;
+        }
+    } else {
+        const int completedMeasurements =
+            session_.completedMeasurementCount(CalibrationPhase::Calibration)
+            + session_.completedMeasurementCount(CalibrationPhase::Validation);
+        if ((session_.isCollecting() || completedMeasurements > 0)
+            && QMessageBox::warning(
+                   this,
+                   QStringLiteral("校准尚未完成"),
+                   QStringLiteral("当前校准进度尚未保存，关闭后将丢失本次进度。"
+                                  "是否明确放弃并关闭？"),
+                   QMessageBox::Discard | QMessageBox::Cancel,
+                   QMessageBox::Cancel)
+                != QMessageBox::Discard) {
+            resumeCollection();
+            return false;
+        }
+    }
+
     if (session_.isCollecting()) {
-        emit acquisitionStopRequested();
         session_.cancelCurrentMeasurement();
     }
-    if (session_.validationComplete() && !recordSaved_) {
-        saveCurrentRecord(false);
-    }
-    QDialog::closeEvent(event);
+    return true;
 }
 
 void CalibrationDialog::goBack()
@@ -365,6 +426,14 @@ QWidget* CalibrationDialog::createIntroductionPage()
     layout->addWidget(wrappedLabel(
         QStringLiteral("本流程根据标准试块在指定温度下的参考SOS，对探头C-D有效基线D生成候选值。"
                        "候选值必须使用重新耦合后的独立数据验证，通过后仍需操作者确认才会生效。")));
+
+    QGroupBox* preparation = new QGroupBox(QStringLiteral("校准前准备"));
+    QVBoxLayout* preparationLayout = new QVBoxLayout(preparation);
+    preparationLayout->addWidget(wrappedLabel(
+        QStringLiteral("校准前请将探头、试块和外部温度计置于同一环境，待温度稳定，"
+                       "并避免明显机械振动和电磁干扰。"
+                       "开始前请确认探头和模体无影响使用的损伤、设备工作正常，并准备好有效的模体校准证书。")));
+    layout->addWidget(preparation);
 
     QGroupBox* parameters = new QGroupBox(QStringLiteral("当前参数"));
     QGridLayout* grid = new QGridLayout(parameters);

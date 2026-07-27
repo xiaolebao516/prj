@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <patients version="2">
-  <patient id="G19" name="十九岁女童" gender="女" birth="2007-08-01" height="165" weight="52"/>
-  <patient id="W20" name="二十岁女性" gender="女" birth="2006-01-01" height="166" weight="54"/>
-  <patient id="B12" name="十二岁男童" gender="男" birth="2014-03-01" height="150" weight="42"/>
-  <patient id="M45" name="成年男性多记录" gender="男" birth="1981-02-01" height="175" weight="70"/>
-  <patient id="OLD16" name="旧记录年龄回算" gender="男" birth="2010-07-17" height="168" weight="58"/>
-  <patient id="EMPTY" name="无检测记录女性" gender="女" birth="1996-04-10" height="163" weight="50"/>
-  <patient id="OUTSIDE" name="超范围结果测试" gender="男" birth="1986-05-20" height="172" weight="68"/>
+  <patient id="G19" name="【测试】十九岁女童" gender="女" birth="2007-08-01" height="165" weight="52"/>
+  <patient id="W20" name="【测试】二十岁女性" gender="女" birth="2006-01-01" height="166" weight="54"/>
+  <patient id="B12" name="【测试】十二岁男童" gender="男" birth="2014-03-01" height="150" weight="42"/>
+  <patient id="M45" name="【测试】成年男性多记录" gender="男" birth="1981-02-01" height="175" weight="70"/>
+  <patient id="OLD16" name="【测试】旧记录年龄回算" gender="男" birth="2010-07-17" height="168" weight="58"/>
+  <patient id="EMPTY" name="【测试】无检测记录女性" gender="女" birth="1996-04-10" height="163" weight="50"/>
+  <patient id="OUTSIDE" name="【测试】超范围结果" gender="男" birth="1986-05-20" height="172" weight="68"/>
 </patients>

@@ -7,4 +7,9 @@
 1. 将 U 盘中的 BoneDensity-换机包 文件夹复制到新电脑。
 2. 打开该文件夹，双击 BoneDensity.exe。
 
-注意：请复制整个文件夹，不要只复制 BoneDensity.exe。换机完成后，请只在其中一台电脑继续使用程序。
+注意：
+- 请复制整个文件夹，不要只复制 BoneDensity.exe。
+- 如果提示档案尚未恢复，请先启动旧电脑上的软件，正常退出后再重试。
+- 如果确认任务管理器中没有 BoneDensity.exe，但仍提示程序正在运行，
+  可删除软件文件夹中的 BoneDensity.instance.lock 后重试。
+- 换机完成后，请只在其中一台电脑继续使用程序。

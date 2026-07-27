@@ -14,6 +14,7 @@ class QProgressBar;
 class QPushButton;
 class QStackedWidget;
 class QTableWidget;
+class CalibrationTests;
 
 class CalibrationDialog : public QDialog
 {
@@ -34,6 +35,7 @@ signals:
 
 protected:
     void closeEvent(QCloseEvent* event) override;
+    void reject() override;
 
 private slots:
     void goBack();
@@ -47,6 +49,8 @@ private slots:
     void updateModeFields();
 
 private:
+    friend class CalibrationTests;
+
     QWidget* createIntroductionPage();
     QWidget* createSetupPage();
     QWidget* createCollectionPage(CalibrationPhase phase);
@@ -60,6 +64,7 @@ private:
     void refreshNavigation();
     void refreshResult();
     bool saveCurrentRecord(bool activate);
+    bool prepareToClose();
     QTableWidget* tableForPhase(CalibrationPhase phase) const;
     QProgressBar* progressForPhase(CalibrationPhase phase) const;
     QLabel* statusForPhase(CalibrationPhase phase) const;
@@ -71,6 +76,7 @@ private:
     CalibrationSession session_;
     bool recordSaved_ = false;
     bool activated_ = false;
+    bool closeApproved_ = false;
 
     QLabel* stepLabel_ = nullptr;
     QStackedWidget* pages_ = nullptr;

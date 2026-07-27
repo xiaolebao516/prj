@@ -12,6 +12,7 @@
 #include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
 #include <QList>
+#include <QQueue>
 #include <QLabel>
 #include <QDomDocument>     // 用于XML管理
 #include <QProgressBar>
@@ -29,9 +30,11 @@ namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
 class QMessageBox;
+class QCloseEvent;
 class QResizeEvent;
 class QPrinter;
 class CalibrationDialog;
+class MainWindowSafetyTests;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -90,9 +93,11 @@ private slots:
     void on_btnShowResult_clicked();
 
 protected:
+    void closeEvent(QCloseEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
 
 private:
+    friend class MainWindowSafetyTests;
     Ui::MainWindow *ui;
     QSerialPort *serial;
     bool serialErrorHandled = false;
@@ -123,6 +128,8 @@ private:
     bool chReceived[4] = {false,false,false,false};
 
     QMap<quint16, WaveGroup> frameGroups;
+    QQueue<quint16> frameGroupOrder;
+    static constexpr int maxIncompleteFrameGroups = 16;
 
     QSlider *gainSliderA;
     QSlider *gainSliderB;
@@ -149,6 +156,8 @@ private:
     AccountInfo currentAccount;
     MeasurementRecord pendingMeasurement;
     bool hasPendingMeasurement = false;
+    bool patientDataWritable = false;
+    QString patientDataLoadError;
 
     PatientInfo currentPatient;   // 当前正在测量的患者
 
@@ -162,6 +171,9 @@ private:
     // ✅ XML相关
     void loadPatients();
     bool savePatients(const QList<PatientInfo>& patients);
+    bool validatePatientFields(const QDate& birthDate,
+                               const QString& height,
+                               const QString& weight);
     void refreshTable(const QList<PatientInfo> &list);
     int editingIndex = -1;
     // ✅ 新增：表单/详情页填充 & 查找
@@ -172,6 +184,8 @@ private:
 
     void on_btnAcquireWaveform_clicked();   // “获取波形”按钮
     void parseIncomingData();               // 解析rxBuffer里的下位机帧
+    void clearFrameAssembly();
+    void resetDisconnectedAcquisitionState();
     void onGainSliderChanged(int value);    // 任意一条增益滑条被拉
 
     // ✅ 新增：初始化搜索界面的辅助函数
@@ -370,9 +384,14 @@ private:
 
     void resetAllPatientMeasurementData();
     void resetOneRoundMeasurementState();
-    void selectCurrentPatient(const PatientInfo& patient);
+    bool hasIncompletePatientRounds() const;
+    bool confirmPatientChange(const QString& targetPatientId);
+    void applyCurrentPatient(const PatientInfo& patient);
+    bool selectCurrentPatient(const PatientInfo& patient);
     void clearCurrentPatient();
     void updatePatientSelectionUi();
+    bool ensurePatientDataWritable();
+    bool trySavePendingMeasurement();
     void updateAgeSosReference();
     void showPatientHistory(const QString& patientId);
     void setupReportPage();
@@ -412,12 +431,7 @@ private:
                                  double risk,
                                  int boneAge);
 
-    void showPatientMeasureFinishedDialog(double sos,
-                                          double tScore,
-                                          double zScore,
-                                          const QString& strength,
-                                          double risk,
-                                          int boneAge);
+    void showPatientMeasureFinishedDialog(const MeasurementRecord& completedMeasurement);
 
     void initProcessPanel();
     void addMiddleLineToProgressBar(QProgressBar *bar);

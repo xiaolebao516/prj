@@ -4,19 +4,23 @@
 #include "calibrationdialog.h"
 #include "calibrationstore.h"
 
+#include <QAbstractButton>
 #include <QCheckBox>
+#include <QCloseEvent>
 #include <QComboBox>
 #include <QDir>
 #include <QDoubleSpinBox>
 #include <QFile>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMessageBox>
 #include <QProgressBar>
 #include <QPushButton>
 #include <QSignalSpy>
 #include <QStackedWidget>
 #include <QTableWidget>
 #include <QTemporaryDir>
+#include <QTimer>
 
 namespace {
 
@@ -96,6 +100,9 @@ private slots:
     void storeActivationReloadAndRestore();
     void corruptStoreBacksUpAndRecovers();
     void failedWriteDoesNotChangeMemory();
+    void partialCalibrationCloseCanBeCancelled();
+    void collectingCalibrationClosePausesAndResumesOnCancel();
+    void unsavedCompletedCalibrationCannotCloseSilently();
     void dialogWorkflowAndGuidance();
 };
 
@@ -293,6 +300,123 @@ void CalibrationTests::failedWriteDoesNotChangeMemory()
     QCOMPARE(store.parameters().activeD, before);
 }
 
+void CalibrationTests::partialCalibrationCloseCanBeCancelled()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    CalibrationStore store;
+    QString error;
+    QVERIFY(store.loadOrInitialize(directory.filePath(QStringLiteral("calibration.xml")), &error));
+
+    CalibrationDialog dialog(&store, QStringLiteral("tester"));
+    QVERIFY(dialog.session_.configure(formalSetup(), store.parameters().activeD, &error));
+    completeMeasurement(dialog.session_, CalibrationPhase::Calibration, 2450.0);
+
+    QCloseEvent event;
+    event.ignore();
+    QTimer closer;
+    closer.setSingleShot(true);
+    QObject::connect(&closer, &QTimer::timeout, []() {
+        if (auto* box = qobject_cast<QMessageBox*>(QApplication::activeModalWidget())) {
+            if (QAbstractButton* button = box->button(QMessageBox::Cancel)) {
+                button->click();
+            }
+        }
+    });
+    closer.start(0);
+    dialog.closeEvent(&event);
+    closer.stop();
+
+    QVERIFY(!event.isAccepted());
+    QCOMPARE(dialog.session_.completedMeasurementCount(CalibrationPhase::Calibration), 1);
+}
+
+void CalibrationTests::collectingCalibrationClosePausesAndResumesOnCancel()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    CalibrationStore store;
+    QString error;
+    QVERIFY(store.loadOrInitialize(directory.filePath(QStringLiteral("calibration.xml")), &error));
+
+    CalibrationDialog dialog(&store, QStringLiteral("tester"));
+    QVERIFY(dialog.session_.configure(formalSetup(), store.parameters().activeD, &error));
+    QVERIFY(dialog.session_.beginMeasurement(CalibrationPhase::Calibration, 23.0, &error));
+    QSignalSpy stopSpy(&dialog, &CalibrationDialog::acquisitionStopRequested);
+    QSignalSpy startSpy(&dialog, &CalibrationDialog::acquisitionStartRequested);
+
+    QCloseEvent event;
+    event.ignore();
+    QTimer closer;
+    closer.setSingleShot(true);
+    QObject::connect(&closer, &QTimer::timeout, []() {
+        if (auto* box = qobject_cast<QMessageBox*>(QApplication::activeModalWidget())) {
+            if (QAbstractButton* button = box->button(QMessageBox::Cancel)) {
+                button->click();
+            }
+        }
+    });
+    closer.start(0);
+    dialog.closeEvent(&event);
+    closer.stop();
+
+    QVERIFY(!event.isAccepted());
+    QVERIFY(dialog.session_.isCollecting());
+    QCOMPARE(stopSpy.count(), 1);
+    QCOMPARE(startSpy.count(), 1);
+    QCOMPARE(startSpy.first().first().toDouble(), dialog.session_.processingD());
+}
+
+void CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const QString path = directory.filePath(QStringLiteral("calibration.xml"));
+    CalibrationStore store;
+    QString error;
+    QVERIFY(store.loadOrInitialize(path, &error));
+
+    CalibrationDialog dialog(&store, QStringLiteral("tester"));
+    QVERIFY(dialog.session_.configure(formalSetup(), store.parameters().activeD, &error));
+    for (int i = 0; i < 6; ++i) {
+        completeMeasurement(dialog.session_, CalibrationPhase::Calibration, 2450.0);
+    }
+    for (int i = 0; i < 6; ++i) {
+        completeMeasurement(dialog.session_, CalibrationPhase::Validation, 2500.0);
+    }
+    QVERIFY(dialog.session_.validationComplete());
+    QVERIFY(QFile::remove(path));
+    QVERIFY(QDir().mkdir(path));
+
+    QCloseEvent event;
+    event.ignore();
+    QTimer closer;
+    closer.setInterval(0);
+    QObject::connect(&closer, &QTimer::timeout, [&closer]() {
+        auto* box = qobject_cast<QMessageBox*>(QApplication::activeModalWidget());
+        if (!box) return;
+        if (box->windowTitle() == QStringLiteral("保存校准结果失败")) {
+            if (QAbstractButton* button = box->button(QMessageBox::Ok)) {
+                button->click();
+            }
+            return;
+        }
+        if (box->windowTitle() == QStringLiteral("校准结果尚未保存")) {
+            closer.stop();
+            if (QAbstractButton* button = box->button(QMessageBox::Cancel)) {
+                button->click();
+            }
+        }
+    });
+    closer.start();
+    dialog.closeEvent(&event);
+    closer.stop();
+
+    QVERIFY(!event.isAccepted());
+    QVERIFY(!dialog.recordSaved_);
+    QVERIFY(dialog.session_.validationComplete());
+}
+
 void CalibrationTests::dialogWorkflowAndGuidance()
 {
     QTemporaryDir directory;
@@ -312,6 +436,7 @@ void CalibrationTests::dialogWorkflowAndGuidance()
     for (QCheckBox* check : dialog.findChildren<QCheckBox*>()) allText += check->text();
     QVERIFY(allText.contains(QStringLiteral("软件不验证证书真实性")));
     QVERIFY(allText.contains(QStringLiteral("同一种耦合剂")));
+    QVERIFY(allText.contains(QStringLiteral("待温度稳定")));
     QVERIFY(allText.contains(QStringLiteral("±2%")));
     QVERIFY(allText.contains(QStringLiteral("变异系数不超过 <b>1%</b>")));
 
