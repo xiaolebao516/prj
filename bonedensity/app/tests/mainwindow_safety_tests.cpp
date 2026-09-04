@@ -92,6 +92,8 @@ private slots:
     void interleavedAndWrappedFrameIndexesStayIndependent();
     void speedSeriesKeepsOnlyRecentPoints();
     void disconnectedControlsAndPlaceholdersAreSafe();
+    void positionGuideTracksExistingBarsWithoutChangingThem();
+    void measurementStatusIsVisibleAndOperatorFacing();
     void patientMeasurementDisablesConflictingControls();
     void debugAutoDisablesConflictingNavigation();
     void patientFormsStayInsideAndCenteredAtSmallWindow();
@@ -140,6 +142,106 @@ void MainWindowSafetyTests::incompleteFrameGroupsAreBounded()
     QCOMPARE(window.frameGroups.size(), MainWindow::maxIncompleteFrameGroups);
     QCOMPARE(window.frameGroupOrder.size(), MainWindow::maxIncompleteFrameGroups);
     QCOMPARE(window.frameGroupOrder.head(), quint16(84));
+}
+
+void MainWindowSafetyTests::positionGuideTracksExistingBarsWithoutChangingThem()
+{
+    MainWindow window;
+    window.hide();
+
+    QCOMPARE(window.ui->barPairB->geometry(), QRect(30, 30, 81, 201));
+    QCOMPARE(window.ui->barPairA->geometry(), QRect(370, 30, 81, 201));
+    QVERIFY(window.ui->lblPositionGuide->text().contains(
+        QStringLiteral("左侧调倾角")));
+    QVERIFY(window.ui->lblPositionGuide->text().contains(
+        QStringLiteral("右侧调位置")));
+    QCOMPARE(window.ui->lblPositionGuideNote->text(),
+             QStringLiteral("提示仅供参考，最终以两条均在中线为准"));
+    QVERIFY(window.ui->lblPositionGuide->styleSheet().contains(
+        QStringLiteral("font-weight: bold")));
+    QVERIFY(!window.ui->lblPositionGuide->geometry().intersects(
+        window.ui->barPairB->geometry()));
+    QVERIFY(!window.ui->lblPositionGuide->geometry().intersects(
+        window.ui->barPairA->geometry()));
+    QVERIFY(!window.ui->lblPositionGuideNote->geometry().intersects(
+        window.ui->barPairB->geometry()));
+    QVERIFY(!window.ui->lblPositionGuideNote->geometry().intersects(
+        window.ui->barPairA->geometry()));
+
+    window.updateProcessPanel(0.0, 0.0, 105, 100, 5, 8.0, false);
+    window.updateProcessPanel(0.0, 0.0, 107, 100, 7, 4.0, false);
+    QVERIFY(window.ui->lblPositionGuide->text().contains(
+        QStringLiteral("左侧调倾角：正在接近中线")));
+    QVERIFY(window.ui->lblPositionGuide->text().contains(
+        QStringLiteral("右侧调位置：正在接近中线")));
+    QVERIFY(window.ui->lblPositionGuide->styleSheet().contains(
+        QStringLiteral("#2E7D32")));
+
+    window.updateProcessPanel(0.0, 0.0, 103, 100, 3, 8.0, false);
+    QVERIFY(window.ui->lblPositionGuide->text().contains(
+        QStringLiteral("左侧调倾角：正在远离中线，请反向微调")));
+    QVERIFY(window.ui->lblPositionGuide->text().contains(
+        QStringLiteral("右侧调位置：正在远离中线，请反向微调")));
+    QVERIFY(window.ui->lblPositionGuide->styleSheet().contains(
+        QStringLiteral("#C62828")));
+
+    window.updateProcessPanel(0.0, 0.0, 109, 100, 9, 0.0, false);
+    QVERIFY(window.ui->lblPositionGuide->text().contains(
+        QStringLiteral("左侧调倾角：已在中线，请保持")));
+    QVERIFY(window.ui->lblPositionGuide->text().contains(
+        QStringLiteral("右侧调位置：已在中线，请保持")));
+    QVERIFY(window.ui->lblPositionGuide->styleSheet().contains(
+        QStringLiteral("#2E7D32")));
+
+    window.updateProcessInvalid(QStringLiteral("测试无效帧"));
+    QVERIFY(window.ui->lblPositionGuide->text().contains(
+        QStringLiteral("当前信号无效")));
+}
+
+void MainWindowSafetyTests::measurementStatusIsVisibleAndOperatorFacing()
+{
+    MainWindow window;
+    window.hide();
+
+    QVERIFY(window.ui->widgetBalanceArea->rect().contains(
+        window.ui->lblProcessStatus->geometry()));
+
+    const auto hasDeveloperWording = [](const QString& text) {
+        return text.contains(QStringLiteral("Gap"), Qt::CaseInsensitive) ||
+               text.contains(QStringLiteral("lag"), Qt::CaseInsensitive) ||
+               text.contains(QStringLiteral("Corr"), Qt::CaseInsensitive) ||
+               text.contains(QStringLiteral("pair"), Qt::CaseInsensitive) ||
+               text.contains(QStringLiteral("Qt Creator"), Qt::CaseInsensitive) ||
+               text.contains(QStringLiteral("控制台"));
+    };
+
+    window.updateProcessPanel(0.0, 0.0, 109, 100, 9, 0.0, true);
+    QVERIFY(window.ui->lblProcessStatus->text().contains(
+        QStringLiteral("第 1/5 轮")));
+    QVERIFY(window.ui->lblProcessStatus->text().contains(
+        QStringLiteral("本轮有效值 1/30")));
+    QVERIFY(window.ui->lblProcessStatus->text().contains(
+        QStringLiteral("数据有效")));
+    QVERIFY(!hasDeveloperWording(window.ui->lblProcessStatus->text()));
+
+    window.lastFrameAngleSignedDiffOk = false;
+    window.lastFrameAnglePairMidGapOk = true;
+    window.updateProcessPanel(0.0, 0.0, 103, 100, 3, 8.0, false);
+    QVERIFY(window.ui->lblProcessStatus->text().contains(
+        QStringLiteral("根据上方提示微调")));
+    QVERIFY(!hasDeveloperWording(window.ui->lblProcessStatus->text()));
+
+    window.updateProcessInvalid(QStringLiteral("B_pair 无效，无法作为参考"));
+    QVERIFY(window.ui->lblProcessStatus->text().contains(
+        QStringLiteral("信号质量不足")));
+    QVERIFY(!hasDeveloperWording(window.ui->lblProcessStatus->text()));
+
+    window.showRoundFinishedTip(0, 5, false);
+    QVERIFY(window.measureTipBox);
+    QCOMPARE(window.measureTipBox->windowTitle(), QStringLiteral("本轮未计入"));
+    QVERIFY(window.measureTipBox->text().contains(QStringLiteral("未达到要求")));
+    QVERIFY(!window.measureTipBox->text().contains(QStringLiteral("测量完成")));
+    window.closeRoundFinishedTip();
 }
 
 void MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary()

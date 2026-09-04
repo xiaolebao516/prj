@@ -497,6 +497,48 @@
                   <set>Qt::AlignCenter</set>
                  </property>
                 </widget>
+                <widget class="QLabel" name="lblPositionGuide">
+                 <property name="geometry">
+                  <rect>
+                   <x>120</x>
+                   <y>45</y>
+                   <width>240</width>
+                   <height>145</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>左侧调倾角：等待实时数据
+右侧调位置：等待实时数据</string>
+                 </property>
+                 <property name="wordWrap">
+                  <bool>true</bool>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">font-size: 13px; font-weight: bold; color: #E6A23C;</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="lblPositionGuideNote">
+                 <property name="geometry">
+                  <rect>
+                   <x>120</x>
+                   <y>195</y>
+                   <width>240</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>提示仅供参考，最终以两条均在中线为准</string>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">font-size: 10px; color: #606266;</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
                 <widget class="QProgressBar" name="barMeasureProgress">
                  <property name="geometry">
                   <rect>
@@ -541,9 +583,9 @@
                  <property name="geometry">
                   <rect>
                    <x>0</x>
-                   <y>340</y>
+                   <y>334</y>
                    <width>481</width>
-                   <height>81</height>
+                   <height>27</height>
                   </rect>
                  </property>
                  <property name="font">

@@ -759,6 +759,7 @@ void MainWindow::on_triggerButton_clicked()
         ui->barMeasureProgress->setFormat("有效值：%v / %m");
         ui->lblPairAValue->setText("D=--\n目标=10.0");
         ui->lblPairBValue->setText("G=--\n目标=0.0");
+        resetPositionGuide();
         ui->lblProcessStatus->setText("检测已手动停止");
         ui->lblProcessStatus->setStyleSheet(
             "font-size: 12px; color: #E6A23C; font-weight: bold;"
@@ -819,6 +820,7 @@ void MainWindow::on_btnAcquireWaveform_clicked()
         ui->barMeasureProgress->setFormat("有效值：%v / %m");
         ui->lblPairAValue->setText("D=--\n目标=10.0");
         ui->lblPairBValue->setText("G=--\n目标=0.0");
+        resetPositionGuide();
         ui->lblProcessStatus->setText("检测已手动停止");
         ui->lblProcessStatus->setStyleSheet(
             "font-size: 12px; color: #E6A23C; font-weight: bold;"
@@ -934,9 +936,10 @@ void MainWindow::startPatientMeasurement(int targetRounds)
     ui->btnPatientInfo->setStyleSheet("");  // 恢复默认样式，确保可点击
 
     ui->lblProcessStatus->setText(
-        QString("正在检测：第 %1/%2 次，请保持探头与桡骨平行")
+        QString("第 %1/%2 轮｜本轮有效值 0/%3｜正在检测，请保持探头贴合")
             .arg(nextRound)
             .arg(normalMeasureRounds)
+            .arg(processValidTarget)
         );
 
     ui->lblProcessStatus->setStyleSheet(
@@ -1017,6 +1020,7 @@ void MainWindow::resetAllPatientMeasurementData()
 
     ui->lblPairAValue->setText("D=--\n目标=10.0");
     ui->lblPairBValue->setText("G=--\n目标=0.0");
+    resetPositionGuide();
 
     ui->lblProcessStatus->setText("等待开始测量");
     ui->lblProcessStatus->setStyleSheet(
@@ -1058,6 +1062,7 @@ void MainWindow::resetOneRoundMeasurementState()
 
     ui->lblPairAValue->setText("D=--\n目标=10.0");
     ui->lblPairBValue->setText("G=--\n目标=0.0");
+    resetPositionGuide();
 
     if (seriesSpeed) {
         seriesSpeed->clear();
@@ -1067,19 +1072,28 @@ void MainWindow::resetOneRoundMeasurementState()
 }
 
 // The caller may have stopped a measurement before resetting this round.
-void MainWindow::showRoundFinishedTip(int finishedRounds, int totalRounds)
+void MainWindow::showRoundFinishedTip(int finishedRounds,
+                                      int totalRounds,
+                                      bool accepted)
 {
     closeRoundFinishedTip();
 
     measureTipBox = new QMessageBox(this);
     measureTipBox->setIcon(QMessageBox::Information);
-    measureTipBox->setWindowTitle("本次测量完成");
+    measureTipBox->setWindowTitle(
+        accepted ? QStringLiteral("本轮测量完成")
+                 : QStringLiteral("本轮未计入"));
 
-    measureTipBox->setText(
-        QString("第 %1/%2 次测量完成。\n\n请再次点击「开始检测」进行下一次测量。")
-            .arg(finishedRounds)
-            .arg(totalRounds)
-        );
+    if (accepted) {
+        measureTipBox->setText(
+            QString("第 %1/%2 轮测量完成。\n\n请再次点击「开始检测」进行下一轮测量。")
+                .arg(finishedRounds)
+                .arg(totalRounds));
+    } else {
+        measureTipBox->setText(
+            QString("本轮数据未达到要求，未计入结果。\n\n"
+                    "请根据界面提示调整后，再次点击「开始检测」。"));
+    }
 
     // 关键 1：不放 OK 按钮，只作为提示窗口
     measureTipBox->setStandardButtons(QMessageBox::NoButton);
@@ -1256,18 +1270,17 @@ void MainWindow::finishOnePatientRound()
         // 本轮失败后，停止采集，让用户重新点"开始检测"并重新调整探头
         stopPatientMeasurement();
 
+        const int rejectedRound = qMin(roundSosList.size() + 1,
+                                       normalMeasureRounds);
         ui->lblProcessStatus->setText(
-            QString("本次小测量姿态/质量不足，已丢弃：corrA=%1，corrB=%2，pairMidGap=%3，lagA-lagB=%4。请重新调整探头。")
-                .arg(oneRoundCorrA, 0, 'f', 2)
-                .arg(oneRoundCorrB, 0, 'f', 2)
-                .arg(oneRoundPairMidGap, 0, 'f', 1)
-                .arg(oneRoundSignedLagDiff, 0, 'f', 1)
-            );
+            QString("第 %1/%2 轮未计入｜数据稳定性不足，请按界面提示调整后重新测量")
+                .arg(rejectedRound)
+                .arg(normalMeasureRounds));
         ui->lblProcessStatus->setStyleSheet(
             "font-size: 12px; color: #E6A23C; font-weight: bold;"
             );
 
-        showRoundFinishedTip(roundSosList.size(), normalMeasureRounds);
+        showRoundFinishedTip(roundSosList.size(), normalMeasureRounds, false);
         return;
     }
 
@@ -1321,11 +1334,9 @@ void MainWindow::finishOnePatientRound()
 
     // 还没满 5 次：停住，等待再次点击「开始检测」
     ui->lblProcessStatus->setText(
-        QString("本次小测量完成。有效主簇：%1/%2，候选次数：%3。请再次点击「开始检测」。")
+        QString("第 %1/%2 轮完成｜请再次点击“开始检测”进行下一轮")
             .arg(finished)
-            .arg(normalMeasureRounds)
-            .arg(candidateRoundList.size())
-        );
+            .arg(normalMeasureRounds));
 
     ui->lblProcessStatus->setStyleSheet(
         "font-size: 12px; color: #409EFF; font-weight: bold;"
@@ -3437,6 +3448,7 @@ void MainWindow::on_btnStartMeasurement_clicked()
         ui->barMeasureProgress->setFormat("有效值：%v / %m");
         ui->lblPairAValue->setText("D=--\n目标=10.0");
         ui->lblPairBValue->setText("G=--\n目标=0.0");
+        resetPositionGuide();
         ui->lblProcessStatus->setText("检测已手动停止");
         ui->lblProcessStatus->setStyleSheet(
             "font-size: 12px; color: #E6A23C; font-weight: bold;"
@@ -3779,6 +3791,69 @@ void MainWindow::setSpeedDebugInvalid(const QString& reason)
     lblSosInfo->setStyleSheet("font-size: 11px; color: #F56C6C;");
 }
 
+void MainWindow::resetPositionGuide(const QString& stateText)
+{
+    previousLeftGuideDistance = -1;
+    previousRightGuideDistance = -1;
+    ui->lblPositionGuide->setText(
+        QString("左侧调倾角：%1\n"
+                "右侧调位置：%1")
+            .arg(stateText));
+    ui->lblPositionGuide->setStyleSheet(
+        "font-size: 13px; font-weight: bold; color: #E6A23C;");
+}
+
+QString MainWindow::updatePositionTrend(int barValue, int& previousDistance)
+{
+    const int distance = qAbs(barValue - 500);
+    QString trend;
+
+    if (distance <= 2) {
+        trend = "已在中线，请保持";
+    } else if (previousDistance < 0) {
+        trend = "请小幅调整并观察变化";
+    } else {
+        const int improvement = previousDistance - distance;
+        if (improvement > 1) {
+            trend = "正在接近中线";
+        } else if (improvement < -1) {
+            trend = "正在远离中线，请反向微调";
+        } else {
+            trend = "变化较小，请继续小幅调整";
+        }
+    }
+
+    previousDistance = distance;
+    return trend;
+}
+
+void MainWindow::updatePositionGuide(int leftBarValue, int rightBarValue)
+{
+    const QString leftTrend =
+        updatePositionTrend(leftBarValue, previousLeftGuideDistance);
+    const QString rightTrend =
+        updatePositionTrend(rightBarValue, previousRightGuideDistance);
+
+    QString color = "#E6A23C";
+    if (leftTrend.contains("正在远离") ||
+        rightTrend.contains("正在远离")) {
+        color = "#C62828";
+    } else if (leftTrend.contains("正在接近") ||
+               rightTrend.contains("正在接近") ||
+               (leftTrend.contains("已在中线") &&
+                rightTrend.contains("已在中线"))) {
+        color = "#2E7D32";
+    }
+
+    ui->lblPositionGuide->setText(
+        QString("左侧调倾角：%1\n"
+                "右侧调位置：%2")
+            .arg(leftTrend, rightTrend));
+    ui->lblPositionGuide->setStyleSheet(
+        QString("font-size: 13px; font-weight: bold; color: %1;")
+            .arg(color));
+}
+
 void MainWindow::initProcessPanel()
 {
     processValidCount = 0;
@@ -3811,10 +3886,11 @@ void MainWindow::initProcessPanel()
     ui->lblPairAValue->setText("D=--\n目标=10.0");
     ui->lblPairBValue->setText("G=--\n目标=0.0");
     ui->lblProcessStatus->setText("等待开始测量");
-    ui->lblProcessStatus->setWordWrap(true);
-    ui->lblProcessStatus->setMinimumHeight(60);
+    ui->lblProcessStatus->setWordWrap(false);
+    ui->lblProcessStatus->setMinimumHeight(0);
     ui->lblGateStats->setText("");
     ui->lblGateStats->setWordWrap(true);
+    resetPositionGuide();
 
     // ======================================================
     // 4. 进度条样式
@@ -3937,6 +4013,7 @@ void MainWindow::updateProcessPanel(double sosA,
 
     ui->barPairA->setValue(qBound(0, dBar, 1000));
     ui->barPairB->setValue(qBound(0, gBar, 1000));
+    updatePositionGuide(gBar, dBar);
 
     // ======================================================
     // 2. 标签显示
@@ -3982,12 +4059,19 @@ void MainWindow::updateProcessPanel(double sosA,
     // ======================================================
     // 5. 状态文字
     // ======================================================
+    const int currentRound = qBound(1,
+                                    roundSosList.size() + 1,
+                                    normalMeasureRounds);
+    const QString progressText =
+        QString("第 %1/%2 轮｜本轮有效值 %3/%4")
+            .arg(currentRound)
+            .arg(normalMeasureRounds)
+            .arg(processValidCount)
+            .arg(processValidTarget);
+
     if (processValidCount >= processValidTarget) {
         ui->lblProcessStatus->setText(
-            QString("本次测量完成：有效值已满 %1/%2")
-                .arg(processValidTarget)
-                .arg(processValidTarget)
-            );
+            progressText + QStringLiteral("｜本轮采集完成"));
 
         ui->lblProcessStatus->setStyleSheet(
             "font-size: 12px; color: #67C23A; font-weight: bold;"
@@ -3997,101 +4081,35 @@ void MainWindow::updateProcessPanel(double sosA,
 
     if (countThisFrame) {
         ui->lblProcessStatus->setText(
-            QString("姿态有效：Gap=%1，目标=%2，lagA-lagB=%3，进度 %4/%5")
-                .arg(pairMidGap, 0, 'f', 1)
-                .arg(mCfg.anglePairMidGapTarget, 0, 'f', 1)
-                .arg(signedLagDiff)
-                .arg(processValidCount)
-                .arg(processValidTarget)
-            );
+            progressText + QStringLiteral("｜数据有效，请保持当前姿势"));
 
         ui->lblProcessStatus->setStyleSheet(
             "font-size: 12px; color: #67C23A; font-weight: bold;"
             );
     } else {
-        // ======================================================
-        // 6. 帧被拒绝：显示具体失败原因 + 门控统计
-        // ======================================================
-        QStringList failReasons;
-
-        // 从成员变量读取当前帧各闸状态（detectAndPlotSpeed 已写入）
-        if (!lastFrameBJumpOk)
-            failReasons << "B跳变";
-        if (!lastFrameBoundaryOk)
-            failReasons << "边界反射";
-        if (!lastFrameDiffOk)
-            failReasons << QString("|lagA-lagB|过大=%1").arg(signedLagDiff);
-        if (!lastFrameDirectionOk)
-            failReasons << QString("A<B方向异常=%1").arg(signedLagDiff);
-        if (!lastFrameCorrOk) {
-            // corrOk 是 corrA AND corrB，细分一下
-            if (gateFailCorrA > 0 && gateFailCorrB == 0)
-                failReasons << "CorrA偏低";
-            else if (gateFailCorrB > 0 && gateFailCorrA == 0)
-                failReasons << "CorrB偏低";
-            else
-                failReasons << "相关性偏低";
-        }
-        if (!lastFrameAngleSignedDiffOk)
-            failReasons << QString("D=%1∉[%2,%3]").arg(signedLagDiff).arg(mCfg.angleSignedDiffMin,0,'f',1).arg(mCfg.angleSignedDiffMax,0,'f',1);
-        if (!lastFrameAnglePairMidGapOk)
-            failReasons << QString("G=%1∉[%2,%3]").arg(pairMidGap,0,'f',1).arg(mCfg.anglePairMidGapMin,0,'f',1).arg(mCfg.anglePairMidGapMax,0,'f',1);
-        if (!lastFrameStableOk && lastFrameAngleOk && lastFrameCorrOk) {
-            // 角度和相关都 OK 但是稳定簇没过，说明问题在稳定性
-            if (lastFrameStableState == 0)
-                failReasons << QString("预热中(%1/%2)").arg(recentBoneLagBList.size()).arg(mCfg.stableLagWarmupCount);
-            else if (lastFrameStableState == 1)
-                failReasons << "簇不够集中";
-            else if (lastFrameStableState == 3)
-                failReasons << "偏离锁定簇";
-        }
-
-        // 引导提示 — 按优先级：先解决角度，再解决稳定性，最后才是信号质量
+        // 帧未计入时只显示操作者可执行的建议，不暴露内部参数。
         QString guide;
-        double gDev = pairMidGap - mCfg.anglePairMidGapTarget;
-        double dDev = signedLagDiff - mCfg.angleSignedDiffTarget;
-
-        if (!lastFrameAnglePairMidGapOk) {
-            if (gDev > 3.0)
-                guide = "探头偏左，请向右(桡骨远端)轻移";
-            else if (gDev < -3.0)
-                guide = "探头偏右，请向左(桡骨近端)轻移";
-            else
-                guide = "G值接近边界，请微调探头左右位置";
-        } else if (!lastFrameAngleSignedDiffOk) {
-            if (dDev < -1.5)
-                guide = "倾角偏高，请放平探头";
-            else if (dDev > 2.0)
-                guide = "倾角偏低，请立起探头";
-            else
-                guide = "D值接近边界，请微调探头倾角";
+        if (!lastFrameAnglePairMidGapOk || !lastFrameAngleSignedDiffOk) {
+            guide = "姿势未达到要求，请根据上方提示微调";
         } else if (!lastFrameStableOk) {
             if (lastFrameStableState == 0) {
-                int remain = mCfg.stableLagWarmupCount - recentBoneLagBList.size();
-                guide = QString("预热中，请保持不动 %1 秒")
-                    .arg(qMax(1, remain * 80 / 1000 + 1));
-            } else if (lastFrameStableState == 1) {
-                guide = "波形波动大，请减小手部晃动";
+                guide = "正在确认稳定性，请保持探头不动";
             } else {
-                guide = "探头偏离锁定位置，请回到之前的触压角度";
+                guide = "信号不稳定，请保持探头位置和压力稳定";
             }
         } else if (!lastFrameCorrOk) {
-            guide = "信号异常，请检查耦合剂是否充足、探头是否贴紧";
+            guide = "接触质量不足，请检查耦合剂和探头贴合";
         } else if (!lastFrameBJumpOk) {
-            guide = "B通道波包跳变，请确保探头稳定贴合";
+            guide = "信号不稳定，请保持探头稳定贴合";
         } else if (!lastFrameBoundaryOk) {
-            guide = "疑似边界反射，请调整探头位置";
+            guide = "信号位置异常，请小幅调整探头位置";
         } else {
-            guide = "请检查耦合剂和探头接触状态";
+            guide = "数据暂未计入，请保持探头稳定";
         }
 
-        // lblProcessStatus 只显示简洁的操作建议
-        ui->lblProcessStatus->setText(
-            QString("%1\n【闸门统计请看 Qt Creator 控制台输出】")
-                .arg(guide)
-            );
+        ui->lblProcessStatus->setText(progressText + QStringLiteral("｜") + guide);
         ui->lblProcessStatus->setStyleSheet(
-            "font-size: 14px; color: #E6A23C; font-weight: bold;"
+            "font-size: 12px; color: #E6A23C; font-weight: bold;"
             );
 
         // lblGateStats 清空（闸门统计走 qDebug）
@@ -4101,7 +4119,20 @@ void MainWindow::updateProcessPanel(double sosA,
 
 void MainWindow::updateProcessInvalid(const QString& reason)
 {
-    ui->lblProcessStatus->setText("无效：" + reason);
+    resetPositionGuide("当前信号无效");
+    const int currentRound = qBound(1,
+                                    roundSosList.size() + 1,
+                                    normalMeasureRounds);
+    const QString progressText =
+        QString("第 %1/%2 轮｜本轮有效值 %3/%4")
+            .arg(currentRound)
+            .arg(normalMeasureRounds)
+            .arg(processValidCount)
+            .arg(processValidTarget);
+    const QString guide = reason.contains(QStringLiteral("滤波"))
+        ? QStringLiteral("暂未检测到有效信号，请检查探头连接和贴合")
+        : QStringLiteral("信号质量不足，请检查耦合剂并保持探头贴合");
+    ui->lblProcessStatus->setText(progressText + QStringLiteral("｜") + guide);
     ui->lblProcessStatus->setStyleSheet(
         "font-size: 12px; color: #F56C6C; font-weight: bold;"
         );

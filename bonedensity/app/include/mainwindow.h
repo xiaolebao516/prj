@@ -243,6 +243,12 @@ private:
     int processValidCount = 0;              // 当前横向进度条已经累计的有效次数
     int processValidTarget = 30;            // 满 50 次认为本轮测量完成
 
+    int previousLeftGuideDistance = -1;
+    int previousRightGuideDistance = -1;
+    void resetPositionGuide(const QString& stateText = QStringLiteral("等待实时数据"));
+    QString updatePositionTrend(int barValue, int& previousDistance);
+    void updatePositionGuide(int leftBarValue, int rightBarValue);
+
     // 原来是 6，但人体桡骨这类复杂波形中，正确结果的 A/B lag 可能差到 7~14。
     // 所以这里放宽一点，真正有效性不只靠 diffLag，而是靠下面的稳定簇判断。
     int processStrictLagTolerance = 18;
@@ -406,7 +412,9 @@ private:
     QList<MeasurementRecord> measurementsForPatient(const QString& patientId) const;
     const MeasurementRecord* latestMeasurementForPatient(const QString& patientId) const;
 
-    void showRoundFinishedTip(int finishedRounds, int totalRounds);
+    void showRoundFinishedTip(int finishedRounds,
+                              int totalRounds,
+                              bool accepted = true);
     void closeRoundFinishedTip();
 
     void handlePatientMeasureValue(double sosA,

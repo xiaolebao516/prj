@@ -407,7 +407,9 @@ void appendUniqueRecord(QList<MeasurementRecord>* records, QSet<QString>* keys,
     records->append(record);
 }
 
-bool loadMeasurementsFile(const QString& path, QList<MeasurementRecord>* records,
+bool loadMeasurementsFile(const QString& path,
+                          const QSet<QString>& patientIds,
+                          QList<MeasurementRecord>* records,
                           QString* errorMessage)
 {
     if (!QFileInfo::exists(path)) return true;
@@ -422,8 +424,13 @@ bool loadMeasurementsFile(const QString& path, QList<MeasurementRecord>* records
     QDomDocument document;
     const bool parsed = static_cast<bool>(document.setContent(&file));
     file.close();
-    if (!parsed || document.documentElement().tagName() != "measurements") {
-        setBadFileError(path, QString::fromUtf8("无法读取 measurements.xml"), errorMessage);
+    QString validationError;
+    if (!parsed ||
+        !validateMeasurementsDocument(document, patientIds, &validationError)) {
+        const QString reason = parsed
+            ? QString::fromUtf8("检测记录内容无效：") + validationError
+            : QString::fromUtf8("无法读取 measurements.xml");
+        setBadFileError(path, reason, errorMessage);
         return false;
     }
 
@@ -448,6 +455,7 @@ bool PatientStore::load(const QString& patientsPath,
     QList<PatientInfo> loadedPatients;
     QList<MeasurementRecord> legacyRecords;
     bool legacy = false;
+    QSet<QString> patientIds;
 
     QFile patientFile(patientsPath);
     if (patientFile.exists()) {
@@ -460,13 +468,20 @@ bool PatientStore::load(const QString& patientsPath,
         QDomDocument patientDocument;
         const bool parsed = static_cast<bool>(patientDocument.setContent(&patientFile));
         patientFile.close();
-        if (!parsed || patientDocument.documentElement().tagName() != "patients") {
-            setBadFileError(patientsPath, QString::fromUtf8("无法读取 patients.xml"), errorMessage);
+        QString validationError;
+        if (!parsed ||
+            !validatePatientsDocument(patientDocument,
+                                      &patientIds,
+                                      &legacy,
+                                      &validationError)) {
+            const QString reason = parsed
+                ? QString::fromUtf8("患者档案内容无效：") + validationError
+                : QString::fromUtf8("无法读取 patients.xml");
+            setBadFileError(patientsPath, reason, errorMessage);
             return false;
         }
 
         const QDomElement root = patientDocument.documentElement();
-        legacy = root.attribute("version") != "2";
         QHash<QString, int> patientIndexes;
         QSet<QString> legacyKeys;
         const QDomNodeList nodes = root.elementsByTagName("patient");
@@ -487,7 +502,12 @@ bool PatientStore::load(const QString& patientsPath,
     }
 
     QList<MeasurementRecord> existingMeasurements;
-    if (!loadMeasurementsFile(measurementsPath, &existingMeasurements, errorMessage)) return false;
+    if (!loadMeasurementsFile(measurementsPath,
+                              patientIds,
+                              &existingMeasurements,
+                              errorMessage)) {
+        return false;
+    }
 
     QList<MeasurementRecord> loadedMeasurements = existingMeasurements;
     if (legacy) {
