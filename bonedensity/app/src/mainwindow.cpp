@@ -11,6 +11,7 @@ static constexpr bool kDebugPerFrame = false;
 #include "agesoschartwidget.h"
 #include "reportwidget.h"
 #include "calibrationdialog.h"
+#include "measurementguidedialog.h"
 #include "utils.h"
 
 #include <QtSerialPort/QSerialPortInfo>
@@ -42,6 +43,8 @@ static constexpr bool kDebugPerFrame = false;
 #include <QAction>
 #include <QMenuBar>
 #include <QSet>
+#include <QScopeGuard>
+#include <QJsonArray>
 #include <QStandardPaths>
 #include <QtPrintSupport/QPrintDialog>
 #include <QtPrintSupport/QPrinter>
@@ -124,6 +127,8 @@ MainWindow::MainWindow(QWidget *parent)
         edit->setMaximumDate(QDate::currentDate());
     }
     accountsFilePath = QCoreApplication::applicationDirPath() + "/accounts.xml";
+    measurementGuideSettingsPath =
+        QCoreApplication::applicationDirPath() + "/measurement-guide.ini";
     QString accountError;
     if (!accountStore.loadOrInitialize(accountsFilePath, &accountError)) {
         QMessageBox::warning(this, "账号初始化失败", accountError);
@@ -386,6 +391,10 @@ void MainWindow::on_btnLogin_clicked() {
 //====================================================================================
 
 MainWindow::~MainWindow() {
+    if (experimentLog.active()) {
+        experimentLog.write({{"event", "application_closed"}});
+        experimentLog.close();
+    }
     if (serial->isOpen()) serial->close();
     delete ui;
 }
@@ -398,6 +407,11 @@ void MainWindow::clearFrameAssembly()
 
 void MainWindow::resetDisconnectedAcquisitionState()
 {
+    if (experimentLog.active()) {
+        experimentLog.write({{"event", "disconnected"}});
+        experimentLog.close();
+        checkExperimentLogError();
+    }
     if (autoTimer && autoTimer->isActive()) autoTimer->stop();
     autoRunning = false;
     patientMeasureRunning = false;
@@ -421,6 +435,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     const bool incompleteMeasurementWasPresent = hasIncompletePatientRounds();
 
     if (patientMeasurementWasRunning) {
+        experimentLog.write({{"event", "close_confirmation_pause"}});
         if (autoTimer && autoTimer->isActive()) autoTimer->stop();
         patientMeasureRunning = false;
         acquireMode = DebugAcquireMode;
@@ -441,6 +456,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
         serial->readAll();
         acquireMode = PatientMeasureMode;
         patientMeasureRunning = true;
+        experimentLog.write({{"event", "close_cancelled_resume"}});
         if (patientTimerWasActive) autoTimer->start(80);
         updatePatientSelectionUi();
     };
@@ -759,7 +775,6 @@ void MainWindow::on_triggerButton_clicked()
         ui->barMeasureProgress->setFormat("有效值：%v / %m");
         ui->lblPairAValue->setText("D=--\n目标=10.0");
         ui->lblPairBValue->setText("G=--\n目标=0.0");
-        resetPositionGuide();
         ui->lblProcessStatus->setText("检测已手动停止");
         ui->lblProcessStatus->setStyleSheet(
             "font-size: 12px; color: #E6A23C; font-weight: bold;"
@@ -820,7 +835,6 @@ void MainWindow::on_btnAcquireWaveform_clicked()
         ui->barMeasureProgress->setFormat("有效值：%v / %m");
         ui->lblPairAValue->setText("D=--\n目标=10.0");
         ui->lblPairBValue->setText("G=--\n目标=0.0");
-        resetPositionGuide();
         ui->lblProcessStatus->setText("检测已手动停止");
         ui->lblProcessStatus->setStyleSheet(
             "font-size: 12px; color: #E6A23C; font-weight: bold;"
@@ -867,7 +881,7 @@ bool MainWindow::hasCurrentPatient() const
     && !currentPatient.name.trimmed().isEmpty();
 }
 
-void MainWindow::startPatientMeasurement(int targetRounds)
+void MainWindow::startPatientMeasurement(int targetRounds, bool offerFirstUseGuide)
 {
     if (!hasCurrentPatient()) {
         pendingStartAfterPatientInfo = false;
@@ -890,6 +904,11 @@ void MainWindow::startPatientMeasurement(int targetRounds)
 
     if (!serial->isOpen()) {
         QMessageBox::warning(this, "串口未连接", "请先连接串口设备。");
+        return;
+    }
+
+    if (offerFirstUseGuide && shouldOfferMeasurementGuide()
+        && !runMeasurementGuide(true)) {
         return;
     }
 
@@ -931,16 +950,15 @@ void MainWindow::startPatientMeasurement(int targetRounds)
     resetOneRoundMeasurementState();
 
     int nextRound = roundSosList.size() + 1;
+    startExperimentLog();
 
     updatePatientSelectionUi();
     ui->btnPatientInfo->setStyleSheet("");  // 恢复默认样式，确保可点击
 
     ui->lblProcessStatus->setText(
-        QString("第 %1/%2 轮｜本轮有效值 0/%3｜正在检测，请保持探头贴合")
+        QString("当前第 %1/%2 轮")
             .arg(nextRound)
-            .arg(normalMeasureRounds)
-            .arg(processValidTarget)
-        );
+            .arg(normalMeasureRounds));
 
     ui->lblProcessStatus->setStyleSheet(
         "font-size: 12px; color: #409EFF; font-weight: bold;"
@@ -950,8 +968,52 @@ void MainWindow::startPatientMeasurement(int targetRounds)
     updatePatientSelectionUi();
 }
 
+void MainWindow::startExperimentLog()
+{
+#ifndef QT_NO_DEBUG
+    experimentLogWarningShown = false;
+    QJsonArray previousRounds;
+    for (double sos : roundSosList) previousRounds.append(sos);
+    const QJsonObject config{
+        {"previous_accepted_rounds", previousRounds},
+        {"implementation", "state-repair-20260905-v1"}, {"build", __DATE__ " " __TIME__},
+        {"round", roundSosList.size() + 1}, {"round_target", normalMeasureRounds},
+        {"frame_target", processValidTarget}, {"round_cluster_tolerance", roundClusterTolerance},
+        {"probe_distance_m", signalProcessor.probeDistanceCD},
+        {"sample_period_s", signalProcessor.samplePeriod},
+        {"B_only", useBOnlyForPatientSos}, {"SOS_offset", patientSosOffset},
+        {"angle_gate_enabled", enablePatientAngleGate},
+        {"frame_corr_A", mCfg.frameCorrAMin}, {"frame_corr_B", mCfg.frameCorrBMin},
+        {"round_corr_A", mCfg.roundCorrAMin}, {"round_corr_B", mCfg.roundCorrBMin},
+        {"D_min", mCfg.angleSignedDiffMin}, {"D_max", mCfg.angleSignedDiffMax},
+        {"G_min", mCfg.anglePairMidGapMin}, {"G_max", mCfg.anglePairMidGapMax},
+        {"warmup", mCfg.stableLagWarmupCount}, {"lock_need", mCfg.stableLagLockNeedCount},
+        {"lag_tolerance", mCfg.stableLagTolerance}, {"unlock_count", mCfg.boneLagUnlockCount},
+        {"window_size", stableLagWindowSize},
+        {"gain_BC", gainSliderA->value()}, {"gain_BD", gainSliderB->value()},
+        {"gain_AC", gainSliderC->value()}, {"gain_AD", gainSliderD->value()}};
+    experimentLog.start(QCoreApplication::applicationDirPath() + "/measurement-experiments", config);
+    checkExperimentLogError();
+#endif
+}
+
+void MainWindow::checkExperimentLogError()
+{
+    if (experimentLogWarningShown || experimentLog.error().isEmpty()) return;
+    experimentLogWarningShown = true;
+    qWarning() << "Experiment recording unavailable:" << experimentLog.error();
+    statusBar()->showMessage(QStringLiteral("实验记录未保存完整，请检查剩余磁盘空间和文件夹权限；检测本身不受此提示控制。"));
+}
+
 void MainWindow::stopPatientMeasurement()
 {
+    if (experimentLog.active()) {
+        experimentLog.write({{"event", "stop"}, {"partial_values", processValidCount},
+                             {"accepted_rounds", roundSosList.size()}});
+        experimentLog.close();
+        checkExperimentLogError();
+    }
+    checkExperimentLogError();
     if (autoTimer->isActive()) {
         autoTimer->stop();
     }
@@ -972,6 +1034,11 @@ void MainWindow::resetPatientMeasurementState(int targetRounds)
 
 void MainWindow::resetAllPatientMeasurementData()
 {
+    if (experimentLog.active()) {
+        experimentLog.write({{"event", "reset_all"}});
+        experimentLog.close();
+        checkExperimentLogError();
+    }
     if (autoTimer && autoTimer->isActive()) {
         autoTimer->stop();
     }
@@ -1020,8 +1087,6 @@ void MainWindow::resetAllPatientMeasurementData()
 
     ui->lblPairAValue->setText("D=--\n目标=10.0");
     ui->lblPairBValue->setText("G=--\n目标=0.0");
-    resetPositionGuide();
-
     ui->lblProcessStatus->setText("等待开始测量");
     ui->lblProcessStatus->setStyleSheet(
         "font-size: 12px; color: #606266;"
@@ -1062,8 +1127,6 @@ void MainWindow::resetOneRoundMeasurementState()
 
     ui->lblPairAValue->setText("D=--\n目标=10.0");
     ui->lblPairBValue->setText("G=--\n目标=0.0");
-    resetPositionGuide();
-
     if (seriesSpeed) {
         seriesSpeed->clear();
     }
@@ -1107,6 +1170,7 @@ void MainWindow::showRoundFinishedTip(int finishedRounds,
         measureTipBox->windowFlags()
         | Qt::Tool
         | Qt::WindowStaysOnTopHint
+        | Qt::WindowDoesNotAcceptFocus
         );
 
     measureTipBox->setAttribute(Qt::WA_DeleteOnClose);
@@ -1122,6 +1186,7 @@ void MainWindow::showRoundFinishedTip(int finishedRounds,
     int x = center.x() - measureTipBox->width() / 2;
     int y = this->geometry().top() + 120;
     measureTipBox->move(x, y);
+    ui->btnStartMeasurement->setFocus(Qt::OtherFocusReason);
 }
 
 void MainWindow::closeRoundFinishedTip()
@@ -1222,6 +1287,11 @@ void MainWindow::finishOnePatientRound()
     bool oneRoundAngleOk =
         (!enablePatientAngleGate) ||
         (oneRoundAngleSignedDiffOk && oneRoundPairMidGapOk);
+    experimentLog.write({{"event", "round_summary"}, {"sos", oneRoundSos},
+        {"corr_A", oneRoundCorrA}, {"corr_B", oneRoundCorrB},
+        {"D", oneRoundSignedLagDiff}, {"G", oneRoundPairMidGap},
+        {"quality_pass", oneRoundCorrB >= mCfg.roundCorrBMin &&
+            oneRoundCorrA >= mCfg.roundCorrAMin && oneRoundAngleOk}});
 
     qDebug() << "One patient round candidate:"
              << "sos =" << oneRoundSos
@@ -1299,6 +1369,10 @@ void MainWindow::finishOnePatientRound()
         roundAList, roundBList, roundClusterTolerance);
 
     int finished = roundSosList.size();
+    QJsonArray acceptedSos;
+    for (double sos : roundSosList) acceptedSos.append(sos);
+    experimentLog.write({{"event", "round_cluster"}, {"accepted_sos", acceptedSos},
+                         {"candidate_count", candidateRoundList.size()}});
 
     qDebug() << "One patient round accepted:"
              << "acceptedRoundCount =" << finished
@@ -1823,7 +1897,10 @@ void MainWindow::plotSamples()
         std::min(filAC.size(), filAD.size())
         );
 
-    if (n <= 0) return;
+    if (n <= 0) {
+        detectAndPlotSpeed(filBC, filBD, filAC, filAD);
+        return;
+    }
 
     // 4. 打印滤波后数据（逐帧大流量，默认关闭）
     // if (kDebugPerFrame) {
@@ -2358,6 +2435,30 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
                                     const QVector<double>& filAC,
                                     const QVector<double>& filAD)
 {
+    const bool recording = patientMeasureRunning && acquireMode == PatientMeasureMode
+                           && experimentLog.active();
+    QElapsedTimer processingTimer;
+    processingTimer.start();
+    QJsonObject evidence{{"event", "frame"}, {"decision", "empty_filtered_input"}};
+    const auto record = [&]() {
+        if (!recording) return;
+        evidence["processing_ms"] = processingTimer.elapsed();
+        evidence["raw_BC"] = MeasurementExperimentLog::encodeRaw(samplesA);
+        evidence["raw_BD"] = MeasurementExperimentLog::encodeRaw(samplesB);
+        evidence["raw_AC"] = MeasurementExperimentLog::encodeRaw(samplesC);
+        evidence["raw_AD"] = MeasurementExperimentLog::encodeRaw(samplesD);
+        evidence["partial_values_before_accept"] = processValidCount;
+        evidence["locked"] = boneLagLocked;
+        evidence["locked_lag"] = lockedBoneLagCenter;
+        experimentLog.write(evidence);
+        checkExperimentLogError();
+    };
+    auto recordOnReturn = qScopeGuard(record);
+    const auto pairEvidence = [](const PairResult& pair) {
+        return QJsonObject{{"valid", pair.valid}, {"rough_lag", pair.roughLag},
+            {"lag", pair.refinedLag}, {"sos", pair.sos}, {"corr", pair.corr},
+            {"early_feature", pair.earlyOnset}, {"late_feature", pair.lateOnset}};
+    };
     int n = std::min(
         std::min(filBC.size(), filBD.size()),
         std::min(filAC.size(), filAD.size())
@@ -2437,6 +2538,8 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
         vMax,
         "B_pair / BD->BC"
         );
+    evidence["B"] = pairEvidence(bRes);
+    evidence["decision"] = "B_pair_invalid";
 
     if (!bRes.valid) {
         qDebug() << "Skip: B_pair invalid, because B_pair is the reference pair";
@@ -2461,6 +2564,7 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
     int bLagJumpLimit = 70;
 
     if (bLagJump > bLagJumpLimit) {
+        evidence["decision"] = "B_lag_jump";
         qDebug() << "Skip: B_pair jump too large"
                  << "roughLag =" << bRes.roughLag
                  << "refinedLag =" << bRes.refinedLag
@@ -2493,6 +2597,7 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
         lagToleranceAB,
         "A_pair / AD->AC / valley"
         );
+    evidence["A_feature_branch"] = aRes.valid ? "valley" : "envelope_fallback";
 
     if (!aRes.valid) {
         int forcedMin = qMax(1, bRes.refinedLag - lagToleranceAB);
@@ -2514,6 +2619,8 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
             );
     }
 
+    evidence["A"] = pairEvidence(aRes);
+    evidence["decision"] = "A_pair_invalid";
     if (!aRes.valid) {
         qDebug() << "Skip: A_pair invalid";
 
@@ -2540,8 +2647,11 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
     double pairMidB = 0.5 * (bRes.earlyOnset + bRes.lateOnset);
     double pairMidA = 0.5 * (aRes.earlyOnset + aRes.lateOnset);
     double pairMidGap = pairMidB - pairMidA;
+    evidence["D"] = aRes.refinedLag - bRes.refinedLag;
+    evidence["G"] = pairMidGap;
 
     if (diffLag > lagToleranceAB) {
+        evidence["decision"] = "AB_difference";
         qDebug() << "Skip: A_pair and B_pair inconsistent"
                  << "lagA =" << aRes.refinedLag
                  << "lagB =" << bRes.refinedLag
@@ -2556,6 +2666,7 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
         // 调试模式：中间检查过程区保持不动
         // 病人检测模式：显示一高一低，但不计入有效值
         if (patientMeasureRunning && acquireMode == PatientMeasureMode) {
+            rejectBoneLagCandidate();
             updateProcessPanel(
                 aRes.sos,
                 bRes.sos,
@@ -2739,6 +2850,7 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
                 );
 
         } else {
+            rejectBoneLagCandidate();
             if (kDebugPerFrame) {
                 qDebug() << "BoneLagStable: current frame not added because pre-check failed"
                          << "bJumpOk =" << bJumpOk
@@ -2768,6 +2880,15 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
             corrOk &&
             angleOk &&
             stableOk;
+        evidence["decision"] = strictValid ? "accepted" : "rejected";
+        evidence["sos_patient"] = sosAvg;
+        evidence["gates"] = QJsonObject{{"B_jump", bJumpOk}, {"boundary", notBoundary},
+            {"AB_diff", diffOk}, {"direction", directionOk},
+            {"corr_A", aRes.corr >= mCfg.frameCorrAMin},
+            {"corr_B", bRes.corr >= mCfg.frameCorrBMin},
+            {"D", angleSignedDiffOk}, {"G", anglePairMidGapOk},
+            {"stability_evaluated", bJumpOk && notBoundary && diffOk && directionOk && corrOk && angleOk},
+            {"stable", stableOk}};
 
 
         if (kDebugPerFrame) {
@@ -2869,6 +2990,9 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
             printGateStats();
         }
 
+        // Write this decision before the last value can finish/close the round log.
+        record();
+        recordOnReturn.dismiss();
         handlePatientMeasureValue(
             aRes.sos,
             bRes.sos,
@@ -2961,6 +3085,7 @@ void MainWindow::processCalibrationFrame(const QVector<double>& filBC,
 
 void MainWindow::resetBoneLagStability()
 {
+    boneLagRejectedFrameCount = 0;
     recentBoneLagBList.clear();
 
     boneLagLocked = false;
@@ -3069,8 +3194,36 @@ QString MainWindow::gateStatsSummary() const
         .arg(pct(gateFailStableOutOfLock));
 }
 
+void MainWindow::discardPartialRound()
+{
+    experimentLog.write({{"event", "discard_partial"}, {"discarded_values", processValidCount}});
+    // A new lock must never inherit samples measured at the previous position.
+    currentRoundSosList.clear();
+    currentRoundAList.clear();
+    currentRoundBList.clear();
+    currentRoundCorrAList.clear();
+    currentRoundCorrBList.clear();
+    currentRoundPairMidGapList.clear();
+    currentRoundSignedLagDiffList.clear();
+    processValidCount = 0;
+    ui->barMeasureProgress->setValue(0);
+}
+
+void MainWindow::rejectBoneLagCandidate()
+{
+    if (!patientMeasureRunning || acquireMode != PatientMeasureMode) return;
+    // Tolerate brief dropouts, but do not keep stale evidence indefinitely.
+    // Reuse the existing sustained-loss count; no new tuning constant.
+    if (++boneLagRejectedFrameCount >= mCfg.boneLagUnlockCount) {
+        experimentLog.write({{"event", "sustained_precheck_loss"}});
+        resetBoneLagStability();
+        discardPartialRound();
+    }
+}
+
 bool MainWindow::checkBoneLagStable(int lagB, int* centerOut, int* countOut)
 {
+    boneLagRejectedFrameCount = 0;
     // ======================================================
     // 1. 当前 lagB 加入候选窗口
     // ======================================================
@@ -3204,19 +3357,17 @@ bool MainWindow::checkBoneLagStable(int lagB, int* centerOut, int* countOut)
     }
 
     // 如果连续多帧都偏离锁定簇，说明探头已经移到别的位置了。
-    // 这时重新寻找稳定簇。注意：这里不清空已累计的有效值，
-    // 只是停止让当前帧推动进度条；如果你希望更严格，也可以在这里清空当前轮。
+    // 重新寻找稳定簇时也丢弃旧位置的本轮样本，不能跨位置混合平均。
     if (boneLagOutOfLockCount >= mCfg.boneLagUnlockCount) {
+        experimentLog.write({{"event", "cluster_lost"}, {"old_lag", lockedBoneLagCenter}});
         if (kDebugPerFrame) {
             qDebug() << "BoneLagStable:"
                      << "unlock because too many out-of-cluster frames"
                      << "oldLockedCenter =" << lockedBoneLagCenter;
         }
 
-        recentBoneLagBList.clear();
-        boneLagLocked = false;
-        lockedBoneLagCenter = 0;
-        boneLagOutOfLockCount = 0;
+        resetBoneLagStability();
+        discardPartialRound();
     }
 
     return false;
@@ -3448,7 +3599,6 @@ void MainWindow::on_btnStartMeasurement_clicked()
         ui->barMeasureProgress->setFormat("有效值：%v / %m");
         ui->lblPairAValue->setText("D=--\n目标=10.0");
         ui->lblPairBValue->setText("G=--\n目标=0.0");
-        resetPositionGuide();
         ui->lblProcessStatus->setText("检测已手动停止");
         ui->lblProcessStatus->setStyleSheet(
             "font-size: 12px; color: #E6A23C; font-weight: bold;"
@@ -3484,7 +3634,46 @@ void MainWindow::on_btnStartMeasurement_clicked()
 
     // 每次点击"开始检测"只测 1 次；
     // 前面完成的第 1 次、第 2 次……保存在 roundSosList 里，不会清空。
-    startPatientMeasurement(normalMeasureRounds);
+    startPatientMeasurement(normalMeasureRounds, true);
+}
+
+void MainWindow::on_btnMeasurementGuide_clicked()
+{
+    if (patientMeasureRunning || (autoRunning && !patientMeasureRunning)) return;
+    runMeasurementGuide(false);
+}
+
+bool MainWindow::shouldOfferMeasurementGuide() const
+{
+    return !measurementGuideSeenThisRun
+        && !MeasurementGuideDialog::isCurrentVersionSeen(
+            measurementGuideSettingsPath);
+}
+
+bool MainWindow::runMeasurementGuide(bool automatic)
+{
+    MeasurementGuideDialog dialog(
+        automatic ? MeasurementGuideDialog::Mode::Automatic
+                  : MeasurementGuideDialog::Mode::Manual,
+        this);
+    const bool accepted = dialog.exec() == QDialog::Accepted;
+
+    if (automatic && accepted) {
+        measurementGuideSeenThisRun = true;
+        QString errorMessage;
+        if (!MeasurementGuideDialog::markCurrentVersionSeen(
+                measurementGuideSettingsPath, &errorMessage)) {
+            statusBar()->showMessage(
+                QStringLiteral("操作教学已完成，但首次提示状态未能保存：%1")
+                    .arg(errorMessage),
+                8000);
+        }
+    }
+
+    if (ui->btnStartMeasurement->isEnabled()) {
+        ui->btnStartMeasurement->setFocus(Qt::OtherFocusReason);
+    }
+    return accepted;
 }
 
 void MainWindow::on_btnPatientNewSave_clicked()
@@ -3791,69 +3980,6 @@ void MainWindow::setSpeedDebugInvalid(const QString& reason)
     lblSosInfo->setStyleSheet("font-size: 11px; color: #F56C6C;");
 }
 
-void MainWindow::resetPositionGuide(const QString& stateText)
-{
-    previousLeftGuideDistance = -1;
-    previousRightGuideDistance = -1;
-    ui->lblPositionGuide->setText(
-        QString("左侧调倾角：%1\n"
-                "右侧调位置：%1")
-            .arg(stateText));
-    ui->lblPositionGuide->setStyleSheet(
-        "font-size: 13px; font-weight: bold; color: #E6A23C;");
-}
-
-QString MainWindow::updatePositionTrend(int barValue, int& previousDistance)
-{
-    const int distance = qAbs(barValue - 500);
-    QString trend;
-
-    if (distance <= 2) {
-        trend = "已在中线，请保持";
-    } else if (previousDistance < 0) {
-        trend = "请小幅调整并观察变化";
-    } else {
-        const int improvement = previousDistance - distance;
-        if (improvement > 1) {
-            trend = "正在接近中线";
-        } else if (improvement < -1) {
-            trend = "正在远离中线，请反向微调";
-        } else {
-            trend = "变化较小，请继续小幅调整";
-        }
-    }
-
-    previousDistance = distance;
-    return trend;
-}
-
-void MainWindow::updatePositionGuide(int leftBarValue, int rightBarValue)
-{
-    const QString leftTrend =
-        updatePositionTrend(leftBarValue, previousLeftGuideDistance);
-    const QString rightTrend =
-        updatePositionTrend(rightBarValue, previousRightGuideDistance);
-
-    QString color = "#E6A23C";
-    if (leftTrend.contains("正在远离") ||
-        rightTrend.contains("正在远离")) {
-        color = "#C62828";
-    } else if (leftTrend.contains("正在接近") ||
-               rightTrend.contains("正在接近") ||
-               (leftTrend.contains("已在中线") &&
-                rightTrend.contains("已在中线"))) {
-        color = "#2E7D32";
-    }
-
-    ui->lblPositionGuide->setText(
-        QString("左侧调倾角：%1\n"
-                "右侧调位置：%2")
-            .arg(leftTrend, rightTrend));
-    ui->lblPositionGuide->setStyleSheet(
-        QString("font-size: 13px; font-weight: bold; color: %1;")
-            .arg(color));
-}
-
 void MainWindow::initProcessPanel()
 {
     processValidCount = 0;
@@ -3890,7 +4016,12 @@ void MainWindow::initProcessPanel()
     ui->lblProcessStatus->setMinimumHeight(0);
     ui->lblGateStats->setText("");
     ui->lblGateStats->setWordWrap(true);
-    resetPositionGuide();
+    ui->lblPositionGuide->setText(
+        QStringLiteral("先调右侧 D：空间位置\n再调左侧 G：左右倾角"));
+    ui->lblPositionGuide->setStyleSheet(
+        QStringLiteral("font-size: 13px; font-weight: bold; color: #303133;"));
+    ui->lblPositionGuideNote->setText(
+        QStringLiteral("最终使右侧 D、左侧 G 均稳定在中线"));
 
     // ======================================================
     // 4. 进度条样式
@@ -3967,6 +4098,12 @@ void MainWindow::updateProcessPanel(double sosA,
                                     double pairMidGap,
                                     bool countThisFrame)
 {
+    ui->barPairA->setEnabled(true);
+    ui->barPairB->setEnabled(true);
+    Q_UNUSED(sosA);
+    Q_UNUSED(sosB);
+    Q_UNUSED(diffLag);
+
     // ======================================================
     // 1. 两个竖条：显示探头角度 / 姿态平衡
     //
@@ -3993,7 +4130,7 @@ void MainWindow::updateProcessPanel(double sosA,
         return 500;
     };
 
-    // 左竖条：D = lagA - lagB
+    // 右竖条：D = lagA - lagB
     int dBar = mapToBar(
         lagA - lagB,
         mCfg.angleSignedDiffTarget,
@@ -4002,7 +4139,7 @@ void MainWindow::updateProcessPanel(double sosA,
         1.4
         );
 
-    // 右竖条：G = pairMidGap
+    // 左竖条：G = pairMidGap
     int gBar = mapToBar(
         pairMidGap,
         mCfg.anglePairMidGapTarget,
@@ -4013,7 +4150,6 @@ void MainWindow::updateProcessPanel(double sosA,
 
     ui->barPairA->setValue(qBound(0, dBar, 1000));
     ui->barPairB->setValue(qBound(0, gBar, 1000));
-    updatePositionGuide(gBar, dBar);
 
     // ======================================================
     // 2. 标签显示
@@ -4056,86 +4192,19 @@ void MainWindow::updateProcessPanel(double sosA,
         (!enablePatientAngleGate) ||
         (angleSignedDiffOk && anglePairMidGapOk);
 
-    // ======================================================
-    // 5. 状态文字
-    // ======================================================
-    const int currentRound = qBound(1,
-                                    roundSosList.size() + 1,
-                                    normalMeasureRounds);
-    const QString progressText =
-        QString("第 %1/%2 轮｜本轮有效值 %3/%4")
-            .arg(currentRound)
-            .arg(normalMeasureRounds)
-            .arg(processValidCount)
-            .arg(processValidTarget);
-
-    if (processValidCount >= processValidTarget) {
-        ui->lblProcessStatus->setText(
-            progressText + QStringLiteral("｜本轮采集完成"));
-
-        ui->lblProcessStatus->setStyleSheet(
-            "font-size: 12px; color: #67C23A; font-weight: bold;"
-            );
-        return;
-    }
-
-    if (countThisFrame) {
-        ui->lblProcessStatus->setText(
-            progressText + QStringLiteral("｜数据有效，请保持当前姿势"));
-
-        ui->lblProcessStatus->setStyleSheet(
-            "font-size: 12px; color: #67C23A; font-weight: bold;"
-            );
-    } else {
-        // 帧未计入时只显示操作者可执行的建议，不暴露内部参数。
-        QString guide;
-        if (!lastFrameAnglePairMidGapOk || !lastFrameAngleSignedDiffOk) {
-            guide = "姿势未达到要求，请根据上方提示微调";
-        } else if (!lastFrameStableOk) {
-            if (lastFrameStableState == 0) {
-                guide = "正在确认稳定性，请保持探头不动";
-            } else {
-                guide = "信号不稳定，请保持探头位置和压力稳定";
-            }
-        } else if (!lastFrameCorrOk) {
-            guide = "接触质量不足，请检查耦合剂和探头贴合";
-        } else if (!lastFrameBJumpOk) {
-            guide = "信号不稳定，请保持探头稳定贴合";
-        } else if (!lastFrameBoundaryOk) {
-            guide = "信号位置异常，请小幅调整探头位置";
-        } else {
-            guide = "数据暂未计入，请保持探头稳定";
-        }
-
-        ui->lblProcessStatus->setText(progressText + QStringLiteral("｜") + guide);
-        ui->lblProcessStatus->setStyleSheet(
-            "font-size: 12px; color: #E6A23C; font-weight: bold;"
-            );
-
-        // lblGateStats 清空（闸门统计走 qDebug）
-        ui->lblGateStats->setText("");
-    }
+    // 姿态计算保留不变；文字不再随每帧跳变。
+    Q_UNUSED(angleOk);
+    ui->lblGateStats->setText("");
 }
 
 void MainWindow::updateProcessInvalid(const QString& reason)
 {
-    resetPositionGuide("当前信号无效");
-    const int currentRound = qBound(1,
-                                    roundSosList.size() + 1,
-                                    normalMeasureRounds);
-    const QString progressText =
-        QString("第 %1/%2 轮｜本轮有效值 %3/%4")
-            .arg(currentRound)
-            .arg(normalMeasureRounds)
-            .arg(processValidCount)
-            .arg(processValidTarget);
-    const QString guide = reason.contains(QStringLiteral("滤波"))
-        ? QStringLiteral("暂未检测到有效信号，请检查探头连接和贴合")
-        : QStringLiteral("信号质量不足，请检查耦合剂并保持探头贴合");
-    ui->lblProcessStatus->setText(progressText + QStringLiteral("｜") + guide);
-    ui->lblProcessStatus->setStyleSheet(
-        "font-size: 12px; color: #F56C6C; font-weight: bold;"
-        );
+    Q_UNUSED(reason);
+    rejectBoneLagCandidate();
+    ui->barPairA->setEnabled(false);
+    ui->barPairB->setEnabled(false);
+    ui->lblPairAValue->setText("D=--");
+    ui->lblPairBValue->setText("G=--");
 }
 
 void MainWindow::on_btnShowResult_clicked() {
@@ -4391,6 +4460,8 @@ void MainWindow::updatePatientSelectionUi()
         patientDataWritable &&
         (patientMeasureRunning || (!hasPendingMeasurement && selected && connected)));
     ui->btnStartMeasurement->setText(patientMeasureRunning ? "停止检测" : "开始检测");
+    ui->btnMeasurementGuide->setEnabled(
+        !patientMeasureRunning && !debugAcquisitionRunning);
     ui->pushButton->setEnabled(
         connected && !patientMeasureRunning && !debugAcquisitionRunning);
     ui->triggerButton->setEnabled(connected && !patientMeasureRunning);

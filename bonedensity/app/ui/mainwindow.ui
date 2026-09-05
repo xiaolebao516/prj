@@ -399,7 +399,7 @@
                   </rect>
                  </property>
                  <property name="text">
-                  <string>G 位置平衡</string>
+                   <string>G 倾角平衡</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignCenter</set>
@@ -491,7 +491,7 @@
                   </rect>
                  </property>
                  <property name="text">
-                  <string>D 延迟一致性</string>
+                   <string>D 位置平衡</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignCenter</set>
@@ -501,20 +501,20 @@
                  <property name="geometry">
                   <rect>
                    <x>120</x>
-                   <y>45</y>
+                   <y>50</y>
                    <width>240</width>
-                   <height>145</height>
+                   <height>80</height>
                   </rect>
                  </property>
                  <property name="text">
-                  <string>左侧调倾角：等待实时数据
-右侧调位置：等待实时数据</string>
+                   <string>先调右侧 D：空间位置
+再调左侧 G：左右倾角</string>
                  </property>
                  <property name="wordWrap">
                   <bool>true</bool>
                  </property>
                  <property name="styleSheet">
-                  <string notr="true">font-size: 13px; font-weight: bold; color: #E6A23C;</string>
+                   <string notr="true">font-size: 13px; font-weight: bold; color: #303133;</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignCenter</set>
@@ -524,19 +524,32 @@
                  <property name="geometry">
                   <rect>
                    <x>120</x>
-                   <y>195</y>
+                   <y>135</y>
                    <width>240</width>
-                   <height>30</height>
+                   <height>45</height>
                   </rect>
                  </property>
                  <property name="text">
-                  <string>提示仅供参考，最终以两条均在中线为准</string>
+                   <string>最终使右侧 D、左侧 G 均稳定在中线</string>
                  </property>
                  <property name="styleSheet">
                   <string notr="true">font-size: 10px; color: #606266;</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="btnMeasurementGuide">
+                 <property name="geometry">
+                  <rect>
+                   <x>170</x>
+                   <y>195</y>
+                   <width>140</width>
+                   <height>36</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>操作教学</string>
                  </property>
                 </widget>
                 <widget class="QProgressBar" name="barMeasureProgress">

@@ -22,6 +22,7 @@
 #include "accountstore.h"
 #include "reportwidget.h"
 #include "signalprocessor.h"
+#include "measurementexperimentlog.h"
 #include "calibrationstore.h"
 QT_USE_NAMESPACE
 
@@ -34,6 +35,7 @@ class QCloseEvent;
 class QResizeEvent;
 class QPrinter;
 class CalibrationDialog;
+class MeasurementGuideDialog;
 class MainWindowSafetyTests;
 
 class MainWindow : public QMainWindow {
@@ -60,6 +62,7 @@ private slots:
     void on_btnBackFromArchive_clicked();      // 从档案返回主页面
     void on_btnPatientInfo_clicked(); //主界面进入选择患者信息
     void on_btnStartMeasurement_clicked();
+    void on_btnMeasurementGuide_clicked();
     void on_btnBackToMain_clicked(); //选择患者信息进入主界面
 
     // 患者信息页面
@@ -243,12 +246,6 @@ private:
     int processValidCount = 0;              // 当前横向进度条已经累计的有效次数
     int processValidTarget = 30;            // 满 50 次认为本轮测量完成
 
-    int previousLeftGuideDistance = -1;
-    int previousRightGuideDistance = -1;
-    void resetPositionGuide(const QString& stateText = QStringLiteral("等待实时数据"));
-    QString updatePositionTrend(int barValue, int& previousDistance);
-    void updatePositionGuide(int leftBarValue, int rightBarValue);
-
     // 原来是 6，但人体桡骨这类复杂波形中，正确结果的 A/B lag 可能差到 7~14。
     // 所以这里放宽一点，真正有效性不只靠 diffLag，而是靠下面的稳定簇判断。
     int processStrictLagTolerance = 18;
@@ -268,9 +265,16 @@ private:
 
     // 如果已经锁定，但连续很多帧偏离锁定簇，说明探头位置变了，重新寻找稳定簇。
     int boneLagOutOfLockCount = 0;
+    int boneLagRejectedFrameCount = 0;
 
     bool checkBoneLagStable(int lagB, int* centerOut = nullptr, int* countOut = nullptr);
     void resetBoneLagStability();
+    void rejectBoneLagCandidate();
+    void discardPartialRound();
+    MeasurementExperimentLog experimentLog;
+    bool experimentLogWarningShown = false;
+    void startExperimentLog();
+    void checkExperimentLogError();
 
     // ================== 门控拒绝率统计（诊断用，不改检验逻辑）==================
     int  gateTotalFrames = 0;
@@ -384,7 +388,7 @@ private:
 
     bool hasCurrentPatient() const;
 
-    void startPatientMeasurement(int targetRounds);
+    void startPatientMeasurement(int targetRounds, bool offerFirstUseGuide = false);
     void stopPatientMeasurement();
     void resetPatientMeasurementState(int targetRounds);
 
@@ -396,6 +400,10 @@ private:
     bool selectCurrentPatient(const PatientInfo& patient);
     void clearCurrentPatient();
     void updatePatientSelectionUi();
+    bool runMeasurementGuide(bool automatic);
+    bool shouldOfferMeasurementGuide() const;
+    QString measurementGuideSettingsPath;
+    bool measurementGuideSeenThisRun = false;
     bool ensurePatientDataWritable();
     bool trySavePendingMeasurement();
     void updateAgeSosReference();

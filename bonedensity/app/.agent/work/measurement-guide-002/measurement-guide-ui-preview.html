@@ -1,0 +1,497 @@
+<div id="bd-guide-preview">
+  <style>
+    #bd-guide-preview {
+      font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+      color: light-dark(#303133, #eef2f7);
+      background: transparent;
+      padding: 8px 0;
+    }
+    #bd-guide-preview * { box-sizing: border-box; }
+    #bd-guide-preview .bd-app {
+      position: relative;
+      min-height: 690px;
+      overflow: hidden;
+      background: light-dark(#f5f7fa, #171b21);
+      border: 1px solid light-dark(#dcdfe6, #343b46);
+      border-radius: 8px;
+    }
+    #bd-guide-preview .bd-titlebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 18px;
+      background: light-dark(#ffffff, #232932);
+      border-bottom: 1px solid light-dark(#e4e7ed, #343b46);
+      font-weight: 500;
+    }
+    #bd-guide-preview .bd-shell {
+      display: grid;
+      grid-template-columns: minmax(420px, 1.1fr) minmax(340px, .9fr);
+      gap: 18px;
+      padding: 18px;
+    }
+    #bd-guide-preview .bd-panel {
+      min-height: 560px;
+      padding: 18px;
+      background: light-dark(#ffffff, #232932);
+      border: 1px solid light-dark(#dcdfe6, #3c4552);
+      border-radius: 7px;
+    }
+    #bd-guide-preview .bd-panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+      font-weight: 500;
+    }
+    #bd-guide-preview .bd-bars {
+      display: grid;
+      grid-template-columns: 100px 1fr 100px;
+      align-items: start;
+      min-height: 315px;
+      gap: 22px;
+    }
+    #bd-guide-preview .bd-meter-wrap { text-align: center; }
+    #bd-guide-preview .bd-meter {
+      position: relative;
+      width: 70px;
+      height: 220px;
+      margin: 10px auto;
+      overflow: hidden;
+      background: light-dark(#edf0f4, #171b21);
+      border: 1px solid light-dark(#bfcbd9, #536070);
+      border-radius: 4px;
+    }
+    #bd-guide-preview .bd-meter-fill {
+      position: absolute;
+      inset: 46% 0 0;
+      background: light-dark(#86c98c, #4f9b62);
+    }
+    #bd-guide-preview .bd-meter-mid {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(50% - 1px);
+      height: 2px;
+      background: light-dark(#303133, #f1f5f9);
+    }
+    #bd-guide-preview .bd-fixed-guide {
+      align-self: center;
+      text-align: center;
+      color: light-dark(#606266, #c6ced8);
+      line-height: 1.8;
+    }
+    #bd-guide-preview .bd-fixed-guide strong {
+      display: block;
+      color: light-dark(#303133, #f3f6fa);
+      font-weight: 500;
+    }
+    #bd-guide-preview .bd-round-status {
+      margin-top: 24px;
+      text-align: center;
+      font-weight: 500;
+      color: light-dark(#2878c8, #79b8ff);
+    }
+    #bd-guide-preview .bd-valid-label {
+      margin: 10px 0 7px;
+      color: light-dark(#606266, #c6ced8);
+    }
+    #bd-guide-preview .bd-dim {
+      position: absolute;
+      inset: 0;
+      background: light-dark(rgba(25, 34, 45, .44), rgba(0, 0, 0, .62));
+    }
+    #bd-guide-preview .bd-dialog {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: min(900px, calc(100% - 44px));
+      transform: translate(-50%, -50%);
+      overflow: hidden;
+      background: light-dark(#ffffff, #232932);
+      border: 1px solid light-dark(#d8dde6, #465160);
+      border-radius: 10px;
+      box-shadow: 0 18px 55px light-dark(rgba(17, 35, 60, .23), rgba(0, 0, 0, .5));
+    }
+    #bd-guide-preview .bd-dialog-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 22px 26px 16px;
+      border-bottom: 1px solid light-dark(#ebeef5, #343b46);
+    }
+    #bd-guide-preview .bd-dialog-head h2 {
+      margin: 0 0 6px;
+      font-weight: 500;
+    }
+    #bd-guide-preview .bd-dialog-head p {
+      margin: 0;
+      color: light-dark(#606266, #b9c2ce);
+    }
+    #bd-guide-preview .bd-guide-body {
+      display: grid;
+      grid-template-columns: minmax(300px, 44%) 1fr;
+      gap: 30px;
+      min-height: 390px;
+      padding: 26px;
+    }
+    #bd-guide-preview .bd-guide-body.is-stacked {
+      grid-template-columns: 1fr;
+    }
+    #bd-guide-preview .bd-storyboard {
+      position: relative;
+      min-height: 320px;
+      overflow: hidden;
+      background: light-dark(#f1f7fb, #172532);
+      border-radius: 8px;
+    }
+    #bd-guide-preview .bd-storyboard.soft {
+      background: light-dark(#eef8f4, #172b26);
+    }
+    #bd-guide-preview .bd-story-label {
+      position: absolute;
+      left: 16px;
+      top: 14px;
+      color: light-dark(#52606d, #c4ced9);
+    }
+    #bd-guide-preview .bd-arm {
+      position: absolute;
+      left: 24%;
+      top: 46%;
+      width: 58%;
+      height: 82px;
+      transform: rotate(-12deg);
+      background: light-dark(#f2c7a5, #a46f50);
+      border-radius: 48px 34px 34px 48px;
+    }
+    #bd-guide-preview .bd-gel {
+      position: absolute;
+      left: 48%;
+      top: 48%;
+      width: 94px;
+      height: 42px;
+      transform: rotate(-12deg);
+      background: light-dark(rgba(54, 160, 220, .34), rgba(72, 178, 232, .38));
+      border-radius: 50%;
+    }
+    #bd-guide-preview .bd-probe {
+      position: absolute;
+      left: 50%;
+      top: 24%;
+      width: 72px;
+      height: 128px;
+      transform-origin: 50% 92%;
+      background: light-dark(#e5e9ef, #657080);
+      border: 2px solid light-dark(#8c98a7, #b9c4d0);
+      border-radius: 18px 18px 11px 11px;
+    }
+    #bd-guide-preview .bd-probe::after {
+      content: "";
+      position: absolute;
+      left: 9px;
+      right: 9px;
+      bottom: -11px;
+      height: 17px;
+      background: light-dark(#7d8998, #a9b5c2);
+      border-radius: 6px;
+    }
+    #bd-guide-preview .bd-motion {
+      position: absolute;
+      left: 30%;
+      right: 15%;
+      bottom: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: light-dark(#2878c8, #79b8ff);
+      font-weight: 500;
+    }
+    #bd-guide-preview .bd-motion i { width: 28px; height: 28px; }
+    #bd-guide-preview .bd-mini-meter {
+      position: absolute;
+      right: 18px;
+      top: 54px;
+      width: 46px;
+      height: 170px;
+      background: light-dark(#e9edf2, #111820);
+      border: 1px solid light-dark(#aeb8c4, #667486);
+      border-radius: 4px;
+    }
+    #bd-guide-preview .bd-mini-meter::before {
+      content: "";
+      position: absolute;
+      inset: 49% 0 auto;
+      height: 2px;
+      background: light-dark(#303133, #ffffff);
+    }
+    #bd-guide-preview .bd-mini-meter::after {
+      content: attr(data-label);
+      position: absolute;
+      left: 50%;
+      top: -30px;
+      transform: translateX(-50%);
+      font-weight: 500;
+    }
+    #bd-guide-preview .bd-copy h3 {
+      margin: 2px 0 15px;
+      font-weight: 500;
+    }
+    #bd-guide-preview .bd-copy ol,
+    #bd-guide-preview .bd-copy ul {
+      margin: 0;
+      padding-left: 1.4em;
+    }
+    #bd-guide-preview .bd-copy li {
+      margin-bottom: 13px;
+      line-height: 1.7;
+    }
+    #bd-guide-preview .bd-emphasis {
+      margin-top: 18px;
+      padding: 13px 15px;
+      background: light-dark(#ecf5ff, #172a3c);
+      border-left: 4px solid light-dark(#409eff, #67aefc);
+      border-radius: 4px;
+      line-height: 1.65;
+    }
+    #bd-guide-preview .bd-dialog-foot {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 10px;
+      padding: 15px 26px 20px;
+      border-top: 1px solid light-dark(#ebeef5, #343b46);
+    }
+    #bd-guide-preview .bd-dots {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #bd-guide-preview .bd-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: light-dark(#c5ccd6, #5a6675);
+    }
+    #bd-guide-preview .bd-dot.active {
+      width: 22px;
+      border-radius: 5px;
+      background: light-dark(#409eff, #67aefc);
+    }
+    #bd-guide-preview .bd-page-count {
+      color: light-dark(#606266, #b9c2ce);
+      margin-left: 3px;
+    }
+    #bd-guide-preview [hidden] { display: none !important; }
+    @media (max-width: 760px) {
+      #bd-guide-preview .bd-shell { grid-template-columns: 1fr; }
+      #bd-guide-preview .bd-dialog { position: absolute; top: 18px; transform: translateX(-50%); }
+      #bd-guide-preview .bd-guide-body { grid-template-columns: 1fr; }
+      #bd-guide-preview .bd-dialog-foot { grid-template-columns: 1fr 1fr; }
+      #bd-guide-preview .bd-dots { grid-column: 1 / -1; }
+    }
+  </style>
+
+  <section class="bd-app" aria-label="骨密度仪检测教学界面预览">
+    <header class="bd-titlebar">
+      <span>骨密度仪 APP</span>
+      <span class="text-small text-muted">患者：演示患者　设备：已连接</span>
+    </header>
+    <div class="bd-shell">
+      <section class="bd-panel">
+        <div class="bd-panel-head">
+          <span>检测过程</span>
+          <button class="btn" id="bd-open-guide" type="button"><i data-lucide="circle-help" aria-hidden="true"></i> 操作教学</button>
+        </div>
+        <div class="bd-bars">
+          <div class="bd-meter-wrap">
+            <strong>G　倾角平衡</strong>
+            <div class="bd-meter" aria-label="左侧 G 进度条"><div class="bd-meter-fill"></div><div class="bd-meter-mid"></div></div>
+            <span>G = 0.0</span>
+          </div>
+          <div class="bd-fixed-guide">
+            <strong>调节目标</strong>
+            先调整右侧 D，再调整左侧 G<br>
+            最终使两条均稳定在中线
+            <p class="text-small text-muted">若长时间无进度，请检查耦合剂和探头贴合。</p>
+          </div>
+          <div class="bd-meter-wrap">
+            <strong>D　位置平衡</strong>
+            <div class="bd-meter" aria-label="右侧 D 进度条"><div class="bd-meter-fill"></div><div class="bd-meter-mid"></div></div>
+            <span>D = 10.0</span>
+          </div>
+        </div>
+        <div class="bd-valid-label">本轮有效值：12 / 30</div>
+        <div class="progress" role="progressbar" aria-label="本轮有效值" aria-valuenow="12" aria-valuemin="0" aria-valuemax="30">
+          <div class="progress-bar" style="width:40%"></div>
+        </div>
+        <div class="bd-round-status" id="bd-under-status">当前第 1/5 轮</div>
+      </section>
+      <section class="bd-panel">
+        <div class="bd-panel-head"><span>四通道波形与声速趋势</span></div>
+        <div class="text-muted">教学弹出时背景变暗，但页面状态保持不变。</div>
+      </section>
+    </div>
+
+    <div class="bd-dim" id="bd-dim"></div>
+    <section class="bd-dialog" id="bd-dialog" role="dialog" aria-modal="true" aria-labelledby="bd-guide-title">
+      <header class="bd-dialog-head">
+        <div>
+          <h2 id="bd-guide-title">检测操作教学</h2>
+          <p>首次检测前请先了解探头调整顺序。</p>
+        </div>
+        <button class="btn btn-ghost" id="bd-close" type="button" aria-label="关闭教学"><i data-lucide="x" aria-hidden="true"></i></button>
+      </header>
+
+      <div class="bd-guide-body" id="bd-guide-body">
+        <div class="bd-storyboard" id="bd-storyboard" aria-label="操作示意图分镜">
+          <span class="bd-story-label" id="bd-story-label">示意图 1：耦合剂与探头贴合</span>
+          <div class="bd-arm"></div>
+          <div class="bd-gel" id="bd-gel"></div>
+          <div class="bd-probe" id="bd-probe"></div>
+          <div class="bd-mini-meter" id="bd-mini-meter" data-label="" hidden></div>
+          <div class="bd-motion" id="bd-motion">
+            <i data-lucide="droplets" aria-hidden="true"></i>
+            <span>足量、均匀涂抹</span>
+          </div>
+        </div>
+
+        <article class="bd-copy" id="bd-page-copy" aria-live="polite">
+          <h3>1　测量前准备</h3>
+          <ol>
+            <li>在前臂桡骨测试部位涂抹足量耦合剂，使皮肤与探头之间均匀覆盖。</li>
+            <li>将探头充分贴合测试部位，先调整右侧 D，再调整左侧 G。</li>
+            <li>最终目标是让两条进度条均稳定在中线，然后保持探头不动。</li>
+            <li>每轮累计 30 个有效值；姿势和信号稳定时通常约 5 秒，共完成 5 轮。</li>
+          </ol>
+          <div class="bd-emphasis">每轮结束后，按空格或点击“开始检测”继续下一轮。</div>
+        </article>
+      </div>
+
+      <footer class="bd-dialog-foot">
+        <div class="bd-dots" id="bd-dots" aria-label="教学页码">
+          <span class="bd-dot active"></span><span class="bd-dot"></span><span class="bd-dot"></span>
+          <span class="bd-page-count" id="bd-page-count">1 / 3</span>
+        </div>
+        <button class="btn btn-ghost" id="bd-skip" type="button">跳过教程</button>
+        <div class="viz-row">
+          <button class="btn" id="bd-prev" type="button" disabled>上一步</button>
+          <button class="btn btn-primary" id="bd-next" type="button">下一步</button>
+        </div>
+      </footer>
+    </section>
+  </section>
+
+  <script>
+    (() => {
+      const root = document.getElementById("bd-guide-preview");
+      const dialog = root.querySelector("#bd-dialog");
+      const dim = root.querySelector("#bd-dim");
+      const body = root.querySelector("#bd-guide-body");
+      const storyboard = root.querySelector("#bd-storyboard");
+      const storyLabel = root.querySelector("#bd-story-label");
+      const probe = root.querySelector("#bd-probe");
+      const gel = root.querySelector("#bd-gel");
+      const miniMeter = root.querySelector("#bd-mini-meter");
+      const motion = root.querySelector("#bd-motion");
+      const copy = root.querySelector("#bd-page-copy");
+      const dots = [...root.querySelectorAll(".bd-dot")];
+      const count = root.querySelector("#bd-page-count");
+      const prev = root.querySelector("#bd-prev");
+      const next = root.querySelector("#bd-next");
+      let page = 0;
+      let manualMode = false;
+
+      const pages = [
+        {
+          label: "示意图 1：耦合剂与探头贴合",
+          icon: "droplets",
+          motion: "足量、均匀涂抹",
+          meter: "",
+          probe: "translate(0, 0) rotate(0deg)",
+          gel: true,
+          html: '<h3>1　测量前准备</h3><ol><li>在前臂桡骨测试部位涂抹足量耦合剂，使皮肤与探头之间均匀覆盖。</li><li>将探头充分贴合测试部位，先调整右侧 D，再调整左侧 G。</li><li>最终目标是让两条进度条均稳定在中线，然后保持探头不动。</li><li>每轮累计 30 个有效值；姿势和信号稳定时通常约 5 秒，共完成 5 轮。</li></ol><div class="bd-emphasis">每轮结束后，按空格或点击“开始检测”继续下一轮。</div>'
+        },
+        {
+          label: "示意图 2：小幅调整探头空间位置",
+          icon: "move",
+          motion: "保持贴合，小幅移动",
+          meter: "D",
+          probe: "translate(-34px, 12px) rotate(0deg)",
+          gel: false,
+          html: '<h3>2　先调整右侧 D：空间位置</h3><ol><li>保持探头与皮肤充分贴合，不要大幅抬起或转动。</li><li>沿测试部位小幅移动探头，同时观察右侧 D 进度条。</li><li>找到 D 稳定在中线的位置后，保持当前位置。</li></ol><div class="bd-emphasis">动作幅度要小；不使用固定“向左、向右”指令，避免探头旋转后方向相反。</div>'
+        },
+        {
+          label: "示意图 3：小幅调整探头左右倾角",
+          icon: "rotate-ccw",
+          motion: "左右微调倾角",
+          meter: "G",
+          probe: "translate(0, 0) rotate(-15deg)",
+          gel: false,
+          html: '<h3>3　再调整左侧 G：左右倾角</h3><ol><li>保持右侧 D 稳定在中线，小幅调整探头左右倾角。</li><li>观察左侧 G 进度条，使 G 也稳定在中线。</li><li>两条均在中线后保持姿势，系统自动累计本轮 30 个有效值。</li><li>完成一轮后按空格或点击“开始检测”，重复至 5 轮完成。</li></ol><div class="bd-emphasis">最终判断始终以右侧 D、左侧 G 两条均稳定在中线为准。</div>'
+        }
+      ];
+
+      function paintMotionIcon(name) {
+        motion.innerHTML = '<i data-lucide="' + name + '" aria-hidden="true"></i><span>' + pages[page].motion + '</span>';
+        if (globalThis.lucide) globalThis.lucide.createIcons({ attrs: { width: 16, height: 16 } });
+      }
+      function renderPage() {
+        const item = pages[page];
+        storyLabel.textContent = item.label;
+        probe.style.transform = item.probe;
+        gel.hidden = !item.gel;
+        miniMeter.hidden = !item.meter;
+        miniMeter.dataset.label = item.meter;
+        copy.innerHTML = item.html;
+        paintMotionIcon(item.icon);
+        dots.forEach((dot, index) => dot.classList.toggle("active", index === page));
+        count.textContent = (page + 1) + " / 3";
+        prev.disabled = page === 0;
+        next.textContent = page === 2 ? (manualMode ? "知道了" : "知道了，开始检测") : "下一步";
+      }
+      function closeGuide(started) {
+        dialog.hidden = true;
+        dim.hidden = true;
+        root.querySelector("#bd-under-status").textContent = started ? "当前第 1/5 轮" : "等待开始检测";
+      }
+      function openGuide(manual) {
+        manualMode = manual;
+        page = 0;
+        dialog.hidden = false;
+        dim.hidden = false;
+        root.querySelector("#bd-skip").textContent = manual ? "关闭" : "跳过教程";
+        renderPage();
+      }
+
+      next.addEventListener("click", () => {
+        if (page < 2) { page += 1; renderPage(); }
+        else closeGuide(!manualMode);
+      });
+      prev.addEventListener("click", () => { if (page > 0) { page -= 1; renderPage(); } });
+      root.querySelector("#bd-skip").addEventListener("click", () => closeGuide(!manualMode));
+      root.querySelector("#bd-close").addEventListener("click", () => closeGuide(false));
+      root.querySelector("#bd-open-guide").addEventListener("click", () => openGuide(true));
+
+      const design = { layout: "split", illustration: "clinical", dialogWidth: 900, showDots: true };
+      function renderDesign() {
+        body.classList.toggle("is-stacked", design.layout === "stacked");
+        storyboard.classList.toggle("soft", design.illustration === "soft");
+        dialog.style.width = "min(" + design.dialogWidth + "px, calc(100% - 44px))";
+        root.querySelector("#bd-dots").hidden = !design.showDots;
+      }
+      renderPage();
+      renderDesign();
+
+      if (globalThis.Tweak) {
+        const tweak = new Tweak({ container: dialog, onChange: renderDesign });
+        tweak.addSelect(design, "layout", { label: "内容布局", options: [{ label: "左图右文", value: "split" }, { label: "上图下文", value: "stacked" }] });
+        tweak.addSelect(design, "illustration", { label: "示意图基调", options: [{ label: "临床线稿", value: "clinical" }, { label: "柔和扁平", value: "soft" }] });
+        tweak.addSlider(design, "dialogWidth", { label: "教程宽度", min: 760, max: 980, step: 20, unit: "px" });
+        tweak.addToggle(design, "showDots", { label: "显示页码点" });
+      }
+    })();
+  </script>
+</div>

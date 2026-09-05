@@ -16,6 +16,7 @@ SOURCES += \
     src/accountstore.cpp \
     src/calibration.cpp \
     src/calibrationdialog.cpp \
+    src/measurementguidedialog.cpp \
     src/calibrationstore.cpp \
     src/patientstore.cpp \
     src/agesoschartwidget.cpp \
@@ -25,10 +26,12 @@ SOURCES += \
     src/utils.cpp
 
 HEADERS += \
+    include/measurementexperimentlog.h \
     include/mainwindow.h \
     include/accountstore.h \
     include/calibration.h \
     include/calibrationdialog.h \
+    include/measurementguidedialog.h \
     include/calibrationstore.h \
     include/patientstore.h \
     include/agesoschartwidget.h \

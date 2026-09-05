@@ -2,6 +2,7 @@
 
 #include "mainwindow.h"
 #include "calibrationdialog.h"
+#include "measurementguidedialog.h"
 #include "reportwidget.h"
 #include "ui_mainwindow.h"
 
@@ -18,6 +19,8 @@
 #include <QPrinter>
 #include <QTemporaryDir>
 #include <QTimer>
+#include <QStackedWidget>
+#include <cmath>
 
 namespace {
 
@@ -85,6 +88,14 @@ class MainWindowSafetyTests : public QObject
     Q_OBJECT
 
 private slots:
+    void rejectedFramesExpirePatientStability();
+    void clusterLossDiscardsPartialRound();
+    void transientRejectionPreservesProgressAndSteadySequence();
+    void experimentRecordingIsBoundedAndUnique();
+    void experimentRecordingIncludesEarlyFailuresAndRawInput();
+    void precheckFailuresExpireStateThroughActualPipeline();
+    void experimentRecordingCoversFeatureDecisions();
+    void experimentRecordingThroughput();
     void invalidChannelsAreDiscarded();
     void incompleteFrameGroupsAreBounded();
     void fragmentedFrameReassemblesAtEveryByteBoundary();
@@ -94,6 +105,8 @@ private slots:
     void disconnectedControlsAndPlaceholdersAreSafe();
     void positionGuideTracksExistingBarsWithoutChangingThem();
     void measurementStatusIsVisibleAndOperatorFacing();
+    void measurementGuideHasThreeApprovedPagesAndPortableMarker();
+    void measurementGuideFirstUseAndSpaceContinue();
     void patientMeasurementDisablesConflictingControls();
     void debugAutoDisablesConflictingNavigation();
     void patientFormsStayInsideAndCenteredAtSmallWindow();
@@ -117,6 +130,283 @@ private slots:
     void reportPdfCanBeCommitted();
     void capturePagesWhenRequested();
 };
+
+void MainWindowSafetyTests::rejectedFramesExpirePatientStability()
+{
+    MainWindow window;
+    window.patientMeasureRunning = true;
+    window.acquireMode = PatientMeasureMode;
+    for (int i = 0; i < window.mCfg.stableLagWarmupCount - 1; ++i)
+        QVERIFY(!window.checkBoneLagStable(128));
+    for (int i = 0; i < window.mCfg.boneLagUnlockCount; ++i)
+        window.updateProcessInvalid("synthetic invalid frame");
+    QVERIFY(window.recentBoneLagBList.isEmpty());
+    QVERIFY(!window.checkBoneLagStable(128));
+    QVERIFY(!window.boneLagLocked);
+}
+
+void MainWindowSafetyTests::clusterLossDiscardsPartialRound()
+{
+    MainWindow window;
+    window.patientMeasureRunning = true;
+    window.acquireMode = PatientMeasureMode;
+    auto feed = [&](int lag) {
+        const bool accepted = window.checkBoneLagStable(lag);
+        window.handlePatientMeasureValue(490000.0 / (lag + 9), 490000.0 / lag,
+            490000.0 / lag, lag + 9, lag, 9, 0, .95, .95, accepted);
+    };
+    for (int i = 0; i < 28; ++i) feed(120);
+    QCOMPARE(window.currentRoundSosList.size(), 15);
+    for (int i = 0; i < window.mCfg.boneLagUnlockCount; ++i) feed(140);
+    QVERIFY(window.currentRoundSosList.isEmpty());
+    QVERIFY(window.currentRoundAList.isEmpty());
+    QVERIFY(window.currentRoundBList.isEmpty());
+    QVERIFY(window.currentRoundCorrAList.isEmpty());
+    QVERIFY(window.currentRoundCorrBList.isEmpty());
+    QVERIFY(window.currentRoundPairMidGapList.isEmpty());
+    QVERIFY(window.currentRoundSignedLagDiffList.isEmpty());
+    QCOMPARE(window.processValidCount, 0);
+    QVERIFY(window.patientMeasureRunning);
+    for (int i = 0; i < 28; ++i) feed(140);
+    QVERIFY(window.candidateRoundList.isEmpty());
+    QCOMPARE(window.currentRoundSosList.size(), 15);
+    for (int i = 0; i < 15; ++i) feed(140);
+    QCOMPARE(window.candidateRoundList.size(), 1);
+    QVERIFY(qAbs(window.candidateRoundList.first().sos - 3500.0) < .001);
+    window.closeRoundFinishedTip();
+}
+
+void MainWindowSafetyTests::transientRejectionPreservesProgressAndSteadySequence()
+{
+    MainWindow window;
+    window.patientMeasureRunning = true;
+    window.acquireMode = PatientMeasureMode;
+    for (int i = 1; i <= window.mCfg.stableLagWarmupCount; ++i)
+        QCOMPARE(window.checkBoneLagStable(128), i == window.mCfg.stableLagWarmupCount);
+    window.handlePatientMeasureValue(3500, 3828, 3828, 137, 128, 9, 0, .95, .95, true);
+    for (int i = 0; i < window.mCfg.boneLagUnlockCount - 1; ++i)
+        window.updateProcessInvalid("transient");
+    QVERIFY(window.boneLagLocked);
+    QCOMPARE(window.currentRoundSosList.size(), 1);
+    QVERIFY(window.checkBoneLagStable(128));
+    window.updateProcessInvalid("one more transient after recovery");
+    QVERIFY(window.boneLagLocked);
+    for (int i = 1; i < window.mCfg.boneLagUnlockCount; ++i)
+        window.updateProcessInvalid("sustained loss");
+    QVERIFY(!window.boneLagLocked);
+    QVERIFY(window.currentRoundSosList.isEmpty());
+    QCOMPARE(window.processValidCount, 0);
+}
+
+void MainWindowSafetyTests::experimentRecordingIsBoundedAndUnique()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    MeasurementExperimentLog log;
+    QVERIFY(log.start(directory.path(), {{"test", true}}, 4096, 16384));
+    const QString firstPath = log.path();
+    QCOMPARE(MeasurementExperimentLog::encodeRaw({0, 256, 65535}),
+             QString::fromLatin1(QByteArray::fromHex("00000001ffff").toBase64()));
+    QVERIFY(log.write({{"event", "frame"}, {"valid", false}}));
+    QVERIFY(log.close());
+    QFile first(firstPath);
+    QVERIFY(first.open(QIODevice::ReadOnly));
+    const QByteArray original = first.readAll();
+    QVERIFY(log.start(directory.path(), {}, 4096, 16384));
+    QVERIFY(log.path() != firstPath);
+    QVERIFY(!log.write({{"oversized", QString(8192, 'x')}}));
+    QVERIFY(!log.active());
+    QVERIFY(!log.error().isEmpty());
+    QVERIFY(QFileInfo(log.path()).size() <= 4096);
+    first.seek(0);
+    QCOMPARE(first.readAll(), original);
+    QVERIFY(!log.start(directory.path(), {}, 4096, original.size()));
+    // A file where a directory is required simulates an unavailable destination.
+    QVERIFY(!log.start(firstPath + "/child", {}));
+}
+
+void MainWindowSafetyTests::experimentRecordingIncludesEarlyFailuresAndRawInput()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    MainWindow window;
+    window.currentPatient = samplePatient();
+    window.currentPatient.name = "DO_NOT_LOG_NAME";
+    window.currentPatient.id = "DO_NOT_LOG_ID";
+    window.patientMeasureRunning = true;
+    window.acquireMode = PatientMeasureMode;
+    QVERIFY(window.experimentLog.start(directory.path(), {}));
+    const QString path = window.experimentLog.path();
+    window.samplesA = {0, 256, 65535};
+    window.samplesB = {2};
+    window.samplesC = {3};
+    window.samplesD = {4};
+    window.detectAndPlotSpeed({}, {}, {}, {});
+    QVector<double> flat(1800, 0.0);
+    window.detectAndPlotSpeed(flat, flat, flat, flat);
+    window.stopPatientMeasurement();
+    QFile file(path);
+    QVERIFY(file.open(QIODevice::ReadOnly));
+    const QByteArray bytes = file.readAll();
+    QVERIFY(!bytes.contains("DO_NOT_LOG"));
+    const auto rows = bytes.trimmed().split('\n');
+    QCOMPARE(rows.size(), 4); // start, two rejected frames, stop
+    const QJsonObject emptyFrame = QJsonDocument::fromJson(rows[1]).object();
+    QCOMPARE(emptyFrame.value("decision").toString(), QString("empty_filtered_input"));
+    QCOMPARE(emptyFrame.value("raw_BC").toString(),
+             MeasurementExperimentLog::encodeRaw(window.samplesA));
+    const QJsonObject invalidFrame = QJsonDocument::fromJson(rows[2]).object();
+    QCOMPARE(invalidFrame.value("decision").toString(), QString("B_pair_invalid"));
+    QVERIFY(!invalidFrame.value("B").toObject().value("valid").toBool());
+    QVERIFY(invalidFrame.value("elapsed_ms").toInteger() >= emptyFrame.value("elapsed_ms").toInteger());
+    QCOMPARE(window.processValidCount, 0);
+    // Logging failure must not grant/reject a valid candidate or stop acquisition.
+    window.patientMeasureRunning = true;
+    window.acquireMode = PatientMeasureMode;
+    QVERIFY(!window.experimentLog.start(path + "/blocked", {}));
+    window.checkExperimentLogError();
+    QVERIFY(window.experimentLogWarningShown);
+    QVERIFY(window.statusBar()->currentMessage().contains(QStringLiteral("实验记录")));
+    for (int i = 1; i <= window.mCfg.stableLagWarmupCount; ++i)
+        QCOMPARE(window.checkBoneLagStable(128), i == window.mCfg.stableLagWarmupCount);
+    QVERIFY(window.patientMeasureRunning);
+}
+
+void MainWindowSafetyTests::precheckFailuresExpireStateThroughActualPipeline()
+{
+    MainWindow window;
+    window.patientMeasureRunning = true;
+    window.acquireMode = PatientMeasureMode;
+    for (int i = 0; i < 14; ++i) window.checkBoneLagStable(128);
+    window.handlePatientMeasureValue(3500, 3828, 3828, 137, 128, 9, 0, .95, .95, true);
+    QVector<double> flat(1800, 0.0);
+    for (int i = 0; i < window.mCfg.boneLagUnlockCount; ++i)
+        window.detectAndPlotSpeed(flat, flat, flat, flat);
+    QVERIFY(!window.boneLagLocked);
+    QVERIFY(window.currentRoundSosList.isEmpty());
+    QVERIFY(!window.ui->barPairA->isEnabled());
+    QVERIFY(!window.ui->barPairB->isEnabled());
+    QCOMPARE(window.ui->lblPairAValue->text(), QString("D=--"));
+    window.updateProcessPanel(3500, 3828, 137, 128, 9, 0, false);
+    QVERIFY(window.ui->barPairA->isEnabled());
+    QVERIFY(window.ui->barPairB->isEnabled());
+    QCOMPARE(window.processValidCount, 0);
+}
+
+void MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    MainWindow window;
+    window.patientMeasureRunning = true;
+    window.acquireMode = PatientMeasureMode;
+    QVERIFY(window.experimentLog.start(directory.path(), {}));
+    const QString path = window.experimentLog.path();
+    // Exactly delayed synthetic wave packets: tests logger coverage, not accuracy.
+    const auto wave = [](double center) {
+        QVector<double> signal(1800);
+        for (int i = 0; i < signal.size(); ++i) {
+            const double t = i - center;
+            // Finite packet support: zero-noise Gaussian tails otherwise trigger
+            // the onset detector long before the intended synthetic packet.
+            if (std::abs(t) > 100.0) continue;
+            signal[i] = 1000.0 * std::exp(-t*t / (2.0*35.0*35.0))
+                * std::cos(2.0*3.141592653589793*t/50.0);
+        }
+        return signal;
+    };
+    const auto bc = wave(928), bd = wave(800);
+    for (int shift = -50; shift <= 20; ++shift)
+        window.detectAndPlotSpeed(bc, bd, wave(937 + shift), wave(800 + shift));
+    window.stopPatientMeasurement();
+    QFile file(path);
+    QVERIFY(file.open(QIODevice::ReadOnly));
+    const auto rows = file.readAll().trimmed().split('\n');
+    int frames = 0, features = 0, gates = 0;
+    int usableShift = 1000;
+    for (const QByteArray& line : rows) {
+        const auto row = QJsonDocument::fromJson(line).object();
+        if (row.value("event") != "frame") continue;
+        ++frames;
+        if (row.contains("G")) {
+            ++features;
+            QVERIFY(row.contains("A_feature_branch"));
+            const auto a = row.value("A").toObject();
+            const auto b = row.value("B").toObject();
+            QCOMPARE(row.value("D").toInt(), a.value("lag").toInt() - b.value("lag").toInt());
+            QCOMPARE(row.value("G").toDouble(), .5 *
+                (b.value("early_feature").toInt() + b.value("late_feature").toInt() -
+                 a.value("early_feature").toInt() - a.value("late_feature").toInt()));
+        }
+        if (row.contains("gates")) {
+            ++gates;
+            const auto checks = row.value("gates").toObject();
+            QVERIFY(checks.contains("stability_evaluated"));
+            QVERIFY(checks.contains("corr_A"));
+            QVERIFY(row.value("decision") == "accepted" || row.value("decision") == "rejected");
+            if (checks.value("stability_evaluated").toBool()) usableShift = frames - 51;
+        }
+    }
+    QCOMPARE(frames, 71);
+    QVERIFY(features > 0);
+    QVERIFY(gates > 0);
+    QVERIFY(usableShift != 1000);
+    window.resetOneRoundMeasurementState();
+    window.patientMeasureRunning = true;
+    window.acquireMode = PatientMeasureMode;
+    QVERIFY(window.experimentLog.start(directory.path(), {}));
+    const QString completePath = window.experimentLog.path();
+    const int neededFrames = window.mCfg.stableLagWarmupCount - 1 + window.processValidTarget;
+    for (int i = 0; i < neededFrames; ++i)
+        window.detectAndPlotSpeed(bc, bd, wave(937 + usableShift), wave(800 + usableShift));
+    QCOMPARE(window.candidateRoundList.size(), 1);
+    QVERIFY(!window.patientMeasureRunning);
+    QVERIFY(!window.experimentLog.active());
+    QFile complete(completePath);
+    QVERIFY(complete.open(QIODevice::ReadOnly));
+    int accepted = 0, summaries = 0, frameCount = 0;
+    QString lastEvent;
+    for (const auto& line : complete.readAll().trimmed().split('\n')) {
+        const auto row = QJsonDocument::fromJson(line).object();
+        lastEvent = row.value("event").toString();
+        if (lastEvent == "frame") {
+            ++frameCount;
+            if (row.value("decision") == "accepted") ++accepted;
+        }
+        if (lastEvent == "round_summary") {
+            ++summaries;
+            QVERIFY(row.value("quality_pass").toBool());
+            QCOMPARE(row.value("sos").toDouble(), window.candidateRoundList.first().sos);
+        }
+    }
+    QCOMPARE(accepted, window.processValidTarget);
+    QCOMPARE(frameCount, neededFrames);
+    QCOMPARE(summaries, 1);
+    QCOMPARE(lastEvent, QString("stop"));
+    window.closeRoundFinishedTip();
+}
+
+void MainWindowSafetyTests::experimentRecordingThroughput()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    MeasurementExperimentLog log;
+    QVERIFY(log.start(directory.path(), {}));
+    const QVector<quint16> raw(1800, 2048);
+    QElapsedTimer timer;
+    timer.start();
+    for (int i = 0; i < 500; ++i) {
+        QVERIFY(log.write({{"event", "frame"},
+            {"raw_BC", MeasurementExperimentLog::encodeRaw(raw)},
+            {"raw_BD", MeasurementExperimentLog::encodeRaw(raw)},
+            {"raw_AC", MeasurementExperimentLog::encodeRaw(raw)},
+            {"raw_AD", MeasurementExperimentLog::encodeRaw(raw)}}));
+    }
+    QVERIFY(log.close());
+    qInfo() << "Synthetic recording: 500 four-channel x 1800-sample frames in"
+            << timer.elapsed() << "ms including encoding and final flush; local disk only";
+    QVERIFY(QFileInfo(log.path()).size() > 9000000);
+}
 
 void MainWindowSafetyTests::invalidChannelsAreDiscarded()
 {
@@ -151,12 +441,12 @@ void MainWindowSafetyTests::positionGuideTracksExistingBarsWithoutChangingThem()
 
     QCOMPARE(window.ui->barPairB->geometry(), QRect(30, 30, 81, 201));
     QCOMPARE(window.ui->barPairA->geometry(), QRect(370, 30, 81, 201));
-    QVERIFY(window.ui->lblPositionGuide->text().contains(
-        QStringLiteral("左侧调倾角")));
-    QVERIFY(window.ui->lblPositionGuide->text().contains(
-        QStringLiteral("右侧调位置")));
+    QCOMPARE(window.ui->lblBPairTitle->text(), QStringLiteral("G 倾角平衡"));
+    QCOMPARE(window.ui->lblAPairTitle->text(), QStringLiteral("D 位置平衡"));
+    QCOMPARE(window.ui->lblPositionGuide->text(),
+             QStringLiteral("先调右侧 D：空间位置\n再调左侧 G：左右倾角"));
     QCOMPARE(window.ui->lblPositionGuideNote->text(),
-             QStringLiteral("提示仅供参考，最终以两条均在中线为准"));
+             QStringLiteral("最终使右侧 D、左侧 G 均稳定在中线"));
     QVERIFY(window.ui->lblPositionGuide->styleSheet().contains(
         QStringLiteral("font-weight: bold")));
     QVERIFY(!window.ui->lblPositionGuide->geometry().intersects(
@@ -167,35 +457,25 @@ void MainWindowSafetyTests::positionGuideTracksExistingBarsWithoutChangingThem()
         window.ui->barPairB->geometry()));
     QVERIFY(!window.ui->lblPositionGuideNote->geometry().intersects(
         window.ui->barPairA->geometry()));
+    QCOMPARE(window.ui->btnMeasurementGuide->text(),
+             QStringLiteral("操作教学"));
+    QVERIFY(!window.ui->btnMeasurementGuide->geometry().intersects(
+        window.ui->barPairB->geometry()));
+    QVERIFY(!window.ui->btnMeasurementGuide->geometry().intersects(
+        window.ui->barPairA->geometry()));
+    QVERIFY(!window.ui->btnMeasurementGuide->geometry().intersects(
+        window.ui->lblPositionGuide->geometry()));
+    QVERIFY(!window.ui->btnMeasurementGuide->geometry().intersects(
+        window.ui->lblPositionGuideNote->geometry()));
 
+    const QString fixedGuide = window.ui->lblPositionGuide->text();
+    const QString fixedNote = window.ui->lblPositionGuideNote->text();
     window.updateProcessPanel(0.0, 0.0, 105, 100, 5, 8.0, false);
-    window.updateProcessPanel(0.0, 0.0, 107, 100, 7, 4.0, false);
-    QVERIFY(window.ui->lblPositionGuide->text().contains(
-        QStringLiteral("左侧调倾角：正在接近中线")));
-    QVERIFY(window.ui->lblPositionGuide->text().contains(
-        QStringLiteral("右侧调位置：正在接近中线")));
-    QVERIFY(window.ui->lblPositionGuide->styleSheet().contains(
-        QStringLiteral("#2E7D32")));
-
-    window.updateProcessPanel(0.0, 0.0, 103, 100, 3, 8.0, false);
-    QVERIFY(window.ui->lblPositionGuide->text().contains(
-        QStringLiteral("左侧调倾角：正在远离中线，请反向微调")));
-    QVERIFY(window.ui->lblPositionGuide->text().contains(
-        QStringLiteral("右侧调位置：正在远离中线，请反向微调")));
-    QVERIFY(window.ui->lblPositionGuide->styleSheet().contains(
-        QStringLiteral("#C62828")));
-
-    window.updateProcessPanel(0.0, 0.0, 109, 100, 9, 0.0, false);
-    QVERIFY(window.ui->lblPositionGuide->text().contains(
-        QStringLiteral("左侧调倾角：已在中线，请保持")));
-    QVERIFY(window.ui->lblPositionGuide->text().contains(
-        QStringLiteral("右侧调位置：已在中线，请保持")));
-    QVERIFY(window.ui->lblPositionGuide->styleSheet().contains(
-        QStringLiteral("#2E7D32")));
-
+    window.updateProcessPanel(0.0, 0.0, 107, 100, 7, 4.0, true);
     window.updateProcessInvalid(QStringLiteral("测试无效帧"));
-    QVERIFY(window.ui->lblPositionGuide->text().contains(
-        QStringLiteral("当前信号无效")));
+    QCOMPARE(window.ui->lblPositionGuide->text(), fixedGuide);
+    QCOMPARE(window.ui->lblPositionGuideNote->text(), fixedNote);
+    QCOMPARE(window.ui->barMeasureProgress->value(), 1);
 }
 
 void MainWindowSafetyTests::measurementStatusIsVisibleAndOperatorFacing()
@@ -215,25 +495,21 @@ void MainWindowSafetyTests::measurementStatusIsVisibleAndOperatorFacing()
                text.contains(QStringLiteral("控制台"));
     };
 
+    window.ui->lblProcessStatus->setText(QStringLiteral("当前第 1/5 轮"));
+    const QString roundStatus = window.ui->lblProcessStatus->text();
     window.updateProcessPanel(0.0, 0.0, 109, 100, 9, 0.0, true);
-    QVERIFY(window.ui->lblProcessStatus->text().contains(
-        QStringLiteral("第 1/5 轮")));
-    QVERIFY(window.ui->lblProcessStatus->text().contains(
-        QStringLiteral("本轮有效值 1/30")));
-    QVERIFY(window.ui->lblProcessStatus->text().contains(
-        QStringLiteral("数据有效")));
+    QCOMPARE(window.ui->lblProcessStatus->text(), roundStatus);
+    QCOMPARE(window.ui->barMeasureProgress->value(), 1);
     QVERIFY(!hasDeveloperWording(window.ui->lblProcessStatus->text()));
 
     window.lastFrameAngleSignedDiffOk = false;
     window.lastFrameAnglePairMidGapOk = true;
     window.updateProcessPanel(0.0, 0.0, 103, 100, 3, 8.0, false);
-    QVERIFY(window.ui->lblProcessStatus->text().contains(
-        QStringLiteral("根据上方提示微调")));
+    QCOMPARE(window.ui->lblProcessStatus->text(), roundStatus);
     QVERIFY(!hasDeveloperWording(window.ui->lblProcessStatus->text()));
 
     window.updateProcessInvalid(QStringLiteral("B_pair 无效，无法作为参考"));
-    QVERIFY(window.ui->lblProcessStatus->text().contains(
-        QStringLiteral("信号质量不足")));
+    QCOMPARE(window.ui->lblProcessStatus->text(), roundStatus);
     QVERIFY(!hasDeveloperWording(window.ui->lblProcessStatus->text()));
 
     window.showRoundFinishedTip(0, 5, false);
@@ -242,6 +518,133 @@ void MainWindowSafetyTests::measurementStatusIsVisibleAndOperatorFacing()
     QVERIFY(window.measureTipBox->text().contains(QStringLiteral("未达到要求")));
     QVERIFY(!window.measureTipBox->text().contains(QStringLiteral("测量完成")));
     window.closeRoundFinishedTip();
+}
+
+void MainWindowSafetyTests::measurementGuideHasThreeApprovedPagesAndPortableMarker()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const QString settingsPath =
+        directory.filePath(QStringLiteral("measurement-guide.ini"));
+
+    QVERIFY(!MeasurementGuideDialog::isCurrentVersionSeen(settingsPath));
+    QString errorMessage;
+    QVERIFY2(MeasurementGuideDialog::markCurrentVersionSeen(
+                 settingsPath, &errorMessage),
+             qPrintable(errorMessage));
+    QVERIFY(MeasurementGuideDialog::isCurrentVersionSeen(settingsPath));
+
+    MeasurementGuideDialog dialog(MeasurementGuideDialog::Mode::Automatic);
+    dialog.setAttribute(Qt::WA_DontShowOnScreen, true);
+    dialog.resize(900, 620);
+    QStackedWidget* pages = dialog.findChild<QStackedWidget*>(
+        QStringLiteral("measurementGuidePages"));
+    QVERIFY(pages);
+    QCOMPARE(pages->count(), 3);
+    QVERIFY(pages->widget(0)->findChild<QLabel*>(
+        QStringLiteral("guideBody"))->text().contains(
+        QStringLiteral("右侧 D")));
+    QVERIFY(pages->widget(1)->findChild<QLabel*>(
+        QStringLiteral("guideHeading"))->text().contains(
+        QStringLiteral("右侧 D")));
+    QVERIFY(pages->widget(2)->findChild<QLabel*>(
+        QStringLiteral("guideHeading"))->text().contains(
+        QStringLiteral("左侧 G")));
+    for (int index = 1; index <= 3; ++index) {
+        QVERIFY(dialog.findChild<QWidget*>(
+            QStringLiteral("measurementGuideIllustration%1").arg(index)));
+    }
+
+    QPushButton* next = dialog.findChild<QPushButton*>(
+        QStringLiteral("guideNextButton"));
+    QVERIFY(next);
+    QCOMPARE(next->text(), QStringLiteral("下一步"));
+
+    const QString captureDir = qEnvironmentVariable("BONE_UI_CAPTURE_DIR");
+    const auto capture = [&dialog, &captureDir](const QString& name) {
+        if (captureDir.isEmpty()) return;
+        QVERIFY(QDir().mkpath(captureDir));
+        dialog.show();
+        QTest::qWait(50);
+        QVERIFY2(dialog.grab().save(QDir(captureDir).filePath(name)),
+                 qPrintable(name));
+    };
+    capture(QStringLiteral("measurement-guide-1.png"));
+    next->click();
+    capture(QStringLiteral("measurement-guide-2.png"));
+    next->click();
+    capture(QStringLiteral("measurement-guide-3.png"));
+    QCOMPARE(pages->currentIndex(), 2);
+    QCOMPARE(next->text(), QStringLiteral("知道了，开始检测"));
+}
+
+void MainWindowSafetyTests::measurementGuideFirstUseAndSpaceContinue()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+
+    MainWindow window;
+    window.setAttribute(Qt::WA_DontShowOnScreen, true);
+    window.show();
+    delete window.serial;
+    auto* serial = new FakeOpenSerialPort(&window);
+    serial->openForTest();
+    window.serial = serial;
+    window.patientDataWritable = true;
+    window.currentPatient = samplePatient();
+    window.measurementGuideSettingsPath =
+        directory.filePath(QStringLiteral("measurement-guide.ini"));
+    window.updatePatientSelectionUi();
+
+    QTimer::singleShot(0, []() {
+        auto* dialog = qobject_cast<MeasurementGuideDialog*>(
+            QApplication::activeModalWidget());
+        QVERIFY(dialog);
+        QPushButton* skip = dialog->findChild<QPushButton*>(
+            QStringLiteral("guideSkipButton"));
+        QVERIFY(skip);
+        skip->click();
+    });
+    window.startPatientMeasurement(5, true);
+    QVERIFY(window.patientMeasureRunning);
+    QVERIFY(MeasurementGuideDialog::isCurrentVersionSeen(
+        window.measurementGuideSettingsPath));
+    window.stopPatientMeasurement();
+
+    window.roundSosList = {4000.0};
+    window.updatePatientSelectionUi();
+    QVERIFY(window.ui->btnStartMeasurement->isEnabled());
+    window.ui->btnStartMeasurement->setFocus(Qt::OtherFocusReason);
+    QTest::keyClick(window.ui->btnStartMeasurement, Qt::Key_Space);
+    QVERIFY(window.patientMeasureRunning);
+    QCOMPARE(window.ui->lblProcessStatus->text(),
+             QStringLiteral("当前第 2/5 轮"));
+    window.stopPatientMeasurement();
+
+    QFile::remove(window.measurementGuideSettingsPath);
+    window.measurementGuideSeenThisRun = false;
+    QTimer::singleShot(0, []() {
+        if (auto* dialog = qobject_cast<MeasurementGuideDialog*>(
+                QApplication::activeModalWidget())) {
+            dialog->reject();
+        }
+    });
+    window.startPatientMeasurement(5, true);
+    QVERIFY(!window.patientMeasureRunning);
+    QVERIFY(!QFileInfo::exists(window.measurementGuideSettingsPath));
+
+    QTimer::singleShot(0, []() {
+        if (auto* dialog = qobject_cast<MeasurementGuideDialog*>(
+                QApplication::activeModalWidget())) {
+            QCOMPARE(dialog->findChild<QPushButton*>(
+                         QStringLiteral("guideSkipButton"))->text(),
+                     QStringLiteral("关闭"));
+            dialog->reject();
+        }
+    });
+    window.on_btnMeasurementGuide_clicked();
+    QVERIFY(!window.patientMeasureRunning);
+    QVERIFY(!QFileInfo::exists(window.measurementGuideSettingsPath));
 }
 
 void MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary()
@@ -372,6 +775,7 @@ void MainWindowSafetyTests::patientMeasurementDisablesConflictingControls()
     QVERIFY(!window.ui->btnReport->isEnabled());
     QVERIFY(!window.ui->pushButton_2->isEnabled());
     QVERIFY(!window.ui->btnArchive->isEnabled());
+    QVERIFY(!window.ui->btnMeasurementGuide->isEnabled());
     QVERIFY(!window.gainSliderA->isEnabled());
     QVERIFY(!window.gainSliderB->isEnabled());
     QVERIFY(!window.gainSliderC->isEnabled());
@@ -397,6 +801,7 @@ void MainWindowSafetyTests::debugAutoDisablesConflictingNavigation()
     QVERIFY(!window.ui->btnPatientInfo->isEnabled());
     QVERIFY(!window.ui->btnReport->isEnabled());
     QVERIFY(!window.ui->btnArchive->isEnabled());
+    QVERIFY(!window.ui->btnMeasurementGuide->isEnabled());
 }
 
 void MainWindowSafetyTests::patientFormsStayInsideAndCenteredAtSmallWindow()
@@ -789,6 +1194,13 @@ void MainWindowSafetyTests::patientMeasurementStartClearsSerialAssembly()
     window.startPatientMeasurement(5);
 
     QVERIFY(window.patientMeasureRunning);
+#ifndef QT_NO_DEBUG
+    QVERIFY2(window.experimentLog.active(), qPrintable(window.experimentLog.error()));
+    const QString logPath = window.experimentLog.path();
+    QVERIFY(logPath.startsWith(QCoreApplication::applicationDirPath()));
+#else
+    QVERIFY(!window.experimentLog.active());
+#endif
     QVERIFY(window.rxBuffer.isEmpty());
     QVERIFY(window.frameGroups.isEmpty());
     QVERIFY(window.frameGroupOrder.isEmpty());
@@ -796,6 +1208,14 @@ void MainWindowSafetyTests::patientMeasurementStartClearsSerialAssembly()
     QVERIFY(window.samplesB.isEmpty());
     for (bool received : window.chReceived) QVERIFY(!received);
     window.stopPatientMeasurement();
+#ifndef QT_NO_DEBUG
+    QFile log(logPath);
+    QVERIFY(log.open(QIODevice::ReadOnly));
+    const auto config = QJsonDocument::fromJson(log.readLine()).object().value("config").toObject();
+    QCOMPARE(config.value("D_min").toDouble(), window.mCfg.angleSignedDiffMin);
+    QCOMPARE(config.value("G_max").toDouble(), window.mCfg.anglePairMidGapMax);
+    QVERIFY(!config.contains("patient"));
+#endif
 }
 
 void MainWindowSafetyTests::serialIoErrorsResetAcquisition_data()

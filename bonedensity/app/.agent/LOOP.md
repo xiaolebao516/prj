@@ -8,18 +8,24 @@ MEASUREMENT-FEEDBACK-001 is the active Standard Loop in this repository.
 
 ## Goal
 
-`Make measurement-process feedback consistently understandable and ensure semantically invalid patient/history XML cannot be loaded and later overwrite recoverable data, while preserving measurement behavior and valid data compatibility.`
+`Complete the approved operation tutorial and, following the 2026-09-05 algorithm audit, repair demonstrated stale/mixed patient-round state and record experiments automatically before evaluating threshold changes. Preserve next-round controls, valid data compatibility, and semantic patient/history validation.`
 
 ## Boundary / Scope
 
-- Keep the original progress bars, center lines, positions, value bindings, titles, and measurement behavior unchanged.
-- Use the existing blank space for guidance: the emphasized real-time label states that the left bar is used while adjusting probe tilt and the right bar while adjusting probe position; a smaller but readable one-line note below states that both should ultimately be brought to their center lines.
-- Update only the emphasized label from consecutive existing bar positions to show waiting, approaching center, moving away and reverse, holding at center, or invalid signal.
-- Repair the clipped bottom status label without moving or resizing the three existing progress bars.
-- Keep the current overall round and current-round valid-frame progress visible during formal patient measurement.
-- Replace user-facing `Gap`, `lag`, `Corr`, pair/debug, and Qt Creator wording with concise operator-facing valid, adjust-pose, stabilize-probe, or improve-contact guidance.
+2026-09-05 approved extension: the user approved checking principles/code first, fixing demonstrated problems before tuning, and testing on himself before other subjects. The following narrow exceptions supersede earlier tutorial-only preservation clauses: expire patient stability/partial-round state after the existing unlock-count number of consecutive rejected frames; discard partial-round values when the existing stability lock is lost; indicate unavailable bar readings without moving/remapping the controls; add bounded, non-identifying Debug experiment recording of complete input frames, decisions and round events. Preserve transient tolerance. Numerical thresholds, SOS/lag/D/G formulas, calibration, serial framing/timing and clinical persistence remain unchanged. Easier positioning and acceptable error are external self-trial criteria, not claims established by software tests.
+
+- Keep the original progress bars, center lines, positions, value bindings, numerical values, and measurement behavior unchanged.
+- Remove the per-frame approaching/moving-away/invalid-signal instruction text and all other operator sentences that change on every incoming frame.
+- Keep a fixed reminder on the process page: adjust the right `D` bar for probe position, then the left `G` bar for probe tilt, and ultimately stabilize both at their center lines.
+- Keep the current overall round and current-round valid-frame progress visible. Round completion and rejection remain clear, but status text changes only at round-level events.
+- Add an idle-only `操作教学` entry and a modal, responsive three-page tutorial: preparation/overview, right-D position adjustment, and left-G tilt adjustment plus round completion.
+- Use the approved first-version abstract diagrams as replaceable temporary assets. Keep text outside the images so later GPT-generated or photographed replacements do not require interaction changes.
+- Before the first eligible measurement in a copied application folder, show the tutorial. `跳过教程` or the final acknowledgement marks the current tutorial version as seen and continues measurement; closing the dialog cancels without marking it seen or starting acquisition.
+- A manually opened tutorial never starts acquisition when it closes.
+- Store only a versioned tutorial-seen marker beside the executable, separate from patient, measurement, account, and calibration XML so copying the application folder preserves the setting.
+- Preserve the proven next-round behavior: after a completed round, Space activates the focused `开始检测` button, and clicking that same button also continues. Do not treat arbitrary page clicks as confirmation.
 - A rejected round must clearly say it was not counted; an accepted round must clearly say which of five rounds completed.
-- Do not add timers, move controls, change bar mapping, create new measurement states, or alter measurement acceptance behavior.
+- Do not add timers, move progress controls, change bar mapping, create new measurement states, or alter measurement acceptance behavior.
 - Preserve SOS calculation, lag calculation and types, D/G formulas, measurement gates and thresholds, acquisition timing, persistence, schemas, dependencies, and final-result behavior.
 - Connect the existing patient/history document validators to the normal load path so unsupported versions, empty or duplicate IDs, and orphan measurements are backed up and rejected before any output list is replaced.
 - Preserve the current XML schemas, valid version-2 load/save behavior, versionless legacy migration, transaction recovery, atomic writes, backup naming, and caller-owned output lists on failure.
@@ -27,33 +33,39 @@ MEASUREMENT-FEEDBACK-001 is the active Standard Loop in this repository.
 
 ## Success Criteria
 
-- `SC-1`: The original progress bars, center lines, geometry, value bindings, titles, measurement gates, accepted-frame count, five-round behavior, and final results remain unchanged.
-- `SC-2`: The emphasized real-time explanation states left-bar tilt adjustment and right-bar position adjustment; a smaller readable one-line note below states the final goal of bringing both bars to their center lines.
-- `SC-3`: Consecutive existing bar positions produce immediate approaching, moving-away/reverse, centered, small-change, waiting, and invalid-signal text without changing bar values.
-- `SC-4`: The bottom measurement status is fully inside its parent, keeps round/frame progress visible, contains no developer-only terminology, and distinguishes valid, rejected, invalid-signal, accepted-round, and rejected-round states.
-- `SC-5`: The canonical Debug build, focused and existing safety tests, screenshot inspection, and final diff checks pass with no protected or unrelated product change.
-- `SC-6`: The user visually confirms the wording, placement, and real-device response in the normal application window.
-- `SC-7`: All seven existing semantic-corruption cases fail closed, preserve the source bytes, create the expected `.bad.bak`, report its path, and leave caller-owned patient/measurement lists unchanged.
-- `SC-8`: Valid version-2 data, versionless legacy migration, paired save/delete, and pending-transaction recovery continue to pass without an XML schema change.
-- `SC-9`: Patient-store, account, calibration, main-window, portable-handoff, canonical Debug build, and final diff checks pass after the persistence repair, except for explicitly external hardware acceptance.
+- `SC-1`: The original D/G progress bars, center lines, geometry, value bindings, measurement gates, accepted-frame count, five-round behavior, acquisition timing, and final results remain unchanged.
+- `SC-2`: No instruction sentence changes on each incoming frame; the fixed right-D/left-G reminder, current round, valid-frame progress, accepted round, and rejected round remain readable.
+- `SC-3`: The responsive tutorial contains exactly the three approved pages and can be opened manually while idle without starting acquisition.
+- `SC-4`: The first eligible measurement shows the current tutorial version once; skip, finish, close, reopen, and version behavior follow the approved contract without modifying clinical XML.
+- `SC-5`: The temporary abstract diagrams are clear, text-free, and replaceable later without changing tutorial control flow.
+- `SC-6`: After a completed round, Space or clicking `开始检测` continues; closing or clicking elsewhere does not start acquisition.
+- `SC-7`: Focused tests, all existing regressions, canonical Debug build, screenshot inspection, and final diff checks pass with no protected algorithm or unrelated product change.
+- `SC-8`: The user visually confirms the tutorial wording, layout, temporary diagrams, and next-round behavior in the normal application window; physical probe usability remains real-device acceptance.
+- `SC-9`: All seven existing semantic-corruption cases fail closed, preserve the source bytes, create the expected `.bad.bak`, report its path, and leave caller-owned patient/measurement lists unchanged.
+- `SC-10`: Valid version-2 data, versionless legacy migration, paired save/delete, and pending-transaction recovery continue to pass without an XML schema change.
+- `SC-11`: Patient-store, account, calibration, main-window, portable-handoff, canonical Debug build, and final diff checks pass after the tutorial change, except for explicitly external hardware acceptance.
+- `SC-12`: A sustained rejected-frame gap cannot reuse a stale patient stability lock/window; fewer consecutive rejections than the existing unlock count preserve partial progress. Lock loss clears all seven partial-round lists and progress without stopping acquisition or mixing clusters. Uninterrupted valid input retains its acceptance sequence.
+- `SC-13`: Debug measurements automatically record complete-frame raw channels, monotonic timing, actual feature branch/values, rejection/acceptance decisions and round boundaries in unique bounded files, without patient identifiers or clinical XML changes. Recording failure is visible and cannot change measurement acceptance; Release does not enable this automatically.
+- `SC-14`: Focused regression and canonical build pass. Hardware self-trial must assess positioning effort, stalls and paired/repeated SOS before threshold changes or claims of accuracy/usability improvement; subsequent other-subject verification remains pending.
 
 ## SOP
 
-1. Preserve the original progress bars and D/G guidance while fitting the bottom status into its existing parent.
-2. Format the existing measurement states as one concise line containing overall round, current valid-frame progress, and an operator-facing status.
-3. Replace misleading rejected-round completion wording and developer-only runtime text without changing any decision condition.
-4. Add focused regression checks for visibility, wording, progress, rejected-round behavior, trend wording, and unchanged bar geometry.
-5. Run the existing safety suite, inspect the rendered page, build the canonical Debug executable, and confirm the final diff scope.
-6. Route normal patient/history loading through the existing semantic validators before converting documents into records.
-7. Run focused patient-store tests first, then the cross-feature regression and canonical build.
+Approved extension sequence: add regression reproductions; repair stale/mixed state locally; add automatic Debug-only full-path experiment recording with bounded storage and no patient identifiers; verify steady-input behavior, transient tolerance, isolation and recording failures; build; then self-trial before selecting any tuning package. Do not deploy an unvalidated wider threshold package.
+
+1. Remove per-frame instruction updates and replace them with the approved fixed reminder without changing any bar or measurement input.
+2. Add the separate three-page tutorial, temporary abstract resources, first-use marker, manual entry, and approved skip/finish/close behavior.
+3. Restore focus to `开始检测` after an accepted round and lock the existing Space/click continuation behavior with focused tests.
+4. Add focused regression checks for tutorial content, first-use versioning, manual open, non-starting close, stable text, unchanged bars, and layout.
+5. Run the existing safety and persistence suites, inspect the rendered pages, build the canonical Debug executable, and confirm the final diff scope.
 
 ## Stop and Escalation Conditions
 
 - Stop before changing SOS, lag estimation, D/G formulas, thresholds, acquisition timing, or accepted-frame behavior.
-- Stop if any existing progress-bar geometry, mapping, title, gate, accepted-frame count, five-round behavior, or algorithm differs from the pre-task implementation.
-- Do not infer new D/G semantics or alter the existing left/right bindings in this task.
+- Stop if any existing progress-bar geometry, mapping, gate, accepted-frame count, five-round behavior, acquisition timing, or algorithm differs from the pre-task implementation.
+- Use only the user-approved physical teaching mapping `right D = position; left G = tilt`; do not infer absolute movement directions.
+- Stop before embedding generated or photographed final assets without a separate user review of those images.
 - Stop before changing an XML schema, valid-record interpretation, legacy migration semantics, transaction protocol, or backup/atomic-write behavior beyond rejecting the already enumerated invalid documents.
 
 ## Learning and Evolution
 
-The regression was caused by coupling guidance work to progress-bar layout and behavior. The durable prevention is a focused test that locks the original bar geometry while exercising only the separate guidance label; no broader Skill or system rule is needed.
+The rejected approach changed text at frame rate even though a human operator could not read it. The durable prevention is to verify instructional usability at the real update rate and to keep per-frame feedback visual while text changes only at operator-readable state boundaries. This remains a focused product/test rule; no broader Skill or system rule is needed.
