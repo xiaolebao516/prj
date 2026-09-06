@@ -1,0 +1,180 @@
+********* Start testing of MainWindowSafetyTests *********
+Config: Using QtTest library 6.5.3, Qt 6.5.3 (x86_64-little_endian-llp64 shared (dynamic) release build; by GCC 11.2.0), windows 11
+PASS   : MainWindowSafetyTests::initTestCase()
+QWARN  : MainWindowSafetyTests::invalidChannelsAreDiscarded() QFontDatabase: Cannot find font directory D:/Qt/6.5.3/mingw_64/lib/fonts.
+Note that Qt no longer ships fonts. Deploy some (from https://dejavu-fonts.github.io/ for example) or switch to fontconfig.
+QWARN  : MainWindowSafetyTests::invalidChannelsAreDiscarded() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::invalidChannelsAreDiscarded() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::invalidChannelsAreDiscarded() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::invalidChannelsAreDiscarded()
+QWARN  : MainWindowSafetyTests::incompleteFrameGroupsAreBounded() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::incompleteFrameGroupsAreBounded() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::incompleteFrameGroupsAreBounded() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::incompleteFrameGroupsAreBounded()
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary()
+QWARN  : MainWindowSafetyTests::parserResynchronizesAfterNoiseAndBadTail() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::parserResynchronizesAfterNoiseAndBadTail() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::parserResynchronizesAfterNoiseAndBadTail() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::parserResynchronizesAfterNoiseAndBadTail()
+QWARN  : MainWindowSafetyTests::interleavedAndWrappedFrameIndexesStayIndependent() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::interleavedAndWrappedFrameIndexesStayIndependent() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::interleavedAndWrappedFrameIndexesStayIndependent() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::interleavedAndWrappedFrameIndexesStayIndependent()
+QWARN  : MainWindowSafetyTests::speedSeriesKeepsOnlyRecentPoints() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::speedSeriesKeepsOnlyRecentPoints() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::speedSeriesKeepsOnlyRecentPoints() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::speedSeriesKeepsOnlyRecentPoints()
+QWARN  : MainWindowSafetyTests::disconnectedControlsAndPlaceholdersAreSafe() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::disconnectedControlsAndPlaceholdersAreSafe() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::disconnectedControlsAndPlaceholdersAreSafe() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::disconnectedControlsAndPlaceholdersAreSafe()
+QWARN  : MainWindowSafetyTests::positionGuideTracksExistingBarsWithoutChangingThem() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::positionGuideTracksExistingBarsWithoutChangingThem() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::positionGuideTracksExistingBarsWithoutChangingThem() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::positionGuideTracksExistingBarsWithoutChangingThem()
+QWARN  : MainWindowSafetyTests::measurementStatusIsVisibleAndOperatorFacing() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::measurementStatusIsVisibleAndOperatorFacing() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::measurementStatusIsVisibleAndOperatorFacing() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::measurementStatusIsVisibleAndOperatorFacing() This plugin does not support raise()
+QWARN  : MainWindowSafetyTests::measurementStatusIsVisibleAndOperatorFacing() This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::measurementStatusIsVisibleAndOperatorFacing()
+QWARN  : MainWindowSafetyTests::patientMeasurementDisablesConflictingControls() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::patientMeasurementDisablesConflictingControls() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::patientMeasurementDisablesConflictingControls() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::patientMeasurementDisablesConflictingControls()
+QWARN  : MainWindowSafetyTests::debugAutoDisablesConflictingNavigation() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::debugAutoDisablesConflictingNavigation() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::debugAutoDisablesConflictingNavigation() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::debugAutoDisablesConflictingNavigation()
+QWARN  : MainWindowSafetyTests::patientFormsStayInsideAndCenteredAtSmallWindow() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::patientFormsStayInsideAndCenteredAtSmallWindow() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::patientFormsStayInsideAndCenteredAtSmallWindow() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::patientFormsStayInsideAndCenteredAtSmallWindow() This plugin does not support propagateSizeHints()
+QWARN  : MainWindowSafetyTests::patientFormsStayInsideAndCenteredAtSmallWindow() QPainter::end: Painter ended with 2 saved states
+QWARN  : MainWindowSafetyTests::patientFormsStayInsideAndCenteredAtSmallWindow() QPainter::end: Painter ended with 2 saved states
+PASS   : MainWindowSafetyTests::patientFormsStayInsideAndCenteredAtSmallWindow()
+QWARN  : MainWindowSafetyTests::pendingResultBlocksAnotherMeasurement() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::pendingResultBlocksAnotherMeasurement() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::pendingResultBlocksAnotherMeasurement() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::pendingResultBlocksAnotherMeasurement()
+QWARN  : MainWindowSafetyTests::samePatientReselectionPreservesPendingResult() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::samePatientReselectionPreservesPendingResult() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::samePatientReselectionPreservesPendingResult() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::samePatientReselectionPreservesPendingResult()
+QWARN  : MainWindowSafetyTests::samePatientReselectionPreservesPartialRounds() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::samePatientReselectionPreservesPartialRounds() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::samePatientReselectionPreservesPartialRounds() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::samePatientReselectionPreservesPartialRounds()
+QWARN  : MainWindowSafetyTests::cancelledPatientSwitchPreservesPartialRounds() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::cancelledPatientSwitchPreservesPartialRounds() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::cancelledPatientSwitchPreservesPartialRounds() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::cancelledPatientSwitchPreservesPartialRounds() This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::cancelledPatientSwitchPreservesPartialRounds()
+QWARN  : MainWindowSafetyTests::cancelledQuickPatientCreationDoesNotWritePatient() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::cancelledQuickPatientCreationDoesNotWritePatient() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::cancelledQuickPatientCreationDoesNotWritePatient() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::cancelledQuickPatientCreationDoesNotWritePatient() This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::cancelledQuickPatientCreationDoesNotWritePatient()
+QWARN  : MainWindowSafetyTests::partialRoundsRequireCloseConfirmation() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::partialRoundsRequireCloseConfirmation() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::partialRoundsRequireCloseConfirmation() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::partialRoundsRequireCloseConfirmation() This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::partialRoundsRequireCloseConfirmation()
+QWARN  : MainWindowSafetyTests::activeFirstRoundClosePausesAndCanResume() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::activeFirstRoundClosePausesAndCanResume() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::activeFirstRoundClosePausesAndCanResume() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::activeFirstRoundClosePausesAndCanResume() This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::activeFirstRoundClosePausesAndCanResume()
+QWARN  : MainWindowSafetyTests::partialRoundsBlockCalibrationDialog() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::partialRoundsBlockCalibrationDialog() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::partialRoundsBlockCalibrationDialog() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::partialRoundsBlockCalibrationDialog() This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::partialRoundsBlockCalibrationDialog()
+QWARN  : MainWindowSafetyTests::futureBirthDateBlocksMeasurement() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::futureBirthDateBlocksMeasurement() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::futureBirthDateBlocksMeasurement() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::futureBirthDateBlocksMeasurement() This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::futureBirthDateBlocksMeasurement()
+QWARN  : MainWindowSafetyTests::pendingSaveValidatesTheRecordedPatient() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::pendingSaveValidatesTheRecordedPatient() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::pendingSaveValidatesTheRecordedPatient() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::pendingSaveValidatesTheRecordedPatient() This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::pendingSaveValidatesTheRecordedPatient()
+QWARN  : MainWindowSafetyTests::pendingTransactionBlocksSingleFileWrites() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::pendingTransactionBlocksSingleFileWrites() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::pendingTransactionBlocksSingleFileWrites() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::pendingTransactionBlocksSingleFileWrites() This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::pendingTransactionBlocksSingleFileWrites()
+QWARN  : MainWindowSafetyTests::patientMeasurementStartClearsSerialAssembly() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::patientMeasurementStartClearsSerialAssembly() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::patientMeasurementStartClearsSerialAssembly() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::patientMeasurementStartClearsSerialAssembly()
+QWARN  : MainWindowSafetyTests::serialIoErrorsResetAcquisition(resource-error) qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::serialIoErrorsResetAcquisition(resource-error) This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::serialIoErrorsResetAcquisition(resource-error) FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::serialIoErrorsResetAcquisition(resource-error) This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::serialIoErrorsResetAcquisition(resource-error)
+QWARN  : MainWindowSafetyTests::serialIoErrorsResetAcquisition(read-error) qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::serialIoErrorsResetAcquisition(read-error) This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::serialIoErrorsResetAcquisition(read-error) FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::serialIoErrorsResetAcquisition(read-error) This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::serialIoErrorsResetAcquisition(read-error)
+QWARN  : MainWindowSafetyTests::serialIoErrorsResetAcquisition(write-error) qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::serialIoErrorsResetAcquisition(write-error) This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::serialIoErrorsResetAcquisition(write-error) FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::serialIoErrorsResetAcquisition(write-error) This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::serialIoErrorsResetAcquisition(write-error)
+PASS   : MainWindowSafetyTests::reportRenderingIsReadableAndArtifactFree()
+QWARN  : MainWindowSafetyTests::invalidMeasurementDateDoesNotInventAge() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::invalidMeasurementDateDoesNotInventAge() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::invalidMeasurementDateDoesNotInventAge() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::invalidMeasurementDateDoesNotInventAge()
+QWARN  : MainWindowSafetyTests::completedReportUsesProvidedMeasurement() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::completedReportUsesProvidedMeasurement() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::completedReportUsesProvidedMeasurement() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::completedReportUsesProvidedMeasurement()
+QWARN  : MainWindowSafetyTests::reportPdfCanBeCommitted() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::reportPdfCanBeCommitted() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::reportPdfCanBeCommitted() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::reportPdfCanBeCommitted()
+SKIP   : MainWindowSafetyTests::capturePagesWhenRequested() BONE_UI_CAPTURE_DIR is not set
+..\..\..\tests\mainwindow_safety_tests.cpp(949) : failure location
+PASS   : MainWindowSafetyTests::cleanupTestCase()
+Totals: 33 passed, 0 failed, 1 skipped, 0 blacklisted, 1318ms
+********* Finished testing of MainWindowSafetyTests *********

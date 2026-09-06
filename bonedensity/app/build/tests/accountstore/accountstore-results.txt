@@ -1,0 +1,10 @@
+********* Start testing of AccountStoreTests *********
+Config: Using QtTest library 6.5.3, Qt 6.5.3 (x86_64-little_endian-llp64 shared (dynamic) release build; by GCC 11.2.0), windows 11
+PASS   : AccountStoreTests::initTestCase()
+PASS   : AccountStoreTests::firstRunCreatesUsableDefaultAdmin()
+PASS   : AccountStoreTests::corruptFileIsBackedUpAndRecovered()
+PASS   : AccountStoreTests::userLifecyclePersistsAndProtectsAdmin()
+PASS   : AccountStoreTests::failedWriteDoesNotChangeInMemoryAccounts()
+PASS   : AccountStoreTests::cleanupTestCase()
+Totals: 6 passed, 0 failed, 0 skipped, 0 blacklisted, 69ms
+********* Finished testing of AccountStoreTests *********

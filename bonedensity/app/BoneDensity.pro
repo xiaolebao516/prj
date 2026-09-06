@@ -14,6 +14,12 @@ contains(CONFIG, observe_before_g_trial) {
     DEFINES += BONE_OBSERVE_BEFORE_G_EXPERIMENT
     TARGET = BoneDensity_SelfTrial
 }
+contains(CONFIG, dual_window_a_trial) {
+    contains(CONFIG, observe_before_g_trial): error("Select only one trial profile")
+    !CONFIG(debug, debug|release): error("The dual-window trial must be a Debug build")
+    DEFINES += BONE_DUAL_WINDOW_A_EXPERIMENT
+    TARGET = BoneDensity_DualWindowTrial
+}
 
 INCLUDEPATH += include
 

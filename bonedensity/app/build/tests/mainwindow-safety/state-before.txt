@@ -1,0 +1,23 @@
+********* Start testing of MainWindowSafetyTests *********
+Config: Using QtTest library 6.5.3, Qt 6.5.3 (x86_64-little_endian-llp64 shared (dynamic) release build; by GCC 11.2.0), windows 11
+PASS   : MainWindowSafetyTests::initTestCase()
+QWARN  : MainWindowSafetyTests::rejectedFramesExpirePatientStability() QFontDatabase: Cannot find font directory D:/Qt/6.5.3/mingw_64/lib/fonts.
+Note that Qt no longer ships fonts. Deploy some (from https://dejavu-fonts.github.io/ for example) or switch to fontconfig.
+QWARN  : MainWindowSafetyTests::rejectedFramesExpirePatientStability() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::rejectedFramesExpirePatientStability() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::rejectedFramesExpirePatientStability() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+FAIL!  : MainWindowSafetyTests::rejectedFramesExpirePatientStability() 'window.recentBoneLagBList.isEmpty()' returned FALSE. ()
+..\..\..\tests\mainwindow_safety_tests.cpp(137) : failure location
+QWARN  : MainWindowSafetyTests::clusterLossDiscardsPartialRound() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::clusterLossDiscardsPartialRound() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::clusterLossDiscardsPartialRound() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+FAIL!  : MainWindowSafetyTests::clusterLossDiscardsPartialRound() 'window.currentRoundSosList.isEmpty()' returned FALSE. ()
+..\..\..\tests\mainwindow_safety_tests.cpp(155) : failure location
+QWARN  : MainWindowSafetyTests::transientRejectionPreservesProgressAndSteadySequence() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::transientRejectionPreservesProgressAndSteadySequence() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::transientRejectionPreservesProgressAndSteadySequence() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+FAIL!  : MainWindowSafetyTests::transientRejectionPreservesProgressAndSteadySequence() '!window.boneLagLocked' returned FALSE. ()
+..\..\..\tests\mainwindow_safety_tests.cpp(190) : failure location
+PASS   : MainWindowSafetyTests::cleanupTestCase()
+Totals: 2 passed, 3 failed, 0 skipped, 0 blacklisted, 102ms
+********* Finished testing of MainWindowSafetyTests *********

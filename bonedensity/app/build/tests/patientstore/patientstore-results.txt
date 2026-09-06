@@ -1,0 +1,27 @@
+********* Start testing of PatientStoreTests *********
+Config: Using QtTest library 6.5.3, Qt 6.5.3 (x86_64-little_endian-llp64 shared (dynamic) release build; by GCC 11.2.0), windows 11
+PASS   : PatientStoreTests::initTestCase()
+PASS   : PatientStoreTests::corruptPatientsAreCopiedWithoutChangingSource()
+PASS   : PatientStoreTests::corruptMeasurementsAreCopiedWithoutChangingSource()
+PASS   : PatientStoreTests::semanticCorruptionIsRejected(unknown-patient-version)
+PASS   : PatientStoreTests::semanticCorruptionIsRejected(unknown-measurement-version)
+PASS   : PatientStoreTests::semanticCorruptionIsRejected(empty-patient-id)
+PASS   : PatientStoreTests::semanticCorruptionIsRejected(duplicate-patient-id)
+PASS   : PatientStoreTests::semanticCorruptionIsRejected(empty-measurement-id)
+PASS   : PatientStoreTests::semanticCorruptionIsRejected(duplicate-measurement-id)
+PASS   : PatientStoreTests::semanticCorruptionIsRejected(orphan-measurement)
+PASS   : PatientStoreTests::pairedSaveAndDeleteKeepDocumentsConsistent()
+PASS   : PatientStoreTests::versionlessLegacyStillMigrates()
+PASS   : PatientStoreTests::unfinishedTransactionIsRecoveredBeforeLoad()
+PASS   : PatientStoreTests::missingTransactionBackupRefusesLoad()
+PASS   : PatientStoreTests::invalidTransactionBackupDoesNotOverwriteLiveFiles(truncated-patients-backup)
+PASS   : PatientStoreTests::invalidTransactionBackupDoesNotOverwriteLiveFiles(truncated-measurements-backup)
+PASS   : PatientStoreTests::invalidTransactionBackupDoesNotOverwriteLiveFiles(duplicate-patient-id-backup)
+PASS   : PatientStoreTests::invalidTransactionBackupDoesNotOverwriteLiveFiles(orphan-measurement-backup)
+PASS   : PatientStoreTests::transactionRecoveryHandlesOriginalExistenceMatrix(both-existed)
+PASS   : PatientStoreTests::transactionRecoveryHandlesOriginalExistenceMatrix(patients-only)
+PASS   : PatientStoreTests::transactionRecoveryHandlesOriginalExistenceMatrix(measurements-only)
+PASS   : PatientStoreTests::transactionRecoveryHandlesOriginalExistenceMatrix(neither-existed)
+PASS   : PatientStoreTests::cleanupTestCase()
+Totals: 23 passed, 0 failed, 0 skipped, 0 blacklisted, 248ms
+********* Finished testing of PatientStoreTests *********

@@ -1,0 +1,481 @@
+********* Start testing of MainWindowSafetyTests *********
+Config: Using QtTest library 6.5.3, Qt 6.5.3 (x86_64-little_endian-llp64 shared (dynamic) release build; by GCC 11.2.0), windows 11
+PASS   : MainWindowSafetyTests::initTestCase()
+QWARN  : MainWindowSafetyTests::rejectedFramesExpirePatientStability() QFontDatabase: Cannot find font directory D:/Qt/6.5.3/mingw_64/lib/fonts.
+Note that Qt no longer ships fonts. Deploy some (from https://dejavu-fonts.github.io/ for example) or switch to fontconfig.
+QWARN  : MainWindowSafetyTests::rejectedFramesExpirePatientStability() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::rejectedFramesExpirePatientStability() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::rejectedFramesExpirePatientStability() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::rejectedFramesExpirePatientStability()
+QWARN  : MainWindowSafetyTests::clusterLossDiscardsPartialRound() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::clusterLossDiscardsPartialRound() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::clusterLossDiscardsPartialRound() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QDEBUG : MainWindowSafetyTests::clusterLossDiscardsPartialRound() One patient round candidate: sos = 3500 A = 3288.59 B = 3500 corrA = 0.95 corrB = 0.95 pairMidGap = 0 signedLagDiff = 9 oneRoundAngleSignedDiffOk = true oneRoundPairMidGapOk = true oneRoundAngleOk = true mCfg.roundCorrAMin = 0.8 mCfg.roundCorrBMin = 0.55
+QDEBUG : MainWindowSafetyTests::clusterLossDiscardsPartialRound() Round cluster rebuilt: candidateCount = 1 candidateSos = QList(3500) candidateCorrA = QList(0.95) candidateCorrB = QList(0.95) acceptedClusterCount = 1 roundSosList = QList(3500)
+QDEBUG : MainWindowSafetyTests::clusterLossDiscardsPartialRound() One patient round accepted: acceptedRoundCount = 1 candidateCount = 1 sos = 3500 A = 3288.59 B = 3500 corrA = 0.95 corrB = 0.95
+QDEBUG : MainWindowSafetyTests::clusterLossDiscardsPartialRound() [闸门统计] 暂无数据
+QWARN  : MainWindowSafetyTests::clusterLossDiscardsPartialRound() This plugin does not support raise()
+QWARN  : MainWindowSafetyTests::clusterLossDiscardsPartialRound() This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::clusterLossDiscardsPartialRound()
+QWARN  : MainWindowSafetyTests::transientRejectionPreservesProgressAndSteadySequence() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::transientRejectionPreservesProgressAndSteadySequence() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::transientRejectionPreservesProgressAndSteadySequence() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::transientRejectionPreservesProgressAndSteadySequence()
+PASS   : MainWindowSafetyTests::experimentRecordingIsBoundedAndUnique()
+QWARN  : MainWindowSafetyTests::experimentRecordingIncludesEarlyFailuresAndRawInput() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::experimentRecordingIncludesEarlyFailuresAndRawInput() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::experimentRecordingIncludesEarlyFailuresAndRawInput() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QDEBUG : MainWindowSafetyTests::experimentRecordingIncludesEarlyFailuresAndRawInput() "B_pair / BD->BC" invalid: arrival pick failed
+QDEBUG : MainWindowSafetyTests::experimentRecordingIncludesEarlyFailuresAndRawInput() Skip: B_pair invalid, because B_pair is the reference pair
+QWARN  : MainWindowSafetyTests::experimentRecordingIncludesEarlyFailuresAndRawInput() Experiment recording unavailable: "cannot create experiment directory"
+PASS   : MainWindowSafetyTests::experimentRecordingIncludesEarlyFailuresAndRawInput()
+QWARN  : MainWindowSafetyTests::precheckFailuresExpireStateThroughActualPipeline() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::precheckFailuresExpireStateThroughActualPipeline() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::precheckFailuresExpireStateThroughActualPipeline() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QDEBUG : MainWindowSafetyTests::precheckFailuresExpireStateThroughActualPipeline() "B_pair / BD->BC" invalid: arrival pick failed
+QDEBUG : MainWindowSafetyTests::precheckFailuresExpireStateThroughActualPipeline() Skip: B_pair invalid, because B_pair is the reference pair
+QDEBUG : MainWindowSafetyTests::precheckFailuresExpireStateThroughActualPipeline() "B_pair / BD->BC" invalid: arrival pick failed
+QDEBUG : MainWindowSafetyTests::precheckFailuresExpireStateThroughActualPipeline() Skip: B_pair invalid, because B_pair is the reference pair
+QDEBUG : MainWindowSafetyTests::precheckFailuresExpireStateThroughActualPipeline() "B_pair / BD->BC" invalid: arrival pick failed
+QDEBUG : MainWindowSafetyTests::precheckFailuresExpireStateThroughActualPipeline() Skip: B_pair invalid, because B_pair is the reference pair
+QDEBUG : MainWindowSafetyTests::precheckFailuresExpireStateThroughActualPipeline() "B_pair / BD->BC" invalid: arrival pick failed
+QDEBUG : MainWindowSafetyTests::precheckFailuresExpireStateThroughActualPipeline() Skip: B_pair invalid, because B_pair is the reference pair
+QDEBUG : MainWindowSafetyTests::precheckFailuresExpireStateThroughActualPipeline() "B_pair / BD->BC" invalid: arrival pick failed
+QDEBUG : MainWindowSafetyTests::precheckFailuresExpireStateThroughActualPipeline() Skip: B_pair invalid, because B_pair is the reference pair
+QDEBUG : MainWindowSafetyTests::precheckFailuresExpireStateThroughActualPipeline() "B_pair / BD->BC" invalid: arrival pick failed
+QDEBUG : MainWindowSafetyTests::precheckFailuresExpireStateThroughActualPipeline() Skip: B_pair invalid, because B_pair is the reference pair
+QDEBUG : MainWindowSafetyTests::precheckFailuresExpireStateThroughActualPipeline() "B_pair / BD->BC" invalid: arrival pick failed
+QDEBUG : MainWindowSafetyTests::precheckFailuresExpireStateThroughActualPipeline() Skip: B_pair invalid, because B_pair is the reference pair
+QDEBUG : MainWindowSafetyTests::precheckFailuresExpireStateThroughActualPipeline() "B_pair / BD->BC" invalid: arrival pick failed
+QDEBUG : MainWindowSafetyTests::precheckFailuresExpireStateThroughActualPipeline() Skip: B_pair invalid, because B_pair is the reference pair
+QDEBUG : MainWindowSafetyTests::precheckFailuresExpireStateThroughActualPipeline() "B_pair / BD->BC" invalid: arrival pick failed
+QDEBUG : MainWindowSafetyTests::precheckFailuresExpireStateThroughActualPipeline() Skip: B_pair invalid, because B_pair is the reference pair
+QDEBUG : MainWindowSafetyTests::precheckFailuresExpireStateThroughActualPipeline() "B_pair / BD->BC" invalid: arrival pick failed
+QDEBUG : MainWindowSafetyTests::precheckFailuresExpireStateThroughActualPipeline() Skip: B_pair invalid, because B_pair is the reference pair
+PASS   : MainWindowSafetyTests::precheckFailuresExpireStateThroughActualPipeline()
+QWARN  : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 726 lateValley = 863 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 727 lateValley = 864 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 728 lateValley = 865 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 729 lateValley = 866 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 730 lateValley = 867 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 731 lateValley = 868 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 732 lateValley = 869 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 733 lateValley = 870 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 734 lateValley = 871 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 735 lateValley = 872 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 736 lateValley = 873 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 737 lateValley = 874 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 738 lateValley = 875 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 739 lateValley = 876 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 740 lateValley = 877 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 741 lateValley = 878 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 742 lateValley = 879 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 743 lateValley = 880 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 744 lateValley = 881 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 745 lateValley = 882 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 746 lateValley = 883 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 747 lateValley = 884 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 748 lateValley = 885 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 749 lateValley = 886 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 751 lateValley = 888 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 752 lateValley = 889 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 753 lateValley = 890 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 754 lateValley = 891 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 755 lateValley = 892 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 756 lateValley = 893 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 757 lateValley = 894 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 758 lateValley = 895 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 759 lateValley = 896 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 760 lateValley = 897 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 761 lateValley = 898 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 762 lateValley = 899 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 763 lateValley = 900 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 764 lateValley = 901 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 765 lateValley = 902 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 766 lateValley = 903 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 767 lateValley = 904 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 768 lateValley = 905 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 769 lateValley = 906 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 770 lateValley = 907 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 771 lateValley = 908 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 772 lateValley = 909 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 773 lateValley = 910 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 774 lateValley = 911 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 775 lateValley = 912 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() [闸门统计 共50帧] BJump=0.0% Boundary=0.0% Diff=0.0% Dir=0.0%
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() [闸门统计] CorrA=0.0% CorrB=0.0% AngDiff=0.0% AngGap=76.0% StabWarm=100.0% StabConc=0.0% StabLock=0.0%
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() [CorrA分布] 最小=0.992  平均=0.992  最大=0.992  门槛=0.78
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 776 lateValley = 913 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 777 lateValley = 914 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 778 lateValley = 915 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 779 lateValley = 916 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 780 lateValley = 917 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 781 lateValley = 918 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 782 lateValley = 919 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 783 lateValley = 920 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 784 lateValley = 921 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 785 lateValley = 922 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 786 lateValley = 923 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 787 lateValley = 924 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 788 lateValley = 925 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 789 lateValley = 926 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 790 lateValley = 927 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 791 lateValley = 928 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 792 lateValley = 929 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 793 lateValley = 930 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 794 lateValley = 931 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 795 lateValley = 932 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() "A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() One patient round candidate: sos = 3888.89 A = 3602.94 B = 3888.89 corrA = 0.991763 corrB = 0.967696 pairMidGap = -5.5 signedLagDiff = 10 oneRoundAngleSignedDiffOk = true oneRoundPairMidGapOk = true oneRoundAngleOk = true mCfg.roundCorrAMin = 0.8 mCfg.roundCorrBMin = 0.55
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() Round cluster rebuilt: candidateCount = 1 candidateSos = QList(3888.89) candidateCorrA = QList(0.991763) candidateCorrB = QList(0.967696) acceptedClusterCount = 1 roundSosList = QList(3888.89)
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() One patient round accepted: acceptedRoundCount = 1 candidateCount = 1 sos = 3888.89 A = 3602.94 B = 3888.89 corrA = 0.991763 corrB = 0.967696
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() [闸门统计 共43帧] BJump=0.0% Boundary=0.0% Diff=0.0% Dir=0.0%
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() [闸门统计] CorrA=0.0% CorrB=0.0% AngDiff=0.0% AngGap=0.0% StabWarm=30.2% StabConc=0.0% StabLock=0.0%
+QDEBUG : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() [CorrA分布] 最小=0.992  平均=0.992  最大=0.992  门槛=0.78
+QWARN  : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() This plugin does not support raise()
+QWARN  : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions() This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions()
+QINFO  : MainWindowSafetyTests::experimentRecordingThroughput() Synthetic recording: 500 four-channel x 1800-sample frames in 69 ms including encoding and final flush; local disk only
+PASS   : MainWindowSafetyTests::experimentRecordingThroughput()
+QWARN  : MainWindowSafetyTests::invalidChannelsAreDiscarded() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::invalidChannelsAreDiscarded() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::invalidChannelsAreDiscarded() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::invalidChannelsAreDiscarded()
+QWARN  : MainWindowSafetyTests::incompleteFrameGroupsAreBounded() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::incompleteFrameGroupsAreBounded() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::incompleteFrameGroupsAreBounded() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::incompleteFrameGroupsAreBounded()
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::fragmentedFrameReassemblesAtEveryByteBoundary()
+QWARN  : MainWindowSafetyTests::parserResynchronizesAfterNoiseAndBadTail() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::parserResynchronizesAfterNoiseAndBadTail() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::parserResynchronizesAfterNoiseAndBadTail() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::parserResynchronizesAfterNoiseAndBadTail()
+QWARN  : MainWindowSafetyTests::interleavedAndWrappedFrameIndexesStayIndependent() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::interleavedAndWrappedFrameIndexesStayIndependent() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::interleavedAndWrappedFrameIndexesStayIndependent() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::interleavedAndWrappedFrameIndexesStayIndependent()
+QWARN  : MainWindowSafetyTests::speedSeriesKeepsOnlyRecentPoints() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::speedSeriesKeepsOnlyRecentPoints() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::speedSeriesKeepsOnlyRecentPoints() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::speedSeriesKeepsOnlyRecentPoints()
+QWARN  : MainWindowSafetyTests::disconnectedControlsAndPlaceholdersAreSafe() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::disconnectedControlsAndPlaceholdersAreSafe() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::disconnectedControlsAndPlaceholdersAreSafe() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::disconnectedControlsAndPlaceholdersAreSafe()
+QWARN  : MainWindowSafetyTests::positionGuideTracksExistingBarsWithoutChangingThem() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::positionGuideTracksExistingBarsWithoutChangingThem() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::positionGuideTracksExistingBarsWithoutChangingThem() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::positionGuideTracksExistingBarsWithoutChangingThem()
+QWARN  : MainWindowSafetyTests::measurementStatusIsVisibleAndOperatorFacing() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::measurementStatusIsVisibleAndOperatorFacing() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::measurementStatusIsVisibleAndOperatorFacing() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::measurementStatusIsVisibleAndOperatorFacing() This plugin does not support raise()
+QWARN  : MainWindowSafetyTests::measurementStatusIsVisibleAndOperatorFacing() This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::measurementStatusIsVisibleAndOperatorFacing()
+PASS   : MainWindowSafetyTests::measurementGuideHasThreeApprovedPagesAndPortableMarker()
+QWARN  : MainWindowSafetyTests::measurementGuideFirstUseAndSpaceContinue() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::measurementGuideFirstUseAndSpaceContinue() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::measurementGuideFirstUseAndSpaceContinue() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::measurementGuideFirstUseAndSpaceContinue() This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::measurementGuideFirstUseAndSpaceContinue()
+QWARN  : MainWindowSafetyTests::patientMeasurementDisablesConflictingControls() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::patientMeasurementDisablesConflictingControls() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::patientMeasurementDisablesConflictingControls() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::patientMeasurementDisablesConflictingControls()
+QWARN  : MainWindowSafetyTests::debugAutoDisablesConflictingNavigation() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::debugAutoDisablesConflictingNavigation() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::debugAutoDisablesConflictingNavigation() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::debugAutoDisablesConflictingNavigation()
+QWARN  : MainWindowSafetyTests::patientFormsStayInsideAndCenteredAtSmallWindow() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::patientFormsStayInsideAndCenteredAtSmallWindow() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::patientFormsStayInsideAndCenteredAtSmallWindow() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::patientFormsStayInsideAndCenteredAtSmallWindow() This plugin does not support propagateSizeHints()
+QWARN  : MainWindowSafetyTests::patientFormsStayInsideAndCenteredAtSmallWindow() QPainter::end: Painter ended with 2 saved states
+QWARN  : MainWindowSafetyTests::patientFormsStayInsideAndCenteredAtSmallWindow() QPainter::end: Painter ended with 2 saved states
+PASS   : MainWindowSafetyTests::patientFormsStayInsideAndCenteredAtSmallWindow()
+QWARN  : MainWindowSafetyTests::pendingResultBlocksAnotherMeasurement() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::pendingResultBlocksAnotherMeasurement() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::pendingResultBlocksAnotherMeasurement() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::pendingResultBlocksAnotherMeasurement()
+QWARN  : MainWindowSafetyTests::samePatientReselectionPreservesPendingResult() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::samePatientReselectionPreservesPendingResult() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::samePatientReselectionPreservesPendingResult() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::samePatientReselectionPreservesPendingResult()
+QWARN  : MainWindowSafetyTests::samePatientReselectionPreservesPartialRounds() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::samePatientReselectionPreservesPartialRounds() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::samePatientReselectionPreservesPartialRounds() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::samePatientReselectionPreservesPartialRounds()
+QWARN  : MainWindowSafetyTests::cancelledPatientSwitchPreservesPartialRounds() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::cancelledPatientSwitchPreservesPartialRounds() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::cancelledPatientSwitchPreservesPartialRounds() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::cancelledPatientSwitchPreservesPartialRounds() This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::cancelledPatientSwitchPreservesPartialRounds()
+QWARN  : MainWindowSafetyTests::cancelledQuickPatientCreationDoesNotWritePatient() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::cancelledQuickPatientCreationDoesNotWritePatient() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::cancelledQuickPatientCreationDoesNotWritePatient() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::cancelledQuickPatientCreationDoesNotWritePatient() This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::cancelledQuickPatientCreationDoesNotWritePatient()
+QWARN  : MainWindowSafetyTests::partialRoundsRequireCloseConfirmation() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::partialRoundsRequireCloseConfirmation() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::partialRoundsRequireCloseConfirmation() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::partialRoundsRequireCloseConfirmation() This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::partialRoundsRequireCloseConfirmation()
+QWARN  : MainWindowSafetyTests::activeFirstRoundClosePausesAndCanResume() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::activeFirstRoundClosePausesAndCanResume() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::activeFirstRoundClosePausesAndCanResume() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::activeFirstRoundClosePausesAndCanResume() This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::activeFirstRoundClosePausesAndCanResume()
+QWARN  : MainWindowSafetyTests::partialRoundsBlockCalibrationDialog() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::partialRoundsBlockCalibrationDialog() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::partialRoundsBlockCalibrationDialog() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::partialRoundsBlockCalibrationDialog() This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::partialRoundsBlockCalibrationDialog()
+QWARN  : MainWindowSafetyTests::futureBirthDateBlocksMeasurement() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::futureBirthDateBlocksMeasurement() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::futureBirthDateBlocksMeasurement() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::futureBirthDateBlocksMeasurement() This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::futureBirthDateBlocksMeasurement()
+QWARN  : MainWindowSafetyTests::pendingSaveValidatesTheRecordedPatient() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::pendingSaveValidatesTheRecordedPatient() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::pendingSaveValidatesTheRecordedPatient() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::pendingSaveValidatesTheRecordedPatient() This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::pendingSaveValidatesTheRecordedPatient()
+QWARN  : MainWindowSafetyTests::pendingTransactionBlocksSingleFileWrites() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::pendingTransactionBlocksSingleFileWrites() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::pendingTransactionBlocksSingleFileWrites() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::pendingTransactionBlocksSingleFileWrites() This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::pendingTransactionBlocksSingleFileWrites()
+QWARN  : MainWindowSafetyTests::patientMeasurementStartClearsSerialAssembly() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::patientMeasurementStartClearsSerialAssembly() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::patientMeasurementStartClearsSerialAssembly() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::patientMeasurementStartClearsSerialAssembly()
+QWARN  : MainWindowSafetyTests::serialIoErrorsResetAcquisition(resource-error) qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::serialIoErrorsResetAcquisition(resource-error) This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::serialIoErrorsResetAcquisition(resource-error) FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::serialIoErrorsResetAcquisition(resource-error) This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::serialIoErrorsResetAcquisition(resource-error)
+QWARN  : MainWindowSafetyTests::serialIoErrorsResetAcquisition(read-error) qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::serialIoErrorsResetAcquisition(read-error) This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::serialIoErrorsResetAcquisition(read-error) FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::serialIoErrorsResetAcquisition(read-error) This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::serialIoErrorsResetAcquisition(read-error)
+QWARN  : MainWindowSafetyTests::serialIoErrorsResetAcquisition(write-error) qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::serialIoErrorsResetAcquisition(write-error) This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::serialIoErrorsResetAcquisition(write-error) FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::serialIoErrorsResetAcquisition(write-error) This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::serialIoErrorsResetAcquisition(write-error)
+PASS   : MainWindowSafetyTests::reportRenderingIsReadableAndArtifactFree()
+QWARN  : MainWindowSafetyTests::invalidMeasurementDateDoesNotInventAge() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::invalidMeasurementDateDoesNotInventAge() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::invalidMeasurementDateDoesNotInventAge() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::invalidMeasurementDateDoesNotInventAge()
+QWARN  : MainWindowSafetyTests::completedReportUsesProvidedMeasurement() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::completedReportUsesProvidedMeasurement() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::completedReportUsesProvidedMeasurement() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::completedReportUsesProvidedMeasurement()
+QWARN  : MainWindowSafetyTests::reportPdfCanBeCommitted() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::reportPdfCanBeCommitted() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::reportPdfCanBeCommitted() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::reportPdfCanBeCommitted()
+SKIP   : MainWindowSafetyTests::capturePagesWhenRequested() BONE_UI_CAPTURE_DIR is not set
+..\..\..\tests\mainwindow_safety_tests.cpp(1369) : failure location
+PASS   : MainWindowSafetyTests::cleanupTestCase()
+Totals: 43 passed, 0 failed, 1 skipped, 0 blacklisted, 1821ms
+********* Finished testing of MainWindowSafetyTests *********

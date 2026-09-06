@@ -1,0 +1,1055 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuite name="MainWindowSafetyTests" timestamp="2026&#x002D;09&#x002D;06T21:23:14" hostname="LEBAO&#x002D;DESK" tests="47" failures="0" errors="0" skipped="1" time="2.220">
+  <properties>
+    <property name="QTestVersion" value="6.5.3"/>
+    <property name="QtVersion" value="6.5.3"/>
+    <property name="QtBuild" value="Qt 6.5.3 (x86_64&#x002D;little_endian&#x002D;llp64 shared (dynamic) release build; by GCC 11.2.0)"/>
+  </properties>
+  <testcase name="initTestCase" classname="MainWindowSafetyTests" time="0.000"/>
+  <testcase name="dualWindowQualityRequiresBothAtCommonLag" classname="MainWindowSafetyTests" time="0.000"/>
+  <testcase name="observeBeforeGPreservesAcceptanceAndExpiry" classname="MainWindowSafetyTests" time="0.295">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 726 lateValley = 863 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 727 lateValley = 864 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 728 lateValley = 865 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 729 lateValley = 866 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 730 lateValley = 867 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 731 lateValley = 868 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 732 lateValley = 869 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 733 lateValley = 870 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 734 lateValley = 871 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 735 lateValley = 872 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 736 lateValley = 873 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 737 lateValley = 874 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 738 lateValley = 875 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 739 lateValley = 876 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 740 lateValley = 877 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 741 lateValley = 878 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 742 lateValley = 879 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 743 lateValley = 880 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 744 lateValley = 881 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 745 lateValley = 882 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 746 lateValley = 883 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 747 lateValley = 884 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 748 lateValley = 885 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 749 lateValley = 886 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 751 lateValley = 888 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 752 lateValley = 889 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 753 lateValley = 890 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 754 lateValley = 891 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 755 lateValley = 892 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 756 lateValley = 893 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 757 lateValley = 894 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 758 lateValley = 895 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 759 lateValley = 896 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 760 lateValley = 897 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 761 lateValley = 898 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 762 lateValley = 899 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 763 lateValley = 900 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 764 lateValley = 901 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 765 lateValley = 902 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 766 lateValley = 903 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 767 lateValley = 904 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 768 lateValley = 905 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 769 lateValley = 906 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 770 lateValley = 907 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 771 lateValley = 908 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 772 lateValley = 909 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 773 lateValley = 910 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 774 lateValley = 911 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 775 lateValley = 912 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA[[闸门统计 共50帧] BJump=0.0% Boundary=0.0% Diff=0.0% Dir=0.0%]]>
+      <![CDATA[[闸门统计] CorrA=0.0% CorrB=0.0% AngDiff=0.0% AngGap=76.0% StabWarm=100.0% StabConc=0.0% StabLock=0.0%]]>
+      <![CDATA[[CorrA分布] 最小=0.992  平均=0.992  最大=0.992  门槛=0.78]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 776 lateValley = 913 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 777 lateValley = 914 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 778 lateValley = 915 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 779 lateValley = 916 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 780 lateValley = 917 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 781 lateValley = 918 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 782 lateValley = 919 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 783 lateValley = 920 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 784 lateValley = 921 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 785 lateValley = 922 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 786 lateValley = 923 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 787 lateValley = 924 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 788 lateValley = 925 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 789 lateValley = 926 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 790 lateValley = 927 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 791 lateValley = 928 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 792 lateValley = 929 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 793 lateValley = 930 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 794 lateValley = 931 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 795 lateValley = 932 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 897 roughLag = 148 refinedLag = 148 corr = 1 sos = 3310.81 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 953 valleyLag = 157 refinedLag = 157 corr = 1 sos = 3121.02 priorLag = 148 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 897 roughLag = 148 refinedLag = 148 corr = 1 sos = 3310.81 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 953 valleyLag = 157 refinedLag = 157 corr = 1 sos = 3121.02 priorLag = 148 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 897 roughLag = 148 refinedLag = 148 corr = 1 sos = 3310.81 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 953 valleyLag = 157 refinedLag = 157 corr = 1 sos = 3121.02 priorLag = 148 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 897 roughLag = 148 refinedLag = 148 corr = 1 sos = 3310.81 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 953 valleyLag = 157 refinedLag = 157 corr = 1 sos = 3121.02 priorLag = 148 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 897 roughLag = 148 refinedLag = 148 corr = 1 sos = 3310.81 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 953 valleyLag = 157 refinedLag = 157 corr = 1 sos = 3121.02 priorLag = 148 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 897 roughLag = 148 refinedLag = 148 corr = 1 sos = 3310.81 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 953 valleyLag = 157 refinedLag = 157 corr = 1 sos = 3121.02 priorLag = 148 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 897 roughLag = 148 refinedLag = 148 corr = 1 sos = 3310.81 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 953 valleyLag = 157 refinedLag = 157 corr = 1 sos = 3121.02 priorLag = 148 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 897 roughLag = 148 refinedLag = 148 corr = 1 sos = 3310.81 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 953 valleyLag = 157 refinedLag = 157 corr = 1 sos = 3121.02 priorLag = 148 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 897 roughLag = 148 refinedLag = 148 corr = 1 sos = 3310.81 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 953 valleyLag = 157 refinedLag = 157 corr = 1 sos = 3121.02 priorLag = 148 priorTol = 20]]>
+      <![CDATA[[闸门统计 共50帧] BJump=0.0% Boundary=0.0% Diff=0.0% Dir=0.0%]]>
+      <![CDATA[[闸门统计] CorrA=0.0% CorrB=0.0% AngDiff=0.0% AngGap=98.0% StabWarm=26.0% StabConc=0.0% StabLock=18.0%]]>
+      <![CDATA[[CorrA分布] 最小=0.992  平均=0.993  最大=1.000  门槛=0.78]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 897 roughLag = 148 refinedLag = 148 corr = 1 sos = 3310.81 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 953 valleyLag = 157 refinedLag = 157 corr = 1 sos = 3121.02 priorLag = 148 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" invalid: arrival pick failed]]>
+      <![CDATA[Skip: B_pair invalid, because B_pair is the reference pair]]>
+      <![CDATA["B_pair / BD->BC" invalid: arrival pick failed]]>
+      <![CDATA[Skip: B_pair invalid, because B_pair is the reference pair]]>
+      <![CDATA["B_pair / BD->BC" invalid: arrival pick failed]]>
+      <![CDATA[Skip: B_pair invalid, because B_pair is the reference pair]]>
+      <![CDATA["B_pair / BD->BC" invalid: arrival pick failed]]>
+      <![CDATA[Skip: B_pair invalid, because B_pair is the reference pair]]>
+      <![CDATA["B_pair / BD->BC" invalid: arrival pick failed]]>
+      <![CDATA[Skip: B_pair invalid, because B_pair is the reference pair]]>
+      <![CDATA["B_pair / BD->BC" invalid: arrival pick failed]]>
+      <![CDATA[Skip: B_pair invalid, because B_pair is the reference pair]]>
+      <![CDATA["B_pair / BD->BC" invalid: arrival pick failed]]>
+      <![CDATA[Skip: B_pair invalid, because B_pair is the reference pair]]>
+      <![CDATA["B_pair / BD->BC" invalid: arrival pick failed]]>
+      <![CDATA[Skip: B_pair invalid, because B_pair is the reference pair]]>
+      <![CDATA["B_pair / BD->BC" invalid: arrival pick failed]]>
+      <![CDATA[Skip: B_pair invalid, because B_pair is the reference pair]]>
+      <![CDATA["B_pair / BD->BC" invalid: arrival pick failed]]>
+      <![CDATA[Skip: B_pair invalid, because B_pair is the reference pair]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+    </system-out>
+    <system-err>
+      <![CDATA[QFontDatabase: Cannot find font directory D:/Qt/6.5.3/mingw_64/lib/fonts.
+Note that Qt no longer ships fonts. Deploy some (from https://dejavu-fonts.github.io/ for example) or switch to fontconfig.]]>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="experimentBuildIdentity" classname="MainWindowSafetyTests" time="0.032">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="rejectedFramesExpirePatientStability" classname="MainWindowSafetyTests" time="0.026">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="clusterLossDiscardsPartialRound" classname="MainWindowSafetyTests" time="0.027">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+      <![CDATA[One patient round candidate: sos = 3500 A = 3288.59 B = 3500 corrA = 0.95 corrB = 0.95 pairMidGap = 0 signedLagDiff = 9 oneRoundAngleSignedDiffOk = true oneRoundPairMidGapOk = true oneRoundAngleOk = true mCfg.roundCorrAMin = 0.8 mCfg.roundCorrBMin = 0.55]]>
+      <![CDATA[Round cluster rebuilt: candidateCount = 1 candidateSos = QList(3500) candidateCorrA = QList(0.95) candidateCorrB = QList(0.95) acceptedClusterCount = 1 roundSosList = QList(3500)]]>
+      <![CDATA[One patient round accepted: acceptedRoundCount = 1 candidateCount = 1 sos = 3500 A = 3288.59 B = 3500 corrA = 0.95 corrB = 0.95]]>
+      <![CDATA[[闸门统计] 暂无数据]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[This plugin does not support raise()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="transientRejectionPreservesProgressAndSteadySequence" classname="MainWindowSafetyTests" time="0.027">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="experimentRecordingIsBoundedAndUnique" classname="MainWindowSafetyTests" time="0.007"/>
+  <testcase name="experimentRecordingIncludesEarlyFailuresAndRawInput" classname="MainWindowSafetyTests" time="0.039">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+      <![CDATA["B_pair / BD->BC" invalid: arrival pick failed]]>
+      <![CDATA[Skip: B_pair invalid, because B_pair is the reference pair]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[Experiment recording unavailable: "cannot create experiment directory"]]>
+    </system-err>
+  </testcase>
+  <testcase name="precheckFailuresExpireStateThroughActualPipeline" classname="MainWindowSafetyTests" time="0.030">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+      <![CDATA["B_pair / BD->BC" invalid: arrival pick failed]]>
+      <![CDATA[Skip: B_pair invalid, because B_pair is the reference pair]]>
+      <![CDATA["B_pair / BD->BC" invalid: arrival pick failed]]>
+      <![CDATA[Skip: B_pair invalid, because B_pair is the reference pair]]>
+      <![CDATA["B_pair / BD->BC" invalid: arrival pick failed]]>
+      <![CDATA[Skip: B_pair invalid, because B_pair is the reference pair]]>
+      <![CDATA["B_pair / BD->BC" invalid: arrival pick failed]]>
+      <![CDATA[Skip: B_pair invalid, because B_pair is the reference pair]]>
+      <![CDATA["B_pair / BD->BC" invalid: arrival pick failed]]>
+      <![CDATA[Skip: B_pair invalid, because B_pair is the reference pair]]>
+      <![CDATA["B_pair / BD->BC" invalid: arrival pick failed]]>
+      <![CDATA[Skip: B_pair invalid, because B_pair is the reference pair]]>
+      <![CDATA["B_pair / BD->BC" invalid: arrival pick failed]]>
+      <![CDATA[Skip: B_pair invalid, because B_pair is the reference pair]]>
+      <![CDATA["B_pair / BD->BC" invalid: arrival pick failed]]>
+      <![CDATA[Skip: B_pair invalid, because B_pair is the reference pair]]>
+      <![CDATA["B_pair / BD->BC" invalid: arrival pick failed]]>
+      <![CDATA[Skip: B_pair invalid, because B_pair is the reference pair]]>
+      <![CDATA["B_pair / BD->BC" invalid: arrival pick failed]]>
+      <![CDATA[Skip: B_pair invalid, because B_pair is the reference pair]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="experimentRecordingCoversFeatureDecisions" classname="MainWindowSafetyTests" time="0.153">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 726 lateValley = 863 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 727 lateValley = 864 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 728 lateValley = 865 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 729 lateValley = 866 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 730 lateValley = 867 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 731 lateValley = 868 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 732 lateValley = 869 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 733 lateValley = 870 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 734 lateValley = 871 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 735 lateValley = 872 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 736 lateValley = 873 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 737 lateValley = 874 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 738 lateValley = 875 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 739 lateValley = 876 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 740 lateValley = 877 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 741 lateValley = 878 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 742 lateValley = 879 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 743 lateValley = 880 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 744 lateValley = 881 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 745 lateValley = 882 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 746 lateValley = 883 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 747 lateValley = 884 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 748 lateValley = 885 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 749 lateValley = 886 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 751 lateValley = 888 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 752 lateValley = 889 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 753 lateValley = 890 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 754 lateValley = 891 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 755 lateValley = 892 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 756 lateValley = 893 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 757 lateValley = 894 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 758 lateValley = 895 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 759 lateValley = 896 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 760 lateValley = 897 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 761 lateValley = 898 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 762 lateValley = 899 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 763 lateValley = 900 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 764 lateValley = 901 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 765 lateValley = 902 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 766 lateValley = 903 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 767 lateValley = 904 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 768 lateValley = 905 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 769 lateValley = 906 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 770 lateValley = 907 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 771 lateValley = 908 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 772 lateValley = 909 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 773 lateValley = 910 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 774 lateValley = 911 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 775 lateValley = 912 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA[[闸门统计 共50帧] BJump=0.0% Boundary=0.0% Diff=0.0% Dir=0.0%]]>
+      <![CDATA[[闸门统计] CorrA=0.0% CorrB=0.0% AngDiff=0.0% AngGap=76.0% StabWarm=100.0% StabConc=0.0% StabLock=0.0%]]>
+      <![CDATA[[CorrA分布] 最小=0.992  平均=0.992  最大=0.992  门槛=0.78]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 776 lateValley = 913 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 777 lateValley = 914 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 778 lateValley = 915 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 779 lateValley = 916 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 780 lateValley = 917 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 781 lateValley = 918 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 782 lateValley = 919 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 783 lateValley = 920 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 784 lateValley = 921 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 785 lateValley = 922 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 786 lateValley = 923 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 787 lateValley = 924 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 788 lateValley = 925 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 789 lateValley = 926 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 790 lateValley = 927 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 791 lateValley = 928 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 792 lateValley = 929 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 793 lateValley = 930 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 794 lateValley = 931 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 795 lateValley = 932 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 796 lateValley = 933 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA["B_pair / BD->BC" earlyOnset = 749 lateOnset = 877 roughLag = 128 refinedLag = 126 corr = 0.967696 sos = 3888.89 lagRange = [ 92 , 278 ]]]>
+      <![CDATA["A_pair / AD->AC / valley" VALLEY earlyValley = 750 lateValley = 887 valleyLag = 137 refinedLag = 136 corr = 0.991763 sos = 3602.94 priorLag = 126 priorTol = 20]]>
+      <![CDATA[One patient round candidate: sos = 3888.89 A = 3602.94 B = 3888.89 corrA = 0.991763 corrB = 0.967696 pairMidGap = -5.5 signedLagDiff = 10 oneRoundAngleSignedDiffOk = true oneRoundPairMidGapOk = true oneRoundAngleOk = true mCfg.roundCorrAMin = 0.8 mCfg.roundCorrBMin = 0.55]]>
+      <![CDATA[Round cluster rebuilt: candidateCount = 1 candidateSos = QList(3888.89) candidateCorrA = QList(0.991763) candidateCorrB = QList(0.967696) acceptedClusterCount = 1 roundSosList = QList(3888.89)]]>
+      <![CDATA[One patient round accepted: acceptedRoundCount = 1 candidateCount = 1 sos = 3888.89 A = 3602.94 B = 3888.89 corrA = 0.991763 corrB = 0.967696]]>
+      <![CDATA[[闸门统计 共43帧] BJump=0.0% Boundary=0.0% Diff=0.0% Dir=0.0%]]>
+      <![CDATA[[闸门统计] CorrA=0.0% CorrB=0.0% AngDiff=0.0% AngGap=0.0% StabWarm=30.2% StabConc=0.0% StabLock=0.0%]]>
+      <![CDATA[[CorrA分布] 最小=0.992  平均=0.992  最大=0.992  门槛=0.78]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[This plugin does not support raise()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="experimentRecordingThroughput" classname="MainWindowSafetyTests" time="0.072">
+    <system-out>
+      <![CDATA[Synthetic recording: 500 four-channel x 1800-sample frames in 69 ms including encoding and final flush; local disk only]]>
+    </system-out>
+  </testcase>
+  <testcase name="invalidChannelsAreDiscarded" classname="MainWindowSafetyTests" time="0.028">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="incompleteFrameGroupsAreBounded" classname="MainWindowSafetyTests" time="0.029">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="fragmentedFrameReassemblesAtEveryByteBoundary" classname="MainWindowSafetyTests" time="0.349">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="parserResynchronizesAfterNoiseAndBadTail" classname="MainWindowSafetyTests" time="0.031">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="interleavedAndWrappedFrameIndexesStayIndependent" classname="MainWindowSafetyTests" time="0.029">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="speedSeriesKeepsOnlyRecentPoints" classname="MainWindowSafetyTests" time="0.177">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="disconnectedControlsAndPlaceholdersAreSafe" classname="MainWindowSafetyTests" time="0.034">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="positionGuideTracksExistingBarsWithoutChangingThem" classname="MainWindowSafetyTests" time="0.031">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="measurementStatusIsVisibleAndOperatorFacing" classname="MainWindowSafetyTests" time="0.033">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[This plugin does not support raise()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="measurementGuideHasThreeApprovedPagesAndPortableMarker" classname="MainWindowSafetyTests" time="0.010"/>
+  <testcase name="measurementGuideFirstUseAndSpaceContinue" classname="MainWindowSafetyTests" time="0.054">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="patientMeasurementDisablesConflictingControls" classname="MainWindowSafetyTests" time="0.025">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="debugAutoDisablesConflictingNavigation" classname="MainWindowSafetyTests" time="0.024">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="patientFormsStayInsideAndCenteredAtSmallWindow" classname="MainWindowSafetyTests" time="0.086">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[QPainter::end: Painter ended with 2 saved states]]>
+      <![CDATA[QPainter::end: Painter ended with 2 saved states]]>
+    </system-err>
+  </testcase>
+  <testcase name="pendingResultBlocksAnotherMeasurement" classname="MainWindowSafetyTests" time="0.026">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="samePatientReselectionPreservesPendingResult" classname="MainWindowSafetyTests" time="0.028">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="samePatientReselectionPreservesPartialRounds" classname="MainWindowSafetyTests" time="0.027">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="cancelledPatientSwitchPreservesPartialRounds" classname="MainWindowSafetyTests" time="0.032">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="cancelledQuickPatientCreationDoesNotWritePatient" classname="MainWindowSafetyTests" time="0.027">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="partialRoundsRequireCloseConfirmation" classname="MainWindowSafetyTests" time="0.025">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="activeFirstRoundClosePausesAndCanResume" classname="MainWindowSafetyTests" time="0.028">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="partialRoundsBlockCalibrationDialog" classname="MainWindowSafetyTests" time="0.028">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="futureBirthDateBlocksMeasurement" classname="MainWindowSafetyTests" time="0.031">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="pendingSaveValidatesTheRecordedPatient" classname="MainWindowSafetyTests" time="0.026">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="pendingTransactionBlocksSingleFileWrites" classname="MainWindowSafetyTests" time="0.027">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="patientMeasurementStartClearsSerialAssembly" classname="MainWindowSafetyTests" time="0.029">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="serialIoErrorsResetAcquisition(resource&#x002D;error)" classname="MainWindowSafetyTests" time="0.026">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="serialIoErrorsResetAcquisition(read&#x002D;error)" classname="MainWindowSafetyTests" time="0.026">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="serialIoErrorsResetAcquisition(write&#x002D;error)" classname="MainWindowSafetyTests" time="0.025">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="reportRenderingIsReadableAndArtifactFree" classname="MainWindowSafetyTests" time="0.002"/>
+  <testcase name="invalidMeasurementDateDoesNotInventAge" classname="MainWindowSafetyTests" time="0.024">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="completedReportUsesProvidedMeasurement" classname="MainWindowSafetyTests" time="0.024">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="reportPdfCanBeCommitted" classname="MainWindowSafetyTests" time="0.109">
+    <system-out>
+      <![CDATA[FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81]]>
+    </system-out>
+    <system-err>
+      <![CDATA[qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()]]>
+      <![CDATA[This plugin does not support propagateSizeHints()]]>
+    </system-err>
+  </testcase>
+  <testcase name="capturePagesWhenRequested" classname="MainWindowSafetyTests" time="0.000">
+    <skipped message="BONE_UI_CAPTURE_DIR is not set"/>
+  </testcase>
+  <testcase name="cleanupTestCase" classname="MainWindowSafetyTests" time="0.000"/>
+</testsuite>

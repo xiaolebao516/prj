@@ -1,0 +1,34 @@
+********* Start testing of PatientStoreTests *********
+Config: Using QtTest library 6.5.3, Qt 6.5.3 (x86_64-little_endian-llp64 shared (dynamic) release build; by GCC 11.2.0), windows 11
+PASS   : PatientStoreTests::initTestCase()
+PASS   : PatientStoreTests::corruptPatientsAreCopiedWithoutChangingSource()
+PASS   : PatientStoreTests::corruptMeasurementsAreCopiedWithoutChangingSource()
+FAIL!  : PatientStoreTests::semanticCorruptionIsRejected(unknown-patient-version) '!store.load(patientsPath, measurementsPath, &patients, &measurements, &error)' returned FALSE. ()
+..\..\..\tests\patientstore_tests.cpp(210) : failure location
+FAIL!  : PatientStoreTests::semanticCorruptionIsRejected(unknown-measurement-version) '!store.load(patientsPath, measurementsPath, &patients, &measurements, &error)' returned FALSE. ()
+..\..\..\tests\patientstore_tests.cpp(210) : failure location
+FAIL!  : PatientStoreTests::semanticCorruptionIsRejected(empty-patient-id) '!store.load(patientsPath, measurementsPath, &patients, &measurements, &error)' returned FALSE. ()
+..\..\..\tests\patientstore_tests.cpp(210) : failure location
+FAIL!  : PatientStoreTests::semanticCorruptionIsRejected(duplicate-patient-id) '!store.load(patientsPath, measurementsPath, &patients, &measurements, &error)' returned FALSE. ()
+..\..\..\tests\patientstore_tests.cpp(210) : failure location
+FAIL!  : PatientStoreTests::semanticCorruptionIsRejected(empty-measurement-id) '!store.load(patientsPath, measurementsPath, &patients, &measurements, &error)' returned FALSE. ()
+..\..\..\tests\patientstore_tests.cpp(210) : failure location
+FAIL!  : PatientStoreTests::semanticCorruptionIsRejected(duplicate-measurement-id) '!store.load(patientsPath, measurementsPath, &patients, &measurements, &error)' returned FALSE. ()
+..\..\..\tests\patientstore_tests.cpp(210) : failure location
+FAIL!  : PatientStoreTests::semanticCorruptionIsRejected(orphan-measurement) '!store.load(patientsPath, measurementsPath, &patients, &measurements, &error)' returned FALSE. ()
+..\..\..\tests\patientstore_tests.cpp(210) : failure location
+PASS   : PatientStoreTests::pairedSaveAndDeleteKeepDocumentsConsistent()
+PASS   : PatientStoreTests::versionlessLegacyStillMigrates()
+PASS   : PatientStoreTests::unfinishedTransactionIsRecoveredBeforeLoad()
+PASS   : PatientStoreTests::missingTransactionBackupRefusesLoad()
+PASS   : PatientStoreTests::invalidTransactionBackupDoesNotOverwriteLiveFiles(truncated-patients-backup)
+PASS   : PatientStoreTests::invalidTransactionBackupDoesNotOverwriteLiveFiles(truncated-measurements-backup)
+PASS   : PatientStoreTests::invalidTransactionBackupDoesNotOverwriteLiveFiles(duplicate-patient-id-backup)
+PASS   : PatientStoreTests::invalidTransactionBackupDoesNotOverwriteLiveFiles(orphan-measurement-backup)
+PASS   : PatientStoreTests::transactionRecoveryHandlesOriginalExistenceMatrix(both-existed)
+PASS   : PatientStoreTests::transactionRecoveryHandlesOriginalExistenceMatrix(patients-only)
+PASS   : PatientStoreTests::transactionRecoveryHandlesOriginalExistenceMatrix(measurements-only)
+PASS   : PatientStoreTests::transactionRecoveryHandlesOriginalExistenceMatrix(neither-existed)
+PASS   : PatientStoreTests::cleanupTestCase()
+Totals: 16 passed, 7 failed, 0 skipped, 0 blacklisted, 180ms
+********* Finished testing of PatientStoreTests *********

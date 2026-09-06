@@ -1,0 +1,26 @@
+********* Start testing of CalibrationTests *********
+Config: Using QtTest library 6.5.3, Qt 6.5.3 (x86_64-little_endian-llp64 shared (dynamic) release build; by GCC 11.2.0), windows 11
+PASS   : CalibrationTests::initTestCase()
+PASS   : CalibrationTests::candidateFormula()
+PASS   : CalibrationTests::setupAndTemperatureValidation()
+PASS   : CalibrationTests::measurementHierarchyAndBOnlyCandidate()
+PASS   : CalibrationTests::validationThresholds()
+PASS   : CalibrationTests::developmentModeCannotActivate()
+PASS   : CalibrationTests::invalidAndBoundaryFramesAreRejected()
+PASS   : CalibrationTests::peakConsistencyRejectsValidationFrame()
+PASS   : CalibrationTests::storeActivationReloadAndRestore()
+PASS   : CalibrationTests::corruptStoreBacksUpAndRecovers()
+PASS   : CalibrationTests::failedWriteDoesNotChangeMemory()
+QWARN  : CalibrationTests::partialCalibrationCloseCanBeCancelled() QFontDatabase: Cannot find font directory D:/Qt/6.5.3/mingw_64/lib/fonts.
+Note that Qt no longer ships fonts. Deploy some (from https://dejavu-fonts.github.io/ for example) or switch to fontconfig.
+QWARN  : CalibrationTests::partialCalibrationCloseCanBeCancelled() This plugin does not support propagateSizeHints()
+PASS   : CalibrationTests::partialCalibrationCloseCanBeCancelled()
+QWARN  : CalibrationTests::collectingCalibrationClosePausesAndResumesOnCancel() This plugin does not support propagateSizeHints()
+PASS   : CalibrationTests::collectingCalibrationClosePausesAndResumesOnCancel()
+QWARN  : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() This plugin does not support propagateSizeHints()
+QWARN  : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() This plugin does not support propagateSizeHints()
+PASS   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently()
+PASS   : CalibrationTests::dialogWorkflowAndGuidance()
+PASS   : CalibrationTests::cleanupTestCase()
+Totals: 16 passed, 0 failed, 0 skipped, 0 blacklisted, 223ms
+********* Finished testing of CalibrationTests *********

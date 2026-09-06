@@ -21,6 +21,7 @@
 #include <QTimer>
 #include <QStackedWidget>
 #include <cmath>
+#include <limits>
 
 namespace {
 
@@ -88,6 +89,8 @@ class MainWindowSafetyTests : public QObject
     Q_OBJECT
 
 private slots:
+    void dualWindowQualityRequiresBothAtCommonLag();
+    void trialRoundQualityStillRejectsBelowFloor();
     void observeBeforeGPreservesAcceptanceAndExpiry();
     void experimentBuildIdentity();
     void rejectedFramesExpirePatientStability();
@@ -133,6 +136,63 @@ private slots:
     void capturePagesWhenRequested();
 };
 
+void MainWindowSafetyTests::dualWindowQualityRequiresBothAtCommonLag()
+{
+    QVector<double> early(240), late(260);
+    const int onset=80, lag=17;
+    for (int i=0;i<early.size();++i) {
+        early[i]=std::sin(i*.37)+.4*std::cos(i*.83);
+        late[i+lag]=3*early[i]+4;
+    }
+    double front=0,middle=0;
+    QCOMPARE(MainWindow::dualWindowAQuality(early,late,onset,lag,&front,&middle),1.0);
+    QVERIFY(front>.999 && middle>.999);
+    // The second window cannot independently choose a better lag.
+    QVERIFY(MainWindow::dualWindowAQuality(early,late,onset,lag+4)<.78);
+    for (int i=onset+31;i<=onset+60;++i) late[i+lag]=-20*early[i];
+    const double badMiddle=MainWindow::dualWindowAQuality(early,late,onset,lag,&front,&middle);
+    QVERIFY(front>.999); QVERIFY(middle<.78); QCOMPARE(badMiddle,qMin(front,middle));
+    for (int i=onset-20;i<onset;++i) late[i+lag]=-40*early[i];
+    MainWindow::dualWindowAQuality(early,late,onset,lag,&front,&middle);
+    QVERIFY(front<.78);
+    QVERIFY(MainWindow::dualWindowAQuality(early,late,10,lag)<=0.0);
+    QCOMPARE(MainWindow::dualWindowAQuality(early,late,220,lag),0.0);
+    QCOMPARE(MainWindow::dualWindowAQuality(early,late,onset,-1),0.0);
+    QCOMPARE(MainWindow::dualWindowAQuality(QVector<double>(240,1),late,onset,lag),0.0);
+    early[onset]=std::numeric_limits<double>::quiet_NaN();
+    QCOMPARE(MainWindow::dualWindowAQuality(early,late,onset,lag),0.0);
+}
+
+void MainWindowSafetyTests::trialRoundQualityStillRejectsBelowFloor()
+{
+    // Exercise actual aggregation on either build, without changing its configured floor.
+    for (int scenario=0;scenario<4;++scenario) {
+        QTemporaryDir directory;
+        QVERIFY(directory.isValid());
+        MainWindow window;
+        window.patientMeasureRunning=true;
+        window.acquireMode=PatientMeasureMode;
+        QVERIFY(window.experimentLog.start(directory.path(),{}));
+        const QString path=window.experimentLog.path();
+        const double a=scenario==0 ? .779 : .799;
+        const double b=scenario==2 ? .549 : .95;
+        const double g=scenario==3 ? 7 : 0;
+        for (int i=0;i<30;++i)
+            window.handlePatientMeasureValue(3500,3828,3828,137,128,9,g,a,b,true);
+        window.stopPatientMeasurement();
+        QFile file(path); QVERIFY(file.open(QIODevice::ReadOnly));
+        bool found=false;
+        for (const auto& line:file.readAll().split('\n')) {
+            const auto row=QJsonDocument::fromJson(line).object();
+            if (row["event"]!="round_summary") continue;
+            found=true;
+            QCOMPARE(row["quality_pass"].toBool(),scenario==1 && window.useDualWindowAQuality);
+        }
+        QVERIFY(found);
+        window.closeRoundFinishedTip();
+    }
+}
+
 void MainWindowSafetyTests::observeBeforeGPreservesAcceptanceAndExpiry()
 {
     QTemporaryDir directory;
@@ -148,6 +208,7 @@ void MainWindowSafetyTests::observeBeforeGPreservesAcceptanceAndExpiry()
     };
     const auto bc=wave(928),bd=wave(800);
     MainWindow probe;
+    probe.useDualWindowAQuality=false;
     probe.observeStabilityBeforeG=false;
     probe.patientMeasureRunning=true;
     probe.acquireMode=PatientMeasureMode;
@@ -175,6 +236,7 @@ void MainWindowSafetyTests::observeBeforeGPreservesAcceptanceAndExpiry()
     for (bool experimental:{false,true}) {
         MainWindow window;
         window.observeStabilityBeforeG=experimental;
+        window.useDualWindowAQuality=false;
         window.patientMeasureRunning=true;
         window.acquireMode=PatientMeasureMode;
         const auto feed=[&](int offset) {
@@ -211,10 +273,19 @@ void MainWindowSafetyTests::observeBeforeGPreservesAcceptanceAndExpiry()
 void MainWindowSafetyTests::experimentBuildIdentity()
 {
     MainWindow window;
-#ifdef BONE_OBSERVE_BEFORE_G_EXPERIMENT
+#ifdef BONE_DUAL_WINDOW_A_EXPERIMENT
+    QVERIFY(window.useDualWindowAQuality);
+    QVERIFY(window.observeStabilityBeforeG);
+    QCOMPARE(window.mCfg.roundCorrAMin,.78);
+    QVERIFY(window.windowTitle().contains(QStringLiteral("双段评分试测版")));
+#elif defined(BONE_OBSERVE_BEFORE_G_EXPERIMENT)
+    QVERIFY(!window.useDualWindowAQuality);
+    QCOMPARE(window.mCfg.roundCorrAMin,.80);
     QVERIFY(window.observeStabilityBeforeG);
     QVERIFY(window.windowTitle().contains(QStringLiteral("试测版")));
 #else
+    QVERIFY(!window.useDualWindowAQuality);
+    QCOMPARE(window.mCfg.roundCorrAMin,.80);
     QVERIFY(!window.observeStabilityBeforeG);
     QVERIFY(!window.windowTitle().contains(QStringLiteral("试测版")));
 #endif
@@ -225,7 +296,10 @@ void MainWindowSafetyTests::experimentBuildIdentity()
     window.stopPatientMeasurement();
     QFile log(path); QVERIFY(log.open(QIODevice::ReadOnly));
     const auto config=QJsonDocument::fromJson(log.readLine()).object().value("config").toObject();
-    QCOMPARE(config.value("implementation").toString(), window.observeStabilityBeforeG
+    QCOMPARE(config.value("round_corr_A").toDouble(),window.mCfg.roundCorrAMin);
+    QCOMPARE(config.value("frame_corr_A").toDouble(),.78);
+    QCOMPARE(config.value("implementation").toString(), window.useDualWindowAQuality
+        ? QStringLiteral("dual-window-a078-20260906-v1") : window.observeStabilityBeforeG
         ? QStringLiteral("observe-before-g-20260906-v1") : QStringLiteral("state-repair-20260905-v1"));
 #endif
 }
@@ -399,6 +473,8 @@ void MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions()
     MainWindow window;
     // This existing fixture explicitly locks down default-flow behavior.
     window.observeStabilityBeforeG = false;
+    window.useDualWindowAQuality = false;
+    window.mCfg.roundCorrAMin = .80;
     window.patientMeasureRunning = true;
     window.acquireMode = PatientMeasureMode;
     QVERIFY(window.experimentLog.start(directory.path(), {}));

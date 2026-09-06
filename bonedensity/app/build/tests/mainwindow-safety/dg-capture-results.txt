@@ -1,0 +1,18 @@
+********* Start testing of MainWindowSafetyTests *********
+Config: Using QtTest library 6.5.3, Qt 6.5.3 (x86_64-little_endian-llp64 shared (dynamic) release build; by GCC 11.2.0), windows 11
+PASS   : MainWindowSafetyTests::initTestCase()
+QWARN  : MainWindowSafetyTests::capturePagesWhenRequested() QFontDatabase: Cannot find font directory D:/Qt/6.5.3/mingw_64/lib/fonts.
+Note that Qt no longer ships fonts. Deploy some (from https://dejavu-fonts.github.io/ for example) or switch to fontconfig.
+QWARN  : MainWindowSafetyTests::capturePagesWhenRequested() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::capturePagesWhenRequested() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::capturePagesWhenRequested() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QWARN  : MainWindowSafetyTests::capturePagesWhenRequested() This plugin does not support propagateSizeHints()
+QWARN  : MainWindowSafetyTests::capturePagesWhenRequested() This plugin does not support propagateSizeHints()
+QWARN  : MainWindowSafetyTests::capturePagesWhenRequested() QPainter::end: Painter ended with 2 saved states
+QWARN  : MainWindowSafetyTests::capturePagesWhenRequested() QPainter::end: Painter ended with 2 saved states
+QWARN  : MainWindowSafetyTests::capturePagesWhenRequested() QPainter::end: Painter ended with 2 saved states
+QWARN  : MainWindowSafetyTests::capturePagesWhenRequested() QPainter::end: Painter ended with 2 saved states
+PASS   : MainWindowSafetyTests::capturePagesWhenRequested()
+PASS   : MainWindowSafetyTests::cleanupTestCase()
+Totals: 3 passed, 0 failed, 0 skipped, 0 blacklisted, 661ms
+********* Finished testing of MainWindowSafetyTests *********

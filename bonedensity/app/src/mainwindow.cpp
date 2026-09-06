@@ -252,7 +252,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     // ------------------- 结束美化代码 -------------------
 
-    this->setWindowTitle(observeStabilityBeforeG
+    if (useDualWindowAQuality) mCfg.roundCorrAMin = 0.78;
+    this->setWindowTitle(useDualWindowAQuality
+        ? QStringLiteral("骨密度仪 · 双段评分试测版（仅研发验证）") : observeStabilityBeforeG
         ? QStringLiteral("骨密度仪 · 姿态流程试测版（仅研发验证）")
         : QStringLiteral("骨密度仪APP"));
     this->setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
@@ -970,6 +972,33 @@ void MainWindow::startPatientMeasurement(int targetRounds, bool offerFirstUseGui
     updatePatientSelectionUi();
 }
 
+double MainWindow::dualWindowAQuality(const QVector<double>& early, const QVector<double>& late,
+                                     int onset, int lag, double* front, double* middle)
+{
+    // Quality only: both windows use the already selected A lag, never a new peak.
+    const auto score = [&](int lo, int hi) {
+        const qint64 begin=qint64(onset)+lo, end=qint64(onset)+hi;
+        if (lag<=0 || begin<0 || end>=early.size() || end+lag>=late.size()) return 0.0;
+        double ma=0,mb=0,aa=0,bb=0,ab=0;
+        for (qint64 i=begin;i<=end;++i) {
+            if (!std::isfinite(early[i]) || !std::isfinite(late[i+lag])) return 0.0;
+            ma+=early[i]; mb+=late[i+lag];
+        }
+        ma/=end-begin+1; mb/=end-begin+1;
+        for (qint64 i=begin;i<=end;++i) {
+            const double a=early[i]-ma,b=late[i+lag]-mb;
+            aa+=a*a; bb+=b*b; ab+=a*b;
+        }
+        if (aa<1e-12 || bb<1e-12) return 0.0;
+        const double value=ab/std::sqrt(aa*bb);
+        return std::isfinite(value) ? qBound(-1.0,value,1.0) : 0.0;
+    };
+    const double a=score(-20,30),b=score(0,60);
+    if (front) *front=a;
+    if (middle) *middle=b;
+    return qMin(a,b);
+}
+
 void MainWindow::startExperimentLog()
 {
 #ifndef QT_NO_DEBUG
@@ -978,7 +1007,7 @@ void MainWindow::startExperimentLog()
     for (double sos : roundSosList) previousRounds.append(sos);
     const QJsonObject config{
         {"previous_accepted_rounds", previousRounds},
-        {"implementation", observeStabilityBeforeG
+        {"implementation", useDualWindowAQuality ? "dual-window-a078-20260906-v1" : observeStabilityBeforeG
             ? "observe-before-g-20260906-v1" : "state-repair-20260905-v1"},
         {"build", __DATE__ " " __TIME__},
         {"round", roundSosList.size() + 1}, {"round_target", normalMeasureRounds},
@@ -2602,6 +2631,13 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
         "A_pair / AD->AC / valley"
         );
     evidence["A_feature_branch"] = aRes.valid ? "valley" : "envelope_fallback";
+    if (useDualWindowAQuality && aRes.valid) {
+        double front=0,middle=0;
+        const double original=aRes.corr;
+        aRes.corr=dualWindowAQuality(filAD,filAC,aRes.earlyOnset,aRes.refinedLag,&front,&middle);
+        evidence["A_quality_trial"] = QJsonObject{{"original_corr",original},
+            {"front_corr",front},{"middle_corr",middle},{"common_lag",aRes.refinedLag}};
+    }
 
     if (!aRes.valid) {
         int forcedMin = qMax(1, bRes.refinedLag - lagToleranceAB);

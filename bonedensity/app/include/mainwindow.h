@@ -268,11 +268,18 @@ private:
     int boneLagRejectedFrameCount = 0;
 
     // Enabled only by the independently built, explicitly labeled self-trial.
-#ifdef BONE_OBSERVE_BEFORE_G_EXPERIMENT
+#if defined(BONE_OBSERVE_BEFORE_G_EXPERIMENT) || defined(BONE_DUAL_WINDOW_A_EXPERIMENT)
     bool observeStabilityBeforeG = true;
 #else
     bool observeStabilityBeforeG = false;
 #endif
+#ifdef BONE_DUAL_WINDOW_A_EXPERIMENT
+    bool useDualWindowAQuality = true;
+#else
+    bool useDualWindowAQuality = false;
+#endif
+    static double dualWindowAQuality(const QVector<double>& early, const QVector<double>& late,
+                                    int onset, int lag, double* front = nullptr, double* middle = nullptr);
 
     bool checkBoneLagStable(int lagB, int* centerOut = nullptr, int* countOut = nullptr);
     void resetBoneLagStability();

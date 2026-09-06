@@ -1,0 +1,30 @@
+********* Start testing of MainWindowSafetyTests *********
+Config: Using QtTest library 6.5.3, Qt 6.5.3 (x86_64-little_endian-llp64 shared (dynamic) release build; by GCC 11.2.0), windows 11
+PASS   : MainWindowSafetyTests::initTestCase()
+QWARN  : MainWindowSafetyTests::patientMeasurementStartClearsSerialAssembly() QFontDatabase: Cannot find font directory D:/Qt/6.5.3/mingw_64/lib/fonts.
+Note that Qt no longer ships fonts. Deploy some (from https://dejavu-fonts.github.io/ for example) or switch to fontconfig.
+QWARN  : MainWindowSafetyTests::patientMeasurementStartClearsSerialAssembly() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::patientMeasurementStartClearsSerialAssembly() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::patientMeasurementStartClearsSerialAssembly() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::patientMeasurementStartClearsSerialAssembly()
+QWARN  : MainWindowSafetyTests::rejectedFramesExpirePatientStability() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::rejectedFramesExpirePatientStability() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::rejectedFramesExpirePatientStability() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::rejectedFramesExpirePatientStability()
+QWARN  : MainWindowSafetyTests::clusterLossDiscardsPartialRound() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::clusterLossDiscardsPartialRound() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::clusterLossDiscardsPartialRound() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+QDEBUG : MainWindowSafetyTests::clusterLossDiscardsPartialRound() One patient round candidate: sos = 3500 A = 3288.59 B = 3500 corrA = 0.95 corrB = 0.95 pairMidGap = 0 signedLagDiff = 9 oneRoundAngleSignedDiffOk = true oneRoundPairMidGapOk = true oneRoundAngleOk = true mCfg.roundCorrAMin = 0.8 mCfg.roundCorrBMin = 0.55
+QDEBUG : MainWindowSafetyTests::clusterLossDiscardsPartialRound() Round cluster rebuilt: candidateCount = 1 candidateSos = QList(3500) candidateCorrA = QList(0.95) candidateCorrB = QList(0.95) acceptedClusterCount = 1 roundSosList = QList(3500)
+QDEBUG : MainWindowSafetyTests::clusterLossDiscardsPartialRound() One patient round accepted: acceptedRoundCount = 1 candidateCount = 1 sos = 3500 A = 3288.59 B = 3500 corrA = 0.95 corrB = 0.95
+QDEBUG : MainWindowSafetyTests::clusterLossDiscardsPartialRound() [闸门统计] 暂无数据
+QWARN  : MainWindowSafetyTests::clusterLossDiscardsPartialRound() This plugin does not support raise()
+QWARN  : MainWindowSafetyTests::clusterLossDiscardsPartialRound() This plugin does not support propagateSizeHints()
+PASS   : MainWindowSafetyTests::clusterLossDiscardsPartialRound()
+QWARN  : MainWindowSafetyTests::transientRejectionPreservesProgressAndSteadySequence() qt.core.qmetaobject.connectslotsbyname: QMetaObject::connectSlotsByName: No matching signal for on_btnShowResult_clicked()
+QWARN  : MainWindowSafetyTests::transientRejectionPreservesProgressAndSteadySequence() This plugin does not support propagateSizeHints()
+QDEBUG : MainWindowSafetyTests::transientRejectionPreservesProgressAndSteadySequence() FIR Designed: centerFreq = 1.25e+06 bandwidth = 600000 Beta = 5 Order = 80 Taps = 81
+PASS   : MainWindowSafetyTests::transientRejectionPreservesProgressAndSteadySequence()
+PASS   : MainWindowSafetyTests::cleanupTestCase()
+Totals: 6 passed, 0 failed, 0 skipped, 0 blacklisted, 132ms
+********* Finished testing of MainWindowSafetyTests *********

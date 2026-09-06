@@ -1,0 +1,542 @@
+/****************************************************************************
+** Meta object code from reading C++ file 'mainwindow_safety_tests.cpp'
+**
+** Created by: The Qt Meta Object Compiler version 68 (Qt 6.5.3)
+**
+** WARNING! All changes made in this file will be lost!
+*****************************************************************************/
+
+#include <QtCore/qmetatype.h>
+
+#if __has_include(<QtCore/qtmochelpers.h>)
+#include <QtCore/qtmochelpers.h>
+#else
+QT_BEGIN_MOC_NAMESPACE
+#endif
+
+
+#include <memory>
+
+#if !defined(Q_MOC_OUTPUT_REVISION)
+#error "The header file 'mainwindow_safety_tests.cpp' doesn't include <QObject>."
+#elif Q_MOC_OUTPUT_REVISION != 68
+#error "This file was generated using the moc from 6.5.3. It"
+#error "cannot be used with the include files from this version of Qt."
+#error "(The moc has changed too much.)"
+#endif
+
+#ifndef Q_CONSTINIT
+#define Q_CONSTINIT
+#endif
+
+QT_WARNING_PUSH
+QT_WARNING_DISABLE_DEPRECATED
+QT_WARNING_DISABLE_GCC("-Wuseless-cast")
+namespace {
+
+#ifdef QT_MOC_HAS_STRINGDATA
+struct qt_meta_stringdata_CLASSMainWindowSafetyTestsENDCLASS_t {};
+static constexpr auto qt_meta_stringdata_CLASSMainWindowSafetyTestsENDCLASS = QtMocHelpers::stringData(
+    "MainWindowSafetyTests",
+    "dualWindowQualityRequiresBothAtCommonLag",
+    "",
+    "trialRoundQualityStillRejectsBelowFloor",
+    "observeBeforeGPreservesAcceptanceAndExpiry",
+    "experimentBuildIdentity",
+    "rejectedFramesExpirePatientStability",
+    "clusterLossDiscardsPartialRound",
+    "transientRejectionPreservesProgressAndSteadySequence",
+    "experimentRecordingIsBoundedAndUnique",
+    "experimentRecordingIncludesEarlyFailuresAndRawInput",
+    "precheckFailuresExpireStateThroughActualPipeline",
+    "experimentRecordingCoversFeatureDecisions",
+    "experimentRecordingThroughput",
+    "invalidChannelsAreDiscarded",
+    "incompleteFrameGroupsAreBounded",
+    "fragmentedFrameReassemblesAtEveryByteBoundary",
+    "parserResynchronizesAfterNoiseAndBadTail",
+    "interleavedAndWrappedFrameIndexesStayIndependent",
+    "speedSeriesKeepsOnlyRecentPoints",
+    "disconnectedControlsAndPlaceholdersAreSafe",
+    "positionGuideTracksExistingBarsWithoutChangingThem",
+    "measurementStatusIsVisibleAndOperatorFacing",
+    "measurementGuideHasThreeApprovedPagesAndPortableMarker",
+    "measurementGuideFirstUseAndSpaceContinue",
+    "patientMeasurementDisablesConflictingControls",
+    "debugAutoDisablesConflictingNavigation",
+    "patientFormsStayInsideAndCenteredAtSmallWindow",
+    "pendingResultBlocksAnotherMeasurement",
+    "samePatientReselectionPreservesPendingResult",
+    "samePatientReselectionPreservesPartialRounds",
+    "cancelledPatientSwitchPreservesPartialRounds",
+    "cancelledQuickPatientCreationDoesNotWritePatient",
+    "partialRoundsRequireCloseConfirmation",
+    "activeFirstRoundClosePausesAndCanResume",
+    "partialRoundsBlockCalibrationDialog",
+    "futureBirthDateBlocksMeasurement",
+    "pendingSaveValidatesTheRecordedPatient",
+    "pendingTransactionBlocksSingleFileWrites",
+    "patientMeasurementStartClearsSerialAssembly",
+    "serialIoErrorsResetAcquisition_data",
+    "serialIoErrorsResetAcquisition",
+    "reportRenderingIsReadableAndArtifactFree",
+    "invalidMeasurementDateDoesNotInventAge",
+    "completedReportUsesProvidedMeasurement",
+    "reportPdfCanBeCommitted",
+    "capturePagesWhenRequested"
+);
+#else  // !QT_MOC_HAS_STRING_DATA
+struct qt_meta_stringdata_CLASSMainWindowSafetyTestsENDCLASS_t {
+    uint offsetsAndSizes[94];
+    char stringdata0[22];
+    char stringdata1[41];
+    char stringdata2[1];
+    char stringdata3[40];
+    char stringdata4[43];
+    char stringdata5[24];
+    char stringdata6[37];
+    char stringdata7[32];
+    char stringdata8[53];
+    char stringdata9[38];
+    char stringdata10[52];
+    char stringdata11[49];
+    char stringdata12[42];
+    char stringdata13[30];
+    char stringdata14[28];
+    char stringdata15[32];
+    char stringdata16[46];
+    char stringdata17[41];
+    char stringdata18[49];
+    char stringdata19[33];
+    char stringdata20[43];
+    char stringdata21[51];
+    char stringdata22[44];
+    char stringdata23[55];
+    char stringdata24[41];
+    char stringdata25[46];
+    char stringdata26[39];
+    char stringdata27[47];
+    char stringdata28[38];
+    char stringdata29[45];
+    char stringdata30[45];
+    char stringdata31[45];
+    char stringdata32[49];
+    char stringdata33[38];
+    char stringdata34[40];
+    char stringdata35[36];
+    char stringdata36[33];
+    char stringdata37[39];
+    char stringdata38[41];
+    char stringdata39[44];
+    char stringdata40[36];
+    char stringdata41[31];
+    char stringdata42[41];
+    char stringdata43[39];
+    char stringdata44[39];
+    char stringdata45[24];
+    char stringdata46[26];
+};
+#define QT_MOC_LITERAL(ofs, len) \
+    uint(sizeof(qt_meta_stringdata_CLASSMainWindowSafetyTestsENDCLASS_t::offsetsAndSizes) + ofs), len 
+Q_CONSTINIT static const qt_meta_stringdata_CLASSMainWindowSafetyTestsENDCLASS_t qt_meta_stringdata_CLASSMainWindowSafetyTestsENDCLASS = {
+    {
+        QT_MOC_LITERAL(0, 21),  // "MainWindowSafetyTests"
+        QT_MOC_LITERAL(22, 40),  // "dualWindowQualityRequiresBoth..."
+        QT_MOC_LITERAL(63, 0),  // ""
+        QT_MOC_LITERAL(64, 39),  // "trialRoundQualityStillRejects..."
+        QT_MOC_LITERAL(104, 42),  // "observeBeforeGPreservesAccept..."
+        QT_MOC_LITERAL(147, 23),  // "experimentBuildIdentity"
+        QT_MOC_LITERAL(171, 36),  // "rejectedFramesExpirePatientSt..."
+        QT_MOC_LITERAL(208, 31),  // "clusterLossDiscardsPartialRound"
+        QT_MOC_LITERAL(240, 52),  // "transientRejectionPreservesPr..."
+        QT_MOC_LITERAL(293, 37),  // "experimentRecordingIsBoundedA..."
+        QT_MOC_LITERAL(331, 51),  // "experimentRecordingIncludesEa..."
+        QT_MOC_LITERAL(383, 48),  // "precheckFailuresExpireStateTh..."
+        QT_MOC_LITERAL(432, 41),  // "experimentRecordingCoversFeat..."
+        QT_MOC_LITERAL(474, 29),  // "experimentRecordingThroughput"
+        QT_MOC_LITERAL(504, 27),  // "invalidChannelsAreDiscarded"
+        QT_MOC_LITERAL(532, 31),  // "incompleteFrameGroupsAreBounded"
+        QT_MOC_LITERAL(564, 45),  // "fragmentedFrameReassemblesAtE..."
+        QT_MOC_LITERAL(610, 40),  // "parserResynchronizesAfterNois..."
+        QT_MOC_LITERAL(651, 48),  // "interleavedAndWrappedFrameInd..."
+        QT_MOC_LITERAL(700, 32),  // "speedSeriesKeepsOnlyRecentPoints"
+        QT_MOC_LITERAL(733, 42),  // "disconnectedControlsAndPlaceh..."
+        QT_MOC_LITERAL(776, 50),  // "positionGuideTracksExistingBa..."
+        QT_MOC_LITERAL(827, 43),  // "measurementStatusIsVisibleAnd..."
+        QT_MOC_LITERAL(871, 54),  // "measurementGuideHasThreeAppro..."
+        QT_MOC_LITERAL(926, 40),  // "measurementGuideFirstUseAndSp..."
+        QT_MOC_LITERAL(967, 45),  // "patientMeasurementDisablesCon..."
+        QT_MOC_LITERAL(1013, 38),  // "debugAutoDisablesConflictingN..."
+        QT_MOC_LITERAL(1052, 46),  // "patientFormsStayInsideAndCent..."
+        QT_MOC_LITERAL(1099, 37),  // "pendingResultBlocksAnotherMea..."
+        QT_MOC_LITERAL(1137, 44),  // "samePatientReselectionPreserv..."
+        QT_MOC_LITERAL(1182, 44),  // "samePatientReselectionPreserv..."
+        QT_MOC_LITERAL(1227, 44),  // "cancelledPatientSwitchPreserv..."
+        QT_MOC_LITERAL(1272, 48),  // "cancelledQuickPatientCreation..."
+        QT_MOC_LITERAL(1321, 37),  // "partialRoundsRequireCloseConf..."
+        QT_MOC_LITERAL(1359, 39),  // "activeFirstRoundClosePausesAn..."
+        QT_MOC_LITERAL(1399, 35),  // "partialRoundsBlockCalibration..."
+        QT_MOC_LITERAL(1435, 32),  // "futureBirthDateBlocksMeasurement"
+        QT_MOC_LITERAL(1468, 38),  // "pendingSaveValidatesTheRecord..."
+        QT_MOC_LITERAL(1507, 40),  // "pendingTransactionBlocksSingl..."
+        QT_MOC_LITERAL(1548, 43),  // "patientMeasurementStartClears..."
+        QT_MOC_LITERAL(1592, 35),  // "serialIoErrorsResetAcquisitio..."
+        QT_MOC_LITERAL(1628, 30),  // "serialIoErrorsResetAcquisition"
+        QT_MOC_LITERAL(1659, 40),  // "reportRenderingIsReadableAndA..."
+        QT_MOC_LITERAL(1700, 38),  // "invalidMeasurementDateDoesNot..."
+        QT_MOC_LITERAL(1739, 38),  // "completedReportUsesProvidedMe..."
+        QT_MOC_LITERAL(1778, 23),  // "reportPdfCanBeCommitted"
+        QT_MOC_LITERAL(1802, 25)   // "capturePagesWhenRequested"
+    },
+    "MainWindowSafetyTests",
+    "dualWindowQualityRequiresBothAtCommonLag",
+    "",
+    "trialRoundQualityStillRejectsBelowFloor",
+    "observeBeforeGPreservesAcceptanceAndExpiry",
+    "experimentBuildIdentity",
+    "rejectedFramesExpirePatientStability",
+    "clusterLossDiscardsPartialRound",
+    "transientRejectionPreservesProgressAndSteadySequence",
+    "experimentRecordingIsBoundedAndUnique",
+    "experimentRecordingIncludesEarlyFailuresAndRawInput",
+    "precheckFailuresExpireStateThroughActualPipeline",
+    "experimentRecordingCoversFeatureDecisions",
+    "experimentRecordingThroughput",
+    "invalidChannelsAreDiscarded",
+    "incompleteFrameGroupsAreBounded",
+    "fragmentedFrameReassemblesAtEveryByteBoundary",
+    "parserResynchronizesAfterNoiseAndBadTail",
+    "interleavedAndWrappedFrameIndexesStayIndependent",
+    "speedSeriesKeepsOnlyRecentPoints",
+    "disconnectedControlsAndPlaceholdersAreSafe",
+    "positionGuideTracksExistingBarsWithoutChangingThem",
+    "measurementStatusIsVisibleAndOperatorFacing",
+    "measurementGuideHasThreeApprovedPagesAndPortableMarker",
+    "measurementGuideFirstUseAndSpaceContinue",
+    "patientMeasurementDisablesConflictingControls",
+    "debugAutoDisablesConflictingNavigation",
+    "patientFormsStayInsideAndCenteredAtSmallWindow",
+    "pendingResultBlocksAnotherMeasurement",
+    "samePatientReselectionPreservesPendingResult",
+    "samePatientReselectionPreservesPartialRounds",
+    "cancelledPatientSwitchPreservesPartialRounds",
+    "cancelledQuickPatientCreationDoesNotWritePatient",
+    "partialRoundsRequireCloseConfirmation",
+    "activeFirstRoundClosePausesAndCanResume",
+    "partialRoundsBlockCalibrationDialog",
+    "futureBirthDateBlocksMeasurement",
+    "pendingSaveValidatesTheRecordedPatient",
+    "pendingTransactionBlocksSingleFileWrites",
+    "patientMeasurementStartClearsSerialAssembly",
+    "serialIoErrorsResetAcquisition_data",
+    "serialIoErrorsResetAcquisition",
+    "reportRenderingIsReadableAndArtifactFree",
+    "invalidMeasurementDateDoesNotInventAge",
+    "completedReportUsesProvidedMeasurement",
+    "reportPdfCanBeCommitted",
+    "capturePagesWhenRequested"
+};
+#undef QT_MOC_LITERAL
+#endif // !QT_MOC_HAS_STRING_DATA
+} // unnamed namespace
+
+Q_CONSTINIT static const uint qt_meta_data_CLASSMainWindowSafetyTestsENDCLASS[] = {
+
+ // content:
+      11,       // revision
+       0,       // classname
+       0,    0, // classinfo
+      45,   14, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+ // slots: name, argc, parameters, tag, flags, initial metatype offsets
+       1,    0,  284,    2, 0x08,    1 /* Private */,
+       3,    0,  285,    2, 0x08,    2 /* Private */,
+       4,    0,  286,    2, 0x08,    3 /* Private */,
+       5,    0,  287,    2, 0x08,    4 /* Private */,
+       6,    0,  288,    2, 0x08,    5 /* Private */,
+       7,    0,  289,    2, 0x08,    6 /* Private */,
+       8,    0,  290,    2, 0x08,    7 /* Private */,
+       9,    0,  291,    2, 0x08,    8 /* Private */,
+      10,    0,  292,    2, 0x08,    9 /* Private */,
+      11,    0,  293,    2, 0x08,   10 /* Private */,
+      12,    0,  294,    2, 0x08,   11 /* Private */,
+      13,    0,  295,    2, 0x08,   12 /* Private */,
+      14,    0,  296,    2, 0x08,   13 /* Private */,
+      15,    0,  297,    2, 0x08,   14 /* Private */,
+      16,    0,  298,    2, 0x08,   15 /* Private */,
+      17,    0,  299,    2, 0x08,   16 /* Private */,
+      18,    0,  300,    2, 0x08,   17 /* Private */,
+      19,    0,  301,    2, 0x08,   18 /* Private */,
+      20,    0,  302,    2, 0x08,   19 /* Private */,
+      21,    0,  303,    2, 0x08,   20 /* Private */,
+      22,    0,  304,    2, 0x08,   21 /* Private */,
+      23,    0,  305,    2, 0x08,   22 /* Private */,
+      24,    0,  306,    2, 0x08,   23 /* Private */,
+      25,    0,  307,    2, 0x08,   24 /* Private */,
+      26,    0,  308,    2, 0x08,   25 /* Private */,
+      27,    0,  309,    2, 0x08,   26 /* Private */,
+      28,    0,  310,    2, 0x08,   27 /* Private */,
+      29,    0,  311,    2, 0x08,   28 /* Private */,
+      30,    0,  312,    2, 0x08,   29 /* Private */,
+      31,    0,  313,    2, 0x08,   30 /* Private */,
+      32,    0,  314,    2, 0x08,   31 /* Private */,
+      33,    0,  315,    2, 0x08,   32 /* Private */,
+      34,    0,  316,    2, 0x08,   33 /* Private */,
+      35,    0,  317,    2, 0x08,   34 /* Private */,
+      36,    0,  318,    2, 0x08,   35 /* Private */,
+      37,    0,  319,    2, 0x08,   36 /* Private */,
+      38,    0,  320,    2, 0x08,   37 /* Private */,
+      39,    0,  321,    2, 0x08,   38 /* Private */,
+      40,    0,  322,    2, 0x08,   39 /* Private */,
+      41,    0,  323,    2, 0x08,   40 /* Private */,
+      42,    0,  324,    2, 0x08,   41 /* Private */,
+      43,    0,  325,    2, 0x08,   42 /* Private */,
+      44,    0,  326,    2, 0x08,   43 /* Private */,
+      45,    0,  327,    2, 0x08,   44 /* Private */,
+      46,    0,  328,    2, 0x08,   45 /* Private */,
+
+ // slots: parameters
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+
+       0        // eod
+};
+
+Q_CONSTINIT const QMetaObject MainWindowSafetyTests::staticMetaObject = { {
+    QMetaObject::SuperData::link<QObject::staticMetaObject>(),
+    qt_meta_stringdata_CLASSMainWindowSafetyTestsENDCLASS.offsetsAndSizes,
+    qt_meta_data_CLASSMainWindowSafetyTestsENDCLASS,
+    qt_static_metacall,
+    nullptr,
+    qt_incomplete_metaTypeArray<qt_meta_stringdata_CLASSMainWindowSafetyTestsENDCLASS_t,
+        // Q_OBJECT / Q_GADGET
+        QtPrivate::TypeAndForceComplete<MainWindowSafetyTests, std::true_type>,
+        // method 'dualWindowQualityRequiresBothAtCommonLag'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'trialRoundQualityStillRejectsBelowFloor'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'observeBeforeGPreservesAcceptanceAndExpiry'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'experimentBuildIdentity'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'rejectedFramesExpirePatientStability'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'clusterLossDiscardsPartialRound'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'transientRejectionPreservesProgressAndSteadySequence'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'experimentRecordingIsBoundedAndUnique'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'experimentRecordingIncludesEarlyFailuresAndRawInput'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'precheckFailuresExpireStateThroughActualPipeline'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'experimentRecordingCoversFeatureDecisions'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'experimentRecordingThroughput'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'invalidChannelsAreDiscarded'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'incompleteFrameGroupsAreBounded'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'fragmentedFrameReassemblesAtEveryByteBoundary'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'parserResynchronizesAfterNoiseAndBadTail'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'interleavedAndWrappedFrameIndexesStayIndependent'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'speedSeriesKeepsOnlyRecentPoints'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'disconnectedControlsAndPlaceholdersAreSafe'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'positionGuideTracksExistingBarsWithoutChangingThem'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'measurementStatusIsVisibleAndOperatorFacing'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'measurementGuideHasThreeApprovedPagesAndPortableMarker'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'measurementGuideFirstUseAndSpaceContinue'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'patientMeasurementDisablesConflictingControls'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'debugAutoDisablesConflictingNavigation'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'patientFormsStayInsideAndCenteredAtSmallWindow'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'pendingResultBlocksAnotherMeasurement'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'samePatientReselectionPreservesPendingResult'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'samePatientReselectionPreservesPartialRounds'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'cancelledPatientSwitchPreservesPartialRounds'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'cancelledQuickPatientCreationDoesNotWritePatient'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'partialRoundsRequireCloseConfirmation'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'activeFirstRoundClosePausesAndCanResume'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'partialRoundsBlockCalibrationDialog'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'futureBirthDateBlocksMeasurement'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'pendingSaveValidatesTheRecordedPatient'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'pendingTransactionBlocksSingleFileWrites'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'patientMeasurementStartClearsSerialAssembly'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'serialIoErrorsResetAcquisition_data'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'serialIoErrorsResetAcquisition'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'reportRenderingIsReadableAndArtifactFree'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'invalidMeasurementDateDoesNotInventAge'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'completedReportUsesProvidedMeasurement'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'reportPdfCanBeCommitted'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'capturePagesWhenRequested'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>
+    >,
+    nullptr
+} };
+
+void MainWindowSafetyTests::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+{
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        auto *_t = static_cast<MainWindowSafetyTests *>(_o);
+        (void)_t;
+        switch (_id) {
+        case 0: _t->dualWindowQualityRequiresBothAtCommonLag(); break;
+        case 1: _t->trialRoundQualityStillRejectsBelowFloor(); break;
+        case 2: _t->observeBeforeGPreservesAcceptanceAndExpiry(); break;
+        case 3: _t->experimentBuildIdentity(); break;
+        case 4: _t->rejectedFramesExpirePatientStability(); break;
+        case 5: _t->clusterLossDiscardsPartialRound(); break;
+        case 6: _t->transientRejectionPreservesProgressAndSteadySequence(); break;
+        case 7: _t->experimentRecordingIsBoundedAndUnique(); break;
+        case 8: _t->experimentRecordingIncludesEarlyFailuresAndRawInput(); break;
+        case 9: _t->precheckFailuresExpireStateThroughActualPipeline(); break;
+        case 10: _t->experimentRecordingCoversFeatureDecisions(); break;
+        case 11: _t->experimentRecordingThroughput(); break;
+        case 12: _t->invalidChannelsAreDiscarded(); break;
+        case 13: _t->incompleteFrameGroupsAreBounded(); break;
+        case 14: _t->fragmentedFrameReassemblesAtEveryByteBoundary(); break;
+        case 15: _t->parserResynchronizesAfterNoiseAndBadTail(); break;
+        case 16: _t->interleavedAndWrappedFrameIndexesStayIndependent(); break;
+        case 17: _t->speedSeriesKeepsOnlyRecentPoints(); break;
+        case 18: _t->disconnectedControlsAndPlaceholdersAreSafe(); break;
+        case 19: _t->positionGuideTracksExistingBarsWithoutChangingThem(); break;
+        case 20: _t->measurementStatusIsVisibleAndOperatorFacing(); break;
+        case 21: _t->measurementGuideHasThreeApprovedPagesAndPortableMarker(); break;
+        case 22: _t->measurementGuideFirstUseAndSpaceContinue(); break;
+        case 23: _t->patientMeasurementDisablesConflictingControls(); break;
+        case 24: _t->debugAutoDisablesConflictingNavigation(); break;
+        case 25: _t->patientFormsStayInsideAndCenteredAtSmallWindow(); break;
+        case 26: _t->pendingResultBlocksAnotherMeasurement(); break;
+        case 27: _t->samePatientReselectionPreservesPendingResult(); break;
+        case 28: _t->samePatientReselectionPreservesPartialRounds(); break;
+        case 29: _t->cancelledPatientSwitchPreservesPartialRounds(); break;
+        case 30: _t->cancelledQuickPatientCreationDoesNotWritePatient(); break;
+        case 31: _t->partialRoundsRequireCloseConfirmation(); break;
+        case 32: _t->activeFirstRoundClosePausesAndCanResume(); break;
+        case 33: _t->partialRoundsBlockCalibrationDialog(); break;
+        case 34: _t->futureBirthDateBlocksMeasurement(); break;
+        case 35: _t->pendingSaveValidatesTheRecordedPatient(); break;
+        case 36: _t->pendingTransactionBlocksSingleFileWrites(); break;
+        case 37: _t->patientMeasurementStartClearsSerialAssembly(); break;
+        case 38: _t->serialIoErrorsResetAcquisition_data(); break;
+        case 39: _t->serialIoErrorsResetAcquisition(); break;
+        case 40: _t->reportRenderingIsReadableAndArtifactFree(); break;
+        case 41: _t->invalidMeasurementDateDoesNotInventAge(); break;
+        case 42: _t->completedReportUsesProvidedMeasurement(); break;
+        case 43: _t->reportPdfCanBeCommitted(); break;
+        case 44: _t->capturePagesWhenRequested(); break;
+        default: ;
+        }
+    }
+    (void)_a;
+}
+
+const QMetaObject *MainWindowSafetyTests::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
+}
+
+void *MainWindowSafetyTests::qt_metacast(const char *_clname)
+{
+    if (!_clname) return nullptr;
+    if (!strcmp(_clname, qt_meta_stringdata_CLASSMainWindowSafetyTestsENDCLASS.stringdata0))
+        return static_cast<void*>(this);
+    return QObject::qt_metacast(_clname);
+}
+
+int MainWindowSafetyTests::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QObject::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        if (_id < 45)
+            qt_static_metacall(this, _c, _id, _a);
+        _id -= 45;
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        if (_id < 45)
+            *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
+        _id -= 45;
+    }
+    return _id;
+}
+QT_WARNING_POP

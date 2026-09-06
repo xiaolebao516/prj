@@ -70,6 +70,7 @@ struct Case {
     double frameA=.78, roundA=.80, gMin=-6, gMax=6;
     int warmup=14, lossCount=10;
     bool stabilityBeforeG=false;
+    bool dualWindow=false;
 };
 
 // Independent observation of the existing valley correlation window, not a new estimator.
@@ -165,7 +166,7 @@ class MainWindowSafetyTests {
         if (stabilityBeforeG && accepted)
             require(frame["gates"].toObject()["stability_evaluated"].toBool(),"New flow accepted an originally precheck-failing frame");
         if (validate) {
-            require(pre==frame["gates"].toObject()["stability_evaluated"].toBool(), "Feature precheck mismatch");
+            require(observe==frame["gates"].toObject()["stability_evaluated"].toBool(), "Feature precheck mismatch");
             require(accepted==(decision=="accepted"), "Feature accepted-frame mismatch");
             require(w.boneLagLocked==frame["locked"].toBool() &&
                     w.lockedBoneLagCenter==frame["locked_lag"].toInt() &&
@@ -180,8 +181,10 @@ public:
         MainWindow w;
         w.hide();
         w.observeStabilityBeforeG=variant.stabilityBeforeG;
+        w.useDualWindowAQuality=variant.dualWindow;
         const auto config=rows.first()["config"].toObject();
-        require(config["implementation"]=="state-repair-20260905-v1", "Unsupported input version");
+        require(config["implementation"]=="state-repair-20260905-v1" ||
+                config["implementation"]=="observe-before-g-20260906-v1", "Unsupported input version");
         require(config["B_only"].toBool() && config["angle_gate_enabled"].toBool() &&
                 config["SOS_offset"].toDouble()==0 && config["frame_target"].toInt()==30 &&
                 config["D_min"].toDouble()==5 && config["D_max"].toDouble()==15 &&
@@ -249,6 +252,12 @@ public:
             for (int i=0;i<expected.size();++i) {
                 if (baseline)
                     require(equivalent(expected[i],actualFrames[i]), QString("Raw frame mismatch at index %1").arg(i));
+                if (variant.dualWindow && expected[i].contains("gates")) {
+                    // Cached A score was computed independently from the raw-wave audit.
+                    for (const auto* key:{"A","B","D","G","sos_patient"})
+                        require(equivalent(expected[i][key],actualFrames[i][key]),
+                            QString("Dual raw feature mismatch: %1 at %2").arg(key).arg(i));
+                }
                 if (actualFrames[i]["decision"]=="accepted") {
                     if (firstAcceptedMs<0) firstAcceptedMs=recordedTimes[i];
                     if (expected[i]["decision"]!="accepted") newlyAccepted.append(actualFrames[i]["sos_patient"].toDouble());
@@ -258,7 +267,7 @@ public:
         if (baseline) {
             int recordedCount=0;
             for (const auto& row : rows) if (row["event"]=="frame") ++recordedCount;
-            require(consumed==recordedCount && reachedTarget, "Baseline completion boundary mismatch");
+            require(consumed==recordedCount && reachedTarget==!originalSummary.isEmpty(), "Baseline completion boundary mismatch");
             require(equivalent(summary,originalSummary), "Baseline round summary mismatch");
         }
         w.closeRoundFinishedTip();
@@ -268,6 +277,7 @@ public:
     }
 };
 
+#ifndef MEASUREMENT_REPLAY_LIBRARY
 int main(int argc, char** argv) {
     QApplication app(argc,argv);
     qInstallMessageHandler([](QtMsgType, const QMessageLogContext&, const QString&){});
@@ -372,3 +382,4 @@ int main(int argc, char** argv) {
         std::fprintf(stderr,"Replay failed: %s\n",e.what()); return 1;
     }
 }
+#endif

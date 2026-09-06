@@ -1,0 +1,3 @@
+<patients version="2">
+    <patient birth="1986-05-12" gender="男" height="172" id="TEST-001" name="测试患者" weight="68"/>
+</patients>

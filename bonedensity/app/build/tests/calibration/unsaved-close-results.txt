@@ -1,0 +1,773 @@
+********* Start testing of CalibrationTests *********
+Config: Using QtTest library 6.5.3, Qt 6.5.3 (x86_64-little_endian-llp64 shared (dynamic) release build; by GCC 11.2.0), windows 11
+INFO   : CalibrationTests::initTestCase() entering
+PASS   : CalibrationTests::initTestCase()
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() entering
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QVERIFY(directory.isValid())
+..\..\..\tests\calibration_tests.cpp(333) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QVERIFY(store.loadOrInitialize(path, &error))
+..\..\..\tests\calibration_tests.cpp(337) : message location
+QWARN  : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QFontDatabase: Cannot find font directory D:/Qt/6.5.3/mingw_64/lib/fonts.
+Note that Qt no longer ships fonts. Deploy some (from https://dejavu-fonts.github.io/ for example) or switch to fontconfig.
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QVERIFY(dialog.session_.configure(formalSetup(), store.parameters().activeD, &error))
+..\..\..\tests\calibration_tests.cpp(340) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QVERIFY(session.beginMeasurement(phase, 23.0, &error))
+..\..\..\tests\calibration_tests.cpp(63) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::MeasurementCompleted)
+..\..\..\tests\calibration_tests.cpp(69) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QVERIFY(session.beginMeasurement(phase, 23.0, &error))
+..\..\..\tests\calibration_tests.cpp(63) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::MeasurementCompleted)
+..\..\..\tests\calibration_tests.cpp(69) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QVERIFY(session.beginMeasurement(phase, 23.0, &error))
+..\..\..\tests\calibration_tests.cpp(63) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::MeasurementCompleted)
+..\..\..\tests\calibration_tests.cpp(69) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QVERIFY(session.beginMeasurement(phase, 23.0, &error))
+..\..\..\tests\calibration_tests.cpp(63) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::MeasurementCompleted)
+..\..\..\tests\calibration_tests.cpp(69) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QVERIFY(session.beginMeasurement(phase, 23.0, &error))
+..\..\..\tests\calibration_tests.cpp(63) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::MeasurementCompleted)
+..\..\..\tests\calibration_tests.cpp(69) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QVERIFY(session.beginMeasurement(phase, 23.0, &error))
+..\..\..\tests\calibration_tests.cpp(63) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::MeasurementCompleted)
+..\..\..\tests\calibration_tests.cpp(69) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QVERIFY(session.beginMeasurement(phase, 23.0, &error))
+..\..\..\tests\calibration_tests.cpp(63) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::MeasurementCompleted)
+..\..\..\tests\calibration_tests.cpp(69) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QVERIFY(session.beginMeasurement(phase, 23.0, &error))
+..\..\..\tests\calibration_tests.cpp(63) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::MeasurementCompleted)
+..\..\..\tests\calibration_tests.cpp(69) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QVERIFY(session.beginMeasurement(phase, 23.0, &error))
+..\..\..\tests\calibration_tests.cpp(63) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::MeasurementCompleted)
+..\..\..\tests\calibration_tests.cpp(69) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QVERIFY(session.beginMeasurement(phase, 23.0, &error))
+..\..\..\tests\calibration_tests.cpp(63) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::MeasurementCompleted)
+..\..\..\tests\calibration_tests.cpp(69) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QVERIFY(session.beginMeasurement(phase, 23.0, &error))
+..\..\..\tests\calibration_tests.cpp(63) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::MeasurementCompleted)
+..\..\..\tests\calibration_tests.cpp(69) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QVERIFY(session.beginMeasurement(phase, 23.0, &error))
+..\..\..\tests\calibration_tests.cpp(63) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::Accepted)
+..\..\..\tests\calibration_tests.cpp(67) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QCOMPARE(result, CalibrationFrameResult::MeasurementCompleted)
+..\..\..\tests\calibration_tests.cpp(69) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QVERIFY(dialog.session_.validationComplete())
+..\..\..\tests\calibration_tests.cpp(347) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QVERIFY(QFile::remove(path))
+..\..\..\tests\calibration_tests.cpp(348) : message location
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QVERIFY(QDir().mkdir(path))
+..\..\..\tests\calibration_tests.cpp(349) : message location
+QWARN  : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() This plugin does not support propagateSizeHints()
+QWARN  : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() This plugin does not support propagateSizeHints()
+INFO   : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() QVERIFY(!event.isAccepted())
+..\..\..\tests\calibration_tests.cpp(371) : message location
+FAIL!  : CalibrationTests::unsavedCompletedCalibrationCannotCloseSilently() '!event.isAccepted()' returned FALSE. ()
+..\..\..\tests\calibration_tests.cpp(371) : failure location
+INFO   : CalibrationTests::cleanupTestCase() entering
+PASS   : CalibrationTests::cleanupTestCase()
+Totals: 2 passed, 1 failed, 0 skipped, 0 blacklisted, 16ms
+********* Finished testing of CalibrationTests *********

@@ -1,0 +1,3 @@
+<accounts version="1">
+    <account enabled="true" passwordHash="aW/C4DWbWbPzBg9H5QddP1BtcNlIj8trdfOXfJNFHiM=" role="admin" salt="fd075968abc88e16" username="admin"/>
+</accounts>

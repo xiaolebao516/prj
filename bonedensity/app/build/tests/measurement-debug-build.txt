@@ -1,0 +1,154 @@
+D:/Qt/Tools/mingw1120_64/bin/mingw32-make -f Makefile.Debug clean
+mingw32-make[1]: Entering directory 'D:/Repository/prj/bonedensity/app/build/debug'
+del debug\qrc_resources.cpp
+del debug\moc_predefs.h
+del debug\moc_mainwindow.cpp debug\moc_calibrationdialog.cpp debug\moc_measurementguidedialog.cpp debug\moc_reportwidget.cpp
+del ui_mainwindow.h
+del debug\main.o debug\mainwindow.o debug\accountstore.o debug\calibration.o debug\calibrationdialog.o debug\measurementguidedialog.o debug\calibrationstore.o debug\patientstore.o debug\agesoschartwidget.o debug\reportwidget.o debug\signalprocessor.o debug\bonehealth.o debug\utils.o debug\qrc_resources.o debug\moc_mainwindow.o debug\moc_calibrationdialog.o debug\moc_measurementguidedialog.o debug\moc_reportwidget.o
+mingw32-make[1]: Leaving directory 'D:/Repository/prj/bonedensity/app/build/debug'
+D:/Qt/Tools/mingw1120_64/bin/mingw32-make -f Makefile.Release clean
+mingw32-make[1]: Entering directory 'D:/Repository/prj/bonedensity/app/build/debug'
+del release\qrc_resources.cpp
+Could Not Find D:\Repository\prj\bonedensity\app\build\debug\release\qrc_resources.cpp
+del release\moc_predefs.h
+Could Not Find D:\Repository\prj\bonedensity\app\build\debug\release\moc_predefs.h
+del release\moc_mainwindow.cpp release\moc_calibrationdialog.cpp release\moc_measurementguidedialog.cpp release\moc_reportwidget.cpp
+Could Not Find D:\Repository\prj\bonedensity\app\build\debug\release\moc_mainwindow.cpp
+del ui_mainwindow.h
+Could Not Find D:\Repository\prj\bonedensity\app\build\debug\ui_mainwindow.h
+del release\main.o release\mainwindow.o release\accountstore.o release\calibration.o release\calibrationdialog.o release\measurementguidedialog.o release\calibrationstore.o release\patientstore.o release\agesoschartwidget.o release\reportwidget.o release\signalprocessor.o release\bonehealth.o release\utils.o release\qrc_resources.o release\moc_mainwindow.o release\moc_calibrationdialog.o release\moc_measurementguidedialog.o release\moc_reportwidget.o
+Could Not Find D:\Repository\prj\bonedensity\app\build\debug\release\main.o
+mingw32-make[1]: Leaving directory 'D:/Repository/prj/bonedensity/app/build/debug'
+D:/Qt/Tools/mingw1120_64/bin/mingw32-make -f Makefile.Debug
+mingw32-make[1]: Entering directory 'D:/Repository/prj/bonedensity/app/build/debug'
+D:\Qt\6.5.3\mingw_64\bin\uic.exe ..\..\ui\mainwindow.ui -o ui_mainwindow.h
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SERIALPORT_LIB -DQT_XML_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I../../../app -I. -I../../include -ID:/Qt/6.5.3/mingw_64/include -ID:/Qt/6.5.3/mingw_64/include/QtCharts -ID:/Qt/6.5.3/mingw_64/include/QtOpenGLWidgets -ID:/Qt/6.5.3/mingw_64/include/QtPrintSupport -ID:/Qt/6.5.3/mingw_64/include/QtWidgets -ID:/Qt/6.5.3/mingw_64/include/QtOpenGL -ID:/Qt/6.5.3/mingw_64/include/QtGui -ID:/Qt/6.5.3/mingw_64/include/QtSerialPort -ID:/Qt/6.5.3/mingw_64/include/QtXml -ID:/Qt/6.5.3/mingw_64/include/QtCore -Idebug -I. -I/include -ID:/Qt/6.5.3/mingw_64/mkspecs/win32-g++  -o debug\main.o ..\..\src\main.cpp
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SERIALPORT_LIB -DQT_XML_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I../../../app -I. -I../../include -ID:/Qt/6.5.3/mingw_64/include -ID:/Qt/6.5.3/mingw_64/include/QtCharts -ID:/Qt/6.5.3/mingw_64/include/QtOpenGLWidgets -ID:/Qt/6.5.3/mingw_64/include/QtPrintSupport -ID:/Qt/6.5.3/mingw_64/include/QtWidgets -ID:/Qt/6.5.3/mingw_64/include/QtOpenGL -ID:/Qt/6.5.3/mingw_64/include/QtGui -ID:/Qt/6.5.3/mingw_64/include/QtSerialPort -ID:/Qt/6.5.3/mingw_64/include/QtXml -ID:/Qt/6.5.3/mingw_64/include/QtCore -Idebug -I. -I/include -ID:/Qt/6.5.3/mingw_64/mkspecs/win32-g++  -o debug\mainwindow.o ..\..\src\mainwindow.cpp
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SERIALPORT_LIB -DQT_XML_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I../../../app -I. -I../../include -ID:/Qt/6.5.3/mingw_64/include -ID:/Qt/6.5.3/mingw_64/include/QtCharts -ID:/Qt/6.5.3/mingw_64/include/QtOpenGLWidgets -ID:/Qt/6.5.3/mingw_64/include/QtPrintSupport -ID:/Qt/6.5.3/mingw_64/include/QtWidgets -ID:/Qt/6.5.3/mingw_64/include/QtOpenGL -ID:/Qt/6.5.3/mingw_64/include/QtGui -ID:/Qt/6.5.3/mingw_64/include/QtSerialPort -ID:/Qt/6.5.3/mingw_64/include/QtXml -ID:/Qt/6.5.3/mingw_64/include/QtCore -Idebug -I. -I/include -ID:/Qt/6.5.3/mingw_64/mkspecs/win32-g++  -o debug\accountstore.o ..\..\src\accountstore.cpp
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SERIALPORT_LIB -DQT_XML_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I../../../app -I. -I../../include -ID:/Qt/6.5.3/mingw_64/include -ID:/Qt/6.5.3/mingw_64/include/QtCharts -ID:/Qt/6.5.3/mingw_64/include/QtOpenGLWidgets -ID:/Qt/6.5.3/mingw_64/include/QtPrintSupport -ID:/Qt/6.5.3/mingw_64/include/QtWidgets -ID:/Qt/6.5.3/mingw_64/include/QtOpenGL -ID:/Qt/6.5.3/mingw_64/include/QtGui -ID:/Qt/6.5.3/mingw_64/include/QtSerialPort -ID:/Qt/6.5.3/mingw_64/include/QtXml -ID:/Qt/6.5.3/mingw_64/include/QtCore -Idebug -I. -I/include -ID:/Qt/6.5.3/mingw_64/mkspecs/win32-g++  -o debug\calibration.o ..\..\src\calibration.cpp
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SERIALPORT_LIB -DQT_XML_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I../../../app -I. -I../../include -ID:/Qt/6.5.3/mingw_64/include -ID:/Qt/6.5.3/mingw_64/include/QtCharts -ID:/Qt/6.5.3/mingw_64/include/QtOpenGLWidgets -ID:/Qt/6.5.3/mingw_64/include/QtPrintSupport -ID:/Qt/6.5.3/mingw_64/include/QtWidgets -ID:/Qt/6.5.3/mingw_64/include/QtOpenGL -ID:/Qt/6.5.3/mingw_64/include/QtGui -ID:/Qt/6.5.3/mingw_64/include/QtSerialPort -ID:/Qt/6.5.3/mingw_64/include/QtXml -ID:/Qt/6.5.3/mingw_64/include/QtCore -Idebug -I. -I/include -ID:/Qt/6.5.3/mingw_64/mkspecs/win32-g++  -o debug\calibrationdialog.o ..\..\src\calibrationdialog.cpp
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SERIALPORT_LIB -DQT_XML_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I../../../app -I. -I../../include -ID:/Qt/6.5.3/mingw_64/include -ID:/Qt/6.5.3/mingw_64/include/QtCharts -ID:/Qt/6.5.3/mingw_64/include/QtOpenGLWidgets -ID:/Qt/6.5.3/mingw_64/include/QtPrintSupport -ID:/Qt/6.5.3/mingw_64/include/QtWidgets -ID:/Qt/6.5.3/mingw_64/include/QtOpenGL -ID:/Qt/6.5.3/mingw_64/include/QtGui -ID:/Qt/6.5.3/mingw_64/include/QtSerialPort -ID:/Qt/6.5.3/mingw_64/include/QtXml -ID:/Qt/6.5.3/mingw_64/include/QtCore -Idebug -I. -I/include -ID:/Qt/6.5.3/mingw_64/mkspecs/win32-g++  -o debug\measurementguidedialog.o ..\..\src\measurementguidedialog.cpp
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SERIALPORT_LIB -DQT_XML_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I../../../app -I. -I../../include -ID:/Qt/6.5.3/mingw_64/include -ID:/Qt/6.5.3/mingw_64/include/QtCharts -ID:/Qt/6.5.3/mingw_64/include/QtOpenGLWidgets -ID:/Qt/6.5.3/mingw_64/include/QtPrintSupport -ID:/Qt/6.5.3/mingw_64/include/QtWidgets -ID:/Qt/6.5.3/mingw_64/include/QtOpenGL -ID:/Qt/6.5.3/mingw_64/include/QtGui -ID:/Qt/6.5.3/mingw_64/include/QtSerialPort -ID:/Qt/6.5.3/mingw_64/include/QtXml -ID:/Qt/6.5.3/mingw_64/include/QtCore -Idebug -I. -I/include -ID:/Qt/6.5.3/mingw_64/mkspecs/win32-g++  -o debug\calibrationstore.o ..\..\src\calibrationstore.cpp
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SERIALPORT_LIB -DQT_XML_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I../../../app -I. -I../../include -ID:/Qt/6.5.3/mingw_64/include -ID:/Qt/6.5.3/mingw_64/include/QtCharts -ID:/Qt/6.5.3/mingw_64/include/QtOpenGLWidgets -ID:/Qt/6.5.3/mingw_64/include/QtPrintSupport -ID:/Qt/6.5.3/mingw_64/include/QtWidgets -ID:/Qt/6.5.3/mingw_64/include/QtOpenGL -ID:/Qt/6.5.3/mingw_64/include/QtGui -ID:/Qt/6.5.3/mingw_64/include/QtSerialPort -ID:/Qt/6.5.3/mingw_64/include/QtXml -ID:/Qt/6.5.3/mingw_64/include/QtCore -Idebug -I. -I/include -ID:/Qt/6.5.3/mingw_64/mkspecs/win32-g++  -o debug\patientstore.o ..\..\src\patientstore.cpp
+..\..\src\mainwindow.cpp: In member function 'void MainWindow::parseIncomingData()':
+..\..\src\mainwindow.cpp:1750:17: warning: unused variable 'gain' [-Wunused-variable]
+ 1750 |         quint16 gain   = p[2] | (p[3] << 8);
+      |                 ^~~~
+..\..\src\mainwindow.cpp: In lambda function:
+..\..\src\mainwindow.cpp:1936:61: warning: 'QAbstractAxis* QChart::axisY(QAbstractSeries*) const' is deprecated [-Wdeprecated-declarations]
+ 1936 |         auto *axisY = qobject_cast<QValueAxis*>(chart->axisY());
+      |                                                 ~~~~~~~~~~~~^~
+In file included from D:/Qt/6.5.3/mingw_64/include/QtCharts/QtCharts:24,
+                 from ../../include/mainwindow.h:11,
+                 from ..\..\src\mainwindow.cpp:8:
+D:/Qt/6.5.3/mingw_64/include/QtCharts/qchart.h:84:38: note: declared here
+   84 |     Q_DECL_DEPRECATED QAbstractAxis *axisY(QAbstractSeries *series = nullptr) const;
+      |                                      ^~~~~
+..\..\src\mainwindow.cpp: In lambda function:
+..\..\src\mainwindow.cpp:1946:61: warning: 'QAbstractAxis* QChart::axisX(QAbstractSeries*) const' is deprecated [-Wdeprecated-declarations]
+ 1946 |         auto *axisX = qobject_cast<QValueAxis*>(chart->axisX());
+      |                                                 ~~~~~~~~~~~~^~
+In file included from D:/Qt/6.5.3/mingw_64/include/QtCharts/QtCharts:24,
+                 from ../../include/mainwindow.h:11,
+                 from ..\..\src\mainwindow.cpp:8:
+D:/Qt/6.5.3/mingw_64/include/QtCharts/qchart.h:83:38: note: declared here
+   83 |     Q_DECL_DEPRECATED QAbstractAxis *axisX(QAbstractSeries *series = nullptr) const;
+      |                                      ^~~~~
+..\..\src\mainwindow.cpp: In member function 'void MainWindow::appendSpeedPoint(double)':
+..\..\src\mainwindow.cpp:2413:62: warning: 'QAbstractAxis* QChart::axisX(QAbstractSeries*) const' is deprecated [-Wdeprecated-declarations]
+ 2413 |     auto *axisX = qobject_cast<QValueAxis*>(chartSpeed->axisX());
+      |                                             ~~~~~~~~~~~~~~~~~^~
+In file included from D:/Qt/6.5.3/mingw_64/include/QtCharts/QtCharts:24,
+                 from ../../include/mainwindow.h:11,
+                 from ..\..\src\mainwindow.cpp:8:
+D:/Qt/6.5.3/mingw_64/include/QtCharts/qchart.h:83:38: note: declared here
+   83 |     Q_DECL_DEPRECATED QAbstractAxis *axisX(QAbstractSeries *series = nullptr) const;
+      |                                      ^~~~~
+..\..\src\mainwindow.cpp:2414:62: warning: 'QAbstractAxis* QChart::axisY(QAbstractSeries*) const' is deprecated [-Wdeprecated-declarations]
+ 2414 |     auto *axisY = qobject_cast<QValueAxis*>(chartSpeed->axisY());
+      |                                             ~~~~~~~~~~~~~~~~~^~
+In file included from D:/Qt/6.5.3/mingw_64/include/QtCharts/QtCharts:24,
+                 from ../../include/mainwindow.h:11,
+                 from ..\..\src\mainwindow.cpp:8:
+D:/Qt/6.5.3/mingw_64/include/QtCharts/qchart.h:84:38: note: declared here
+   84 |     Q_DECL_DEPRECATED QAbstractAxis *axisY(QAbstractSeries *series = nullptr) const;
+      |                                      ^~~~~
+..\..\src\mainwindow.cpp: In lambda function:
+..\..\src\mainwindow.cpp:3440:30: warning: 'void QChart::setAxisX(QAbstractAxis*, QAbstractSeries*)' is deprecated [-Wdeprecated-declarations]
+ 3440 |         (*chartPtr)->setAxisX(axisX, *seriesPtr);
+      |         ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+In file included from D:/Qt/6.5.3/mingw_64/include/QtCharts/QtCharts:24,
+                 from ../../include/mainwindow.h:11,
+                 from ..\..\src\mainwindow.cpp:8:
+D:/Qt/6.5.3/mingw_64/include/QtCharts/qchart.h:81:28: note: declared here
+   81 |     Q_DECL_DEPRECATED void setAxisX(QAbstractAxis *axis, QAbstractSeries *series = nullptr);
+      |                            ^~~~~~~~
+..\..\src\mainwindow.cpp:3451:30: warning: 'void QChart::setAxisY(QAbstractAxis*, QAbstractSeries*)' is deprecated [-Wdeprecated-declarations]
+ 3451 |         (*chartPtr)->setAxisY(axisY, *seriesPtr);
+      |         ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+In file included from D:/Qt/6.5.3/mingw_64/include/QtCharts/QtCharts:24,
+                 from ../../include/mainwindow.h:11,
+                 from ..\..\src\mainwindow.cpp:8:
+D:/Qt/6.5.3/mingw_64/include/QtCharts/qchart.h:82:28: note: declared here
+   82 |     Q_DECL_DEPRECATED void setAxisY(QAbstractAxis *axis, QAbstractSeries *series = nullptr);
+      |                            ^~~~~~~~
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SERIALPORT_LIB -DQT_XML_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I../../../app -I. -I../../include -ID:/Qt/6.5.3/mingw_64/include -ID:/Qt/6.5.3/mingw_64/include/QtCharts -ID:/Qt/6.5.3/mingw_64/include/QtOpenGLWidgets -ID:/Qt/6.5.3/mingw_64/include/QtPrintSupport -ID:/Qt/6.5.3/mingw_64/include/QtWidgets -ID:/Qt/6.5.3/mingw_64/include/QtOpenGL -ID:/Qt/6.5.3/mingw_64/include/QtGui -ID:/Qt/6.5.3/mingw_64/include/QtSerialPort -ID:/Qt/6.5.3/mingw_64/include/QtXml -ID:/Qt/6.5.3/mingw_64/include/QtCore -Idebug -I. -I/include -ID:/Qt/6.5.3/mingw_64/mkspecs/win32-g++  -o debug\agesoschartwidget.o ..\..\src\agesoschartwidget.cpp
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SERIALPORT_LIB -DQT_XML_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I../../../app -I. -I../../include -ID:/Qt/6.5.3/mingw_64/include -ID:/Qt/6.5.3/mingw_64/include/QtCharts -ID:/Qt/6.5.3/mingw_64/include/QtOpenGLWidgets -ID:/Qt/6.5.3/mingw_64/include/QtPrintSupport -ID:/Qt/6.5.3/mingw_64/include/QtWidgets -ID:/Qt/6.5.3/mingw_64/include/QtOpenGL -ID:/Qt/6.5.3/mingw_64/include/QtGui -ID:/Qt/6.5.3/mingw_64/include/QtSerialPort -ID:/Qt/6.5.3/mingw_64/include/QtXml -ID:/Qt/6.5.3/mingw_64/include/QtCore -Idebug -I. -I/include -ID:/Qt/6.5.3/mingw_64/mkspecs/win32-g++  -o debug\reportwidget.o ..\..\src\reportwidget.cpp
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SERIALPORT_LIB -DQT_XML_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I../../../app -I. -I../../include -ID:/Qt/6.5.3/mingw_64/include -ID:/Qt/6.5.3/mingw_64/include/QtCharts -ID:/Qt/6.5.3/mingw_64/include/QtOpenGLWidgets -ID:/Qt/6.5.3/mingw_64/include/QtPrintSupport -ID:/Qt/6.5.3/mingw_64/include/QtWidgets -ID:/Qt/6.5.3/mingw_64/include/QtOpenGL -ID:/Qt/6.5.3/mingw_64/include/QtGui -ID:/Qt/6.5.3/mingw_64/include/QtSerialPort -ID:/Qt/6.5.3/mingw_64/include/QtXml -ID:/Qt/6.5.3/mingw_64/include/QtCore -Idebug -I. -I/include -ID:/Qt/6.5.3/mingw_64/mkspecs/win32-g++  -o debug\signalprocessor.o ..\..\src\signalprocessor.cpp
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SERIALPORT_LIB -DQT_XML_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I../../../app -I. -I../../include -ID:/Qt/6.5.3/mingw_64/include -ID:/Qt/6.5.3/mingw_64/include/QtCharts -ID:/Qt/6.5.3/mingw_64/include/QtOpenGLWidgets -ID:/Qt/6.5.3/mingw_64/include/QtPrintSupport -ID:/Qt/6.5.3/mingw_64/include/QtWidgets -ID:/Qt/6.5.3/mingw_64/include/QtOpenGL -ID:/Qt/6.5.3/mingw_64/include/QtGui -ID:/Qt/6.5.3/mingw_64/include/QtSerialPort -ID:/Qt/6.5.3/mingw_64/include/QtXml -ID:/Qt/6.5.3/mingw_64/include/QtCore -Idebug -I. -I/include -ID:/Qt/6.5.3/mingw_64/mkspecs/win32-g++  -o debug\bonehealth.o ..\..\src\bonehealth.cpp
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SERIALPORT_LIB -DQT_XML_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I../../../app -I. -I../../include -ID:/Qt/6.5.3/mingw_64/include -ID:/Qt/6.5.3/mingw_64/include/QtCharts -ID:/Qt/6.5.3/mingw_64/include/QtOpenGLWidgets -ID:/Qt/6.5.3/mingw_64/include/QtPrintSupport -ID:/Qt/6.5.3/mingw_64/include/QtWidgets -ID:/Qt/6.5.3/mingw_64/include/QtOpenGL -ID:/Qt/6.5.3/mingw_64/include/QtGui -ID:/Qt/6.5.3/mingw_64/include/QtSerialPort -ID:/Qt/6.5.3/mingw_64/include/QtXml -ID:/Qt/6.5.3/mingw_64/include/QtCore -Idebug -I. -I/include -ID:/Qt/6.5.3/mingw_64/mkspecs/win32-g++  -o debug\utils.o ..\..\src\utils.cpp
+D:\Qt\6.5.3\mingw_64\bin\rcc.exe -name resources --no-zstd ..\..\resources\resources.qrc -o debug\qrc_resources.cpp
+g++ -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -dM -E -o debug\moc_predefs.h D:\Qt\6.5.3\mingw_64\mkspecs\features\data\dummy.cpp
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SERIALPORT_LIB -DQT_XML_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I../../../app -I. -I../../include -ID:/Qt/6.5.3/mingw_64/include -ID:/Qt/6.5.3/mingw_64/include/QtCharts -ID:/Qt/6.5.3/mingw_64/include/QtOpenGLWidgets -ID:/Qt/6.5.3/mingw_64/include/QtPrintSupport -ID:/Qt/6.5.3/mingw_64/include/QtWidgets -ID:/Qt/6.5.3/mingw_64/include/QtOpenGL -ID:/Qt/6.5.3/mingw_64/include/QtGui -ID:/Qt/6.5.3/mingw_64/include/QtSerialPort -ID:/Qt/6.5.3/mingw_64/include/QtXml -ID:/Qt/6.5.3/mingw_64/include/QtCore -Idebug -I. -I/include -ID:/Qt/6.5.3/mingw_64/mkspecs/win32-g++  -o debug\qrc_resources.o debug\qrc_resources.cpp
+D:\Qt\6.5.3\mingw_64\bin\moc.exe -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SERIALPORT_LIB -DQT_XML_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN --include D:/Repository/prj/bonedensity/app/build/debug/debug/moc_predefs.h -ID:/Qt/6.5.3/mingw_64/mkspecs/win32-g++ -ID:/Repository/prj/bonedensity/app -ID:/Repository/prj/bonedensity/app/include -ID:/Qt/6.5.3/mingw_64/include -ID:/Qt/6.5.3/mingw_64/include/QtCharts -ID:/Qt/6.5.3/mingw_64/include/QtOpenGLWidgets -ID:/Qt/6.5.3/mingw_64/include/QtPrintSupport -ID:/Qt/6.5.3/mingw_64/include/QtWidgets -ID:/Qt/6.5.3/mingw_64/include/QtOpenGL -ID:/Qt/6.5.3/mingw_64/include/QtGui -ID:/Qt/6.5.3/mingw_64/include/QtSerialPort -ID:/Qt/6.5.3/mingw_64/include/QtXml -ID:/Qt/6.5.3/mingw_64/include/QtCore -I. -IC:/msys64/ucrt64/include/c++/15.2.0 -IC:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32 -IC:/msys64/ucrt64/include/c++/15.2.0/backward -IC:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include -IC:/msys64/ucrt64/include -IC:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include-fixed ..\..\include\mainwindow.h -o debug\moc_mainwindow.cpp
+D:\Qt\6.5.3\mingw_64\bin\moc.exe -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SERIALPORT_LIB -DQT_XML_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN --include D:/Repository/prj/bonedensity/app/build/debug/debug/moc_predefs.h -ID:/Qt/6.5.3/mingw_64/mkspecs/win32-g++ -ID:/Repository/prj/bonedensity/app -ID:/Repository/prj/bonedensity/app/include -ID:/Qt/6.5.3/mingw_64/include -ID:/Qt/6.5.3/mingw_64/include/QtCharts -ID:/Qt/6.5.3/mingw_64/include/QtOpenGLWidgets -ID:/Qt/6.5.3/mingw_64/include/QtPrintSupport -ID:/Qt/6.5.3/mingw_64/include/QtWidgets -ID:/Qt/6.5.3/mingw_64/include/QtOpenGL -ID:/Qt/6.5.3/mingw_64/include/QtGui -ID:/Qt/6.5.3/mingw_64/include/QtSerialPort -ID:/Qt/6.5.3/mingw_64/include/QtXml -ID:/Qt/6.5.3/mingw_64/include/QtCore -I. -IC:/msys64/ucrt64/include/c++/15.2.0 -IC:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32 -IC:/msys64/ucrt64/include/c++/15.2.0/backward -IC:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include -IC:/msys64/ucrt64/include -IC:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include-fixed ..\..\include\calibrationdialog.h -o debug\moc_calibrationdialog.cpp
+D:\Qt\6.5.3\mingw_64\bin\moc.exe -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SERIALPORT_LIB -DQT_XML_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN --include D:/Repository/prj/bonedensity/app/build/debug/debug/moc_predefs.h -ID:/Qt/6.5.3/mingw_64/mkspecs/win32-g++ -ID:/Repository/prj/bonedensity/app -ID:/Repository/prj/bonedensity/app/include -ID:/Qt/6.5.3/mingw_64/include -ID:/Qt/6.5.3/mingw_64/include/QtCharts -ID:/Qt/6.5.3/mingw_64/include/QtOpenGLWidgets -ID:/Qt/6.5.3/mingw_64/include/QtPrintSupport -ID:/Qt/6.5.3/mingw_64/include/QtWidgets -ID:/Qt/6.5.3/mingw_64/include/QtOpenGL -ID:/Qt/6.5.3/mingw_64/include/QtGui -ID:/Qt/6.5.3/mingw_64/include/QtSerialPort -ID:/Qt/6.5.3/mingw_64/include/QtXml -ID:/Qt/6.5.3/mingw_64/include/QtCore -I. -IC:/msys64/ucrt64/include/c++/15.2.0 -IC:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32 -IC:/msys64/ucrt64/include/c++/15.2.0/backward -IC:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include -IC:/msys64/ucrt64/include -IC:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include-fixed ..\..\include\measurementguidedialog.h -o debug\moc_measurementguidedialog.cpp
+D:\Qt\6.5.3\mingw_64\bin\moc.exe -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SERIALPORT_LIB -DQT_XML_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN --include D:/Repository/prj/bonedensity/app/build/debug/debug/moc_predefs.h -ID:/Qt/6.5.3/mingw_64/mkspecs/win32-g++ -ID:/Repository/prj/bonedensity/app -ID:/Repository/prj/bonedensity/app/include -ID:/Qt/6.5.3/mingw_64/include -ID:/Qt/6.5.3/mingw_64/include/QtCharts -ID:/Qt/6.5.3/mingw_64/include/QtOpenGLWidgets -ID:/Qt/6.5.3/mingw_64/include/QtPrintSupport -ID:/Qt/6.5.3/mingw_64/include/QtWidgets -ID:/Qt/6.5.3/mingw_64/include/QtOpenGL -ID:/Qt/6.5.3/mingw_64/include/QtGui -ID:/Qt/6.5.3/mingw_64/include/QtSerialPort -ID:/Qt/6.5.3/mingw_64/include/QtXml -ID:/Qt/6.5.3/mingw_64/include/QtCore -I. -IC:/msys64/ucrt64/include/c++/15.2.0 -IC:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32 -IC:/msys64/ucrt64/include/c++/15.2.0/backward -IC:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include -IC:/msys64/ucrt64/include -IC:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include-fixed ..\..\include\reportwidget.h -o debug\moc_reportwidget.cpp
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SERIALPORT_LIB -DQT_XML_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I../../../app -I. -I../../include -ID:/Qt/6.5.3/mingw_64/include -ID:/Qt/6.5.3/mingw_64/include/QtCharts -ID:/Qt/6.5.3/mingw_64/include/QtOpenGLWidgets -ID:/Qt/6.5.3/mingw_64/include/QtPrintSupport -ID:/Qt/6.5.3/mingw_64/include/QtWidgets -ID:/Qt/6.5.3/mingw_64/include/QtOpenGL -ID:/Qt/6.5.3/mingw_64/include/QtGui -ID:/Qt/6.5.3/mingw_64/include/QtSerialPort -ID:/Qt/6.5.3/mingw_64/include/QtXml -ID:/Qt/6.5.3/mingw_64/include/QtCore -Idebug -I. -I/include -ID:/Qt/6.5.3/mingw_64/mkspecs/win32-g++  -o debug\moc_calibrationdialog.o debug\moc_calibrationdialog.cpp
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SERIALPORT_LIB -DQT_XML_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I../../../app -I. -I../../include -ID:/Qt/6.5.3/mingw_64/include -ID:/Qt/6.5.3/mingw_64/include/QtCharts -ID:/Qt/6.5.3/mingw_64/include/QtOpenGLWidgets -ID:/Qt/6.5.3/mingw_64/include/QtPrintSupport -ID:/Qt/6.5.3/mingw_64/include/QtWidgets -ID:/Qt/6.5.3/mingw_64/include/QtOpenGL -ID:/Qt/6.5.3/mingw_64/include/QtGui -ID:/Qt/6.5.3/mingw_64/include/QtSerialPort -ID:/Qt/6.5.3/mingw_64/include/QtXml -ID:/Qt/6.5.3/mingw_64/include/QtCore -Idebug -I. -I/include -ID:/Qt/6.5.3/mingw_64/mkspecs/win32-g++  -o debug\moc_measurementguidedialog.o debug\moc_measurementguidedialog.cpp
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SERIALPORT_LIB -DQT_XML_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I../../../app -I. -I../../include -ID:/Qt/6.5.3/mingw_64/include -ID:/Qt/6.5.3/mingw_64/include/QtCharts -ID:/Qt/6.5.3/mingw_64/include/QtOpenGLWidgets -ID:/Qt/6.5.3/mingw_64/include/QtPrintSupport -ID:/Qt/6.5.3/mingw_64/include/QtWidgets -ID:/Qt/6.5.3/mingw_64/include/QtOpenGL -ID:/Qt/6.5.3/mingw_64/include/QtGui -ID:/Qt/6.5.3/mingw_64/include/QtSerialPort -ID:/Qt/6.5.3/mingw_64/include/QtXml -ID:/Qt/6.5.3/mingw_64/include/QtCore -Idebug -I. -I/include -ID:/Qt/6.5.3/mingw_64/mkspecs/win32-g++  -o debug\moc_reportwidget.o debug\moc_reportwidget.cpp
+g++ -c -fno-keep-inline-dllexport -g -std=gnu++1z -Wall -Wextra -Wextra -fexceptions -mthreads -DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1 -DQT_CHARTS_LIB -DQT_OPENGLWIDGETS_LIB -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_SERIALPORT_LIB -DQT_XML_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN -I../../../app -I. -I../../include -ID:/Qt/6.5.3/mingw_64/include -ID:/Qt/6.5.3/mingw_64/include/QtCharts -ID:/Qt/6.5.3/mingw_64/include/QtOpenGLWidgets -ID:/Qt/6.5.3/mingw_64/include/QtPrintSupport -ID:/Qt/6.5.3/mingw_64/include/QtWidgets -ID:/Qt/6.5.3/mingw_64/include/QtOpenGL -ID:/Qt/6.5.3/mingw_64/include/QtGui -ID:/Qt/6.5.3/mingw_64/include/QtSerialPort -ID:/Qt/6.5.3/mingw_64/include/QtXml -ID:/Qt/6.5.3/mingw_64/include/QtCore -Idebug -I. -I/include -ID:/Qt/6.5.3/mingw_64/mkspecs/win32-g++  -o debug\moc_mainwindow.o debug\moc_mainwindow.cpp
+g++ -Wl,-subsystem,windows -mthreads -o debug\BoneDensity.exe @debug\object_script.BoneDensity.Debug D:\Qt\6.5.3\mingw_64\lib\libQt6Charts.a D:\Qt\6.5.3\mingw_64\lib\libQt6OpenGLWidgets.a D:\Qt\6.5.3\mingw_64\lib\libQt6PrintSupport.a D:\Qt\6.5.3\mingw_64\lib\libQt6Widgets.a D:\Qt\6.5.3\mingw_64\lib\libQt6OpenGL.a D:\Qt\6.5.3\mingw_64\lib\libQt6Gui.a D:\Qt\6.5.3\mingw_64\lib\libQt6SerialPort.a D:\Qt\6.5.3\mingw_64\lib\libQt6Xml.a D:\Qt\6.5.3\mingw_64\lib\libQt6Core.a -lmingw32 D:\Qt\6.5.3\mingw_64\lib\libQt6EntryPoint.a -lshell32  
+mingw32-make[1]: Leaving directory 'D:/Repository/prj/bonedensity/app/build/debug'
+D:\Repository\prj\bonedensity\app\build\debug\debug\BoneDensity.exe 64 bit, debug executable
+Skipping plugin qinsighttracker.dll. Use -deploy-insighttracker if you want to use it.
+Adding Qt6Network for qtuiotouchplugin.dll
+Adding Qt6Svg for qsvgicon.dll
+Skipping plugin qtvirtualkeyboardplugin.dll due to disabled dependencies (Qt6Qml Qt6Quick).
+Direct dependencies: Qt6Charts Qt6Core Qt6Gui Qt6OpenGL Qt6OpenGLWidgets Qt6PrintSupport Qt6SerialPort Qt6Widgets Qt6Xml
+All dependencies   : Qt6Charts Qt6Core Qt6Gui Qt6OpenGL Qt6OpenGLWidgets Qt6PrintSupport Qt6SerialPort Qt6Widgets Qt6Xml
+To be deployed     : Qt6Charts Qt6Core Qt6Gui Qt6Network Qt6OpenGL Qt6OpenGLWidgets Qt6PrintSupport Qt6SerialPort Qt6Svg Qt6Widgets Qt6Xml
+Qt6Charts.dll is up to date.
+Qt6Core.dll is up to date.
+Qt6Gui.dll is up to date.
+Qt6Network.dll is up to date.
+Qt6OpenGL.dll is up to date.
+Qt6OpenGLWidgets.dll is up to date.
+Qt6PrintSupport.dll is up to date.
+Qt6SerialPort.dll is up to date.
+Qt6Svg.dll is up to date.
+Qt6Widgets.dll is up to date.
+Qt6Xml.dll is up to date.
+opengl32sw.dll is up to date.
+D3Dcompiler_47.dll is up to date.
+libgcc_s_seh-1.dll is up to date.
+libstdc++-6.dll is up to date.
+libwinpthread-1.dll is up to date.
+qtuiotouchplugin.dll is up to date.
+qsvgicon.dll is up to date.
+qgif.dll is up to date.
+qicns.dll is up to date.
+qico.dll is up to date.
+qjpeg.dll is up to date.
+qsvg.dll is up to date.
+qtga.dll is up to date.
+qtiff.dll is up to date.
+qwbmp.dll is up to date.
+qwebp.dll is up to date.
+qnetworklistmanager.dll is up to date.
+qwindows.dll is up to date.
+qwindowsvistastyle.dll is up to date.
+qcertonlybackend.dll is up to date.
+qopensslbackend.dll is up to date.
+qschannelbackend.dll is up to date.
+Debug build completed: D:\Repository\prj\bonedensity\app\build\debug\debug\BoneDensity.exe

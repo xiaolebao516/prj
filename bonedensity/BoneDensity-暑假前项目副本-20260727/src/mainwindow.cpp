@@ -1,0 +1,4995 @@
+// ======================================================
+// 逐帧调试开关：改为 true 可恢复每帧详细 qDebug 输出
+// （波形数据、首波定位、角度特征、稳定性状态等）
+// 正常使用时保持 false，只看每轮结束的闸门统计汇总
+// ======================================================
+static constexpr bool kDebugPerFrame = false;
+
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
+#include "bonehealth.h"
+#include "agesoschartwidget.h"
+#include "reportwidget.h"
+#include "calibrationdialog.h"
+#include "utils.h"
+
+#include <QtSerialPort/QSerialPortInfo>
+#include <QMessageBox>
+#include <QCloseEvent>
+#include <QDoubleValidator>
+#include <QResizeEvent>
+#include <QtCharts/QValueAxis>
+#include <QRegularExpression>
+#include <QInputDialog>
+#include <QDateTime>
+#include <QCoreApplication>
+#include <QDomElement>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <algorithm>
+#include <cmath> // 确保包含 math 头文件
+#include <QFrame>
+#include <QGridLayout>
+#include <QBoxLayout>
+#include <QPointer>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QTableWidget>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QUuid>
+#include <QAction>
+#include <QMenuBar>
+#include <QSet>
+#include <QStandardPaths>
+#include <QtPrintSupport/QPrintDialog>
+#include <QtPrintSupport/QPrinter>
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+namespace {
+
+int ageOnDate(const QString& birthDay, const QDate& date)
+{
+    const QDate birth = QDate::fromString(birthDay, QStringLiteral("yyyy-MM-dd"));
+    if (!birth.isValid() || !date.isValid() || date < birth) return -1;
+
+    int age = date.year() - birth.year();
+    if (birth.addYears(age) > date) --age;
+    return age;
+}
+
+void installPatientFormLayout(
+    QWidget* page,
+    const QList<QPair<QWidget*, QWidget*>>& rows,
+    const QList<QPushButton*>& buttons)
+{
+    auto* layout = new QGridLayout(page);
+    layout->setContentsMargins(28, 24, 28, 24);
+    layout->setHorizontalSpacing(24);
+    layout->setVerticalSpacing(18);
+    layout->setColumnStretch(0, 1);
+    layout->setColumnMinimumWidth(1, 130);
+    layout->setColumnStretch(2, 3);
+    layout->setColumnStretch(3, 1);
+    layout->setRowStretch(0, 1);
+
+    int rowIndex = 1;
+    for (const auto& row : rows) {
+        QWidget* label = row.first;
+        QWidget* field = row.second;
+        label->setMinimumWidth(120);
+        field->setMinimumSize(320, 42);
+        field->setMaximumWidth(680);
+        field->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        layout->addWidget(label, rowIndex, 1, Qt::AlignVCenter);
+        layout->addWidget(field, rowIndex, 2);
+        ++rowIndex;
+    }
+
+    auto* buttonLayout = new QHBoxLayout();
+    buttonLayout->setContentsMargins(0, 12, 0, 0);
+    buttonLayout->setSpacing(24);
+    buttonLayout->addStretch();
+    for (QPushButton* button : buttons) {
+        button->setMinimumSize(150, 58);
+        button->setMaximumSize(190, 70);
+        buttonLayout->addWidget(button);
+    }
+    buttonLayout->addStretch();
+    layout->addLayout(buttonLayout, rowIndex, 1, 1, 2);
+    layout->setRowStretch(rowIndex + 1, 1);
+}
+
+} // namespace
+
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent),
+    ui(new Ui::MainWindow),
+    serial(new QSerialPort(this))
+{
+    ui->setupUi(this);
+    for (QLineEdit* edit : {ui->eHeight, ui->eWeight,
+                            ui->editHeight, ui->editWeight,
+                            ui->dHeight, ui->dWeight}) {
+        auto* validator = new QDoubleValidator(0.1, 999.9, 1, edit);
+        validator->setNotation(QDoubleValidator::StandardNotation);
+        edit->setValidator(validator);
+    }
+    for (QDateEdit* edit : {ui->eBirth, ui->dateBirth, ui->dBirth}) {
+        edit->setDisplayFormat(QStringLiteral("yyyy-MM-dd"));
+        edit->setMinimumDate(QDate(1900, 1, 1));
+        edit->setMaximumDate(QDate::currentDate());
+    }
+    accountsFilePath = QCoreApplication::applicationDirPath() + "/accounts.xml";
+    QString accountError;
+    if (!accountStore.loadOrInitialize(accountsFilePath, &accountError)) {
+        QMessageBox::warning(this, "账号初始化失败", accountError);
+    }
+    calibrationFilePath = QCoreApplication::applicationDirPath() + "/calibration.xml";
+    QString calibrationError;
+    if (!calibrationStore.loadOrInitialize(calibrationFilePath, &calibrationError)) {
+        QMessageBox::warning(this, QStringLiteral("校准参数加载失败"), calibrationError);
+    } else if (!calibrationError.isEmpty()) {
+        QMessageBox::warning(this, QStringLiteral("校准参数已恢复"), calibrationError);
+    }
+    signalProcessor.probeDistanceCD = calibrationStore.parameters().activeD;
+    calibrationSignalProcessor.probeDistanceCD = calibrationStore.parameters().activeD;
+    QAction* manageAccountsAction = ui->menubar->addAction("账号管理");
+    manageAccountsAction->setObjectName("manageAccountsAction");
+    manageAccountsAction->setVisible(false);
+    connect(manageAccountsAction, &QAction::triggered, this, &MainWindow::manageAccounts);
+
+    // ------------------- 开始美化代码 -------------------
+
+    // 1. 设置主窗口背景色 (告别灰色)
+    this->setStyleSheet("QMainWindow { background-color: #F5F7FA; }");
+
+    // 2. 定义全局样式表 (建议放在单独的 QString 变量中，方便修改)
+    QString qss = R"(
+    /* 全局字体 */
+    QWidget {
+        font-family: 'Microsoft YaHei', 'Segoe UI';
+        font-size: 14px;
+        color: #333333;
+    }
+
+    /* ---------------- 按钮美化 ---------------- */
+    QPushButton {
+        background-color: #FFFFFF;
+        border: 1px solid #DCDFE6;
+        border-radius: 6px;       /* 圆角 */
+        padding: 8px 16px;        /* 内边距，让按钮变胖一点 */
+        color: #606266;
+        font-weight: bold;
+    }
+    QPushButton:hover {
+        background-color: #ECF5FF; /* 悬停变淡蓝 */
+        color: #409EFF;
+        border-color: #C6E2FF;
+    }
+    QPushButton:pressed {
+        background-color: #409EFF; /* 按下变深蓝 */
+        color: #FFFFFF;
+        border-color: #409EFF;
+    }
+    QPushButton:disabled {
+        background-color: #EBEEF5;
+        color: #A8ABB2;
+        border-color: #DCDFE6;
+    }
+
+    /* 特殊按钮：比如"获取波形"、"保存"这种主要操作，可以单独设为蓝色背景 */
+    /* 你需要在 UI 设计器里给这些按钮的 styleSheet 属性单独加，或者用 objectName 区分 */
+    QPushButton#btnAcquireWaveform, QPushButton#btnLogin {
+        background-color: #409EFF;
+        color: white;
+        border: none;
+    }
+    QPushButton#btnAcquireWaveform:hover, QPushButton#btnLogin:hover {
+        background-color: #66B1FF;
+    }
+
+    /* ---------------- 输入框美化 ---------------- */
+    QLineEdit, QDateEdit, QComboBox {
+        border: 1px solid #DCDFE6;
+        border-radius: 4px;
+        padding: 5px;  /* 文字不要紧贴边框 */
+        background-color: #FFFFFF;
+        selection-background-color: #409EFF;
+    }
+    QLineEdit:focus, QDateEdit:focus, QComboBox:focus {
+        border: 1px solid #409EFF; /* 选中时边框变蓝 */
+    }
+
+    /* ---------------- 表格美化 (TableWidget) ---------------- */
+    QTableWidget {
+        background-color: #FFFFFF;
+        border: 1px solid #EBEEF5;
+        gridline-color: #EBEEF5;
+        selection-background-color: #ECF5FF; /* 选中行背景淡蓝 */
+        selection-color: #606266;            /* 选中行文字颜色 */
+    }
+    QHeaderView::section {
+        background-color: #F5F7FA;  /* 表头背景灰白 */
+        border: none;
+        border-bottom: 1px solid #EBEEF5;
+        border-right: 1px solid #EBEEF5;
+        padding: 8px;
+        font-weight: bold;
+    }
+
+    /* ---------------- 标签 ---------------- */
+    QLabel {
+        color: #303133;
+    }
+
+    /* ---------------- 分组框 ---------------- */
+    QGroupBox {
+        border: 1px solid #DCDFE6;
+        border-radius: 6px;
+        margin-top: 10px; /* 给标题留位置 */
+        padding-top: 10px;
+    }
+    QGroupBox::title {
+        subcontrol-origin: margin;
+        subcontrol-position: top left;
+        padding: 0 5px;
+        color: #409EFF; /* 标题蓝色 */
+        font-weight: bold;
+    }
+)";
+
+    // 应用样式表到整个应用程序窗口
+    this->setStyleSheet(qss);
+
+    // ------------------- 结束美化代码 -------------------
+
+    this->setWindowTitle("骨密度仪APP");
+    this->setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
+    //this->showFullScreen();
+    this->showMaximized();
+
+    // ✅ 默认显示主页面
+    ui->stackedWidget->setCurrentWidget(ui->pageLogin);
+
+    connect(&scanTimer, &QTimer::timeout, this, &MainWindow::scanPorts);
+    scanTimer.start(1000);
+    scanPorts();
+
+    //connect(serial, &QSerialPort::readyRead, this, &MainWindow::handleSerialReadyRead);
+    connect(serial, &QSerialPort::errorOccurred, this, &MainWindow::handleSerialError);
+
+    setupChart();
+    setupSpeedChart(); // ✅ 初始化声速趋势图
+    setupSpeedDebugPanel();  // ✅ 初始化声速调试显示区域
+    initProcessPanel();       // 初始化检查过程示意区
+    initLatestResultPanel();  // 初始化右侧最近一次测量结果区
+    setupReportPage();
+
+    updatePatientSelectionUi();
+
+    connect(ui->pushButton, &QPushButton::clicked,
+            this, &MainWindow::on_btnAcquireWaveform_clicked);
+    connect(ui->btnReport, &QPushButton::clicked, this, [this]() {
+        if (!hasCurrentPatient()) {
+            QMessageBox::information(this, "报表", "请先选择患者。");
+            return;
+        }
+        const MeasurementRecord* latest = latestMeasurementForPatient(currentPatient.id);
+        if (!latest) {
+            QMessageBox::information(this, "报表", "当前患者还没有已保存的检测结果。");
+            return;
+        }
+        showReport(currentPatient, *latest);
+    });
+    connect(ui->pushButton_2, &QPushButton::clicked,
+            this, &MainWindow::openCalibrationDialog);
+    // ✅ 初始化滤波器
+    signalProcessor.designFIR(1250000.0, 600000.0, 62500000.0);
+
+    // ✅ 加载患者数据库
+    xmlFilePath = QCoreApplication::applicationDirPath() + "/patients.xml";
+    measurementsFilePath = QCoreApplication::applicationDirPath() + "/measurements.xml";
+    loadPatients();
+    //ui->comboPart->setCurrentIndex(-1);
+    //ui->dPartCombo->setCurrentIndex(-1);
+    refreshTable(patientList);
+    updatePatientSelectionUi();
+
+
+    // ✅ 档案管理按钮连接
+
+    ui->dateBirth->setDisplayFormat("yyyy-MM-dd");
+    ui->dBirth->setDisplayFormat("yyyy-MM-dd");
+    ui->dateCheck->setVisible(false);
+    ui->editDiag->setVisible(false);
+    ui->dCheck->setVisible(false);
+    ui->dDiag->setVisible(false);
+    ui->label_7->setVisible(false);
+    ui->label_8->setVisible(false);
+    ui->label_9->setVisible(false);
+    ui->label_11->setVisible(false);
+    ui->dID->setReadOnly(true);
+    ui->btnSelectPatient->setVisible(false);
+    ui->btnViewHistory->setVisible(false);
+
+    installPatientFormLayout(
+        ui->pagePatientForm,
+        {{ui->label, ui->editName},
+         {ui->label_18, ui->editID},
+         {ui->label_2, ui->comboGender},
+         {ui->label_3, ui->dateBirth},
+         {ui->label_5, ui->editHeight},
+         {ui->label_6, ui->editWeight}},
+        {ui->btnFormSave, ui->btnFormBack});
+    installPatientFormLayout(
+        ui->pagePatientDetail,
+        {{ui->label_16, ui->dName},
+         {ui->label_13, ui->dID},
+         {ui->label_14, ui->dGender},
+         {ui->label_17, ui->dBirth},
+         {ui->label_12, ui->dHeight},
+         {ui->label_10, ui->dWeight}},
+        {ui->btnDetailSave, ui->btnDetailDelete, ui->btnDetailBack});
+
+    initSearchControls(); // ✅ 初始化下拉框
+
+    autoTimer = new QTimer(this);
+    connect(autoTimer,&QTimer::timeout,this,&MainWindow::sendCmd);
+
+    // 自适应屏幕分辨率：设计稿 1920x1080，按屏幕等比缩放
+    QScreen *screen = QGuiApplication::primaryScreen();
+    if (screen) {
+        QRect screenGeo = screen->availableGeometry();
+        int sw = screenGeo.width();
+        int sh = screenGeo.height();
+        if (sw > 0 && sh > 0) {
+            double scaleW = (double)sw / 1920.0;
+            double scaleH = (double)sh / 1080.0;
+            double scale = qMin(scaleW, scaleH);
+            if (scale < 1.0) {
+                this->resize(qRound(1920 * scale), qRound(1080 * scale));
+            }
+            if (scale < 1.0 || sw > 1920) {
+                this->move(screenGeo.x() + (sw - this->width()) / 2,
+                           screenGeo.y() + (sh - this->height()) / 2);
+            }
+        }
+    }
+
+    scheduleResponsiveLayout();
+}
+
+//先登录===============================================================================
+void MainWindow::on_btnLogin_clicked() {
+    QString user = ui->editUsername->text().trimmed();
+    QString pass = ui->editPassword->text();
+
+    ui->lblLoginMsg->clear();
+
+    AccountInfo account;
+    if (accountStore.authenticate(user, pass, &account)) {
+        currentAccount = account;
+        ui->editPassword->clear();
+        if (QAction* action = findChild<QAction*>("manageAccountsAction")) {
+            action->setVisible(currentAccount.role == "admin");
+        }
+        ui->stackedWidget->setCurrentWidget(ui->pageMain);
+        scheduleResponsiveLayout();
+        return;
+    }
+    ui->lblLoginMsg->setText("账号或密码错误，请重试");
+}
+//====================================================================================
+
+MainWindow::~MainWindow() {
+    if (serial->isOpen()) serial->close();
+    delete ui;
+}
+
+void MainWindow::clearFrameAssembly()
+{
+    frameGroups.clear();
+    frameGroupOrder.clear();
+}
+
+void MainWindow::resetDisconnectedAcquisitionState()
+{
+    if (autoTimer && autoTimer->isActive()) autoTimer->stop();
+    autoRunning = false;
+    patientMeasureRunning = false;
+    acquireMode = DebugAcquireMode;
+    rxBuffer.clear();
+    samplesA.clear();
+    samplesB.clear();
+    samplesC.clear();
+    samplesD.clear();
+    chReceived[0] = chReceived[1] = chReceived[2] = chReceived[3] = false;
+    clearFrameAssembly();
+    ui->triggerButton->setText(QStringLiteral("自动采集"));
+    updatePatientSelectionUi();
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    const bool patientMeasurementWasRunning = patientMeasureRunning;
+    const bool patientTimerWasActive =
+        patientMeasurementWasRunning && autoTimer && autoTimer->isActive();
+    const bool incompleteMeasurementWasPresent = hasIncompletePatientRounds();
+
+    if (patientMeasurementWasRunning) {
+        if (autoTimer && autoTimer->isActive()) autoTimer->stop();
+        patientMeasureRunning = false;
+        acquireMode = DebugAcquireMode;
+        updatePatientSelectionUi();
+    }
+
+    const auto resumePatientMeasurement = [this,
+                                           patientMeasurementWasRunning,
+                                           patientTimerWasActive]() {
+        if (!patientMeasurementWasRunning || !serial || !serial->isOpen()) return;
+        rxBuffer.clear();
+        clearFrameAssembly();
+        samplesA.clear();
+        samplesB.clear();
+        samplesC.clear();
+        samplesD.clear();
+        chReceived[0] = chReceived[1] = chReceived[2] = chReceived[3] = false;
+        serial->readAll();
+        acquireMode = PatientMeasureMode;
+        patientMeasureRunning = true;
+        if (patientTimerWasActive) autoTimer->start(80);
+        updatePatientSelectionUi();
+    };
+
+    if (hasPendingMeasurement) {
+        const QMessageBox::StandardButton choice = QMessageBox::warning(
+            this,
+            QStringLiteral("检测结果尚未保存"),
+            QStringLiteral("本次检测结果尚未保存。请选择“重试”再次保存，或明确放弃后退出。"),
+            QMessageBox::Retry | QMessageBox::Discard | QMessageBox::Cancel,
+            QMessageBox::Retry);
+        if (choice == QMessageBox::Retry) {
+            if (trySavePendingMeasurement()) event->accept();
+            else {
+                event->ignore();
+                resumePatientMeasurement();
+            }
+            return;
+        }
+        if (choice == QMessageBox::Discard) {
+            event->accept();
+            return;
+        }
+        event->ignore();
+        resumePatientMeasurement();
+        return;
+    }
+
+    if (incompleteMeasurementWasPresent) {
+        const QMessageBox::StandardButton choice = QMessageBox::warning(
+            this,
+            QStringLiteral("检测尚未完成"),
+            QStringLiteral("当前患者已完成 %1/%2 次测量，本组检测尚未完成。"
+                           "退出会丢失本组进度，是否仍要退出？")
+                .arg(roundSosList.size())
+                .arg(normalMeasureRounds),
+            QMessageBox::Discard | QMessageBox::Cancel,
+            QMessageBox::Cancel);
+        if (choice == QMessageBox::Discard) event->accept();
+        else {
+            event->ignore();
+            resumePatientMeasurement();
+        }
+        return;
+    }
+
+    event->accept();
+}
+
+void MainWindow::manageAccounts()
+{
+    if (currentAccount.role != "admin") return;
+    QDialog dialog(this); dialog.setWindowTitle("账号管理"); dialog.resize(600, 360);
+    QVBoxLayout layout(&dialog); QTableWidget table(&dialog); table.setColumnCount(3);
+    table.setEditTriggers(QAbstractItemView::NoEditTriggers);
+    table.setHorizontalHeaderLabels({"账号", "状态", "角色"});
+    const QList<AccountInfo>& accounts = accountStore.accounts(); table.setRowCount(accounts.size());
+    for (int i=0;i<accounts.size();++i) { table.setItem(i,0,new QTableWidgetItem(accounts[i].username)); table.setItem(i,1,new QTableWidgetItem(accounts[i].enabled?"启用":"停用")); table.setItem(i,2,new QTableWidgetItem(accounts[i].role)); }
+    layout.addWidget(&table); QHBoxLayout buttons; QPushButton add("创建",&dialog), toggle("启用/停用",&dialog), reset("重置密码",&dialog), remove("删除",&dialog), close("关闭",&dialog);
+    buttons.addWidget(&add);buttons.addWidget(&toggle);buttons.addWidget(&reset);buttons.addWidget(&remove);buttons.addStretch();buttons.addWidget(&close);layout.addLayout(&buttons);
+    auto selected = [&table](){ return table.currentRow() >= 0 ? table.item(table.currentRow(),0)->text() : QString(); };
+    connect(&close,&QPushButton::clicked,&dialog,&QDialog::accept);
+    connect(&add,&QPushButton::clicked,&dialog,[this,&dialog](){ bool ok=false; QString name=QInputDialog::getText(&dialog,"创建账号","账号：",QLineEdit::Normal,QString(),&ok); if(!ok)return; QString pass=QInputDialog::getText(&dialog,"创建账号","密码：",QLineEdit::Password,QString(),&ok); if(!ok)return; QString error; if(!accountStore.createUser(name,pass,&error)){QMessageBox::warning(&dialog,"失败",error);return;} dialog.accept(); });
+    connect(&toggle,&QPushButton::clicked,&dialog,[this,&dialog,selected](){QString name=selected();if(name.isEmpty())return;for(const AccountInfo&a:accountStore.accounts())if(a.username==name){QString e;if(!accountStore.setEnabled(name,!a.enabled,&e)){QMessageBox::warning(&dialog,"失败",e);return;}dialog.accept();return;}});
+    connect(&reset,&QPushButton::clicked,&dialog,[this,&dialog,selected](){bool ok=false;QString name=selected();if(name.isEmpty())return;QString pass=QInputDialog::getText(&dialog,"重置密码","新密码：",QLineEdit::Password,QString(),&ok);if(!ok)return;QString e;if(!accountStore.resetPassword(name,pass,&e)){QMessageBox::warning(&dialog,"失败",e);return;}dialog.accept();});
+    connect(&remove,&QPushButton::clicked,&dialog,[this,&dialog,selected](){QString name=selected();if(name.isEmpty()||QMessageBox::question(&dialog,"确认删除","确定删除账号？")!=QMessageBox::Yes)return;QString e;if(!accountStore.deleteUser(name,&e)){QMessageBox::warning(&dialog,"失败",e);return;}dialog.accept();});
+    dialog.exec();
+}
+
+void MainWindow::openCalibrationDialog()
+{
+    if (patientMeasureRunning) {
+        QMessageBox::information(this,
+                                 QStringLiteral("正在检测"),
+                                 QStringLiteral("请先停止当前患者检测，再进入探头校准。"));
+        return;
+    }
+
+    if (hasIncompletePatientRounds()) {
+        QMessageBox::information(
+            this,
+            QStringLiteral("患者检测尚未完成"),
+            QStringLiteral("当前患者已完成 %1/%2 次测量。请先完成本组检测，"
+                           "避免同一组测量混用不同的校准参数。")
+                .arg(roundSosList.size())
+                .arg(normalMeasureRounds));
+        return;
+    }
+
+    if (autoRunning) {
+        autoTimer->stop();
+        autoRunning = false;
+        ui->triggerButton->setText(QStringLiteral("自动采集"));
+        updatePatientSelectionUi();
+    }
+
+    CalibrationDialog dialog(&calibrationStore, currentAccount.username, this);
+    calibrationDialog = &dialog;
+    connect(&dialog, &CalibrationDialog::acquisitionStartRequested,
+            this, &MainWindow::startCalibrationAcquisition);
+    connect(&dialog, &CalibrationDialog::acquisitionStopRequested,
+            this, &MainWindow::stopCalibrationAcquisition);
+    connect(&dialog, &CalibrationDialog::activeDChanged, this, [this](double activeD) {
+        signalProcessor.probeDistanceCD = activeD;
+        calibrationSignalProcessor.probeDistanceCD = activeD;
+    });
+    dialog.exec();
+    stopCalibrationAcquisition();
+    calibrationDialog = nullptr;
+}
+
+void MainWindow::startCalibrationAcquisition(double processingD)
+{
+    if (!serial->isOpen()) {
+        if (calibrationDialog) {
+            calibrationDialog->notifyAcquisitionUnavailable(
+                QStringLiteral("设备未连接。请先连接骨密度仪，再重新开始本次采集。"));
+        }
+        return;
+    }
+
+    rxBuffer.clear();
+    clearFrameAssembly();
+    samplesA.clear();
+    samplesB.clear();
+    samplesC.clear();
+    samplesD.clear();
+    chReceived[0] = chReceived[1] = chReceived[2] = chReceived[3] = false;
+    serial->readAll();
+    calibrationSignalProcessor.probeDistanceCD = processingD;
+    acquireMode = CalibrationAcquireMode;
+    autoTimer->start(80);
+}
+
+void MainWindow::stopCalibrationAcquisition()
+{
+    if (autoTimer && autoTimer->isActive() && acquireMode == CalibrationAcquireMode) {
+        autoTimer->stop();
+    }
+    if (acquireMode == CalibrationAcquireMode) acquireMode = DebugAcquireMode;
+    rxBuffer.clear();
+    clearFrameAssembly();
+    chReceived[0] = chReceived[1] = chReceived[2] = chReceived[3] = false;
+    calibrationSignalProcessor.probeDistanceCD = calibrationStore.parameters().activeD;
+}
+
+// ================= 串口扫描等原有代码 =======================================================================================
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    QMainWindow::resizeEvent(event);
+
+    if (!ui || !ui->pageMain || !ui->mainBodyWidget) return;
+
+    const int pageWidth = ui->pageMain->width();
+    const int pageHeight = ui->pageMain->height();
+    if (pageWidth <= 0 || pageHeight <= 0) return;
+
+    const int margin = 10;
+    const int toolbarHeight = 62;
+    const int bodyTop = toolbarHeight + 10;
+    const int bodyHeight = qMax(1, pageHeight - bodyTop - margin);
+    const int bodyWidth = qMax(1, pageWidth - margin * 2);
+
+    ui->layoutWidget_2->setGeometry(margin, 0, bodyWidth, toolbarHeight);
+    ui->mainBodyWidget->setGeometry(margin, bodyTop, bodyWidth, bodyHeight);
+    ui->layoutWidget->setGeometry(ui->mainBodyWidget->rect());
+
+    // The child layouts are updated by Qt after this event. Adjust them once more
+    // on the next event-loop turn so the first display uses final parent sizes.
+    QTimer::singleShot(0, this, [this]() {
+        if (!ui || !ui->mainBodyWidget) return;
+
+        ui->layoutWidget_3->setGeometry(ui->grpWaveArea->contentsRect());
+
+        const QRect speedRect = ui->grpSpeedArea->contentsRect();
+        QFrame *speedPanel = ui->grpSpeedArea->findChild<QFrame*>("speedDebugPanel");
+        const int panelHeight = speedPanel ? 52 : 0;
+        const int panelGap = speedPanel ? 4 : 0;
+        if (speedPanel) {
+            speedPanel->setGeometry(speedRect.x(), speedRect.y(),
+                                    speedRect.width(), panelHeight);
+        }
+        ui->chartViewSpeed->setGeometry(speedRect.x(),
+                                        speedRect.y() + panelHeight + panelGap,
+                                        speedRect.width(),
+                                        qMax(1, speedRect.height() - panelHeight - panelGap));
+
+        ui->chartViewReference->setGeometry(ui->grpReferenceCurveArea->contentsRect());
+
+        // The right column contains fixed-position child widgets in the .ui file.
+        // Recalculate their vertical areas so the image remains visible at smaller heights.
+        const QRect rightRect = ui->rightColumnWidget->rect();
+        const int rightWidth = qMax(1, rightRect.width());
+        const int rightHeight = qMax(1, rightRect.height());
+        const int infoHeight = qMin(341, qMax(341, rightHeight * 38 / 100));
+        const int resultHeight = qMin(331, qMax(260, rightHeight * 34 / 100));
+        const int imageY = infoHeight + resultHeight;
+        const int imageHeight = qMax(1, rightHeight - imageY);
+
+        ui->grpPatientInfoRight->setGeometry(0, 0, rightWidth, infoHeight);
+        ui->grpLatestResultRight->setGeometry(0, infoHeight, rightWidth, resultHeight);
+        ui->grpPartImageRight->setGeometry(0, imageY, rightWidth, imageHeight);
+        ui->label_32->setGeometry(ui->grpPartImageRight->contentsRect());
+    });
+}
+
+void MainWindow::scheduleResponsiveLayout()
+{
+    QTimer::singleShot(0, this, [this]() {
+        if (!ui) return;
+        QResizeEvent event(size(), size());
+        resizeEvent(&event);
+    });
+}
+
+void MainWindow::scanPorts() {
+    QString current = ui->comboPort->currentData().toString();
+    ui->comboPort->blockSignals(true);
+    ui->comboPort->clear();
+
+    const auto infos = QSerialPortInfo::availablePorts();
+    for (const QSerialPortInfo &info : infos) {
+        // 文本：COM11 - USB Serial Device
+        // data：COM11   ✅ 只存端口名
+        ui->comboPort->addItem(info.portName() + " - " + info.description(),
+                               info.portName());
+    }
+
+    int idx = ui->comboPort->findData(current);
+    if (idx >= 0) ui->comboPort->setCurrentIndex(idx);
+    ui->comboPort->blockSignals(false);
+}
+
+
+void MainWindow::on_connectButton_clicked() {
+    if (!serial->isOpen()) {
+
+        QString portName = ui->comboPort->currentData().toString();
+        if (portName.isEmpty()) {
+            QMessageBox::warning(this, "无法连接设备", "请先选择设备端口，再点击“连接”。");
+            return;
+        }
+
+        serial->setPortName(portName);
+        serial->setBaudRate(QSerialPort::Baud115200);
+        serial->setDataBits(QSerialPort::Data8);
+        serial->setParity(QSerialPort::NoParity);
+        serial->setStopBits(QSerialPort::OneStop);
+        serial->setFlowControl(QSerialPort::NoFlowControl);
+
+        serial->setReadBufferSize(0);              // 可选
+
+        // ⭐⭐⭐ 关键一行：关闭文本模式的 LF ↔ CRLF 自动转换
+        serial->setTextModeEnabled(false);   // ⭐⭐ 最关键！！！
+
+        if (serial->open(QIODevice::ReadWrite)) {
+            serial->setDataTerminalReady(true); // 拉高 DTR，告诉 Pico "我准备好了"
+            serial->setRequestToSend(false);     // 拉高 RTS (部分固件也需要这个)
+
+
+
+
+            // ★★ 必须加的三行，解决 USB CDC 卡住的问题
+            serial->clear(QSerialPort::AllDirections);
+            serial->flush();
+            serial->readAll();
+            serial->waitForReadyRead(10);
+            serial->readAll();
+
+            rxBuffer.clear();
+            clearFrameAssembly();
+            chReceived[0] = chReceived[1] = chReceived[2] = chReceived[3] = false;
+            serialErrorHandled = false;
+
+            qDebug() << "Serial opened on" << portName;
+            qDebug() << "Serial actually opened:" << serial->isOpen();
+            qDebug() << "Error:" << serial->error();
+
+            ui->connectButton->setText("断开连接");
+
+            // 允许重复连接流程，但同一串口只保留一个 readyRead 连接。
+            connect(serial, &QSerialPort::readyRead,
+                    this, &MainWindow::handleSerialReadyRead,
+                    Qt::UniqueConnection);
+            updatePatientSelectionUi();
+
+        } else {
+            QMessageBox::warning(this,
+                                 "无法连接设备",
+                                 "设备连接失败。\n请检查 USB 是否插好、设备是否被其他程序占用，然后重试。");
+            return;
+        }
+
+    } else {
+        serial->close();
+        serialErrorHandled = false;
+        ui->connectButton->setText("连接");
+        resetDisconnectedAcquisitionState();
+    }
+}
+
+
+
+void MainWindow::on_triggerButton_clicked()
+{
+    if (patientMeasureRunning) {
+        // 检测中点击“获取波形”按钮 = 停止检测
+        stopPatientMeasurement();
+        resetOneRoundMeasurementState();
+        resetBoneLagStability();
+        resetGateStats();
+
+        ui->barPairA->setValue(500);
+        ui->barPairB->setValue(500);
+        ui->barMeasureProgress->setValue(0);
+        ui->barMeasureProgress->setFormat("有效值：%v / %m");
+        ui->lblPairAValue->setText("D=--\n目标=10.0");
+        ui->lblPairBValue->setText("G=--\n目标=0.0");
+        ui->lblProcessStatus->setText("检测已手动停止");
+        ui->lblProcessStatus->setStyleSheet(
+            "font-size: 12px; color: #E6A23C; font-weight: bold;"
+            );
+        return;
+    }
+
+    acquireMode = DebugAcquireMode;
+
+    if (!autoRunning) {
+        autoTimer->start(80);
+        ui->triggerButton->setText("停止自动采集");
+        autoRunning = true;
+    } else {
+        autoTimer->stop();
+        ui->triggerButton->setText("自动采集");
+        autoRunning = false;
+    }
+    updatePatientSelectionUi();
+}
+
+void MainWindow::sendCmd() {
+    if (!serial->isOpen()) return;
+
+    quint16 idx16 = nextFrameIdx++;
+
+    QByteArray cmd;
+    cmd.append((char)0xA5);
+    cmd.append((char)0x5A);
+
+    // gain 小端
+    cmd.append((char)(globalGain & 0xFF));
+    cmd.append((char)((globalGain >> 8) & 0xFF));
+
+    // frame_idx 小端（16bit）
+    // ✅ 修复：原Lambda代码只发了1个字节，这里必须发2个字节
+    cmd.append((char)(idx16 & 0xFF));
+    cmd.append((char)((idx16 >> 8) & 0xFF));
+
+    serial->write(cmd);
+    // 注意：自动模式下不要加 waitForBytesWritten，会阻塞界面
+    // 也不要在这里 clear() rxBuffer，否则会把正在接收的数据清掉
+}
+
+//=====================发命令==============================================================
+void MainWindow::on_btnAcquireWaveform_clicked()
+{
+    if (patientMeasureRunning) {
+        // 检测中点击"获取波形" = 停止检测
+        stopPatientMeasurement();
+        resetOneRoundMeasurementState();
+        resetBoneLagStability();
+        resetGateStats();
+
+        ui->barPairA->setValue(500);
+        ui->barPairB->setValue(500);
+        ui->barMeasureProgress->setValue(0);
+        ui->barMeasureProgress->setFormat("有效值：%v / %m");
+        ui->lblPairAValue->setText("D=--\n目标=10.0");
+        ui->lblPairBValue->setText("G=--\n目标=0.0");
+        ui->lblProcessStatus->setText("检测已手动停止");
+        ui->lblProcessStatus->setStyleSheet(
+            "font-size: 12px; color: #E6A23C; font-weight: bold;"
+            );
+        return;
+    }
+
+    acquireMode = DebugAcquireMode;
+
+    if (!serial->isOpen()) {
+        QMessageBox::warning(this, "设备未连接", "请先点击“连接”，连接设备后再获取波形。");
+        return;
+    }
+
+    quint16 idx16 = nextFrameIdx++;
+
+    QByteArray cmd;
+    cmd.append(char(0xA5));
+    cmd.append(char(0x5A));
+
+    cmd.append(char(globalGain & 0xFF));
+    cmd.append(char((globalGain >> 8) & 0xFF));
+
+    cmd.append(char(idx16 & 0xFF));
+    cmd.append(char((idx16 >> 8) & 0xFF));
+
+    rxBuffer.clear();
+    serial->write(cmd);
+    serial->waitForBytesWritten(50);
+
+    qDebug() << "TX CMD" << cmd.toHex(' ');
+
+    samplesA.clear();
+    samplesB.clear();
+    samplesC.clear();
+    samplesD.clear();
+
+    chReceived[0] = chReceived[1] = chReceived[2] = chReceived[3] = false;
+}
+
+bool MainWindow::hasCurrentPatient() const
+{
+    return !currentPatient.id.trimmed().isEmpty()
+    && !currentPatient.name.trimmed().isEmpty();
+}
+
+void MainWindow::startPatientMeasurement(int targetRounds)
+{
+    if (!hasCurrentPatient()) {
+        pendingStartAfterPatientInfo = false;
+
+        clearNewForm();
+        ui->stackedWidget->setCurrentWidget(ui->pagePatientSelect);
+        return;
+    }
+
+    const QDate birthDate =
+        QDate::fromString(currentPatient.birthDay, QStringLiteral("yyyy-MM-dd"));
+    if (!birthDate.isValid() || birthDate > QDate::currentDate()) {
+        QMessageBox::warning(
+            this,
+            QStringLiteral("日期异常"),
+            QStringLiteral("患者出生日期无效，或当前 Windows 系统日期早于患者出生日期。"
+                           "请先核对患者档案和电脑日期，再开始检测。"));
+        return;
+    }
+
+    if (!serial->isOpen()) {
+        QMessageBox::warning(this, "串口未连接", "请先连接串口设备。");
+        return;
+    }
+
+    rxBuffer.clear();
+    clearFrameAssembly();
+    samplesA.clear();
+    samplesB.clear();
+    samplesC.clear();
+    samplesD.clear();
+    chReceived[0] = chReceived[1] = chReceived[2] = chReceived[3] = false;
+    serial->readAll();
+
+    if (roundSosList.size() >= normalMeasureRounds) {
+        resetPatientMeasurementState(normalMeasureRounds);
+    }
+    if (roundSosList.size() >= normalMeasureRounds) {
+        QMessageBox::information(this,
+                                 "检测已完成",
+                                 "当前被检者已经完成 5 次测量。");
+        return;
+    }
+
+    // 关闭上一轮完成提示
+    closeRoundFinishedTip();
+
+    // 如果之前 trigger 正在调试采集，先停掉
+    if (autoRunning) {
+        autoTimer->stop();
+        autoRunning = false;
+        ui->triggerButton->setText("自动采集");
+    }
+
+    acquireMode = PatientMeasureMode;
+    patientMeasureRunning = true;
+    updatePatientSelectionUi();
+    currentMeasureTargetRounds = qMax(1, targetRounds);
+
+    // 只重置当前这一轮，不清空 roundSosList
+    resetOneRoundMeasurementState();
+
+    int nextRound = roundSosList.size() + 1;
+
+    updatePatientSelectionUi();
+    ui->btnPatientInfo->setStyleSheet("");  // 恢复默认样式，确保可点击
+
+    ui->lblProcessStatus->setText(
+        QString("正在检测：第 %1/%2 次，请保持探头与桡骨平行")
+            .arg(nextRound)
+            .arg(normalMeasureRounds)
+        );
+
+    ui->lblProcessStatus->setStyleSheet(
+        "font-size: 12px; color: #409EFF; font-weight: bold;"
+        );
+
+    autoTimer->start(80);
+    updatePatientSelectionUi();
+}
+
+void MainWindow::stopPatientMeasurement()
+{
+    if (autoTimer->isActive()) {
+        autoTimer->stop();
+    }
+
+    patientMeasureRunning = false;
+    acquireMode = DebugAcquireMode;
+    updatePatientSelectionUi();
+
+    updatePatientSelectionUi();
+}
+
+// Keep the dedicated measurement button synchronized after the legacy reset.
+void MainWindow::resetPatientMeasurementState(int targetRounds)
+{
+    currentMeasureTargetRounds = qMax(1, targetRounds);
+    resetAllPatientMeasurementData();
+}
+
+void MainWindow::resetAllPatientMeasurementData()
+{
+    if (autoTimer && autoTimer->isActive()) {
+        autoTimer->stop();
+    }
+    autoRunning = false;
+    acquireMode = DebugAcquireMode;
+
+    currentRoundSosList.clear();
+    currentRoundAList.clear();
+    currentRoundBList.clear();
+    currentRoundCorrAList.clear();
+    currentRoundCorrBList.clear();
+    currentRoundPairMidGapList.clear();
+    currentRoundSignedLagDiffList.clear();
+
+    roundSosList.clear();
+    roundAList.clear();
+    roundBList.clear();
+    candidateRoundList.clear();
+
+    processValidCount = 0;
+
+    // ✅ 新增：清空正式测量稳定 lag 窗口
+    resetBoneLagStability();
+    resetGateStats();
+    lastFrameBJumpOk = false;
+    lastFrameBoundaryOk = false;
+    lastFrameDiffOk = false;
+    lastFrameDirectionOk = false;
+    lastFrameCorrOk = false;
+    lastFrameAngleSignedDiffOk = false;
+    lastFrameAnglePairMidGapOk = false;
+    lastFrameAngleOk = false;
+    lastFrameStableOk = false;
+    lastFrameStableState = 0;
+
+    closeRoundFinishedTip();
+
+    ui->barPairA->setValue(500);
+    ui->barPairB->setValue(500);
+
+
+    ui->barMeasureProgress->setRange(0, processValidTarget);
+    ui->barMeasureProgress->setValue(0);
+    ui->barMeasureProgress->setFormat("有效值：%v / %m");
+    ui->barMeasureProgress->setTextVisible(true);
+
+    ui->lblPairAValue->setText("D=--\n目标=10.0");
+    ui->lblPairBValue->setText("G=--\n目标=0.0");
+
+    ui->lblProcessStatus->setText("等待开始测量");
+    ui->lblProcessStatus->setStyleSheet(
+        "font-size: 12px; color: #606266;"
+        );
+
+    if (seriesSpeed) {
+        seriesSpeed->clear();
+    }
+
+    speedPointIndex = 0;
+    updatePatientSelectionUi();
+}
+
+void MainWindow::resetOneRoundMeasurementState()
+{
+    updatePatientSelectionUi();
+    currentRoundSosList.clear();
+    currentRoundAList.clear();
+    currentRoundBList.clear();
+    currentRoundCorrAList.clear();
+    currentRoundCorrBList.clear();
+    currentRoundPairMidGapList.clear();
+    currentRoundSignedLagDiffList.clear();
+
+    processValidCount = 0;
+
+    // ✅ 新增：每一轮正式测量开始时，清空最近 lagB 稳定性窗口和门控统计
+    resetBoneLagStability();
+    resetGateStats();
+
+    ui->barPairA->setValue(500);
+    ui->barPairB->setValue(500);
+
+    ui->barMeasureProgress->setRange(0, processValidTarget);
+    ui->barMeasureProgress->setValue(0);
+    ui->barMeasureProgress->setFormat("有效值：%v / %m");
+    ui->barMeasureProgress->setTextVisible(true);
+
+    ui->lblPairAValue->setText("D=--\n目标=10.0");
+    ui->lblPairBValue->setText("G=--\n目标=0.0");
+
+    if (seriesSpeed) {
+        seriesSpeed->clear();
+    }
+
+    speedPointIndex = 0;
+}
+
+// The caller may have stopped a measurement before resetting this round.
+void MainWindow::showRoundFinishedTip(int finishedRounds, int totalRounds)
+{
+    closeRoundFinishedTip();
+
+    measureTipBox = new QMessageBox(this);
+    measureTipBox->setIcon(QMessageBox::Information);
+    measureTipBox->setWindowTitle("本次测量完成");
+
+    measureTipBox->setText(
+        QString("第 %1/%2 次测量完成。\n\n请再次点击「开始检测」进行下一次测量。")
+            .arg(finishedRounds)
+            .arg(totalRounds)
+        );
+
+    // 关键 1：不放 OK 按钮，只作为提示窗口
+    measureTipBox->setStandardButtons(QMessageBox::NoButton);
+
+    // 关键 2：必须设置为非模态，否则它可能会挡住主窗口，导致你点不了"开始检测"
+    measureTipBox->setModal(false);
+    measureTipBox->setWindowModality(Qt::NonModal);
+
+    // 关键 3：让它像一个小提示窗口，不要抢占整个应用
+    measureTipBox->setWindowFlags(
+        measureTipBox->windowFlags()
+        | Qt::Tool
+        | Qt::WindowStaysOnTopHint
+        );
+
+    measureTipBox->setAttribute(Qt::WA_DeleteOnClose);
+
+    connect(measureTipBox, &QObject::destroyed, this, [this]() {
+        measureTipBox = nullptr;
+    });
+
+    // 显示在主窗口中间偏上位置，避免挡住"开始检测"按钮
+    measureTipBox->show();
+
+    QPoint center = this->geometry().center();
+    int x = center.x() - measureTipBox->width() / 2;
+    int y = this->geometry().top() + 120;
+    measureTipBox->move(x, y);
+}
+
+void MainWindow::closeRoundFinishedTip()
+{
+    if (measureTipBox) {
+        QMessageBox *box = measureTipBox;
+        measureTipBox = nullptr;
+
+        box->hide();
+        box->deleteLater();
+    }
+}
+
+void MainWindow::handlePatientMeasureValue(double sosA,
+                                           double sosB,
+                                           double sosAvg,
+                                           int lagA,
+                                           int lagB,
+                                           int diffLag,
+                                           double pairMidGap,
+                                           double corrA,
+                                           double corrB,
+                                           bool strictValid)
+{
+    if (!patientMeasureRunning || acquireMode != PatientMeasureMode) {
+        return;
+    }
+
+    updateProcessPanel(
+        sosA,
+        sosB,
+        lagA,
+        lagB,
+        diffLag,
+        pairMidGap,
+        strictValid
+        );
+
+    if (!strictValid) {
+        return;
+    }
+
+    currentRoundSosList.append(sosAvg);
+    currentRoundAList.append(sosA);
+    currentRoundBList.append(sosB);
+
+    currentRoundCorrAList.append(corrA);
+    currentRoundCorrBList.append(corrB);
+
+    // ✅ 新增：保存这一帧的姿态特征
+    currentRoundPairMidGapList.append(pairMidGap);
+    currentRoundSignedLagDiffList.append(lagA - lagB);
+
+    if (kDebugPerFrame) {
+        qDebug() << "Patient frame accepted:"
+                 << "count =" << currentRoundSosList.size()
+                 << "sosAvg =" << sosAvg
+                 << "sosA =" << sosA
+                 << "sosB =" << sosB
+                 << "lagA =" << lagA
+                 << "lagB =" << lagB
+                 << "diffLag =" << diffLag
+                 << "signedLagDiff =" << (lagA - lagB)
+                 << "pairMidGap =" << pairMidGap
+                 << "corrA =" << corrA
+                 << "corrB =" << corrB;
+    }
+
+    if (currentRoundSosList.size() >= processValidTarget) {
+        finishOnePatientRound();
+    }
+}
+
+void MainWindow::finishOnePatientRound()
+{
+    double oneRoundSos = Utils::trimmedMeanValue(currentRoundSosList, 0.2);
+    double oneRoundA   = Utils::trimmedMeanValue(currentRoundAList, 0.2);
+    double oneRoundB   = Utils::trimmedMeanValue(currentRoundBList, 0.2);
+
+    double oneRoundCorrA = Utils::trimmedMeanValue(currentRoundCorrAList, 0.2);
+    double oneRoundCorrB = Utils::trimmedMeanValue(currentRoundCorrBList, 0.2);
+
+    // ✅ 新增：这一轮的平均姿态特征
+    double oneRoundPairMidGap =
+        Utils::trimmedMeanValue(currentRoundPairMidGapList, 0.2);
+
+    double oneRoundSignedLagDiff =
+        Utils::trimmedMeanValue(currentRoundSignedLagDiffList, 0.2);
+
+    bool oneRoundAngleSignedDiffOk =
+        (oneRoundSignedLagDiff >= mCfg.angleSignedDiffMin &&
+         oneRoundSignedLagDiff <= mCfg.angleSignedDiffMax);
+
+    bool oneRoundPairMidGapOk =
+        (oneRoundPairMidGap >= mCfg.anglePairMidGapMin &&
+         oneRoundPairMidGap <= mCfg.anglePairMidGapMax);
+
+    bool oneRoundAngleOk =
+        (!enablePatientAngleGate) ||
+        (oneRoundAngleSignedDiffOk && oneRoundPairMidGapOk);
+
+    qDebug() << "One patient round candidate:"
+             << "sos =" << oneRoundSos
+             << "A =" << oneRoundA
+             << "B =" << oneRoundB
+             << "corrA =" << oneRoundCorrA
+             << "corrB =" << oneRoundCorrB
+             << "pairMidGap =" << oneRoundPairMidGap
+             << "signedLagDiff =" << oneRoundSignedLagDiff
+             << "oneRoundAngleSignedDiffOk =" << oneRoundAngleSignedDiffOk
+             << "oneRoundPairMidGapOk =" << oneRoundPairMidGapOk
+             << "oneRoundAngleOk =" << oneRoundAngleOk
+             << "mCfg.roundCorrAMin =" << mCfg.roundCorrAMin
+             << "mCfg.roundCorrBMin =" << mCfg.roundCorrBMin;
+
+    // ======================================================
+    // 新增：整轮质量门槛
+    //
+    // 目的：
+    // 即使某些帧勉强通过了单帧 corrOk，
+    // 如果整轮平均相关质量不够好，说明这一轮很可能是
+    // "稳定但位置不准 / 波形质量差"的测量，直接丢弃。
+    // ======================================================
+    if (oneRoundCorrB < mCfg.roundCorrBMin ||
+        oneRoundCorrA < mCfg.roundCorrAMin ||
+        !oneRoundAngleOk) {
+        qDebug() << "One patient round rejected by quality:"
+                 << "sos =" << oneRoundSos
+                 << "corrA =" << oneRoundCorrA
+                 << "corrB =" << oneRoundCorrB;
+        printGateStats();
+
+        currentRoundSosList.clear();
+        currentRoundAList.clear();
+        currentRoundBList.clear();
+        currentRoundCorrAList.clear();
+        currentRoundCorrBList.clear();
+        currentRoundPairMidGapList.clear();
+        currentRoundSignedLagDiffList.clear();
+
+        processValidCount = 0;
+        ui->barMeasureProgress->setValue(0);
+        ui->barMeasureProgress->setFormat("有效值：%v / %m");
+        ui->barMeasureProgress->setTextVisible(true);
+
+        // 本轮失败后，停止采集，让用户重新点"开始检测"并重新调整探头
+        stopPatientMeasurement();
+
+        ui->lblProcessStatus->setText(
+            QString("本次小测量姿态/质量不足，已丢弃：corrA=%1，corrB=%2，pairMidGap=%3，lagA-lagB=%4。请重新调整探头。")
+                .arg(oneRoundCorrA, 0, 'f', 2)
+                .arg(oneRoundCorrB, 0, 'f', 2)
+                .arg(oneRoundPairMidGap, 0, 'f', 1)
+                .arg(oneRoundSignedLagDiff, 0, 'f', 1)
+            );
+        ui->lblProcessStatus->setStyleSheet(
+            "font-size: 12px; color: #E6A23C; font-weight: bold;"
+            );
+
+        showRoundFinishedTip(roundSosList.size(), normalMeasureRounds);
+        return;
+    }
+
+    RoundCandidate cand;
+    cand.sos = oneRoundSos;
+    cand.a = oneRoundA;
+    cand.b = oneRoundB;
+    cand.corrA = oneRoundCorrA;
+    cand.corrB = oneRoundCorrB;
+
+    candidateRoundList.append(cand);
+
+    // 从所有候选小测量中，重建"最大一致簇"。
+    // 离群小测量不会进入 roundSosList。
+    Utils::rebuildAcceptedRoundsFromCandidates(candidateRoundList, roundSosList,
+        roundAList, roundBList, roundClusterTolerance);
+
+    int finished = roundSosList.size();
+
+    qDebug() << "One patient round accepted:"
+             << "acceptedRoundCount =" << finished
+             << "candidateCount =" << candidateRoundList.size()
+             << "sos =" << oneRoundSos
+             << "A =" << oneRoundA
+             << "B =" << oneRoundB
+             << "corrA =" << oneRoundCorrA
+             << "corrB =" << oneRoundCorrB;
+    printGateStats();
+
+    // 当前轮清零，但不清空 roundSosList / candidateRoundList
+    currentRoundSosList.clear();
+    currentRoundAList.clear();
+    currentRoundBList.clear();
+    currentRoundCorrAList.clear();
+    currentRoundCorrBList.clear();
+    currentRoundPairMidGapList.clear();
+    currentRoundSignedLagDiffList.clear();
+
+    processValidCount = 0;
+    ui->barMeasureProgress->setValue(0);
+    ui->barMeasureProgress->setFormat("有效值：%v / %m");
+
+    // 本轮完成后立刻停止采集，恢复"开始检测"按钮
+    stopPatientMeasurement();
+
+    // 如果已经完成 5 次，直接生成最终结果
+    if (finished >= normalMeasureRounds) {
+        finishAllPatientRounds();
+        return;
+    }
+
+    // 还没满 5 次：停住，等待再次点击「开始检测」
+    ui->lblProcessStatus->setText(
+        QString("本次小测量完成。有效主簇：%1/%2，候选次数：%3。请再次点击「开始检测」。")
+            .arg(finished)
+            .arg(normalMeasureRounds)
+            .arg(candidateRoundList.size())
+        );
+
+    ui->lblProcessStatus->setStyleSheet(
+        "font-size: 12px; color: #409EFF; font-weight: bold;"
+        );
+
+    showRoundFinishedTip(finished, normalMeasureRounds);
+}
+
+void MainWindow::finishAllPatientRounds()
+{
+    closeRoundFinishedTip();
+
+    if (hasPendingMeasurement) {
+        stopPatientMeasurement();
+        ui->lblProcessStatus->setText(
+            QStringLiteral("上一次检测结果尚未保存，请先点击“保存结果”。"));
+        ui->lblProcessStatus->setStyleSheet(
+            "font-size: 12px; color: #E6A23C; font-weight: bold;");
+        updatePatientSelectionUi();
+        return;
+    }
+
+    if (roundSosList.size() < normalMeasureRounds) {
+        ui->lblProcessStatus->setText(
+            QString("有效小测量不足：%1/%2，请继续测量。")
+                .arg(roundSosList.size())
+                .arg(normalMeasureRounds)
+            );
+        ui->lblProcessStatus->setStyleSheet(
+            "font-size: 12px; color: #E6A23C; font-weight: bold;"
+            );
+        return;
+    }
+
+    double finalSos = Utils::trimmedMeanValue(roundSosList, 0.2);
+    double finalA   = Utils::trimmedMeanValue(roundAList, 0.2);
+    double finalB   = Utils::trimmedMeanValue(roundBList, 0.2);
+
+    stopPatientMeasurement();
+
+    int age = BoneHealth::calcPatientAge(
+        QDate::fromString(currentPatient.birthDay, "yyyy-MM-dd"));
+
+    double youngMean = currentPatient.gender.contains("男") ? 4150.0 : 4137.0;
+    double youngSd   = 115.2;
+
+    double ageMean = BoneHealth::calcAgeReferenceMean(age);
+    if (currentPatient.gender.contains("男")) {
+        ageMean += 20.0;
+    }
+
+    double ageSd = 115.2;
+
+    double tScore = (finalSos - youngMean) / youngSd;
+    double zScore = (finalSos - ageMean) / ageSd;
+
+    QString strength = BoneHealth::classifyBoneStrength(tScore);
+    double risk = BoneHealth::calcRelativeFractureRisk(tScore);
+    int boneAge = BoneHealth::estimateBoneAgeFromSos(finalSos, currentPatient.gender);
+
+    currentPatient.checkDate = QDate::currentDate().toString("yyyy-MM-dd");
+    currentPatient.speedOfSound = QString::number(finalSos, 'f', 1);
+    currentPatient.diagprompt = strength;
+
+    updateLatestResultPanel(finalSos, tScore, zScore, strength, risk, boneAge);
+
+    pendingMeasurement = MeasurementRecord();
+    pendingMeasurement.id = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    pendingMeasurement.patientId = currentPatient.id;
+    pendingMeasurement.measuredAt = QDateTime::currentDateTime().toString(Qt::ISODate);
+    pendingMeasurement.operatorName = currentAccount.username;
+    pendingMeasurement.part = QString::fromUtf8("桡骨");
+    pendingMeasurement.sos = QString::number(finalSos, 'f', 1);
+    pendingMeasurement.tScore = QString::number(tScore, 'f', 2);
+    pendingMeasurement.zScore = QString::number(zScore, 'f', 2);
+    pendingMeasurement.diagnosis = strength;
+    pendingMeasurement.patientName = currentPatient.name;
+    pendingMeasurement.patientGender = currentPatient.gender;
+    pendingMeasurement.patientBirthDay = currentPatient.birthDay;
+    pendingMeasurement.patientHeight = currentPatient.height;
+    pendingMeasurement.patientWeight = currentPatient.weight;
+    pendingMeasurement.patientAge = QString::number(age);
+    pendingMeasurement.boneStrength = strength;
+    pendingMeasurement.fractureRisk = QString::number(risk, 'f', 1);
+    pendingMeasurement.boneAge = QString::number(boneAge);
+    hasPendingMeasurement = true;
+    const MeasurementRecord completedMeasurement = pendingMeasurement;
+    QList<MeasurementRecord> savedMeasurements = measurementList;
+    savedMeasurements.append(pendingMeasurement);
+    if (saveMeasurements(savedMeasurements)) {
+        measurementList = savedMeasurements;
+        hasPendingMeasurement = false;
+        pendingMeasurement = MeasurementRecord();
+        refreshTable(patientList);
+    }
+    updatePatientSelectionUi();
+
+    ui->lblProcessStatus->setText(
+        QString("5 次测量完成：最终 SOS=%1 m/s")
+            .arg(finalSos, 0, 'f', 1)
+        );
+    ui->lblProcessStatus->setStyleSheet(
+        "font-size: 12px; color: #67C23A; font-weight: bold;"
+        );
+
+    showPatientMeasureFinishedDialog(completedMeasurement);
+
+    qDebug() << "All patient rounds finished:"
+             << "rounds =" << roundSosList.size()
+             << "finalSos =" << finalSos
+             << "finalA =" << finalA
+             << "finalB =" << finalB
+             << "T =" << tScore
+             << "Z =" << zScore
+             << "strength =" << strength
+             << "risk =" << risk
+             << "boneAge =" << boneAge;
+}
+
+
+void MainWindow::initLatestResultPanel()
+{
+    ui->lblLatestPart->setText("桡骨");
+    ui->lblLatestSOS->setText("--");
+    ui->lblLatestT->setText("--");
+    ui->lblLatestZ->setText("--");
+    ui->lblLatestStrength->setText("--");
+    ui->lblLatestRisk->setText("--");
+    ui->lblLatestBoneAge->setText("--");
+}
+
+void MainWindow::updateLatestResultPanel(double sos,
+                                         double tScore,
+                                         double zScore,
+                                         const QString& strength,
+                                         double risk,
+                                         int boneAge)
+{
+    ui->lblLatestPart->setText("桡骨");
+    ui->lblLatestSOS->setText(QString("%1 m/s").arg(sos, 0, 'f', 1));
+    ui->lblLatestT->setText(QString("%1").arg(tScore, 0, 'f', 2));
+    ui->lblLatestZ->setText(QString("%1").arg(zScore, 0, 'f', 2));
+    ui->lblLatestStrength->setText(strength);
+    ui->lblLatestRisk->setText(QString("%1").arg(risk, 0, 'f', 1));
+    ui->lblLatestBoneAge->setText(QString("%1 岁").arg(boneAge));
+}
+
+void MainWindow::showPatientMeasureFinishedDialog(
+    const MeasurementRecord& completedMeasurement)
+{
+    if (hasPendingMeasurement) {
+        QMessageBox::warning(this, "结果保存失败",
+                             "本次报表已经生成，但检测结果尚未保存，请返回主界面后重试保存。");
+    }
+    showReport(currentPatient, completedMeasurement);
+}
+
+void MainWindow::setupReportPage()
+{
+    QVBoxLayout* pageLayout = new QVBoxLayout(ui->pageReport);
+    pageLayout->setContentsMargins(16, 12, 16, 12);
+    pageLayout->setSpacing(10);
+
+    QHBoxLayout* toolbar = new QHBoxLayout();
+    QPushButton* backButton = new QPushButton("返回主界面", ui->pageReport);
+    QPushButton* exportButton = new QPushButton("导出 PDF", ui->pageReport);
+    QPushButton* printButton = new QPushButton("打印", ui->pageReport);
+    toolbar->addWidget(backButton);
+    toolbar->addStretch();
+    toolbar->addWidget(exportButton);
+    toolbar->addWidget(printButton);
+    pageLayout->addLayout(toolbar);
+
+    reportWidget = new ReportWidget(ui->pageReport);
+    pageLayout->addWidget(reportWidget, 1);
+
+    connect(backButton, &QPushButton::clicked, this, [this]() {
+        ui->stackedWidget->setCurrentWidget(ui->pageMain);
+        scheduleResponsiveLayout();
+    });
+    connect(printButton, &QPushButton::clicked, this, [this]() {
+        QPrinter printer(QPrinter::HighResolution);
+        printer.setPageSize(QPageSize(QPageSize::A4));
+        printer.setPageOrientation(QPageLayout::Portrait);
+        printer.setPageMargins(QMarginsF(8, 8, 8, 8), QPageLayout::Millimeter);
+        QPrintDialog dialog(&printer, this);
+        dialog.setWindowTitle("打印检测报表");
+        if (dialog.exec() == QDialog::Accepted && !renderReportToPrinter(&printer)) {
+            QMessageBox::warning(this, "打印失败", "无法生成打印内容，请检查打印机设置后重试。");
+        }
+    });
+    connect(exportButton, &QPushButton::clicked, this, [this]() {
+        const ReportData& data = reportWidget->reportData();
+        QString fileName = QString("%1_%2_%3.pdf")
+                               .arg(data.patientName, data.patientId,
+                                    data.measuredAt.left(10));
+        fileName.replace(QRegularExpression(R"([\\/:*?\"<>|])"), "_");
+        const QString defaultPath = QStandardPaths::writableLocation(
+                                        QStandardPaths::DocumentsLocation)
+                                    + "/" + fileName;
+        QString outputPath = QFileDialog::getSaveFileName(
+            this, "导出检测报表", defaultPath, "PDF 文件 (*.pdf)");
+        if (outputPath.isEmpty()) return;
+        if (!outputPath.endsWith(".pdf", Qt::CaseInsensitive)) outputPath += ".pdf";
+
+        QPrinter printer(QPrinter::HighResolution);
+        printer.setOutputFormat(QPrinter::PdfFormat);
+        printer.setOutputFileName(outputPath);
+        printer.setPageSize(QPageSize(QPageSize::A4));
+        printer.setPageOrientation(QPageLayout::Portrait);
+        printer.setPageMargins(QMarginsF(8, 8, 8, 8), QPageLayout::Millimeter);
+        if (!renderReportToPrinter(&printer)) {
+            QMessageBox::warning(this, "导出失败", "无法写入 PDF 文件，请检查保存位置后重试。");
+            return;
+        }
+        QMessageBox::information(this, "导出完成", "检测报表已保存为 PDF 文件。");
+    });
+}
+
+ReportData MainWindow::buildReportData(const PatientInfo& patient,
+                                       const MeasurementRecord& measurement) const
+{
+    auto fallback = [](const QString& snapshot, const QString& current) {
+        return snapshot.trimmed().isEmpty() ? current : snapshot;
+    };
+    auto withUnit = [](const QString& value, const QString& unit) {
+        return value.trimmed().isEmpty() ? QString() : value + " " + unit;
+    };
+
+    ReportData data;
+    data.patientName = fallback(measurement.patientName, patient.name);
+    data.patientId = measurement.patientId.isEmpty() ? patient.id : measurement.patientId;
+    data.gender = fallback(measurement.patientGender, patient.gender);
+    data.birthDay = fallback(measurement.patientBirthDay, patient.birthDay);
+    data.height = withUnit(fallback(measurement.patientHeight, patient.height), "cm");
+    data.weight = withUnit(fallback(measurement.patientWeight, patient.weight), "kg");
+    data.part = measurement.part;
+    data.sos = withUnit(measurement.sos, "m/s");
+    data.tScore = measurement.tScore;
+    data.zScore = measurement.zScore;
+    data.boneStrength = measurement.boneStrength.isEmpty()
+        ? measurement.diagnosis : measurement.boneStrength;
+    data.operatorName = measurement.operatorName;
+
+    const QDateTime measuredDateTime = QDateTime::fromString(measurement.measuredAt, Qt::ISODate);
+    data.measuredAt = measuredDateTime.isValid()
+        ? measuredDateTime.toString("yyyy-MM-dd HH:mm") : measurement.measuredAt;
+
+    data.age = measurement.patientAge;
+    if (data.age.isEmpty() && measuredDateTime.isValid()) {
+        const QDate birthDate = QDate::fromString(data.birthDay, "yyyy-MM-dd");
+        const int age = ageOnDate(data.birthDay, measuredDateTime.date());
+        if (birthDate.isValid() && age >= 0) {
+            data.age = QString::number(age);
+        }
+    }
+
+    QStringList diagnosisParts;
+    if (!data.boneStrength.isEmpty()) {
+        diagnosisParts << "骨强度评估：" + data.boneStrength;
+    }
+    diagnosisParts << "相对骨折风险："
+                          + (measurement.fractureRisk.trimmed().isEmpty()
+                                 ? QStringLiteral("--")
+                                 : measurement.fractureRisk);
+    diagnosisParts << (measurement.boneAge.isEmpty()
+                           ? QStringLiteral("相对骨龄：--")
+                           : QStringLiteral("相对骨龄：%1 岁").arg(measurement.boneAge));
+    if (!measurement.diagnosis.isEmpty() && measurement.diagnosis != data.boneStrength) {
+        diagnosisParts << measurement.diagnosis;
+    }
+    data.diagnosis = diagnosisParts.join("；");
+    return data;
+}
+
+void MainWindow::showReport(const PatientInfo& patient,
+                            const MeasurementRecord& measurement)
+{
+    reportWidget->setReportData(buildReportData(patient, measurement));
+    ui->stackedWidget->setCurrentWidget(ui->pageReport);
+}
+
+bool MainWindow::renderReportToPrinter(QPrinter* printer)
+{
+    if (!printer || !reportWidget) return false;
+    QPainter painter;
+    if (!painter.begin(printer)) return false;
+    const QRect pageRect = printer->pageLayout().paintRectPixels(printer->resolution());
+    reportWidget->renderReport(&painter, pageRect);
+    return painter.end();
+}
+
+
+void MainWindow::handleSerialReadyRead() {
+    QByteArray chunk = serial->readAll();
+
+    //qDebug() << "RX chunk" << chunk.size() << chunk.toHex(' ');
+
+    rxBuffer.append(chunk);
+
+    // 显示当前 buffer 前 40 字节
+    //if (rxBuffer.size() > 0) {
+    //    int show = qMin(40, rxBuffer.size());
+    //    qDebug() << "RX buffer head" << show << ":"
+    //             << rxBuffer.left(show).toHex(' ');
+    //}
+
+    parseIncomingData();
+}
+
+void MainWindow::parseIncomingData() {
+    const QByteArray MAGIC = QByteArray::fromHex("AA55");
+    const int headerSize = 9;
+
+    while (true) {
+        // 1. 查找 MAGIC
+        int start = rxBuffer.indexOf(MAGIC);
+        if (start < 0) {
+            if (rxBuffer.size() > 4096)
+                rxBuffer.remove(0, rxBuffer.size() - 2);
+            return;
+        }
+
+        if (start > 0) {
+            // ❌ 删除丢弃字节的打印
+            // qDebug() << "Drop" << start << "bytes before frame head";
+            rxBuffer.remove(0, start);
+        }
+
+        if (rxBuffer.size() < headerSize) {
+            return; // 数据不够，直接返回不打印
+        }
+
+        const unsigned char *p =
+            reinterpret_cast<const unsigned char*>(rxBuffer.constData());
+
+        quint16 gain   = p[2] | (p[3] << 8);
+        quint16 idx    = p[4] | (p[5] << 8);
+        quint8  ch     = p[6];
+        quint16 length = p[7] | (p[8] << 8);
+
+        // ❌ 删除 Header 解析信息的打印
+        /*
+        qDebug() << "Header:" << "AA55"
+                 << "gain=" << gain
+                 << "idx=" << idx
+                 << "ch=" << ch
+                 << "len=" << length;
+        */
+
+        // 2. length 合法性
+        if (length == 0 || length > 5000) {
+            // ❌ 删除错误打印
+            rxBuffer.remove(0, 1);
+            continue;
+        }
+
+        int frameBytes = headerSize + length * 2 + 2;
+
+        if (rxBuffer.size() < frameBytes) {
+            return; // 数据不够
+        }
+
+        // 3. 校验尾巴 EE EE
+        quint8 tail1 = p[headerSize + length * 2];
+        quint8 tail2 = p[headerSize + length * 2 + 1];
+
+        if (tail1 != 0xEE || tail2 != 0xEE) {
+            // ❌ 删除校验错误打印
+            rxBuffer.remove(0, 1);
+            continue;
+        }
+
+        if (ch < 1 || ch > 4) {
+            rxBuffer.remove(0, frameBytes);
+            continue;
+        }
+
+        // 4. 解析 Payload
+        // ❌ 删除 VALID FRAME 打印
+        // qDebug() << ">>> VALID FRAME idx=" << idx << "ch=" << ch;
+
+        const unsigned char *payload = p + headerSize;
+
+        QVector<quint16> tmp;
+        tmp.reserve(length);
+
+        for (int i = 0; i < length; ++i) {
+            quint16 raw = payload[2*i] | (payload[2*i+1] << 8);
+            tmp.append(raw & 0x0FFF);
+        }
+
+        if (!frameGroups.contains(idx)) {
+            while (frameGroupOrder.size() >= maxIncompleteFrameGroups) {
+                frameGroups.remove(frameGroupOrder.dequeue());
+            }
+            frameGroupOrder.enqueue(idx);
+        }
+        WaveGroup &g = frameGroups[idx];
+        g.ch[ch - 1] = tmp;
+        g.has[ch - 1] = true;
+
+        // ❌ 删除 flags 打印
+        /*
+        QString flags;
+        for (int i = 0; i < 4; ++i) flags += g.has[i] ? "1" : "0";
+        qDebug() << "FrameGroup idx" << idx << "flags:" << flags;
+        */
+
+        if (g.has[0] && g.has[1] && g.has[2] && g.has[3]) {
+            // ❌ 删除 DONE 打印
+            // qDebug() << ">>> FULL GROUP DONE idx=" << idx;
+
+            samplesA = g.ch[0];
+            samplesB = g.ch[1];
+            samplesC = g.ch[2];
+            samplesD = g.ch[3];
+
+
+            frameGroups.remove(idx);
+            frameGroupOrder.removeAll(idx);
+            plotSamples();
+        }
+
+        rxBuffer.remove(0, frameBytes);
+    }
+}
+
+
+
+void MainWindow::plotSamples()
+{
+    // ==========================================================
+    // 当前实际通道映射：
+    // samplesA = CH1 = B -> C
+    // samplesB = CH2 = B -> D
+    // samplesC = CH3 = A -> C
+    // samplesD = CH4 = A -> D
+    // ==========================================================
+
+    // 1. 根据铜块未滤波原始数据设置假波抹除参数
+    GateConfig cfgBC;  // samplesA = B->C
+    cfgBC.baselineStart = 20;
+    cfgBC.baselineEnd   = 105;
+    cfgBC.eraseStart    = 115;
+    cfgBC.eraseEnd      = 500;
+    cfgBC.rampEnd       = 560;
+
+    GateConfig cfgBD;  // samplesB = B->D
+    cfgBD.baselineStart = 20;
+    cfgBD.baselineEnd   = 105;
+    cfgBD.eraseStart    = 115;
+    cfgBD.eraseEnd      = 500;
+    cfgBD.rampEnd       = 560;
+
+    GateConfig cfgAC;  // samplesC = A->C
+    cfgAC.baselineStart = 0;
+    cfgAC.baselineEnd   = 15;
+    cfgAC.eraseStart    = 18;
+    cfgAC.eraseEnd      = 480;
+    cfgAC.rampEnd       = 550;
+
+    GateConfig cfgAD;  // samplesD = A->D
+    cfgAD.baselineStart = 0;
+    cfgAD.baselineEnd   = 15;
+    cfgAD.eraseStart    = 18;
+    cfgAD.eraseEnd      = 480;
+    cfgAD.rampEnd       = 550;
+
+    // 2. 先在原始 ADC 层面抹掉假波，并减掉各通道基线
+    QVector<double> rawBC = SignalProcessor::preprocessRawForFIR(samplesA, cfgBC, "B->C");
+    QVector<double> rawBD = SignalProcessor::preprocessRawForFIR(samplesB, cfgBD, "B->D");
+    QVector<double> rawAC = SignalProcessor::preprocessRawForFIR(samplesC, cfgAC, "A->C");
+    QVector<double> rawAD = SignalProcessor::preprocessRawForFIR(samplesD, cfgAD, "A->D");
+
+    // 3. 再做 FIR 滤波
+    QVector<double> filBC = signalProcessor.applyFIRDouble(rawBC);
+    QVector<double> filBD = signalProcessor.applyFIRDouble(rawBD);
+    QVector<double> filAC = signalProcessor.applyFIRDouble(rawAC);
+    QVector<double> filAD = signalProcessor.applyFIRDouble(rawAD);
+
+    int n = std::min(
+        std::min(filBC.size(), filBD.size()),
+        std::min(filAC.size(), filAD.size())
+        );
+
+    if (n <= 0) return;
+
+    // 4. 打印滤波后数据（逐帧大流量，默认关闭）
+    // if (kDebugPerFrame) {
+    //     printRangeFormatted("B->C / filBC", filBC, 0, 1499);
+    //     printRangeFormatted("B->D / filBD", filBD, 0, 1499);
+    //     printRangeFormatted("A->C / filAC", filAC, 0, 1499);
+    //     printRangeFormatted("A->D / filAD", filAD, 0, 1499);
+    // }
+
+    // 5. 声速检测
+    detectAndPlotSpeed(filBC, filBD, filAC, filAD);
+
+    // 6. 画图
+    QVector<QPointF> ptsA, ptsB, ptsC, ptsD;
+    ptsA.reserve(n);
+    ptsB.reserve(n);
+    ptsC.reserve(n);
+    ptsD.reserve(n);
+
+    for (int i = 0; i < n; ++i) {
+        ptsA.append(QPointF(i, filBC[i] + 2048.0));
+        ptsB.append(QPointF(i, filBD[i] + 2048.0));
+        ptsC.append(QPointF(i, filAC[i] + 2048.0));
+        ptsD.append(QPointF(i, filAD[i] + 2048.0));
+    }
+
+    seriesA->replace(ptsA);
+    seriesB->replace(ptsB);
+    seriesC->replace(ptsC);
+    seriesD->replace(ptsD);
+
+    auto setFixedAxisY = [&](QChart *chart) {
+        auto *axisY = qobject_cast<QValueAxis*>(chart->axisY());
+        if (axisY) axisY->setRange(0, 4095);
+    };
+
+    setFixedAxisY(chartA);
+    setFixedAxisY(chartB);
+    setFixedAxisY(chartC);
+    setFixedAxisY(chartD);
+
+    auto updateAxisX = [&](QChart *chart, int count) {
+        auto *axisX = qobject_cast<QValueAxis*>(chart->axisX());
+        if (axisX) axisX->setRange(0, count - 1);
+    };
+
+    updateAxisX(chartA, n);
+    updateAxisX(chartB, n);
+    updateAxisX(chartC, n);
+    updateAxisX(chartD, n);
+}
+
+void MainWindow::printRangeFormatted(const QString& name,
+                                     const QVector<double>& data,
+                                     int start, int end) const
+{
+    if (data.isEmpty()) return;
+
+    int n = data.size();
+    start = qMax(0, start);
+    end   = qMin(end, n - 1);
+    if (start > end) return;
+
+    qDebug().noquote() << "";
+    qDebug().noquote() << "======== " + name +
+                              QString(" [%1..%2] ========").arg(start).arg(end);
+
+    for (int base = start; base <= end; base += 25) {
+        if ((base - start) % 120 == 0) {
+            qDebug().noquote() << QString("---- [%1] ----").arg(base);
+        }
+
+        QString line = QString("[%1] ").arg(base, 4, 10, QLatin1Char('0'));
+        int lineEnd = qMin(base + 24, end);
+
+        for (int i = base; i <= lineEnd; ++i) {
+            line += QString("%1 ").arg(data[i] + 2048.0, 8, 'f', 2);
+        }
+
+        qDebug().noquote() << line;
+    }
+
+    qDebug().noquote() << "======================================";
+}
+
+
+
+void MainWindow::appendAngleFeatureCsv(const QString& mode,
+                                       double sosAvg,
+                                       double sosA,
+                                       double sosB,
+                                       int lagA,
+                                       int lagB,
+                                       int diffLag,
+                                       int signedLagDiff,
+                                       double wB,
+                                       double corrA,
+                                       double corrB,
+                                       int bcOnset,
+                                       int bdOnset,
+                                       int acOnset,
+                                       int adOnset,
+                                       int bcPeak,
+                                       int bdPeak,
+                                       int acPeak,
+                                       int adPeak,
+                                       int bcValley,
+                                       int bdValley,
+                                       int acValley,
+                                       int adValley,
+                                       int valleyLagB,
+                                       int valleyLagA,
+                                       double pairMidB,
+                                       double pairMidA,
+                                       double pairMidGap,
+                                       double onsetMidB,
+                                       double onsetMidA,
+                                       double onsetMidGap,
+                                       double peakMidB,
+                                       double peakMidA,
+                                       double peakMidGap,
+                                       double valleyMidB,
+                                       double valleyMidA,
+                                       double valleyMidGap,
+                                       double depthBC,
+                                       double depthBD,
+                                       double depthAC,
+                                       double depthAD,
+                                       double depthRatioBCBD,
+                                       double depthRatioACAD,
+                                       double depthRatioAB,
+                                       double expectedOffset,
+                                       double offsetResidual) const
+{
+    QString path = QCoreApplication::applicationDirPath() + "/angle_features.csv";
+
+    QFile file(path);
+
+    bool needHeader = true;
+
+    if (file.exists() && file.size() > 0) {
+        needHeader = false;
+    }
+
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
+        qDebug() << "AngleFeature CSV open failed:" << path;
+        return;
+    }
+
+    QTextStream out(&file);
+
+    if (needHeader) {
+        out << "time,mode,"
+            << "sosAvg,sosA,sosB,"
+            << "lagA,lagB,diffLag,signedLagDiff,wB,corrA,corrB,"
+            << "bcOnset,bdOnset,acOnset,adOnset,"
+            << "bcPeak,bdPeak,acPeak,adPeak,"
+            << "bcValley,bdValley,acValley,adValley,"
+            << "valleyLagB,valleyLagA,"
+            << "pairMidB,pairMidA,pairMidGap,"
+            << "onsetMidB,onsetMidA,onsetMidGap,"
+            << "peakMidB,peakMidA,peakMidGap,"
+            << "valleyMidB,valleyMidA,valleyMidGap,"
+            << "depthBC,depthBD,depthAC,depthAD,"
+            << "depthRatioBCBD,depthRatioACAD,depthRatioAB,"
+            << "expectedOffset,offsetResidual"
+            << "\n";
+    }
+
+    out << QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss.zzz") << ","
+        << mode << ","
+        << sosAvg << ","
+        << sosA << ","
+        << sosB << ","
+        << lagA << ","
+        << lagB << ","
+        << diffLag << ","
+        << signedLagDiff << ","
+        << wB << ","
+        << corrA << ","
+        << corrB << ","
+        << bcOnset << ","
+        << bdOnset << ","
+        << acOnset << ","
+        << adOnset << ","
+        << bcPeak << ","
+        << bdPeak << ","
+        << acPeak << ","
+        << adPeak << ","
+        << bcValley << ","
+        << bdValley << ","
+        << acValley << ","
+        << adValley << ","
+        << valleyLagB << ","
+        << valleyLagA << ","
+        << pairMidB << ","
+        << pairMidA << ","
+        << pairMidGap << ","
+        << onsetMidB << ","
+        << onsetMidA << ","
+        << onsetMidGap << ","
+        << peakMidB << ","
+        << peakMidA << ","
+        << peakMidGap << ","
+        << valleyMidB << ","
+        << valleyMidA << ","
+        << valleyMidGap << ","
+        << depthBC << ","
+        << depthBD << ","
+        << depthAC << ","
+        << depthAD << ","
+        << depthRatioBCBD << ","
+        << depthRatioACAD << ","
+        << depthRatioAB << ","
+        << expectedOffset << ","
+        << offsetResidual
+        << "\n";
+
+    file.close();
+}
+
+void MainWindow::printAngleFeatureDebug(const QVector<double>& filBC,
+                                        const QVector<double>& filBD,
+                                        const QVector<double>& filAC,
+                                        const QVector<double>& filAD,
+                                        const ArrivalResult& pickBC,
+                                        const ArrivalResult& pickBD,
+                                        const ArrivalResult& pickAC,
+                                        const ArrivalResult& pickAD,
+                                        const PairResult& bRes,
+                                        const PairResult& aRes,
+                                        double sosAvg,
+                                        double wB) const
+{
+    int n = std::min(
+        std::min(filBC.size(), filBD.size()),
+        std::min(filAC.size(), filAD.size())
+        );
+
+    if (n <= 0) {
+        return;
+    }
+
+    // ======================================================
+    // 1. 四路统一找"第一个明显波谷"
+    //
+    // 注意：这里暂时只用于调试，不参与正式结果。
+    // 搜索范围先用 620~1400，覆盖铜块、塑料、桡骨主要第一波区域。
+    // ======================================================
+    int valleySearchStart = 620;
+    int valleySearchEnd = qMin(1400, n - 2);
+
+    ValleyResult vBC = SignalProcessor::findFirstProminentValley(
+        filBC,
+        valleySearchStart,
+        valleySearchEnd,
+        25.0,
+        0.25,
+        20
+        );
+
+    ValleyResult vBD = SignalProcessor::findFirstProminentValley(
+        filBD,
+        valleySearchStart,
+        valleySearchEnd,
+        25.0,
+        0.25,
+        20
+        );
+
+    ValleyResult vAC = SignalProcessor::findFirstProminentValley(
+        filAC,
+        valleySearchStart,
+        valleySearchEnd,
+        25.0,
+        0.25,
+        20
+        );
+
+    ValleyResult vAD = SignalProcessor::findFirstProminentValley(
+        filAD,
+        valleySearchStart,
+        valleySearchEnd,
+        25.0,
+        0.25,
+        20
+        );
+
+    auto idxOrInvalid = [](const ValleyResult& v) -> int {
+        return v.valid ? v.idx : -1;
+    };
+
+    auto depthOrZero = [](const ValleyResult& v) -> double {
+        return v.valid ? v.depth : 0.0;
+    };
+
+    int bcValley = idxOrInvalid(vBC);
+    int bdValley = idxOrInvalid(vBD);
+    int acValley = idxOrInvalid(vAC);
+    int adValley = idxOrInvalid(vAD);
+
+    double depthBC = depthOrZero(vBC);
+    double depthBD = depthOrZero(vBD);
+    double depthAC = depthOrZero(vAC);
+    double depthAD = depthOrZero(vAD);
+
+    // ======================================================
+    // 2. 当前算法实际使用的 pair 特征
+    //
+    // B_pair: early = BD, late = BC
+    // A_pair: early = AD, late = AC
+    //
+    // bRes.earlyOnset / lateOnset 对 B 来说是 BD / BC
+    // aRes.earlyOnset / lateOnset 对 A 来说是 AD / AC
+    // ======================================================
+    double pairMidB = 0.5 * (bRes.earlyOnset + bRes.lateOnset);
+    double pairMidA = 0.5 * (aRes.earlyOnset + aRes.lateOnset);
+    double pairMidGap = pairMidB - pairMidA;
+
+    // ======================================================
+    // 3. onset 中心关系
+    // ======================================================
+    int onsetLagB = pickBC.onset - pickBD.onset;
+    int onsetLagA = pickAC.onset - pickAD.onset;
+
+    double onsetMidB = 0.5 * (pickBD.onset + pickBC.onset);
+    double onsetMidA = 0.5 * (pickAD.onset + pickAC.onset);
+    double onsetMidGap = onsetMidB - onsetMidA;
+
+    // ======================================================
+    // 4. peak 中心关系
+    // ======================================================
+    int peakLagB = pickBC.peak - pickBD.peak;
+    int peakLagA = pickAC.peak - pickAD.peak;
+
+    double peakMidB = 0.5 * (pickBD.peak + pickBC.peak);
+    double peakMidA = 0.5 * (pickAD.peak + pickAC.peak);
+    double peakMidGap = peakMidB - peakMidA;
+
+    // ======================================================
+    // 5. valley 中心关系
+    // ======================================================
+    int valleyLagB = -999;
+    int valleyLagA = -999;
+
+    double valleyMidB = -999.0;
+    double valleyMidA = -999.0;
+    double valleyMidGap = -999.0;
+
+    if (vBC.valid && vBD.valid) {
+        valleyLagB = vBC.idx - vBD.idx;
+        valleyMidB = 0.5 * (vBD.idx + vBC.idx);
+    }
+
+    if (vAC.valid && vAD.valid) {
+        valleyLagA = vAC.idx - vAD.idx;
+        valleyMidA = 0.5 * (vAD.idx + vAC.idx);
+    }
+
+    if (vBC.valid && vBD.valid && vAC.valid && vAD.valid) {
+        valleyMidGap = valleyMidB - valleyMidA;
+    }
+
+    // ======================================================
+    // 6. A/B lag 系统偏差
+    //
+    // 先用一个很粗的经验公式：
+    // 塑料 lagB≈202, offset≈3
+    // 铜块 lagB≈105, offset≈6
+    // 粗略得到 expectedOffset ≈ 8.5 - 0.028 * lagB
+    //
+    // 这只是调试用，不要现在加入正式判定。
+    // ======================================================
+    int signedLagDiff = aRes.refinedLag - bRes.refinedLag;
+    int diffLag = std::abs(signedLagDiff);
+
+    double expectedOffset = 8.5 - 0.028 * bRes.refinedLag;
+    double offsetResidual = signedLagDiff - expectedOffset;
+
+    // ======================================================
+    // 7. 深度比例
+    // ======================================================
+    double depthRatioBCBD = Utils::safeRatio(depthBC, depthBD);
+    double depthRatioACAD = Utils::safeRatio(depthAC, depthAD);
+
+    double bDepthMean = 0.5 * (depthBC + depthBD);
+    double aDepthMean = 0.5 * (depthAC + depthAD);
+
+    double depthRatioAB = Utils::safeRatio(aDepthMean, bDepthMean);
+
+    QString mode = (acquireMode == PatientMeasureMode) ? "Patient" : "Debug";
+
+    // ======================================================
+    // 8. qDebug 输出
+    // ======================================================
+    qDebug() << "AngleFeature_PAIR:"
+             << "mode =" << mode
+             << "sosAvg =" << sosAvg
+             << "sosA =" << aRes.sos
+             << "sosB =" << bRes.sos
+             << "lagA =" << aRes.refinedLag
+             << "lagB =" << bRes.refinedLag
+             << "signedLagDiff =" << signedLagDiff
+             << "diffLag =" << diffLag
+             << "wB =" << wB
+             << "corrA =" << aRes.corr
+             << "corrB =" << bRes.corr
+             << "pairMidB =" << pairMidB
+             << "pairMidA =" << pairMidA
+             << "pairMidGap =" << pairMidGap;
+
+    qDebug() << "AngleFeature_ONSET_PEAK:"
+             << "BC.onset =" << pickBC.onset
+             << "BD.onset =" << pickBD.onset
+             << "AC.onset =" << pickAC.onset
+             << "AD.onset =" << pickAD.onset
+             << "onsetLagB =" << onsetLagB
+             << "onsetLagA =" << onsetLagA
+             << "onsetMidB =" << onsetMidB
+             << "onsetMidA =" << onsetMidA
+             << "onsetMidGap =" << onsetMidGap
+             << "peakLagB =" << peakLagB
+             << "peakLagA =" << peakLagA
+             << "peakMidGap =" << peakMidGap;
+
+    qDebug() << "AngleFeature_VALLEY:"
+             << "BC.valley =" << bcValley
+             << "BD.valley =" << bdValley
+             << "AC.valley =" << acValley
+             << "AD.valley =" << adValley
+             << "valleyLagB =" << valleyLagB
+             << "valleyLagA =" << valleyLagA
+             << "valleyMidB =" << valleyMidB
+             << "valleyMidA =" << valleyMidA
+             << "valleyMidGap =" << valleyMidGap
+             << "depthBC =" << depthBC
+             << "depthBD =" << depthBD
+             << "depthAC =" << depthAC
+             << "depthAD =" << depthAD
+             << "depthRatioBCBD =" << depthRatioBCBD
+             << "depthRatioACAD =" << depthRatioACAD
+             << "depthRatioAB =" << depthRatioAB;
+
+    qDebug() << "AngleFeature_OFFSET:"
+             << "lagB =" << bRes.refinedLag
+             << "signedLagDiff =" << signedLagDiff
+             << "expectedOffset =" << expectedOffset
+             << "offsetResidual =" << offsetResidual;
+
+    // ======================================================
+    // 9. 保存到 CSV
+    // ======================================================
+    appendAngleFeatureCsv(
+        mode,
+        sosAvg,
+        aRes.sos,
+        bRes.sos,
+        aRes.refinedLag,
+        bRes.refinedLag,
+        diffLag,
+        signedLagDiff,
+        wB,
+        aRes.corr,
+        bRes.corr,
+        pickBC.onset,
+        pickBD.onset,
+        pickAC.onset,
+        pickAD.onset,
+        pickBC.peak,
+        pickBD.peak,
+        pickAC.peak,
+        pickAD.peak,
+        bcValley,
+        bdValley,
+        acValley,
+        adValley,
+        valleyLagB,
+        valleyLagA,
+        pairMidB,
+        pairMidA,
+        pairMidGap,
+        onsetMidB,
+        onsetMidA,
+        onsetMidGap,
+        peakMidB,
+        peakMidA,
+        peakMidGap,
+        valleyMidB,
+        valleyMidA,
+        valleyMidGap,
+        depthBC,
+        depthBD,
+        depthAC,
+        depthAD,
+        depthRatioBCBD,
+        depthRatioACAD,
+        depthRatioAB,
+        expectedOffset,
+        offsetResidual
+        );
+}
+
+void MainWindow::appendSpeedPoint(double speedAvg)
+{
+    seriesSpeed->append(speedPointIndex, speedAvg);
+    const int excessPoints = seriesSpeed->count() - 50;
+    if (excessPoints > 0) seriesSpeed->removePoints(0, excessPoints);
+    speedPointIndex++;
+
+    auto *axisX = qobject_cast<QValueAxis*>(chartSpeed->axisX());
+    auto *axisY = qobject_cast<QValueAxis*>(chartSpeed->axisY());
+
+    if (axisX) {
+        if (speedPointIndex < 50) {
+            axisX->setRange(0, 50);
+        } else {
+            axisX->setRange(speedPointIndex - 50, speedPointIndex);
+        }
+
+        axisX->setTickCount(6);
+    }
+
+    if (axisY) {
+        axisY->setRange(2000, 5000);
+        axisY->setTickCount(4);
+        axisY->setLabelFormat("%.0f");
+    }
+}
+
+void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
+                                    const QVector<double>& filBD,
+                                    const QVector<double>& filAC,
+                                    const QVector<double>& filAD)
+{
+    int n = std::min(
+        std::min(filBC.size(), filBD.size()),
+        std::min(filAC.size(), filAD.size())
+        );
+
+    if (n <= 0) {
+        setSpeedDebugInvalid("滤波数据为空");
+
+        if (patientMeasureRunning && acquireMode == PatientMeasureMode) {
+            updateProcessInvalid("滤波数据为空");
+        }
+
+        return;
+    }
+
+    // ======================================================
+    // 1. 首波粗定位参数
+    // ======================================================
+    int noiseStart = 560;
+    int noiseEnd   = 615;
+
+    int searchStart = 620;
+    int searchEnd = qMin(n - 1, 1600);
+
+    double kSigma = 4.0;
+    int runLen = 8;
+    int envWin = 20;
+    double onsetRatio = 0.20;
+    int peakLookAhead = 140;
+
+    ArrivalResult pickBC = SignalProcessor::detectFirstArrivalSmart(
+        filBC, noiseStart, noiseEnd, searchStart, searchEnd,
+        kSigma, runLen, envWin, onsetRatio, peakLookAhead
+        );
+
+    ArrivalResult pickBD = SignalProcessor::detectFirstArrivalSmart(
+        filBD, noiseStart, noiseEnd, searchStart, searchEnd,
+        kSigma, runLen, envWin, onsetRatio, peakLookAhead
+        );
+
+    ArrivalResult pickAC = SignalProcessor::detectFirstArrivalSmart(
+        filAC, noiseStart, noiseEnd, searchStart, searchEnd,
+        kSigma, runLen, envWin, onsetRatio, peakLookAhead
+        );
+
+    ArrivalResult pickAD = SignalProcessor::detectFirstArrivalSmart(
+        filAD, noiseStart, noiseEnd, searchStart, searchEnd,
+        kSigma, runLen, envWin, onsetRatio, peakLookAhead
+        );
+
+    if (kDebugPerFrame) {
+        qDebug() << "FirstArrivalSmart:"
+                 << "BC.onset =" << pickBC.onset << "BC.peak =" << pickBC.peak
+                 << "BD.onset =" << pickBD.onset << "BD.peak =" << pickBD.peak
+                 << "AC.onset =" << pickAC.onset << "AC.peak =" << pickAC.peak
+                 << "AD.onset =" << pickAD.onset << "AD.peak =" << pickAD.peak;
+    }
+
+    if (acquireMode == CalibrationAcquireMode) {
+        processCalibrationFrame(filBC, filBD, filAC, filAD,
+                                pickBC, pickBD, pickAC, pickAD);
+        return;
+    }
+
+    double vMin = 1800.0;
+    double vMax = 5000.0;
+
+    // ======================================================
+    // 2. 先算 B_pair：BD -> BC
+    // ======================================================
+    PairResult bRes = signalProcessor.estimatePairSpeed(
+        filBD,
+        filBC,
+        pickBD,
+        pickBC,
+        vMin,
+        vMax,
+        "B_pair / BD->BC"
+        );
+
+    if (!bRes.valid) {
+        qDebug() << "Skip: B_pair invalid, because B_pair is the reference pair";
+
+        setSpeedDebugInvalid("B_pair 无效");
+
+        if (patientMeasureRunning && acquireMode == PatientMeasureMode) {
+            updateProcessInvalid("B_pair 无效，无法作为参考");
+        }
+
+        return;
+    }
+
+    // ======================================================
+    // B_pair 质量检查：防止从第一波粗定位跳到后面的波包
+    // ======================================================
+    int bLagJump = std::abs(bRes.refinedLag - bRes.roughLag);
+
+    // 这次桡骨正确簇：B_jump 大约 10~34
+    // 错误 2400 簇：B_jump 大约 109~115
+    // 所以 70 是一个比较安全的分界
+    int bLagJumpLimit = 70;
+
+    if (bLagJump > bLagJumpLimit) {
+        qDebug() << "Skip: B_pair jump too large"
+                 << "roughLag =" << bRes.roughLag
+                 << "refinedLag =" << bRes.refinedLag
+                 << "jump =" << bLagJump
+                 << "limit =" << bLagJumpLimit;
+
+        setSpeedDebugInvalid(
+            QString("B_pair 跳变过大 rough=%1 refined=%2")
+                .arg(bRes.roughLag)
+                .arg(bRes.refinedLag)
+            );
+
+        if (patientMeasureRunning && acquireMode == PatientMeasureMode) {
+            updateProcessInvalid("B_pair 跳变过大，疑似选到后波包");
+        }
+
+        return;
+    }
+
+    // ======================================================
+    // 3. 再算 A_pair：AD -> AC
+    // ======================================================
+    int lagToleranceAB = 20;
+
+    PairResult aRes = signalProcessor.estimatePairSpeedByValley(
+        filAD,
+        filAC,
+        pickAD,
+        bRes.refinedLag,
+        lagToleranceAB,
+        "A_pair / AD->AC / valley"
+        );
+
+    if (!aRes.valid) {
+        int forcedMin = qMax(1, bRes.refinedLag - lagToleranceAB);
+        int forcedMax = bRes.refinedLag + lagToleranceAB;
+
+        qDebug() << "A_pair valley failed, fallback to constrained corr"
+                 << "forced range = [" << forcedMin << "," << forcedMax << "]";
+
+        aRes = signalProcessor.estimatePairSpeed(
+            filAD,
+            filAC,
+            pickAD,
+            pickAC,
+            vMin,
+            vMax,
+            "A_pair / AD->AC / constrained",
+            forcedMin,
+            forcedMax
+            );
+    }
+
+    if (!aRes.valid) {
+        qDebug() << "Skip: A_pair invalid";
+
+        setSpeedDebugInvalid("A_pair 无效");
+
+        if (patientMeasureRunning && acquireMode == PatientMeasureMode) {
+            updateProcessInvalid("A_pair 无效");
+        }
+
+        return;
+    }
+
+    // ======================================================
+    // 4. A/B 一致性判断
+    // ======================================================
+    int diffLag = std::abs(aRes.refinedLag - bRes.refinedLag);
+
+    // ======================================================
+    // 新增：提前计算 pairMidGap
+    //
+    // 注意：这里要放在 diffLag > lagToleranceAB 判断之前。
+    // 因为即使 A/B 差异过大，我们仍然希望竖向平衡条能显示角度偏向。
+    // ======================================================
+    double pairMidB = 0.5 * (bRes.earlyOnset + bRes.lateOnset);
+    double pairMidA = 0.5 * (aRes.earlyOnset + aRes.lateOnset);
+    double pairMidGap = pairMidB - pairMidA;
+
+    if (diffLag > lagToleranceAB) {
+        qDebug() << "Skip: A_pair and B_pair inconsistent"
+                 << "lagA =" << aRes.refinedLag
+                 << "lagB =" << bRes.refinedLag
+                 << "diff =" << diffLag
+                 << "tolerance =" << lagToleranceAB
+                 << "pairMidGap =" << pairMidGap;
+
+        setSpeedDebugInvalid(
+            QString("A/B 差异过大，diff=%1").arg(diffLag)
+            );
+
+        // 调试模式：中间检查过程区保持不动
+        // 病人检测模式：显示一高一低，但不计入有效值
+        if (patientMeasureRunning && acquireMode == PatientMeasureMode) {
+            updateProcessPanel(
+                aRes.sos,
+                bRes.sos,
+                aRes.refinedLag,
+                bRes.refinedLag,
+                diffLag,
+                pairMidGap,
+                false
+                );
+        }
+
+        return;
+    }
+
+    // ======================================================
+    // 5. 计算声速
+    //
+    // sosWeighted：原来的 A/B 加权值，保留用于调试观察。
+    // sosPatient ：正式测量真正采用的值。
+    //
+    // 当前建议：
+    // A 通道主要用于姿态门控；
+    // B 通道作为正式 SOS 主测量值。
+    // ======================================================
+    double wB = 0.75;
+
+    if (aRes.refinedLag > bRes.refinedLag + 3) {
+        wB = 0.8;
+    }
+
+    if (std::abs(aRes.refinedLag - bRes.refinedLag) <= 2) {
+        wB = 0.7;
+    }
+
+    double sosWeighted = wB * bRes.sos + (1.0 - wB) * aRes.sos;
+
+    double sosPatient = sosWeighted;
+
+    if (useBOnlyForPatientSos) {
+        sosPatient = bRes.sos;
+    }
+
+    // 预留最终校准偏移，先默认为 0
+    sosPatient += patientSosOffset;
+
+    // 为了尽量少改后面的代码，继续用 sosAvg 这个变量名，
+    // 但它现在表示"正式采用的 SOS"。
+    double sosAvg = sosPatient;
+
+    if (kDebugPerFrame) {
+        qDebug() << "SpeedFinal:"
+                 << "sosA =" << aRes.sos
+                 << "sosB =" << bRes.sos
+                 << "weighted =" << sosWeighted
+                 << "patient =" << sosPatient
+                 << "useBOnly =" << useBOnlyForPatientSos
+                 << "offset =" << patientSosOffset
+                 << "lagA =" << aRes.refinedLag
+                 << "lagB =" << bRes.refinedLag
+                 << "diffLag =" << diffLag
+                 << "wB =" << wB
+                 << "mode =" << (acquireMode == PatientMeasureMode ? "Patient" : "Debug");
+    }
+
+    // ======================================================
+    // 角度/姿态特征调试输出（逐帧大流量，默认关闭）
+    // 只用于研究 A/B 绝对位置关系，不影响正式测量结果。
+    // ======================================================
+    if (kDebugPerFrame) {
+        printAngleFeatureDebug(
+            filBC,
+            filBD,
+            filAC,
+            filAD,
+            pickBC,
+            pickBD,
+            pickAC,
+            pickAD,
+            bRes,
+            aRes,
+            sosAvg,
+            wB
+            );
+    }
+
+    // ======================================================
+    // 6. 声速调试值显示：调试模式和病人模式都显示
+    // ======================================================
+    updateSpeedDebugPanel(
+        aRes.sos,
+        bRes.sos,
+        sosAvg,
+        aRes.refinedLag,
+        bRes.refinedLag,
+        diffLag,
+        aRes.corr,
+        bRes.corr
+        );
+
+    // ======================================================
+    // 7. 声速曲线：调试模式和病人模式都显示
+    // ======================================================
+    appendSpeedPoint(sosAvg);
+
+    // ======================================================
+    // 8. 中间检查过程区：
+    // 只有病人检测模式才更新
+    // trigger / 获取波形调试模式下保持不动
+    // ======================================================
+    if (patientMeasureRunning && acquireMode == PatientMeasureMode) {
+
+        // ======================================================
+        // 1. 基础质量判定
+        // ======================================================
+        int bLagJump = std::abs(bRes.refinedLag - bRes.roughLag);
+
+        bool bJumpOk = (bLagJump <= 70);
+        bool notBoundary = (bRes.refinedLag < 260);
+
+        int signedLagDiff = aRes.refinedLag - bRes.refinedLag;
+        int diffLagForCheck = std::abs(signedLagDiff);
+
+        bool diffOk = (diffLagForCheck <= 18);
+        bool directionOk = (signedLagDiff >= -2);
+
+        // 注意：
+        // B_corr 现在只作为底线，不再作为主要姿态判据。
+        bool corrOk = (bRes.corr >= mCfg.frameCorrBMin && aRes.corr >= mCfg.frameCorrAMin);
+
+
+        // ======================================================
+        // 2. 新增：A/B 绝对位置关系，也就是角度判定
+        //
+        // pairMidB = B组两个特征点中心
+        // pairMidA = A组两个特征点中心
+        // pairMidGap = pairMidB - pairMidA
+        //
+        // 这次 CSV 显示：
+        // 3600 错误角度：signedLagDiff≈5,  pairMidGap≈27
+        // 3800 正确角度：signedLagDiff≈10, pairMidGap≈6.5
+        // 4000 错误角度：signedLagDiff≈1,  pairMidGap≈-4.5
+        // ======================================================
+        double pairMidB = 0.5 * (bRes.earlyOnset + bRes.lateOnset);
+        double pairMidA = 0.5 * (aRes.earlyOnset + aRes.lateOnset);
+        double pairMidGap = pairMidB - pairMidA;
+
+        bool angleSignedDiffOk =
+            (signedLagDiff >= mCfg.angleSignedDiffMin &&
+             signedLagDiff <= mCfg.angleSignedDiffMax);
+
+        bool anglePairMidGapOk =
+            (pairMidGap >= mCfg.anglePairMidGapMin &&
+             pairMidGap <= mCfg.anglePairMidGapMax);
+
+        bool angleOk =
+            (!enablePatientAngleGate) ||
+            (angleSignedDiffOk && anglePairMidGapOk);
+
+
+        // ======================================================
+        // 3. 稳定 lag 簇判定
+        //
+        // 只有通过基础质量 + 姿态判定的帧，才允许进入稳定窗口。
+        // 否则会污染 stableLag 窗口。
+        // ======================================================
+        int stableCenter = 0;
+        int stableCount = 0;
+        bool stableOk = false;
+
+        if (bJumpOk &&
+            notBoundary &&
+            diffOk &&
+            directionOk &&
+            corrOk &&
+            angleOk) {
+
+            stableOk = checkBoneLagStable(
+                bRes.refinedLag,
+                &stableCenter,
+                &stableCount
+                );
+
+        } else {
+            if (kDebugPerFrame) {
+                qDebug() << "BoneLagStable: current frame not added because pre-check failed"
+                         << "bJumpOk =" << bJumpOk
+                         << "notBoundary =" << notBoundary
+                         << "diffOk =" << diffOk
+                         << "directionOk =" << directionOk
+                         << "corrOk =" << corrOk
+                         << "angleOk =" << angleOk
+                         << "angleSignedDiffOk =" << angleSignedDiffOk
+                         << "anglePairMidGapOk =" << anglePairMidGapOk
+                         << "signedLagDiff =" << signedLagDiff
+                         << "pairMidGap =" << pairMidGap
+                         << "corrA =" << aRes.corr
+                         << "corrB =" << bRes.corr;
+            }
+        }
+
+
+        // ======================================================
+        // 4. 最终正式有效帧判定
+        // ======================================================
+        bool strictValid =
+            bJumpOk &&
+            notBoundary &&
+            diffOk &&
+            directionOk &&
+            corrOk &&
+            angleOk &&
+            stableOk;
+
+
+        if (kDebugPerFrame) {
+            qDebug() << "PatientValidCheck:"
+                     << "lagA =" << aRes.refinedLag
+                     << "lagB =" << bRes.refinedLag
+                     << "diffLag =" << diffLagForCheck
+                     << "signedLagDiff =" << signedLagDiff
+                     << "pairMidB =" << pairMidB
+                     << "pairMidA =" << pairMidA
+                     << "pairMidGap =" << pairMidGap
+                     << "angleSignedDiffRange = ["
+                     << mCfg.angleSignedDiffMin << "," << mCfg.angleSignedDiffMax << "]"
+                     << "anglePairMidGapRange = ["
+                     << mCfg.anglePairMidGapMin << "," << mCfg.anglePairMidGapMax << "]"
+                     << "bRoughLag =" << bRes.roughLag
+                     << "bJump =" << bLagJump
+                     << "corrA =" << aRes.corr
+                     << "corrB =" << bRes.corr
+                     << "mCfg.frameCorrAMin =" << mCfg.frameCorrAMin
+                 << "mCfg.frameCorrBMin =" << mCfg.frameCorrBMin
+                 << "bJumpOk =" << bJumpOk
+                 << "notBoundary =" << notBoundary
+                 << "diffOk =" << diffOk
+                 << "directionOk =" << directionOk
+                 << "corrOk =" << corrOk
+                 << "angleSignedDiffOk =" << angleSignedDiffOk
+                 << "anglePairMidGapOk =" << anglePairMidGapOk
+                 << "angleOk =" << angleOk
+                 << "stableCenter =" << stableCenter
+                 << "stableCount =" << stableCount
+                 << "boneLagLocked =" << boneLagLocked
+                 << "lockedBoneLagCenter =" << lockedBoneLagCenter
+                 << "stableOk =" << stableOk
+                 << "strictValid =" << strictValid;
+        }
+
+
+        // ======================================================
+        // 门控拒绝率统计（不改检验逻辑，纯诊断用）
+        // ======================================================
+        // 脱耦过滤：corr<0.25 认为探头悬空/无耦合，不计入闸门统计
+        if (bRes.corr < 0.25) {
+            gateDecoupledFrames++;
+        } else {
+            gateTotalFrames++;
+
+            // 跟踪 CorrA 分布（诊断用）
+            if (gateTotalFrames == 1) {
+                gateCorrAMin = aRes.corr;
+                gateCorrAMax = aRes.corr;
+                gateCorrASum = aRes.corr;
+            } else {
+                if (aRes.corr < gateCorrAMin) gateCorrAMin = aRes.corr;
+                if (aRes.corr > gateCorrAMax) gateCorrAMax = aRes.corr;
+                gateCorrASum += aRes.corr;
+            }
+
+            // 记录当前帧各闸门状态
+            lastFrameBJumpOk = bJumpOk;
+            lastFrameBoundaryOk = notBoundary;
+            lastFrameDiffOk = diffOk;
+            lastFrameDirectionOk = directionOk;
+            lastFrameCorrOk = corrOk;
+            lastFrameAngleSignedDiffOk = angleSignedDiffOk;
+            lastFrameAnglePairMidGapOk = anglePairMidGapOk;
+            lastFrameAngleOk = angleOk;
+            lastFrameStableOk = stableOk;
+
+            // 累加各闸失败计数
+            if (!bJumpOk)             gateFailBJump++;
+            if (!notBoundary)         gateFailBoundary++;
+            if (!diffOk)              gateFailDiff++;
+            if (!directionOk)         gateFailDirection++;
+            if (bRes.corr < mCfg.frameCorrBMin) gateFailCorrB++;
+            if (aRes.corr < mCfg.frameCorrAMin) gateFailCorrA++;
+            if (!angleSignedDiffOk)   gateFailAngleSignedDiff++;
+            if (!anglePairMidGapOk)   gateFailAnglePairMidGap++;
+
+            // 稳定簇状态细分
+            if (!stableOk) {
+                if (boneLagLocked) {
+                    gateFailStableOutOfLock++;
+                    lastFrameStableState = 3;
+                } else if (recentBoneLagBList.size() < mCfg.stableLagWarmupCount) {
+                    gateFailStableWarmup++;
+                    lastFrameStableState = 0;
+                } else {
+                    gateFailStableNotConcentrated++;
+                    lastFrameStableState = 1;
+                }
+            } else {
+                lastFrameStableState = 2;
+            }
+        }
+
+        // 每 50 帧自动输出一次当前统计（不需要等有效帧攒满）
+        if (gateTotalFrames % 50 == 0) {
+            printGateStats();
+        }
+
+        handlePatientMeasureValue(
+            aRes.sos,
+            bRes.sos,
+            sosAvg,
+            aRes.refinedLag,
+            bRes.refinedLag,
+            diffLagForCheck,
+            pairMidGap,
+            aRes.corr,
+            bRes.corr,
+            strictValid
+            );
+    }
+}
+
+void MainWindow::processCalibrationFrame(const QVector<double>& filBC,
+                                         const QVector<double>& filBD,
+                                         const QVector<double>& filAC,
+                                         const QVector<double>& filAD,
+                                         const ArrivalResult& pickBC,
+                                         const ArrivalResult& pickBD,
+                                         const ArrivalResult& pickAC,
+                                         const ArrivalResult& pickAD)
+{
+    if (!calibrationDialog) return;
+
+    constexpr double vMin = 1800.0;
+    constexpr double vMax = 5000.0;
+    constexpr int lagToleranceAB = 20;
+
+    CalibrationFrame frame;
+    const PairResult bRes = calibrationSignalProcessor.estimatePairSpeed(
+        filBD, filBC, pickBD, pickBC, vMin, vMax,
+        QStringLiteral("Calibration B_pair / BD->BC"));
+
+    if (!bRes.valid) {
+        calibrationDialog->submitFrame(frame);
+        return;
+    }
+
+    const int bLagJump = std::abs(bRes.refinedLag - bRes.roughLag);
+    const int lagMin = qMax(1, static_cast<int>(std::floor(
+        calibrationSignalProcessor.probeDistanceCD
+        / (vMax * calibrationSignalProcessor.samplePeriod))) - 5);
+    const int lagMax = qMax(lagMin + 1, static_cast<int>(std::ceil(
+        calibrationSignalProcessor.probeDistanceCD
+        / (vMin * calibrationSignalProcessor.samplePeriod))) + 5);
+
+    frame.bValid = bLagJump <= 70 && bRes.corr >= mCfg.frameCorrBMin;
+    frame.boundaryPeak = std::abs(bRes.refinedLag) <= lagMin + 2
+        || std::abs(bRes.refinedLag) >= lagMax - 2;
+    frame.sosB = bRes.sos;
+    frame.corrB = bRes.corr;
+    frame.lagB = bRes.refinedLag;
+
+    PairResult aRes = calibrationSignalProcessor.estimatePairSpeedByValley(
+        filAD, filAC, pickAD, bRes.refinedLag, lagToleranceAB,
+        QStringLiteral("Calibration A_pair / AD->AC / valley"));
+    if (!aRes.valid) {
+        aRes = calibrationSignalProcessor.estimatePairSpeed(
+            filAD, filAC, pickAD, pickAC, vMin, vMax,
+            QStringLiteral("Calibration A_pair / AD->AC / constrained"),
+            qMax(1, bRes.refinedLag - lagToleranceAB),
+            bRes.refinedLag + lagToleranceAB);
+    }
+    frame.aValid = aRes.valid && aRes.corr >= 0.25;
+    if (aRes.valid) {
+        frame.sosA = aRes.sos;
+        frame.corrA = aRes.corr;
+        frame.lagA = aRes.refinedLag;
+    }
+
+    const PairResult auditB = signalProcessor.estimatePairSpeed(
+        filBD, filBC, pickBD, pickBC, vMin, vMax,
+        QStringLiteral("Calibration active-D peak audit"));
+    frame.peakConsistent = auditB.valid
+        && std::abs(auditB.refinedLag - bRes.refinedLag) <= 3;
+
+    if (aRes.valid) {
+        updateSpeedDebugPanel(aRes.sos, bRes.sos, bRes.sos,
+                              aRes.refinedLag, bRes.refinedLag,
+                              std::abs(aRes.refinedLag - bRes.refinedLag),
+                              aRes.corr, bRes.corr);
+    } else {
+        updateSpeedDebugPanel(0.0, bRes.sos, bRes.sos,
+                              0, bRes.refinedLag, 0, 0.0, bRes.corr);
+    }
+    calibrationDialog->submitFrame(frame);
+}
+
+void MainWindow::resetBoneLagStability()
+{
+    recentBoneLagBList.clear();
+
+    boneLagLocked = false;
+    lockedBoneLagCenter = 0;
+
+    boneLagOutOfLockCount = 0;
+
+    if (kDebugPerFrame) {
+        qDebug() << "Bone lag stability reset.";
+    }
+}
+
+void MainWindow::resetGateStats()
+{
+    gateTotalFrames = 0;
+    gateFailBJump = 0;
+    gateFailBoundary = 0;
+    gateFailDiff = 0;
+    gateFailDirection = 0;
+    gateFailCorrA = 0;
+    gateFailCorrB = 0;
+    gateFailAngleSignedDiff = 0;
+    gateFailAnglePairMidGap = 0;
+    gateFailStableWarmup = 0;
+    gateFailStableNotConcentrated = 0;
+    gateFailStableOutOfLock = 0;
+    gateDecoupledFrames = 0;
+    gateCorrAMin = 0.0;
+    gateCorrAMax = 0.0;
+    gateCorrASum = 0.0;
+}
+
+void MainWindow::printGateStats() const
+{
+    if (gateTotalFrames <= 0) {
+        qDebug() << "[闸门统计] 暂无数据";
+        return;
+    }
+
+    auto pct = [&](int fail) -> QString {
+        double r = (double)fail / (double)gateTotalFrames * 100.0;
+        return QString("%1%").arg(r, 0, 'f', 1);
+    };
+
+    // 分两行短输出，避免 Qt Creator 截断长行
+    qDebug().noquote()
+        << QString("[闸门统计 共%1帧] BJump=%2 Boundary=%3 Diff=%4 Dir=%5")
+               .arg(gateTotalFrames)
+               .arg(pct(gateFailBJump))
+               .arg(pct(gateFailBoundary))
+               .arg(pct(gateFailDiff))
+               .arg(pct(gateFailDirection));
+
+    qDebug().noquote()
+        << QString("[闸门统计] CorrA=%1 CorrB=%2 AngDiff=%3 AngGap=%4 StabWarm=%5 StabConc=%6 StabLock=%7")
+               .arg(pct(gateFailCorrA))
+               .arg(pct(gateFailCorrB))
+               .arg(pct(gateFailAngleSignedDiff))
+               .arg(pct(gateFailAnglePairMidGap))
+               .arg(pct(gateFailStableWarmup))
+               .arg(pct(gateFailStableNotConcentrated))
+               .arg(pct(gateFailStableOutOfLock));
+
+    if (gateDecoupledFrames > 0) {
+        qDebug().noquote()
+            << QString("  (另有 %1 帧因脱耦被忽略，corr<0.25)")
+                   .arg(gateDecoupledFrames);
+    }
+
+    if (gateTotalFrames > 0) {
+        double corrAMean = gateCorrASum / gateTotalFrames;
+        qDebug().noquote()
+            << QString("[CorrA分布] 最小=%1  平均=%2  最大=%3  门槛=%4")
+                   .arg(gateCorrAMin, 0, 'f', 3)
+                   .arg(corrAMean, 0, 'f', 3)
+                   .arg(gateCorrAMax, 0, 'f', 3)
+                   .arg(mCfg.frameCorrAMin, 0, 'f', 2);
+    }
+}
+
+QString MainWindow::gateStatsSummary() const
+{
+    // 保留旧接口兼容，但调用方应改用 printGateStats()
+    if (gateTotalFrames <= 0) return QString();
+
+    auto pct = [&](int fail) -> QString {
+        double r = (double)fail / (double)gateTotalFrames * 100.0;
+        return QString("%1%").arg(r, 0, 'f', 1);
+    };
+
+    return QString(
+        "BJump=%1 Boundary=%2 Diff=%3 Dir=%4 | "
+        "CorrA=%5 CorrB=%6 | "
+        "AngDiff=%7 AngGap=%8 | "
+        "StabWarm=%9 StabConc=%10 StabLock=%11")
+        .arg(pct(gateFailBJump))
+        .arg(pct(gateFailBoundary))
+        .arg(pct(gateFailDiff))
+        .arg(pct(gateFailDirection))
+        .arg(pct(gateFailCorrA))
+        .arg(pct(gateFailCorrB))
+        .arg(pct(gateFailAngleSignedDiff))
+        .arg(pct(gateFailAnglePairMidGap))
+        .arg(pct(gateFailStableWarmup))
+        .arg(pct(gateFailStableNotConcentrated))
+        .arg(pct(gateFailStableOutOfLock));
+}
+
+bool MainWindow::checkBoneLagStable(int lagB, int* centerOut, int* countOut)
+{
+    // ======================================================
+    // 1. 当前 lagB 加入候选窗口
+    // ======================================================
+    recentBoneLagBList.append(lagB);
+
+    while (recentBoneLagBList.size() > stableLagWindowSize) {
+        recentBoneLagBList.removeFirst();
+    }
+
+    // ======================================================
+    // 2. 如果还没有锁定稳定簇，先进入 warmup 观察阶段
+    // ======================================================
+    if (!boneLagLocked) {
+
+        if (recentBoneLagBList.size() < mCfg.stableLagWarmupCount) {
+            if (centerOut) *centerOut = lagB;
+            if (countOut) *countOut = recentBoneLagBList.size();
+
+            if (kDebugPerFrame) {
+                qDebug() << "BoneLagStable:"
+                         << "lagB =" << lagB
+                         << "recentCount =" << recentBoneLagBList.size()
+                         << "warmupNeed =" << mCfg.stableLagWarmupCount
+                         << "locked = false"
+                         << "stable = false, warmup";
+            }
+
+            return false;
+        }
+
+        // 用最近 mCfg.stableLagWarmupCount 个候选的中位数作为锁定中心。
+        // 注意：这里不再选择最小 lag，也就是不再追逐最高声速簇。
+        QVector<int> sorted = recentBoneLagBList;
+        std::sort(sorted.begin(), sorted.end());
+
+        int center = sorted[sorted.size() / 2];
+
+        int countAroundCenter = 0;
+        for (int v : recentBoneLagBList) {
+            if (std::abs(v - center) <= mCfg.stableLagTolerance) {
+                countAroundCenter++;
+            }
+        }
+
+        if (centerOut) *centerOut = center;
+        if (countOut) *countOut = countAroundCenter;
+
+        // 候选还不够集中，不锁定，不让进度条动。
+        if (countAroundCenter < mCfg.stableLagLockNeedCount) {
+            if (kDebugPerFrame) {
+                qDebug() << "BoneLagStable:"
+                         << "lagB =" << lagB
+                         << "window =" << recentBoneLagBList
+                         << "candidateCenter =" << center
+                         << "countAroundCenter =" << countAroundCenter
+                         << "need =" << mCfg.stableLagLockNeedCount
+                         << "tolerance =" << mCfg.stableLagTolerance
+                         << "locked = false"
+                         << "stable = false, not concentrated";
+            }
+
+            return false;
+        }
+
+        // 锁定稳定簇
+        boneLagLocked = true;
+        lockedBoneLagCenter = center;
+        boneLagOutOfLockCount = 0;
+
+        bool currentInCluster =
+            (std::abs(lagB - lockedBoneLagCenter) <= mCfg.stableLagTolerance);
+
+        if (kDebugPerFrame) {
+            qDebug() << "BoneLagStable:"
+                     << "LOCKED"
+                     << "lockedCenter =" << lockedBoneLagCenter
+                     << "countAroundCenter =" << countAroundCenter
+                     << "currentLagB =" << lagB
+                     << "currentInCluster =" << currentInCluster;
+        }
+
+        // 锁定这一帧，如果当前点也在簇内，就允许有效。
+        return currentInCluster;
+    }
+
+    // ======================================================
+    // 3. 已经锁定稳定簇：只接受锁定簇附近的帧
+    // ======================================================
+    bool currentInCluster =
+        (std::abs(lagB - lockedBoneLagCenter) <= mCfg.stableLagTolerance);
+
+    int countAroundLocked = 0;
+    for (int v : recentBoneLagBList) {
+        if (std::abs(v - lockedBoneLagCenter) <= mCfg.stableLagTolerance) {
+            countAroundLocked++;
+        }
+    }
+
+    if (centerOut) *centerOut = lockedBoneLagCenter;
+    if (countOut) *countOut = countAroundLocked;
+
+    if (currentInCluster) {
+        boneLagOutOfLockCount = 0;
+
+        if (kDebugPerFrame) {
+            qDebug() << "BoneLagStable:"
+                     << "lagB =" << lagB
+                     << "lockedCenter =" << lockedBoneLagCenter
+                     << "countAroundLocked =" << countAroundLocked
+                     << "tolerance =" << mCfg.stableLagTolerance
+                     << "currentInCluster = true"
+                     << "stable = true";
+        }
+
+        return true;
+    }
+
+    // 当前帧偏离锁定簇，不计入。
+    boneLagOutOfLockCount++;
+
+    if (kDebugPerFrame) {
+        qDebug() << "BoneLagStable:"
+                 << "lagB =" << lagB
+                 << "lockedCenter =" << lockedBoneLagCenter
+                 << "countAroundLocked =" << countAroundLocked
+                 << "tolerance =" << mCfg.stableLagTolerance
+                 << "currentInCluster = false"
+                 << "outOfLockCount =" << boneLagOutOfLockCount
+                 << "unlockNeed =" << mCfg.boneLagUnlockCount
+                 << "stable = false";
+    }
+
+    // 如果连续多帧都偏离锁定簇，说明探头已经移到别的位置了。
+    // 这时重新寻找稳定簇。注意：这里不清空已累计的有效值，
+    // 只是停止让当前帧推动进度条；如果你希望更严格，也可以在这里清空当前轮。
+    if (boneLagOutOfLockCount >= mCfg.boneLagUnlockCount) {
+        if (kDebugPerFrame) {
+            qDebug() << "BoneLagStable:"
+                     << "unlock because too many out-of-cluster frames"
+                     << "oldLockedCenter =" << lockedBoneLagCenter;
+        }
+
+        recentBoneLagBList.clear();
+        boneLagLocked = false;
+        lockedBoneLagCenter = 0;
+        boneLagOutOfLockCount = 0;
+    }
+
+    return false;
+}
+
+void MainWindow::handleSerialError(QSerialPort::SerialPortError error) {
+    const bool communicationError =
+        error == QSerialPort::ResourceError ||
+        error == QSerialPort::ReadError ||
+        error == QSerialPort::WriteError;
+    if (!communicationError || serialErrorHandled) return;
+
+    serialErrorHandled = true;
+
+    if (acquireMode == CalibrationAcquireMode && calibrationDialog) {
+        calibrationDialog->notifyAcquisitionUnavailable(
+            QStringLiteral("设备通信已中断，本次独立测量已取消。请检查USB和设备电源，重新连接后再采集。"));
+        stopCalibrationAcquisition();
+    }
+    serial->close();
+    ui->connectButton->setText("连接");
+    resetDisconnectedAcquisitionState();
+    statusBar()->showMessage("设备通信已中断，请检查 USB 连接和设备电源。重新插入后点击“连接”。", 10000);
+
+    QMessageBox::warning(this,
+                         "设备通信已中断",
+                         "设备通信已中断，可能是 USB 被拔出、连接不稳定或读写失败。\n"
+                         "请检查 USB 线和设备电源，重新插入后点击“连接”。");
+}
+
+
+
+
+void MainWindow::setupChart()
+{
+    QVBoxLayout *vbox = new QVBoxLayout();
+    vbox->setSpacing(2);
+    vbox->setContentsMargins(2, 2, 2, 2);
+
+    auto createChannel = [&](QLineSeries **seriesPtr,
+                             QChart **chartPtr,
+                             QChartView **viewPtr,
+                             QSlider **sliderPtr) {
+        // 1. 曲线
+        *seriesPtr = new QLineSeries();
+
+        QPen pen(QColor(0, 229, 255));
+        pen.setWidth(2);
+        (*seriesPtr)->setPen(pen);
+
+        // 2. 图表
+        *chartPtr = new QChart();
+        (*chartPtr)->addSeries(*seriesPtr);
+        (*chartPtr)->legend()->hide();
+
+        // 关键：尽量压缩边距
+        (*chartPtr)->setMargins(QMargins(0, 0, 0, 0));
+        (*chartPtr)->layout()->setContentsMargins(0, 0, 0, 0);
+        (*chartPtr)->setBackgroundRoundness(0);
+        (*chartPtr)->setBackgroundBrush(QBrush(QColor(30, 30, 30)));
+
+        // 3. X 轴：去掉 Sample Index 和数字标签，节省高度
+        QValueAxis *axisX = new QValueAxis();
+        axisX->setTitleText("");
+        axisX->setLabelFormat("%d");
+        axisX->setLabelsVisible(false);       // 不显示横坐标数字
+        axisX->setGridLineVisible(true);
+        axisX->setGridLineColor(QColor(80, 80, 80));
+        axisX->setLinePenColor(QColor(120, 120, 120));
+        (*chartPtr)->setAxisX(axisX, *seriesPtr);
+
+        // 4. Y 轴：去掉 Amplitude，只保留少量刻度
+        QValueAxis *axisY = new QValueAxis();
+        axisY->setTitleText("");
+        axisY->setRange(0, 4095);
+        axisY->setTickCount(3);               // 只保留 0 / 中间 / 4095
+        axisY->setLabelFormat("%.0f");
+        axisY->setLabelsColor(Qt::white);
+        axisY->setGridLineColor(QColor(80, 80, 80));
+        axisY->setLinePenColor(QColor(120, 120, 120));
+        (*chartPtr)->setAxisY(axisY, *seriesPtr);
+
+        // 5. 图表视图
+        *viewPtr = new QChartView(*chartPtr);
+        (*viewPtr)->setRenderHint(QPainter::Antialiasing);
+        (*viewPtr)->setStyleSheet("background: transparent;");
+        (*viewPtr)->setMinimumHeight(90);
+        (*viewPtr)->setMaximumHeight(125);
+
+        // 6. 增益滑条
+        *sliderPtr = new QSlider(Qt::Vertical);
+        (*sliderPtr)->setRange(0, 1241);
+        (*sliderPtr)->setValue(globalGain);
+        (*sliderPtr)->setInvertedAppearance(false);
+        (*sliderPtr)->setTickPosition(QSlider::NoTicks);
+        (*sliderPtr)->setFixedWidth(24);
+        (*sliderPtr)->setCursor(Qt::PointingHandCursor);
+
+        QString sliderStyle = R"(
+            QSlider:vertical {
+                background: transparent;
+                min-width: 24px;
+            }
+            QSlider::groove:vertical {
+                background: #E0E0E0;
+                width: 4px;
+                border-radius: 2px;
+                margin: 0px 10px;
+            }
+            QSlider::handle:vertical {
+                background: #FFFFFF;
+                border: 2px solid #409EFF;
+                height: 14px;
+                margin: 0 -5px;
+                border-radius: 8px;
+            }
+            QSlider::handle:vertical:hover {
+                background: #409EFF;
+                border: 2px solid #409EFF;
+            }
+            QSlider::add-page:vertical {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                            stop:0 #409EFF, stop:1 #36D1DC);
+                width: 4px;
+                border-radius: 2px;
+                margin: 0px 10px;
+            }
+            QSlider::sub-page:vertical {
+                background: #E4E7ED;
+                width: 4px;
+                border-radius: 2px;
+                margin: 0px 10px;
+            }
+        )";
+
+        (*sliderPtr)->setStyleSheet(sliderStyle);
+
+        connect(*sliderPtr,
+                &QSlider::valueChanged,
+                this,
+                &MainWindow::onGainSliderChanged);
+
+        // 7. 一行：左边图，右边滑条
+        QHBoxLayout *hbox = new QHBoxLayout();
+        hbox->setContentsMargins(2, 0, 2, 2);
+        hbox->setSpacing(4);
+
+        hbox->addWidget(*viewPtr, 1);
+        hbox->addWidget(*sliderPtr, 0, Qt::AlignHCenter);
+
+        vbox->addLayout(hbox);
+    };
+
+    // 注意：这里不再显示 A→C/A→D/B→C/B→D 文字，只创建四路图
+    createChannel(&seriesA, &chartA, &viewA, &gainSliderA);
+    createChannel(&seriesB, &chartB, &viewB, &gainSliderB);
+    createChannel(&seriesC, &chartC, &viewC, &gainSliderC);
+    createChannel(&seriesD, &chartD, &viewD, &gainSliderD);
+
+    QWidget *container = new QWidget();
+    container->setLayout(vbox);
+
+    // 关键：不要再套 QScrollArea，避免右侧滚轮
+    ui->verticalLayoutChart->setContentsMargins(0, 0, 0, 0);
+    ui->verticalLayoutChart->setSpacing(0);
+    ui->verticalLayoutChart->addWidget(container);
+}
+
+
+void MainWindow::onGainSliderChanged(int value)
+{
+    // 如果值没变，直接返回，避免多余信号
+    if (globalGain == value)
+        return;
+
+    // 更新全局增益
+    globalGain = static_cast<quint16>(value);
+
+    // 四个滑条同步 —— 使用 QSignalBlocker 防止递归触发 valueChanged
+    {
+        QSignalBlocker b1(gainSliderA);
+        QSignalBlocker b2(gainSliderB);
+        QSignalBlocker b3(gainSliderC);
+        QSignalBlocker b4(gainSliderD);
+
+        gainSliderA->setValue(value);
+        gainSliderB->setValue(value);
+        gainSliderC->setValue(value);
+        gainSliderD->setValue(value);
+    }
+
+    // 状态栏提示当前增益
+    statusBar()->showMessage(
+        QString("当前增益 = 0x%1 (%2)")
+            .arg(globalGain, 4, 16, QLatin1Char('0'))
+            .arg(globalGain),
+        1500
+        );
+}
+
+
+
+void MainWindow::on_btnPatientInfo_clicked()
+{
+    if (patientMeasureRunning) return;
+    ui->eName->clear();
+    ui->eID->clear();
+    ui->eGender->setCurrentIndex(0);
+    ui->eBirth->setDate(QDate::currentDate());
+    ui->eHeight->clear();
+    ui->eWeight->clear();
+    ui->stackedWidget->setCurrentWidget(ui->pagePatientSelect);
+}
+
+void MainWindow::on_btnStartMeasurement_clicked()
+{
+    // 这个按钮现在 UI 显示为"开始检测"或"停止检测"，objectName 仍然是 btnPatientInfo
+
+    if (patientMeasureRunning) {
+        // 正在检测中 → 停止检测
+        stopPatientMeasurement();
+        resetOneRoundMeasurementState();
+        resetBoneLagStability();
+        resetGateStats();
+
+        ui->barPairA->setValue(500);
+        ui->barPairB->setValue(500);
+        ui->barMeasureProgress->setValue(0);
+        ui->barMeasureProgress->setFormat("有效值：%v / %m");
+        ui->lblPairAValue->setText("D=--\n目标=10.0");
+        ui->lblPairBValue->setText("G=--\n目标=0.0");
+        ui->lblProcessStatus->setText("检测已手动停止");
+        ui->lblProcessStatus->setStyleSheet(
+            "font-size: 12px; color: #E6A23C; font-weight: bold;"
+            );
+        return;
+    }
+
+    if (hasPendingMeasurement) {
+        statusBar()->showMessage(
+            QStringLiteral("上一次检测结果尚未保存，请先点击“保存结果”再开始新的检测。"),
+            8000);
+        updatePatientSelectionUi();
+        return;
+    }
+
+    // 关键：如果上一轮测完后弹了提示框，点击"开始检测"时先自动关掉
+    closeRoundFinishedTip();
+
+    // 已完成上一组五轮测量时，开始按钮直接开启同一患者的新一组测量。
+    if (roundSosList.size() >= normalMeasureRounds) {
+        resetPatientMeasurementState(normalMeasureRounds);
+    }
+
+    // 没有当前病人信息：直接进入病人信息填写/导入页面
+    // 不弹 OK 小窗口，也不自动开始测量
+    if (!hasCurrentPatient()) {
+        pendingStartAfterPatientInfo = false;
+
+        clearNewForm();
+        ui->stackedWidget->setCurrentWidget(ui->pagePatientSelect);
+        return;
+    }
+
+    // 每次点击"开始检测"只测 1 次；
+    // 前面完成的第 1 次、第 2 次……保存在 roundSosList 里，不会清空。
+    startPatientMeasurement(normalMeasureRounds);
+}
+
+void MainWindow::on_btnPatientNewSave_clicked()
+{
+    PatientInfo p;
+    p.name     = ui->eName->text().trimmed();
+    p.id       = ui->eID->text().trimmed();
+    p.gender   = ui->eGender->currentText();
+    p.birthDay = ui->eBirth->date().toString("yyyy-MM-dd");
+    p.height   = ui->eHeight->text().trimmed();
+    p.weight   = ui->eWeight->text().trimmed();
+
+    if (p.name.isEmpty() || p.id.isEmpty()) {
+        QMessageBox::warning(this, "错误", "姓名和ID不能为空");
+        return;
+    }
+    if (!validatePatientFields(ui->eBirth->date(), p.height, p.weight)) return;
+
+    for (const PatientInfo& existing : patientList) {
+        if (existing.id == p.id) {
+            QMessageBox::warning(this, "重复 ID", "该编号已存在，请从档案中选择患者。");
+            return;
+        }
+    }
+    if (!confirmPatientChange(p.id)) return;
+
+    QList<PatientInfo> candidate = patientList;
+    candidate.append(p);
+    if (!savePatients(candidate)) return;
+    patientList = candidate;
+    applyCurrentPatient(p);
+    ui->stackedWidget->setCurrentWidget(ui->pageMain);
+    scheduleResponsiveLayout();
+}
+
+void MainWindow::on_btnBackToMain_clicked() {
+    ui->stackedWidget->setCurrentWidget(ui->pageMain);
+    scheduleResponsiveLayout();
+}
+
+void MainWindow::on_btnImportFromDB_clicked() {
+    if (patientMeasureRunning) {
+        QMessageBox::warning(this, "检测进行中", "检测进行中不能切换患者。");
+        return;
+    }
+    archiveMode = ImportMode;        // 标记为导入模式
+    ui->btnSelectPatient->setVisible(true);
+    ui->btnViewHistory->setVisible(false);
+    statusBar()->showMessage("请单击选中患者，再点击“选择患者”；也可以双击患者行直接导入", 5000);
+    refreshTable(patientList);
+    ui->stackedWidget->setCurrentWidget(ui->pageArchive);
+}
+
+void MainWindow::updateCurrentPatientUI() {
+    const QString empty = "--";
+    ui->labelName->setText("姓名: " + (currentPatient.name.isEmpty() ? empty : currentPatient.name));
+    ui->labelID->setText("ID: " + (currentPatient.id.isEmpty() ? empty : currentPatient.id));
+    ui->labelGender->setText("性别: " + (currentPatient.gender.isEmpty() ? empty : currentPatient.gender));
+    ui->labelBirth->setText("出生日期: " + (currentPatient.birthDay.isEmpty() ? empty : currentPatient.birthDay));
+    ui->labelHeight->setText("身高: " + (currentPatient.height.isEmpty() ? empty : currentPatient.height));
+    ui->labelWeight->setText("体重: " + (currentPatient.weight.isEmpty() ? empty : currentPatient.weight));
+
+}
+
+
+
+bool MainWindow::trySavePendingMeasurement()
+{
+    if (!hasPendingMeasurement) {
+        return true;
+    }
+    bool patientExists = false;
+    for (const PatientInfo& patient : patientList) {
+        if (patient.id == pendingMeasurement.patientId) {
+            patientExists = true;
+            break;
+        }
+    }
+    if (!patientExists) {
+        QMessageBox::warning(this, "错误", "检测结果对应的患者档案已不存在，不能保存。");
+        return false;
+    }
+    QList<MeasurementRecord> candidate = measurementList;
+    candidate.append(pendingMeasurement);
+    if (!saveMeasurements(candidate)) return false;
+    measurementList = candidate;
+    hasPendingMeasurement = false;
+    pendingMeasurement = MeasurementRecord();
+    updatePatientSelectionUi();
+    return true;
+}
+
+void MainWindow::on_btnSaveResult_clicked() {
+    if (!hasPendingMeasurement) {
+        QMessageBox::information(this, "提示", "当前没有可保存的新检测结果。");
+        return;
+    }
+    if (!trySavePendingMeasurement()) return;
+    QMessageBox::information(this, "成功", "测量结果已保存。");
+}
+
+void MainWindow::setupSpeedChart()
+{
+    // ======================================================
+    // 1. 创建声速曲线
+    // ======================================================
+    seriesSpeed = new QLineSeries();
+    seriesSpeed->setName("声速趋势");
+
+    QPen pen(QColor(255, 215, 0));   // 黄色线
+    pen.setWidth(2);
+    seriesSpeed->setPen(pen);
+
+    // ======================================================
+    // 2. 创建图表
+    // ======================================================
+    chartSpeed = new QChart();
+    chartSpeed->addSeries(seriesSpeed);
+
+    // 节省空间：不显示标题、不显示图例
+    chartSpeed->setTitle("");
+    chartSpeed->legend()->hide();
+
+    // 压缩边距
+    chartSpeed->setMargins(QMargins(2, 2, 2, 2));
+    chartSpeed->setBackgroundRoundness(0);
+
+    // 深色背景
+    chartSpeed->setBackgroundBrush(QBrush(QColor(30, 30, 30)));
+    chartSpeed->setPlotAreaBackgroundBrush(QBrush(QColor(30, 30, 30)));
+    chartSpeed->setPlotAreaBackgroundVisible(true);
+
+    // ======================================================
+    // 3. X轴：时间/次数
+    // ======================================================
+    QValueAxis *axisX = new QValueAxis();
+    axisX->setTitleText("");
+    axisX->setRange(0, 50);
+    axisX->setTickCount(6);          // 0,10,20,30,40,50
+    axisX->setLabelFormat("%d");
+
+    axisX->setLabelsColor(Qt::white);
+    axisX->setGridLineColor(QColor(80, 80, 80));
+    axisX->setLinePenColor(QColor(120, 120, 120));
+
+    QFont fontX = axisX->labelsFont();
+    fontX.setPointSize(8);
+    axisX->setLabelsFont(fontX);
+
+    chartSpeed->addAxis(axisX, Qt::AlignBottom);
+    seriesSpeed->attachAxis(axisX);
+
+    // ======================================================
+    // 4. Y轴：声速范围固定 2000~5000
+    // ======================================================
+    QValueAxis *axisY = new QValueAxis();
+    axisY->setTitleText("");
+    axisY->setRange(2000, 5000);
+    axisY->setTickCount(4);          // 2000,3000,4000,5000
+    axisY->setLabelFormat("%.0f");
+
+    axisY->setLabelsColor(Qt::white);
+    axisY->setGridLineColor(QColor(80, 80, 80));
+    axisY->setLinePenColor(QColor(120, 120, 120));
+
+    QFont fontY = axisY->labelsFont();
+    fontY.setPointSize(8);
+    axisY->setLabelsFont(fontY);
+
+    chartSpeed->addAxis(axisY, Qt::AlignLeft);
+    seriesSpeed->attachAxis(axisY);
+
+    // ======================================================
+    // 5. 绑定到 UI
+    // ======================================================
+    ui->chartViewSpeed->setChart(chartSpeed);
+    ui->chartViewSpeed->setRenderHint(QPainter::Antialiasing);
+    ui->chartViewSpeed->setStyleSheet("background: transparent;");
+}
+
+void MainWindow::setupSpeedDebugPanel()
+{
+    QWidget *host = ui->chartViewSpeed->parentWidget();
+
+    if (!host) {
+        return;
+    }
+
+    QFrame *panel = new QFrame(host);
+    panel->setObjectName("speedDebugPanel");
+    panel->setFrameShape(QFrame::StyledPanel);
+    panel->setMaximumHeight(60);
+    panel->setMinimumHeight(52);
+
+    panel->setStyleSheet(R"(
+        QFrame#speedDebugPanel {
+            background-color: #FFFFFF;
+            border: 1px solid #DCDFE6;
+            border-radius: 6px;
+        }
+        QLabel {
+            border: none;
+            background: transparent;
+            color: #303133;
+        }
+    )");
+
+    QGridLayout *grid = new QGridLayout(panel);
+    grid->setContentsMargins(6, 2, 6, 2);
+    grid->setHorizontalSpacing(10);
+    grid->setVerticalSpacing(1);
+
+    QLabel *title = new QLabel("声速调试值");
+    title->setStyleSheet("font-size: 13px; font-weight: bold; color: #409EFF;");
+
+    lblSosA = new QLabel("A：-- m/s");
+    lblSosB = new QLabel("B：-- m/s");
+    lblSosAvg = new QLabel("平均：-- m/s");
+    lblSosInfo = new QLabel("等待测量...");
+
+    QString valueStyle = "font-size: 12px; font-weight: bold; color: #303133;";
+    lblSosA->setStyleSheet(valueStyle);
+    lblSosB->setStyleSheet(valueStyle);
+    lblSosAvg->setStyleSheet(valueStyle);
+    lblSosInfo->setStyleSheet("font-size: 11px; color: #606266;");
+
+    grid->addWidget(title,     0, 0);
+    grid->addWidget(lblSosA,   1, 0);
+    grid->addWidget(lblSosB,   1, 1);
+    grid->addWidget(lblSosAvg, 1, 2);
+    grid->addWidget(lblSosInfo, 2, 0, 1, 3);
+
+    // 优先插入到 chartViewSpeed 所在布局里
+    QLayout *layout = host->layout();
+
+    if (QBoxLayout *box = qobject_cast<QBoxLayout*>(layout)) {
+        int idx = box->indexOf(ui->chartViewSpeed);
+
+        if (idx >= 0) {
+            box->insertWidget(idx, panel, 0);
+        } else {
+            box->insertWidget(0, panel, 0);
+        }
+
+        return;
+    }
+
+    // 如果父控件没有布局，退回固定位置，但注意 parent 是 chartViewSpeed 的父控件，
+    // 不是 pageMain，所以不会再跑到窗口最上面。
+    QRect oldRect = ui->chartViewSpeed->geometry();
+
+    int panelHeight = 46;
+    int gap = 4;
+
+    panel->setGeometry(oldRect.x(),
+                       oldRect.y(),
+                       oldRect.width(),
+                       panelHeight);
+
+    ui->chartViewSpeed->setGeometry(oldRect.x(),
+                                    oldRect.y() + panelHeight + gap,
+                                    oldRect.width(),
+                                    qMax(120, oldRect.height() - panelHeight - gap));
+
+    panel->show();
+}
+
+void MainWindow::updateSpeedDebugPanel(double sosA,
+                                       double sosB,
+                                       double sosAvg,
+                                       int lagA,
+                                       int lagB,
+                                       int diffLag,
+                                       double corrA,
+                                       double corrB)
+{
+    if (!lblSosA || !lblSosB || !lblSosAvg || !lblSosInfo) {
+        return;
+    }
+
+    lblSosA->setText(QString("A：%1").arg(sosA, 0, 'f', 0));
+    lblSosB->setText(QString("B：%1").arg(sosB, 0, 'f', 0));
+    lblSosAvg->setText(QString("平均：%1 m/s").arg(sosAvg, 0, 'f', 0));
+
+    lblSosInfo->setText(
+        QString("lagA=%1  lagB=%2  diff=%3  corrA=%4  corrB=%5")
+            .arg(lagA)
+            .arg(lagB)
+            .arg(diffLag)
+            .arg(corrA, 0, 'f', 2)
+            .arg(corrB, 0, 'f', 2)
+        );
+
+    lblSosInfo->setStyleSheet("font-size: 11px; color: #67C23A;");
+}
+
+void MainWindow::setSpeedDebugInvalid(const QString& reason)
+{
+    if (!lblSosA || !lblSosB || !lblSosAvg || !lblSosInfo) {
+        return;
+    }
+
+    lblSosInfo->setText("无效：" + reason);
+    lblSosInfo->setStyleSheet("font-size: 11px; color: #F56C6C;");
+}
+
+void MainWindow::initProcessPanel()
+{
+    processValidCount = 0;
+
+    // ======================================================
+    // 1. 两个竖向进度条
+    // ======================================================
+    ui->barPairA->setRange(0, 1000);
+    ui->barPairB->setRange(0, 1000);
+
+    // 平衡状态：两个都在 50%
+    ui->barPairA->setValue(500);
+    ui->barPairB->setValue(500);
+
+    // 如果运行后发现绿色条方向反了，就把 false 改成 true
+    ui->barPairA->setInvertedAppearance(false);
+    ui->barPairB->setInvertedAppearance(false);
+
+    // ======================================================
+    // 2. 横向有效测量进度条
+    // ======================================================
+    ui->barMeasureProgress->setRange(0, processValidTarget);
+    ui->barMeasureProgress->setValue(0);
+    ui->barMeasureProgress->setFormat("有效值：%v / %m");
+    ui->barMeasureProgress->setTextVisible(true);
+
+    // ======================================================
+    // 3. 文本初始化
+    // ======================================================
+    ui->lblPairAValue->setText("D=--\n目标=10.0");
+    ui->lblPairBValue->setText("G=--\n目标=0.0");
+    ui->lblProcessStatus->setText("等待开始测量");
+    ui->lblProcessStatus->setWordWrap(true);
+    ui->lblProcessStatus->setMinimumHeight(60);
+    ui->lblGateStats->setText("");
+    ui->lblGateStats->setWordWrap(true);
+
+    // ======================================================
+    // 4. 进度条样式
+    // ======================================================
+    QString barStyle = R"(
+        QProgressBar {
+            border: 1px solid #BFCBD9;
+            border-radius: 4px;
+            background-color: #EEEEEE;
+            text-align: center;
+        }
+        QProgressBar::chunk {
+            background-color: #00C853;
+            border-radius: 3px;
+        }
+    )";
+
+    ui->barPairA->setStyleSheet(barStyle);
+    ui->barPairB->setStyleSheet(barStyle);
+    ui->barMeasureProgress->setStyleSheet(barStyle);
+
+    // ======================================================
+    // 5. 给两个竖条加 50% 中线
+    // ======================================================
+    QTimer::singleShot(0, this, [this]() {
+        addMiddleLineToProgressBar(ui->barPairA);
+        addMiddleLineToProgressBar(ui->barPairB);
+    });
+}
+
+void MainWindow::addMiddleLineToProgressBar(QProgressBar *bar)
+{
+    if (!bar) {
+        return;
+    }
+
+    // 防止重复添加中线
+    if (bar->findChild<QFrame*>("middleLine")) {
+        return;
+    }
+
+    QFrame *line = new QFrame(bar);
+    line->setObjectName("middleLine");
+    line->setFrameShape(QFrame::NoFrame);
+    line->setStyleSheet("background-color: #E6A23C;");
+
+    int w = bar->width();
+    int h = bar->height();
+
+    if (w <= 0 || h <= 0) {
+        // 如果此时控件还没布局完成，稍后再试一次
+        QPointer<QProgressBar> safeBar(bar);
+
+        QTimer::singleShot(100, this, [this, safeBar]() {
+            if (safeBar) {
+                addMiddleLineToProgressBar(safeBar.data());
+            }
+        });
+
+        return;
+    }
+
+    // 50% 中线
+    line->setGeometry(0, h / 2 - 1, w, 2);
+    line->raise();
+    line->show();
+}
+
+void MainWindow::updateProcessPanel(double sosA,
+                                    double sosB,
+                                    int lagA,
+                                    int lagB,
+                                    int diffLag,
+                                    double pairMidGap,
+                                    bool countThisFrame)
+{
+    // ======================================================
+    // 1. 两个竖条：显示探头角度 / 姿态平衡
+    //
+
+    auto mapToBar = [](double value,
+                       double target,
+                       double fullScale,
+                       double maxOffset,
+                       double power) -> int {
+        double dev = value - target;
+        double norm = std::abs(dev) / fullScale;
+        norm = qBound(0.0, norm, 1.0);
+
+        double curved = std::pow(norm, power);
+        int offset = qRound(maxOffset * curved);
+        offset = qBound(0, offset, 480);
+
+        if (dev > 0.0) {
+            return 500 + offset;
+        } else if (dev < 0.0) {
+            return 500 - offset;
+        }
+
+        return 500;
+    };
+
+    // 左竖条：D = lagA - lagB
+    int dBar = mapToBar(
+        lagA - lagB,
+        mCfg.angleSignedDiffTarget,
+        6.0,
+        320.0,
+        1.4
+        );
+
+    // 右竖条：G = pairMidGap
+    int gBar = mapToBar(
+        pairMidGap,
+        mCfg.anglePairMidGapTarget,
+        12.0,
+        320.0,
+        1.4
+        );
+
+    ui->barPairA->setValue(qBound(0, dBar, 1000));
+    ui->barPairB->setValue(qBound(0, gBar, 1000));
+
+    // ======================================================
+    // 2. 标签显示
+    // ======================================================
+    int signedLagDiff = lagA - lagB;
+
+    ui->lblPairAValue->setText(
+        QString("D=%1\n目标=%2")
+            .arg(signedLagDiff)
+            .arg(mCfg.angleSignedDiffTarget, 0, 'f', 1)
+        );
+
+    ui->lblPairBValue->setText(
+        QString("G=%1\n目标=%2")
+            .arg(pairMidGap, 0, 'f', 1)
+            .arg(mCfg.anglePairMidGapTarget, 0, 'f', 1)
+        );
+
+    // ======================================================
+    // 3. 横向进度条：只有 strictValid=true 才前进
+    // ======================================================
+    if (countThisFrame && processValidCount < processValidTarget) {
+        processValidCount++;
+    }
+
+    ui->barMeasureProgress->setValue(processValidCount);
+
+    // ======================================================
+    // 4. 计算当前姿态是否在允许范围内
+    // ======================================================
+    bool angleSignedDiffOk =
+        (signedLagDiff >= mCfg.angleSignedDiffMin &&
+         signedLagDiff <= mCfg.angleSignedDiffMax);
+
+    bool anglePairMidGapOk =
+        (pairMidGap >= mCfg.anglePairMidGapMin &&
+         pairMidGap <= mCfg.anglePairMidGapMax);
+
+    bool angleOk =
+        (!enablePatientAngleGate) ||
+        (angleSignedDiffOk && anglePairMidGapOk);
+
+    // ======================================================
+    // 5. 状态文字
+    // ======================================================
+    if (processValidCount >= processValidTarget) {
+        ui->lblProcessStatus->setText(
+            QString("本次测量完成：有效值已满 %1/%2")
+                .arg(processValidTarget)
+                .arg(processValidTarget)
+            );
+
+        ui->lblProcessStatus->setStyleSheet(
+            "font-size: 12px; color: #67C23A; font-weight: bold;"
+            );
+        return;
+    }
+
+    if (countThisFrame) {
+        ui->lblProcessStatus->setText(
+            QString("姿态有效：Gap=%1，目标=%2，lagA-lagB=%3，进度 %4/%5")
+                .arg(pairMidGap, 0, 'f', 1)
+                .arg(mCfg.anglePairMidGapTarget, 0, 'f', 1)
+                .arg(signedLagDiff)
+                .arg(processValidCount)
+                .arg(processValidTarget)
+            );
+
+        ui->lblProcessStatus->setStyleSheet(
+            "font-size: 12px; color: #67C23A; font-weight: bold;"
+            );
+    } else {
+        // ======================================================
+        // 6. 帧被拒绝：显示具体失败原因 + 门控统计
+        // ======================================================
+        QStringList failReasons;
+
+        // 从成员变量读取当前帧各闸状态（detectAndPlotSpeed 已写入）
+        if (!lastFrameBJumpOk)
+            failReasons << "B跳变";
+        if (!lastFrameBoundaryOk)
+            failReasons << "边界反射";
+        if (!lastFrameDiffOk)
+            failReasons << QString("|lagA-lagB|过大=%1").arg(signedLagDiff);
+        if (!lastFrameDirectionOk)
+            failReasons << QString("A<B方向异常=%1").arg(signedLagDiff);
+        if (!lastFrameCorrOk) {
+            // corrOk 是 corrA AND corrB，细分一下
+            if (gateFailCorrA > 0 && gateFailCorrB == 0)
+                failReasons << "CorrA偏低";
+            else if (gateFailCorrB > 0 && gateFailCorrA == 0)
+                failReasons << "CorrB偏低";
+            else
+                failReasons << "相关性偏低";
+        }
+        if (!lastFrameAngleSignedDiffOk)
+            failReasons << QString("D=%1∉[%2,%3]").arg(signedLagDiff).arg(mCfg.angleSignedDiffMin,0,'f',1).arg(mCfg.angleSignedDiffMax,0,'f',1);
+        if (!lastFrameAnglePairMidGapOk)
+            failReasons << QString("G=%1∉[%2,%3]").arg(pairMidGap,0,'f',1).arg(mCfg.anglePairMidGapMin,0,'f',1).arg(mCfg.anglePairMidGapMax,0,'f',1);
+        if (!lastFrameStableOk && lastFrameAngleOk && lastFrameCorrOk) {
+            // 角度和相关都 OK 但是稳定簇没过，说明问题在稳定性
+            if (lastFrameStableState == 0)
+                failReasons << QString("预热中(%1/%2)").arg(recentBoneLagBList.size()).arg(mCfg.stableLagWarmupCount);
+            else if (lastFrameStableState == 1)
+                failReasons << "簇不够集中";
+            else if (lastFrameStableState == 3)
+                failReasons << "偏离锁定簇";
+        }
+
+        // 引导提示 — 按优先级：先解决角度，再解决稳定性，最后才是信号质量
+        QString guide;
+        double gDev = pairMidGap - mCfg.anglePairMidGapTarget;
+        double dDev = signedLagDiff - mCfg.angleSignedDiffTarget;
+
+        if (!lastFrameAnglePairMidGapOk) {
+            if (gDev > 3.0)
+                guide = "探头偏左，请向右(桡骨远端)轻移";
+            else if (gDev < -3.0)
+                guide = "探头偏右，请向左(桡骨近端)轻移";
+            else
+                guide = "G值接近边界，请微调探头左右位置";
+        } else if (!lastFrameAngleSignedDiffOk) {
+            if (dDev < -1.5)
+                guide = "倾角偏高，请放平探头";
+            else if (dDev > 2.0)
+                guide = "倾角偏低，请立起探头";
+            else
+                guide = "D值接近边界，请微调探头倾角";
+        } else if (!lastFrameStableOk) {
+            if (lastFrameStableState == 0) {
+                int remain = mCfg.stableLagWarmupCount - recentBoneLagBList.size();
+                guide = QString("预热中，请保持不动 %1 秒")
+                    .arg(qMax(1, remain * 80 / 1000 + 1));
+            } else if (lastFrameStableState == 1) {
+                guide = "波形波动大，请减小手部晃动";
+            } else {
+                guide = "探头偏离锁定位置，请回到之前的触压角度";
+            }
+        } else if (!lastFrameCorrOk) {
+            guide = "信号异常，请检查耦合剂是否充足、探头是否贴紧";
+        } else if (!lastFrameBJumpOk) {
+            guide = "B通道波包跳变，请确保探头稳定贴合";
+        } else if (!lastFrameBoundaryOk) {
+            guide = "疑似边界反射，请调整探头位置";
+        } else {
+            guide = "请检查耦合剂和探头接触状态";
+        }
+
+        // lblProcessStatus 只显示简洁的操作建议
+        ui->lblProcessStatus->setText(
+            QString("%1\n【闸门统计请看 Qt Creator 控制台输出】")
+                .arg(guide)
+            );
+        ui->lblProcessStatus->setStyleSheet(
+            "font-size: 14px; color: #E6A23C; font-weight: bold;"
+            );
+
+        // lblGateStats 清空（闸门统计走 qDebug）
+        ui->lblGateStats->setText("");
+    }
+}
+
+void MainWindow::updateProcessInvalid(const QString& reason)
+{
+    ui->lblProcessStatus->setText("无效：" + reason);
+    ui->lblProcessStatus->setStyleSheet(
+        "font-size: 12px; color: #F56C6C; font-weight: bold;"
+        );
+}
+
+void MainWindow::on_btnShowResult_clicked() {
+    // 可以在这里写跳转逻辑
+    // 比如：ui->stackedWidget->setCurrentWidget(ui->pageResult);
+
+    // 暂时先弹窗提示，证明按钮好使
+    QMessageBox::information(this, "结果", "正在跳转到测量结果分析界面...\n(界面开发中)");
+
+    // 如果你想测试跳转到已有页面（比如档案页），可以解开下面这行：
+    // ui->stackedWidget->setCurrentWidget(ui->pageArchive);
+}
+
+
+// ==================== 档案管理 ===============================================================================================
+void MainWindow::on_btnArchive_clicked() {
+    if (patientMeasureRunning) {
+        QMessageBox::warning(this, "检测进行中", "检测进行中不能编辑或删除患者。");
+        return;
+    }
+    ui->btnViewHistory->setVisible(true);
+    refreshTable(patientList);   // ✅ 进入档案页时刷新表格
+    ui->stackedWidget->setCurrentWidget(ui->pageArchive);
+}
+
+void MainWindow::on_btnBackFromArchive_clicked() {
+    ui->btnSelectPatient->setVisible(false);
+    ui->btnViewHistory->setVisible(false);
+    ui->stackedWidget->setCurrentWidget(ui->pageMain);
+    scheduleResponsiveLayout();
+    archiveMode = NormalMode;
+}
+
+void MainWindow::loadPatients() {
+    patientDataWritable = false;
+    patientDataLoadError.clear();
+    QString errorMessage;
+    if (!patientStore.load(xmlFilePath, measurementsFilePath,
+                           &patientList, &measurementList, &errorMessage)) {
+        patientDataLoadError = errorMessage;
+        QMessageBox::warning(
+            this,
+            "档案加载失败，已进入只读保护",
+            errorMessage + "\n\n为避免覆盖原档案，本次运行已禁止新增、修改、删除和检测保存。"
+                           "请保留提示中的异常副本，修复数据文件后重新启动软件。");
+        updatePatientSelectionUi();
+        return;
+    }
+    patientDataWritable = true;
+    updatePatientSelectionUi();
+}
+
+QList<MeasurementRecord> MainWindow::measurementsForPatient(const QString& patientId) const
+{
+    QList<MeasurementRecord> records;
+    for (const MeasurementRecord& record : measurementList) {
+        if (record.patientId == patientId) records.append(record);
+    }
+    return records;
+}
+
+const MeasurementRecord* MainWindow::latestMeasurementForPatient(const QString& patientId) const
+{
+    const MeasurementRecord* latest = nullptr;
+    for (const MeasurementRecord& record : measurementList) {
+        if (record.patientId == patientId &&
+            (!latest || record.measuredAt > latest->measuredAt)) {
+            latest = &record;
+        }
+    }
+    return latest;
+}
+
+bool MainWindow::ensurePatientDataWritable()
+{
+    if (QFileInfo::exists(xmlFilePath + QStringLiteral(".txn"))) {
+        patientDataWritable = false;
+        patientDataLoadError = QStringLiteral(
+            "检测到未完成的档案保存事务。为避免覆盖可恢复数据，本次运行已进入只读保护。"
+            "请关闭并重新启动软件，让程序先完成档案恢复。");
+        updatePatientSelectionUi();
+    }
+    if (patientDataWritable) return true;
+
+    const QString detail = patientDataLoadError.trimmed().isEmpty()
+        ? QStringLiteral("档案加载或恢复未成功。")
+        : patientDataLoadError;
+    QMessageBox::warning(this, "档案处于只读保护",
+                         detail + QStringLiteral("\n本次运行禁止新增、修改、删除和检测保存。"));
+    return false;
+}
+
+bool MainWindow::savePatients(const QList<PatientInfo>& patients)
+{
+    if (!ensurePatientDataWritable()) return false;
+    QString errorMessage;
+    if (!patientStore.savePatients(xmlFilePath, patients, &errorMessage)) {
+        QMessageBox::warning(this, "档案保存失败", errorMessage);
+        return false;
+    }
+    return true;
+}
+
+bool MainWindow::saveMeasurements(const QList<MeasurementRecord>& measurements)
+{
+    if (!ensurePatientDataWritable()) return false;
+    QString errorMessage;
+    if (!patientStore.saveMeasurements(measurementsFilePath, measurements, &errorMessage)) {
+        QMessageBox::warning(this, "结果保存失败", errorMessage);
+        return false;
+    }
+    return true;
+}
+
+bool MainWindow::savePatientData(const QList<PatientInfo>& patients,
+                                 const QList<MeasurementRecord>& measurements)
+{
+    if (!ensurePatientDataWritable()) return false;
+    QString errorMessage;
+    if (!patientStore.savePatientData(xmlFilePath, measurementsFilePath,
+                                      patients, measurements, &errorMessage)) {
+        if (QFileInfo::exists(xmlFilePath + QStringLiteral(".txn"))) {
+            patientDataWritable = false;
+            patientDataLoadError = QStringLiteral(
+                "档案保存事务未能完成。为避免覆盖可恢复数据，本次运行已进入只读保护。"
+                "请关闭并重新启动软件完成恢复。");
+            updatePatientSelectionUi();
+            errorMessage += QStringLiteral("\n\n") + patientDataLoadError;
+        }
+        QMessageBox::critical(this, "档案保存失败", errorMessage);
+        return false;
+    }
+    return true;
+}
+
+bool MainWindow::hasIncompletePatientRounds() const
+{
+    return patientMeasureRunning
+        || !currentRoundSosList.isEmpty()
+        || (!roundSosList.isEmpty() && roundSosList.size() < normalMeasureRounds);
+}
+
+bool MainWindow::confirmPatientChange(const QString& targetPatientId)
+{
+    if (!currentPatient.id.isEmpty() && currentPatient.id == targetPatientId) {
+        return true;
+    }
+
+    if (hasPendingMeasurement) {
+        return QMessageBox::question(
+                   this,
+                   QStringLiteral("放弃未保存结果"),
+                   QStringLiteral("当前结果尚未保存，是否放弃并更换患者？"))
+            == QMessageBox::Yes;
+    }
+
+    if (hasIncompletePatientRounds()) {
+        return QMessageBox::question(
+                   this,
+                   QStringLiteral("放弃未完成检测"),
+                   QStringLiteral("当前患者已完成 %1/%2 次测量。更换患者会清空本组进度，"
+                                  "是否仍要更换？")
+                       .arg(roundSosList.size())
+                       .arg(normalMeasureRounds))
+            == QMessageBox::Yes;
+    }
+    return true;
+}
+
+void MainWindow::applyCurrentPatient(const PatientInfo& patient)
+{
+    currentPatient = patient;
+    hasPendingMeasurement = false;
+    pendingMeasurement = MeasurementRecord();
+    pendingStartAfterPatientInfo = false;
+    resetAllPatientMeasurementData();
+    initLatestResultPanel();
+    updateCurrentPatientUI();
+    updatePatientSelectionUi();
+    updateAgeSosReference();
+}
+
+bool MainWindow::selectCurrentPatient(const PatientInfo& patient)
+{
+    if (patientMeasureRunning) return false;
+    if (!currentPatient.id.isEmpty() && currentPatient.id == patient.id) {
+        currentPatient = patient;
+        updateCurrentPatientUI();
+        updatePatientSelectionUi();
+        updateAgeSosReference();
+        return true;
+    }
+    if (!confirmPatientChange(patient.id)) return false;
+    applyCurrentPatient(patient);
+    return true;
+}
+
+void MainWindow::clearCurrentPatient()
+{
+    currentPatient = PatientInfo();
+    hasPendingMeasurement = false;
+    pendingMeasurement = MeasurementRecord();
+    pendingStartAfterPatientInfo = false;
+    resetAllPatientMeasurementData();
+    initLatestResultPanel();
+    updateCurrentPatientUI();
+    updatePatientSelectionUi();
+    updateAgeSosReference();
+}
+
+void MainWindow::updateAgeSosReference()
+{
+    if (!ui || !ui->chartViewReference) return;
+    if (!hasCurrentPatient()) {
+        ui->chartViewReference->clearReferenceData();
+        return;
+    }
+
+    const MeasurementRecord* latest = latestMeasurementForPatient(currentPatient.id);
+    if (!latest) {
+        const int age = ageOnDate(currentPatient.birthDay, QDate::currentDate());
+        ui->chartViewReference->setReferenceData(currentPatient.gender, age, false);
+        return;
+    }
+
+    const QString gender = latest->patientGender.trimmed().isEmpty()
+        ? currentPatient.gender : latest->patientGender;
+
+    bool ageOk = false;
+    int age = latest->patientAge.trimmed().toInt(&ageOk);
+    if (!ageOk) {
+        QDate measuredDate = QDateTime::fromString(latest->measuredAt, Qt::ISODate).date();
+        if (!measuredDate.isValid()) {
+            measuredDate = QDate::fromString(latest->measuredAt.left(10), QStringLiteral("yyyy-MM-dd"));
+        }
+        const QString birthDay = latest->patientBirthDay.trimmed().isEmpty()
+            ? currentPatient.birthDay : latest->patientBirthDay;
+        age = ageOnDate(birthDay, measuredDate);
+    }
+
+    ui->chartViewReference->setReferenceData(gender, age, true, latest->sos);
+}
+
+void MainWindow::updatePatientSelectionUi()
+{
+    const bool selected = hasCurrentPatient();
+    const bool connected = serial && serial->isOpen();
+    const bool debugAcquisitionRunning = autoRunning && !patientMeasureRunning;
+    ui->btnPatientInfo->setText(selected ? "更换患者" : "建立档案");
+    ui->btnPatientInfo->setEnabled(
+        patientDataWritable && !patientMeasureRunning && !debugAcquisitionRunning);
+    ui->btnStartMeasurement->setEnabled(
+        patientDataWritable &&
+        (patientMeasureRunning || (!hasPendingMeasurement && selected && connected)));
+    ui->btnStartMeasurement->setText(patientMeasureRunning ? "停止检测" : "开始检测");
+    ui->pushButton->setEnabled(
+        connected && !patientMeasureRunning && !debugAcquisitionRunning);
+    ui->triggerButton->setEnabled(connected && !patientMeasureRunning);
+    ui->btnReport->setEnabled(!patientMeasureRunning && !debugAcquisitionRunning);
+    ui->pushButton_2->setEnabled(!patientMeasureRunning);
+    if (gainSliderA) gainSliderA->setEnabled(!patientMeasureRunning);
+    if (gainSliderB) gainSliderB->setEnabled(!patientMeasureRunning);
+    if (gainSliderC) gainSliderC->setEnabled(!patientMeasureRunning);
+    if (gainSliderD) gainSliderD->setEnabled(!patientMeasureRunning);
+    // 正常完成时结果已自动保存；仅在自动保存失败时保留重试入口。
+    ui->btnSaveResult->setVisible(hasPendingMeasurement);
+    ui->btnSaveResult->setEnabled(patientDataWritable);
+    ui->btnArchive->setEnabled(!patientMeasureRunning && !debugAcquisitionRunning);
+    ui->btnAdd->setEnabled(patientDataWritable);
+    ui->btnDeleteSelected->setEnabled(patientDataWritable);
+    ui->btnFormSave->setEnabled(patientDataWritable);
+    ui->btnDetailSave->setEnabled(patientDataWritable);
+    ui->btnDetailDelete->setEnabled(patientDataWritable);
+    ui->btnPatientNewSave->setEnabled(patientDataWritable);
+    if (QAction* action = findChild<QAction*>(QStringLiteral("manageAccountsAction"))) {
+        action->setEnabled(!patientMeasureRunning && !debugAcquisitionRunning);
+    }
+}
+
+void MainWindow::showPatientHistory(const QString& patientId)
+{
+    QDialog dialog(this);
+    dialog.setWindowTitle("检测历史");
+    dialog.resize(860, 420);
+    QVBoxLayout* layout = new QVBoxLayout(&dialog);
+    QTableWidget* table = new QTableWidget(&dialog);
+    table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    table->setColumnCount(6);
+    table->setHorizontalHeaderLabels({"检测时间", "SOS", "T 值", "Z 值", "诊断", "操作员"});
+    QList<MeasurementRecord> records = measurementsForPatient(patientId);
+    std::sort(records.begin(), records.end(), [](const MeasurementRecord& a, const MeasurementRecord& b) {
+        return a.measuredAt > b.measuredAt;
+    });
+    table->setRowCount(records.size());
+    for (int row = 0; row < records.size(); ++row) {
+        const MeasurementRecord& record = records[row];
+        QTableWidgetItem* timeItem = new QTableWidgetItem(record.measuredAt);
+        timeItem->setData(Qt::UserRole, record.id);
+        table->setItem(row, 0, timeItem);
+        table->setItem(row, 1, new QTableWidgetItem(record.sos));
+        table->setItem(row, 2, new QTableWidgetItem(record.tScore));
+        table->setItem(row, 3, new QTableWidgetItem(record.zScore));
+        table->setItem(row, 4, new QTableWidgetItem(record.diagnosis));
+        table->setItem(row, 5, new QTableWidgetItem(record.operatorName));
+    }
+    table->horizontalHeader()->setStretchLastSection(true);
+    layout->addWidget(table);
+    QHBoxLayout* buttons = new QHBoxLayout();
+    QPushButton* reportButton = new QPushButton("查看报表", &dialog);
+    QPushButton* deleteButton = new QPushButton("删除本条记录", &dialog);
+    deleteButton->setEnabled(patientDataWritable);
+    QPushButton* closeButton = new QPushButton("关闭", &dialog);
+    buttons->addWidget(reportButton);
+    buttons->addWidget(deleteButton);
+    buttons->addStretch();
+    buttons->addWidget(closeButton);
+    layout->addLayout(buttons);
+    connect(closeButton, &QPushButton::clicked, &dialog, &QDialog::accept);
+    auto openSelectedReport = [this, table, patientId, &dialog]() {
+        const int row = table->currentRow();
+        if (row < 0 || !table->item(row, 0)) {
+            QMessageBox::information(&dialog, "提示", "请先选择一条检测记录。");
+            return;
+        }
+        const QString recordId = table->item(row, 0)->data(Qt::UserRole).toString();
+        const PatientInfo* patient = nullptr;
+        const MeasurementRecord* measurement = nullptr;
+        for (const PatientInfo& item : patientList) {
+            if (item.id == patientId) {
+                patient = &item;
+                break;
+            }
+        }
+        for (const MeasurementRecord& item : measurementList) {
+            if (item.id == recordId) {
+                measurement = &item;
+                break;
+            }
+        }
+        if (!patient || !measurement) {
+            QMessageBox::warning(&dialog, "报表", "无法找到这条检测记录对应的报表数据。");
+            return;
+        }
+        const PatientInfo patientCopy = *patient;
+        const MeasurementRecord measurementCopy = *measurement;
+        dialog.accept();
+        showReport(patientCopy, measurementCopy);
+    };
+    connect(reportButton, &QPushButton::clicked, &dialog, openSelectedReport);
+    connect(table, &QTableWidget::cellDoubleClicked, &dialog,
+            [openSelectedReport](int, int) { openSelectedReport(); });
+    connect(deleteButton, &QPushButton::clicked, &dialog, [this, table, patientId, &dialog]() {
+        const int row = table->currentRow();
+        if (row < 0 || !table->item(row, 0)) return;
+        const QString recordId = table->item(row, 0)->data(Qt::UserRole).toString();
+        if (QMessageBox::question(&dialog, "确认删除", "确定删除这条检测记录？") != QMessageBox::Yes) return;
+        for (int i = 0; i < measurementList.size(); ++i) {
+            if (measurementList[i].id == recordId) {
+                QList<MeasurementRecord> candidate = measurementList;
+                candidate.removeAt(i);
+                if (!saveMeasurements(candidate)) return;
+                measurementList = candidate;
+                refreshTable(patientList);
+                dialog.accept();
+                return;
+            }
+        }
+    });
+    dialog.exec();
+}
+
+void MainWindow::on_btnSelectPatient_clicked()
+{
+    if (patientMeasureRunning || archiveMode != ImportMode) return;
+    int row = ui->table->currentRow();
+    if (row < 0 || !ui->table->item(row, 0)) {
+        QMessageBox::information(this, "提示", "请先选中一位患者，再点击“选择患者”。");
+        return;
+    }
+    const QString id = ui->table->item(row, 0)->text();
+    for (const PatientInfo& patient : patientList) {
+        if (patient.id == id) {
+            if (!selectCurrentPatient(patient)) return;
+            archiveMode = NormalMode;
+            ui->btnSelectPatient->setVisible(false);
+            ui->btnViewHistory->setVisible(false);
+            ui->stackedWidget->setCurrentWidget(ui->pageMain);
+            scheduleResponsiveLayout();
+            return;
+        }
+    }
+
+}
+
+void MainWindow::on_btnViewHistory_clicked()
+{
+    if (patientMeasureRunning) return;
+    int row = ui->table->currentRow();
+    if (row < 0 || !ui->table->item(row, 0)) {
+        QMessageBox::information(this, "提示", "请先选中一位患者，再点击“查看历史”。");
+        return;
+    }
+    showPatientHistory(ui->table->item(row, 0)->text());
+}
+
+void MainWindow::refreshTable(const QList<PatientInfo> &list) {
+    ui->table->clear();
+
+    // ✅ 设置6列：ID, 姓名, 性别, 出生日期, 检查日期, 声速
+    // 注意：复选框将直接附加在第一列(ID列)上
+    ui->table->setColumnCount(6);
+    QStringList headers;
+    headers << "编号(ID)" << "姓名" << "性别" << "出生日期" << "检查日期" << "声速(m/s)";
+    ui->table->setHorizontalHeaderLabels(headers);
+
+    ui->table->setRowCount(list.size());
+    for (int i = 0; i < list.size(); ++i) {
+        const PatientInfo &p = list[i];
+
+        // --- 第一列：ID + 复选框 ---
+        QTableWidgetItem *itemID = new QTableWidgetItem(p.id);
+        // ⭐⭐⭐ 关键：设置 CheckState 为 Unchecked (未选中) ⭐⭐⭐
+        itemID->setCheckState(Qt::Unchecked);
+        // 设置为不可编辑，但可勾选，可选择
+        itemID->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+
+        ui->table->setItem(i, 0, itemID);
+        // -------------------------
+
+        ui->table->setItem(i, 1, new QTableWidgetItem(p.name));
+        ui->table->setItem(i, 2, new QTableWidgetItem(p.gender));
+        ui->table->setItem(i, 3, new QTableWidgetItem(p.birthDay));
+        const MeasurementRecord* latest = latestMeasurementForPatient(p.id);
+        const QString date = latest ? latest->measuredAt.left(10) : "--";
+        const QString sosStr = latest ? latest->sos : "--";
+        ui->table->setItem(i, 4, new QTableWidgetItem(date));
+        ui->table->setItem(i, 5, new QTableWidgetItem(sosStr));
+    }
+
+    // 列宽设置
+    ui->table->setColumnWidth(0, 250);
+    ui->table->setColumnWidth(1, 250);
+    ui->table->setColumnWidth(2, 100);
+    ui->table->setColumnWidth(3, 300);
+    ui->table->setColumnWidth(4, 300);
+    ui->table->setColumnWidth(5, 200);
+
+    // ⭐⭐⭐ 关键：取消整行选中行为，否则点击复选框容易触发双击事件或选中干扰 ⭐⭐⭐
+    // 如果你希望能同时点选和勾选，可以保留 SelectRows，
+    // 但为了让勾选操作更明确，通常可以保留 SelectRows。
+    ui->table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->table->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->table->horizontalHeader()->setStretchLastSection(true);
+    updateAgeSosReference();
+}
+
+
+void MainWindow::on_btnShowAll_clicked() {
+    refreshTable(patientList);
+}
+
+// 姓名或编号搜索
+void MainWindow::on_btnSearchName_clicked() {
+    QString key = ui->editSearchKeyword->text().trimmed(); // 从文本框获取
+    if (key.isEmpty()) {
+        QMessageBox::information(this, "提示", "请输入姓名或编号关键字");
+        return;
+    }
+    QList<PatientInfo> result;
+    for (auto &p : patientList) {
+        if (p.name.contains(key, Qt::CaseInsensitive) ||
+            p.id.contains(key, Qt::CaseInsensitive)) {
+            result << p;
+        }
+    }
+    refreshTable(result);
+    //QMessageBox::information(this, "搜索结果", QString("找到 %1 条记录").arg(result.size()));
+}
+
+// 2. ID 搜索
+void MainWindow::on_btnSearchID_clicked() {
+    on_btnSearchName_clicked();
+}
+
+// 3. 日期搜索 (组合年月日)
+void MainWindow::on_btnSearchDate_clicked() {
+    // 组装日期字符串，格式必须与 XML 里存的格式一致 (yyyy-MM-dd)
+    int year = ui->comboYear->currentData().toInt();
+    int month = ui->comboMonth->currentData().toInt();
+    int day = ui->comboDay->currentData().toInt();
+
+    // 格式化为 "2026-01-05" 这种标准格式
+    // %1: 年份
+    // %2: 月份 (填充0到2位)
+    // %3: 日期 (填充0到2位)
+    QString searchDate = QString("%1-%2-%3")
+                             .arg(year)
+                             .arg(month, 2, 10, QLatin1Char('0'))
+                             .arg(day, 2, 10, QLatin1Char('0'));
+
+    qDebug() << "Searching date:" << searchDate;
+
+    QList<PatientInfo> result;
+    for (const PatientInfo& patient : patientList) {
+        for (const MeasurementRecord& record : measurementsForPatient(patient.id)) {
+            if (record.measuredAt.left(10) == searchDate) {
+                result << patient;
+                break;
+            }
+        }
+    }
+    refreshTable(result);
+
+    if (result.isEmpty()) {
+        QMessageBox::information(this, "搜索结果", "该日期没有检查记录");
+    }
+}
+
+void MainWindow::on_btnDeleteSelected_clicked()
+{
+    if (patientMeasureRunning) {
+        QMessageBox::warning(this, "检测进行中", "检测进行中不能删除患者。");
+        return;
+    }
+    int rowCount = ui->table->rowCount();
+    QSet<QString> patientIds;
+    for (int i = 0; i < rowCount; ++i) {
+        QTableWidgetItem *item = ui->table->item(i, 0);
+        if (item && item->checkState() == Qt::Checked) {
+            patientIds.insert(item->text());
+        }
+    }
+
+    if (patientIds.isEmpty()) {
+        QMessageBox::information(this, "提示", "请先勾选需要删除的病人记录");
+        return;
+    }
+    if (hasPendingMeasurement && patientIds.contains(pendingMeasurement.patientId)) {
+        QMessageBox::warning(this, "存在未保存结果",
+                             "当前患者还有未保存的检测结果，请先保存结果后再删除档案。");
+        return;
+    }
+
+    QString msg = QString("确定要删除选中的 %1 条记录吗？\n此操作不可恢复！").arg(patientIds.size());
+    if (QMessageBox::question(this, "确认删除", msg) != QMessageBox::Yes) {
+        return;
+    }
+
+    QList<PatientInfo> patientCandidate;
+    for (const PatientInfo& patient : patientList) {
+        if (!patientIds.contains(patient.id)) patientCandidate.append(patient);
+    }
+    QList<MeasurementRecord> measurementCandidate;
+    for (const MeasurementRecord& record : measurementList) {
+        if (!patientIds.contains(record.patientId)) measurementCandidate.append(record);
+    }
+    if (!savePatientData(patientCandidate, measurementCandidate)) return;
+
+    const bool removedCurrent = patientIds.contains(currentPatient.id);
+    patientList = patientCandidate;
+    measurementList = measurementCandidate;
+    if (removedCurrent) clearCurrentPatient();
+    refreshTable(patientList);
+    QMessageBox::information(this, "成功", QString("已成功删除 %1 条记录").arg(patientIds.size()));
+}
+
+void MainWindow::on_btnAdd_clicked() {
+    if (patientMeasureRunning) {
+        QMessageBox::warning(this, "检测进行中", "检测进行中不能编辑患者。");
+        return;
+    }
+    clearNewForm();
+    ui->stackedWidget->setCurrentWidget(ui->pagePatientForm);
+}
+
+void MainWindow::on_table_cellDoubleClicked(int row, int)
+{
+    if (patientMeasureRunning) {
+        QMessageBox::warning(this, "检测进行中", "检测进行中不能切换或编辑患者。");
+        return;
+    }
+    if (row < 0 || row >= ui->table->rowCount()) return;
+
+    QTableWidgetItem* idItem   = ui->table->item(row, 0);
+    if (!idItem) return;
+
+    QString id = idItem->text();
+    int idx = -1;
+    for (int i = 0; i < patientList.size(); ++i) {
+        if (patientList[i].id == id) {
+            idx = i;
+            break;
+        }
+    }
+
+    if (idx == -1) {
+        QMessageBox::warning(this, "错误", "未找到该行对应的内部数据");
+        return;
+    }
+
+    switch (archiveMode) {
+    case ImportMode:
+        if (!selectCurrentPatient(patientList[idx])) return;
+
+        ui->stackedWidget->setCurrentWidget(ui->pageMain);
+        archiveMode = NormalMode;
+        ui->btnSelectPatient->setVisible(false);
+        ui->btnViewHistory->setVisible(false);
+
+        // 注意：这里不再自动 startPatientMeasurement()
+        // 等你回到主界面后，再手动点击"开始检测"
+        break;
+
+    case PrintMode:
+        currentPatient = patientList[idx];
+        QMessageBox::information(this, "打印", "选择了病人：" + currentPatient.name);
+        ui->stackedWidget->setCurrentWidget(ui->pageMain);
+        archiveMode = NormalMode;
+        break;
+
+    case NormalMode:
+    default:
+        fillDetailPage(patientList[idx], idx);
+        ui->stackedWidget->setCurrentWidget(ui->pagePatientDetail);
+        break;
+    }
+}
+
+
+
+
+void MainWindow::clearNewForm() {
+    ui->editName->clear();
+    ui->editID->clear();
+    ui->comboGender->setCurrentIndex(0);
+    ui->dateBirth->setDate(QDate::currentDate());
+    //ui->comboPart->setCurrentIndex(-1);
+    ui->editHeight->clear();
+    ui->editWeight->clear();
+
+}
+
+bool MainWindow::validatePatientFields(const QDate& birthDate,
+                                       const QString& height,
+                                       const QString& weight)
+{
+    if (!birthDate.isValid() || birthDate > QDate::currentDate()) {
+        QMessageBox::warning(this, "出生日期无效", "出生日期不能晚于今天。");
+        return false;
+    }
+
+    const auto validOptionalNumber = [](const QString& text) {
+        if (text.trimmed().isEmpty()) return true;
+        bool ok = false;
+        const double value = text.toDouble(&ok);
+        return ok && std::isfinite(value) && value > 0.0 && value <= 999.9;
+    };
+    if (!validOptionalNumber(height)) {
+        QMessageBox::warning(this, "身高无效",
+                             "身高请填写大于 0 且不超过 999.9 的数字，单位为 cm；也可以留空。");
+        return false;
+    }
+    if (!validOptionalNumber(weight)) {
+        QMessageBox::warning(this, "体重无效",
+                             "体重请填写大于 0 且不超过 999.9 的数字，单位为 kg；也可以留空。");
+        return false;
+    }
+    return true;
+}
+
+void MainWindow::on_btnFormBack_clicked() {
+    editingIndex = -1; // 返回时也重置状态
+    ui->stackedWidget->setCurrentWidget(ui->pageArchive);
+}
+
+void MainWindow::on_btnFormSave_clicked() {
+    if (patientMeasureRunning) {
+        QMessageBox::warning(this, "检测进行中", "检测进行中不能编辑患者。");
+        return;
+    }
+    // 1) 从新增表单页面采集数据（注意这些控件名都是 pagePatientForm 上的）
+    PatientInfo p;
+    p.name      = ui->editName->text().trimmed();
+    p.id        = ui->editID->text().trimmed();
+    p.gender    = ui->comboGender->currentText();
+    p.birthDay  = ui->dateBirth->date().toString("yyyy-MM-dd");
+    p.height    = ui->editHeight->text().trimmed();
+    p.weight    = ui->editWeight->text().trimmed();
+
+
+    // 2) 基本校验
+    if (p.name.isEmpty() || p.id.isEmpty()) {
+        QMessageBox::warning(this, "缺少信息", "姓名和编号(ID)不能为空");
+        return;
+    }
+    if (!validatePatientFields(ui->dateBirth->date(), p.height, p.weight)) return;
+
+    // 3) 新增 / 编辑 分支
+    QList<PatientInfo> candidate = patientList;
+    if (editingIndex == -1) {
+        // 新增：校验 ID 唯一
+        for (const auto &it : patientList) {
+            if (it.id == p.id) {
+                QMessageBox::warning(this, "重复ID", "该编号(ID)已存在，请更换。");
+                return;
+            }
+        }
+        candidate.push_back(p);
+    } else {
+        candidate[editingIndex] = p;
+    }
+
+    if (!savePatients(candidate)) return;
+    patientList = candidate;
+    refreshTable(patientList);
+
+    // 5) 复位状态并返回档案页
+    editingIndex = -1;
+    ui->stackedWidget->setCurrentWidget(ui->pageArchive);
+}
+
+
+
+void MainWindow::fillDetailPage(const PatientInfo& p, int index) {
+    editingIndex = index;
+
+    ui->dName->setText(p.name);
+    ui->dID->setText(p.id);
+    ui->dGender->setCurrentText(p.gender);
+    ui->dBirth->setDate(QDate::fromString(p.birthDay, "yyyy-MM-dd"));
+    ui->dHeight->setText(p.height);
+    ui->dWeight->setText(p.weight);
+}
+
+void MainWindow::on_btnDetailBack_clicked() {
+    editingIndex = -1;
+    ui->stackedWidget->setCurrentWidget(ui->pageArchive);
+}
+
+void MainWindow::on_btnDetailSave_clicked() {
+    if (patientMeasureRunning) {
+        QMessageBox::warning(this, "检测进行中", "检测进行中不能编辑患者。");
+        return;
+    }
+    if (editingIndex < 0 || editingIndex >= patientList.size()) {
+        QMessageBox::warning(this, "错误", "没有选中的病人记录");
+        return;
+    }
+
+    // 读回编辑后的内容
+    const PatientInfo& p = patientList[editingIndex];
+    QString newId = ui->dID->text().trimmed();
+    if (newId != p.id) {
+        QMessageBox::warning(this, "不允许修改", "为保持检测历史关联，本版本不允许修改患者 ID。");
+        return;
+    }
+    if (ui->dName->text().trimmed().isEmpty() || newId.isEmpty()) {
+        QMessageBox::warning(this, "缺少信息", "姓名和编号(ID)不能为空");
+        return;
+    }
+    if (!validatePatientFields(ui->dBirth->date(),
+                               ui->dHeight->text().trimmed(),
+                               ui->dWeight->text().trimmed())) return;
+    // 如果 ID 改了，检查是否与其他记录冲突
+    if (newId != p.id) {
+        for (int i=0; i<patientList.size(); ++i) {
+            if (i != editingIndex && patientList[i].id == newId) {
+                QMessageBox::warning(this, "重复ID", "该编号(ID)已存在，请更换");
+                return;
+            }
+        }
+    }
+
+    QList<PatientInfo> candidate = patientList;
+    PatientInfo& updated = candidate[editingIndex];
+    updated.name      = ui->dName->text().trimmed();
+    updated.id        = newId;
+    updated.gender    = ui->dGender->currentText();
+    updated.birthDay  = ui->dBirth->date().toString("yyyy-MM-dd");
+    updated.height    = ui->dHeight->text().trimmed();
+    updated.weight    = ui->dWeight->text().trimmed();
+
+    if (!savePatients(candidate)) return;
+    patientList = candidate;
+    if (currentPatient.id == updated.id) {
+        currentPatient = updated;
+        updateCurrentPatientUI();
+    }
+    refreshTable(patientList);
+    QMessageBox::information(this, "成功", "已保存修改");
+}
+
+void MainWindow::on_btnDetailDelete_clicked() {
+    if (patientMeasureRunning) {
+        QMessageBox::warning(this, "检测进行中", "检测进行中不能删除患者。");
+        return;
+    }
+    if (editingIndex < 0 || editingIndex >= patientList.size()) return;
+
+    if (hasPendingMeasurement &&
+        pendingMeasurement.patientId == patientList[editingIndex].id) {
+        QMessageBox::warning(this, "存在未保存结果",
+                             "当前患者还有未保存的检测结果，请先保存结果后再删除档案。");
+        return;
+    }
+
+    if (QMessageBox::question(this, "确认删除", "确定删除该病人信息？此操作不可恢复") != QMessageBox::Yes)
+        return;
+
+    const QString deletedPatientId = patientList[editingIndex].id;
+    QList<PatientInfo> patientCandidate = patientList;
+    patientCandidate.removeAt(editingIndex);
+    QList<MeasurementRecord> measurementCandidate;
+    for (const MeasurementRecord& record : measurementList) {
+        if (record.patientId != deletedPatientId) measurementCandidate.append(record);
+    }
+    if (!savePatientData(patientCandidate, measurementCandidate)) return;
+
+    const bool removedCurrent = currentPatient.id == deletedPatientId;
+    patientList = patientCandidate;
+    measurementList = measurementCandidate;
+    if (removedCurrent) clearCurrentPatient();
+    refreshTable(patientList);
+
+    editingIndex = -1;
+    ui->stackedWidget->setCurrentWidget(ui->pageArchive);
+}
+
+void MainWindow::initSearchControls()
+{
+    // 1. 初始化年份 (从今年往前推到1900年)
+    int currentYear = QDate::currentDate().year();
+    ui->comboYear->clear();
+    // 添加一个 "不限" 选项，方便用户只搜月份（可选）
+    // ui->comboYear->addItem("不限", 0);
+
+    for (int y = currentYear; y >= 1900; --y) {
+        ui->comboYear->addItem(QString::number(y), y);
+    }
+
+    // 2. 初始化月份 (1-12)
+    ui->comboMonth->clear();
+    for (int m = 1; m <= 12; ++m) {
+        ui->comboMonth->addItem(QString::number(m), m);
+    }
+    // 设置默认为当前月份
+    ui->comboMonth->setCurrentIndex(QDate::currentDate().month() - 1);
+
+    // 3. 初始化日 (联动)
+    // 连接信号：当年份或月份改变时，重新计算天数
+    connect(ui->comboYear, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &MainWindow::updateDayCombo);
+    connect(ui->comboMonth, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &MainWindow::updateDayCombo);
+
+    // 先手动触发一次以填充天数
+    updateDayCombo();
+
+    // 默认选中当天
+    int currentDay = QDate::currentDate().day();
+    int idx = ui->comboDay->findText(QString::number(currentDay));
+    if (idx != -1) ui->comboDay->setCurrentIndex(idx);
+}
+
+void MainWindow::updateDayCombo()
+{
+    // 获取当前选中的年月
+    int year = ui->comboYear->currentData().toInt();
+    int month = ui->comboMonth->currentData().toInt();
+
+    // 记录之前选中的天数，防止刷新后跳变
+    QString currentDayText = ui->comboDay->currentText();
+
+    ui->comboDay->clear();
+
+    // 计算该月有多少天
+    int daysInMonth = QDate(year, month, 1).daysInMonth();
+
+    for (int d = 1; d <= daysInMonth; ++d) {
+        ui->comboDay->addItem(QString::number(d), d);
+    }
+
+    // 尝试恢复之前选中的天数（如果新月份也有这一天）
+    int idx = ui->comboDay->findText(currentDayText);
+    if (idx != -1) {
+        ui->comboDay->setCurrentIndex(idx);
+    }
+}
