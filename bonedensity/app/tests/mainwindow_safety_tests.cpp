@@ -88,6 +88,8 @@ class MainWindowSafetyTests : public QObject
     Q_OBJECT
 
 private slots:
+    void observeBeforeGPreservesAcceptanceAndExpiry();
+    void experimentBuildIdentity();
     void rejectedFramesExpirePatientStability();
     void clusterLossDiscardsPartialRound();
     void transientRejectionPreservesProgressAndSteadySequence();
@@ -130,6 +132,103 @@ private slots:
     void reportPdfCanBeCommitted();
     void capturePagesWhenRequested();
 };
+
+void MainWindowSafetyTests::observeBeforeGPreservesAcceptanceAndExpiry()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const auto wave = [](double center) {
+        QVector<double> signal(1800);
+        for (int i=0;i<signal.size();++i) {
+            const double t=i-center;
+            if (std::abs(t)<=100)
+                signal[i]=1000*std::exp(-t*t/(2*35.0*35.0))*std::cos(2*3.141592653589793*t/50);
+        }
+        return signal;
+    };
+    const auto bc=wave(928),bd=wave(800);
+    MainWindow probe;
+    probe.observeStabilityBeforeG=false;
+    probe.patientMeasureRunning=true;
+    probe.acquireMode=PatientMeasureMode;
+    QVERIFY(probe.experimentLog.start(directory.path(),{}));
+    const auto scanPath=probe.experimentLog.path();
+    for (int shift=-50;shift<=20;++shift)
+        probe.detectAndPlotSpeed(bc,bd,wave(937+shift),wave(800+shift));
+    probe.stopPatientMeasurement();
+    QFile scan(scanPath); QVERIFY(scan.open(QIODevice::ReadOnly));
+    int shift=-50,goodShift=1000,badGShift=1000;
+    for (const auto& line:scan.readAll().trimmed().split('\n')) {
+        const auto row=QJsonDocument::fromJson(line).object();
+        if (row.value("event")!="frame") continue;
+        const auto gates=row.value("gates").toObject();
+        if (!gates.isEmpty()) {
+            bool base=true;
+            for (const char* key:{"B_jump","boundary","AB_diff","direction","corr_A","corr_B","D"})
+                base=base && gates.value(key).toBool();
+            if (base && gates.value("G").toBool()) goodShift=shift;
+            if (base && !gates.value("G").toBool()) badGShift=shift;
+        }
+        ++shift;
+    }
+    QVERIFY(goodShift!=1000 && badGShift!=1000);
+    for (bool experimental:{false,true}) {
+        MainWindow window;
+        window.observeStabilityBeforeG=experimental;
+        window.patientMeasureRunning=true;
+        window.acquireMode=PatientMeasureMode;
+        const auto feed=[&](int offset) {
+            window.detectAndPlotSpeed(bc,bd,wave(937+offset),wave(800+offset));
+        };
+        for (int i=0;i<20;++i) feed(badGShift);
+        QCOMPARE(window.processValidCount,0);
+        QVERIFY(window.currentRoundSosList.isEmpty());
+        QCOMPARE(window.boneLagLocked,experimental);
+        feed(goodShift);
+        QCOMPARE(window.processValidCount,experimental ? 1 : 0);
+        if (!experimental) continue;
+        for (int i=0;i<20;++i) feed(badGShift);
+        QCOMPARE(window.processValidCount,1);
+        QVERIFY(window.boneLagLocked);
+        for (int i=0;i<window.mCfg.boneLagUnlockCount;++i)
+            window.detectAndPlotSpeed(wave(948),bd,wave(957+badGShift),wave(800+badGShift));
+        QCOMPARE(window.processValidCount,0);
+        QVERIFY(window.currentRoundSosList.isEmpty());
+        QVERIFY(!window.boneLagLocked);
+        for (int i=0;i<20;++i) feed(badGShift);
+        feed(goodShift);
+        QCOMPARE(window.processValidCount,1);
+        for (int i=0;i<window.mCfg.boneLagUnlockCount;++i)
+            window.detectAndPlotSpeed(QVector<double>(1800),QVector<double>(1800),QVector<double>(1800),QVector<double>(1800));
+        QCOMPARE(window.processValidCount,0);
+        QVERIFY(window.currentRoundSosList.isEmpty());
+        QVERIFY(!window.boneLagLocked);
+        feed(goodShift);
+        QCOMPARE(window.processValidCount,0);
+    }
+}
+
+void MainWindowSafetyTests::experimentBuildIdentity()
+{
+    MainWindow window;
+#ifdef BONE_OBSERVE_BEFORE_G_EXPERIMENT
+    QVERIFY(window.observeStabilityBeforeG);
+    QVERIFY(window.windowTitle().contains(QStringLiteral("试测版")));
+#else
+    QVERIFY(!window.observeStabilityBeforeG);
+    QVERIFY(!window.windowTitle().contains(QStringLiteral("试测版")));
+#endif
+#ifndef QT_NO_DEBUG
+    window.startExperimentLog();
+    QVERIFY(window.experimentLog.active());
+    const auto path=window.experimentLog.path();
+    window.stopPatientMeasurement();
+    QFile log(path); QVERIFY(log.open(QIODevice::ReadOnly));
+    const auto config=QJsonDocument::fromJson(log.readLine()).object().value("config").toObject();
+    QCOMPARE(config.value("implementation").toString(), window.observeStabilityBeforeG
+        ? QStringLiteral("observe-before-g-20260906-v1") : QStringLiteral("state-repair-20260905-v1"));
+#endif
+}
 
 void MainWindowSafetyTests::rejectedFramesExpirePatientStability()
 {
@@ -298,6 +397,8 @@ void MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions()
     QTemporaryDir directory;
     QVERIFY(directory.isValid());
     MainWindow window;
+    // This existing fixture explicitly locks down default-flow behavior.
+    window.observeStabilityBeforeG = false;
     window.patientMeasureRunning = true;
     window.acquireMode = PatientMeasureMode;
     QVERIFY(window.experimentLog.start(directory.path(), {}));

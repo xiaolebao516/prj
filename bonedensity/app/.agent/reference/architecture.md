@@ -19,6 +19,7 @@ Serial waveform → signal processing → frame acceptance → lag-B stability l
 - Current patient SOS output is B-channel based; A participates in posture and quality diagnostics.
 - Rejected frames and rounds do not enter the next aggregation level.
 - Starting a new round resets round-local stability and diagnostic state before acquisition.
+- `Utils::trimmedMeanValue` uses an arithmetic mean when fewer than 10 values are supplied. Thus a 30-value round uses its requested trimming, but the normal five-round final aggregation does not trim extremes; do not infer behavior solely from the helper name.
 
 ## Configuration and Change Impact
 

@@ -1,0 +1,689 @@
+{
+    "candidate_raw_checks": [
+        {
+            "file": "round-20260905-124559-476-58375f1c-6609-4c41-8e74-43e2cb5d9ca2.jsonl",
+            "matched": true,
+            "scenario": "observe_before_G"
+        },
+        {
+            "file": "round-20260905-124735-190-47b3fafc-74fe-4e81-bc44-c29e7e445b5d.jsonl",
+            "matched": true,
+            "scenario": "observe_before_G"
+        },
+        {
+            "file": "round-20260905-124740-123-91fd04ee-9c12-471c-b3c9-edb9f243acb5.jsonl",
+            "matched": true,
+            "scenario": "observe_before_G"
+        },
+        {
+            "file": "round-20260905-124814-673-6a35ee95-c5e2-4a86-a758-a3610080a923.jsonl",
+            "matched": true,
+            "scenario": "observe_before_G"
+        },
+        {
+            "file": "round-20260905-124829-956-60ed4bbe-8c0e-46f6-8e3f-9be2dad7f8fc.jsonl",
+            "matched": true,
+            "scenario": "observe_before_G"
+        },
+        {
+            "file": "round-20260905-124840-006-3fa5fa33-f655-4acb-9c29-fcbee4f29d2c.jsonl",
+            "matched": true,
+            "scenario": "observe_before_G"
+        },
+        {
+            "file": "round-20260905-124847-799-a7d67c99-ceee-4fe7-b37c-b6bb4644afca.jsonl",
+            "matched": true,
+            "scenario": "observe_before_G"
+        },
+        {
+            "file": "round-20260905-124854-450-7dd390b1-4b13-4353-a7b6-e65510bd9f9c.jsonl",
+            "matched": true,
+            "scenario": "observe_before_G"
+        }
+    ],
+    "feature_baseline_verified": true,
+    "flow_scope": "Experimental product-flow raw replay cross-checked against independent research feature sequencing for all eight recordings. G-failing frames never accepted; original numeric thresholds and round checks unchanged. Not a hardware benefit or accuracy test.",
+    "manifest": [
+        {
+            "file": "round-20260905-124559-476-58375f1c-6609-4c41-8e74-43e2cb5d9ca2.jsonl",
+            "sha256": "caec2f24698489f8d4adf4749b42c7cd6932bee97ff3e0aa4fb7cc1d3c39d558"
+        },
+        {
+            "file": "round-20260905-124735-190-47b3fafc-74fe-4e81-bc44-c29e7e445b5d.jsonl",
+            "sha256": "fc941d0557ebf7536a42c597c38b0cb69e07d56a02545afad8237befa076bd84"
+        },
+        {
+            "file": "round-20260905-124740-123-91fd04ee-9c12-471c-b3c9-edb9f243acb5.jsonl",
+            "sha256": "90d40f9ad6099cd12aa6908e71298c795f2172a67282d6f4085590b54724a201"
+        },
+        {
+            "file": "round-20260905-124814-673-6a35ee95-c5e2-4a86-a758-a3610080a923.jsonl",
+            "sha256": "dee27148485a098fc046693dd5acaca5ecbc6cb2b2ac1510fb531975dedde929"
+        },
+        {
+            "file": "round-20260905-124829-956-60ed4bbe-8c0e-46f6-8e3f-9be2dad7f8fc.jsonl",
+            "sha256": "1a5e9b80345ff62be0b62a1f542cdc84fff94bf6d89a283a2aa7d93e5891515c"
+        },
+        {
+            "file": "round-20260905-124840-006-3fa5fa33-f655-4acb-9c29-fcbee4f29d2c.jsonl",
+            "sha256": "66db2845090e66b9aaca1cc4f9c890fbd1359d73616f8efc8b26613b7759c5d5"
+        },
+        {
+            "file": "round-20260905-124847-799-a7d67c99-ceee-4fe7-b37c-b6bb4644afca.jsonl",
+            "sha256": "52bf612175a509b74f655935bb3b93308152b5273fa55486ae58535d6c8bbf4d"
+        },
+        {
+            "file": "round-20260905-124854-450-7dd390b1-4b13-4353-a7b6-e65510bd9f9c.jsonl",
+            "sha256": "dd7c0dd211407fb97ff7bf69e0099382c0386026bf555d0211d5c3658468654f"
+        }
+    ],
+    "raw_baseline": [
+        {
+            "completion_ms_on_recorded_timeline": 94795,
+            "consumed_frames": 1010,
+            "discarded_values": 0,
+            "file": "round-20260905-124559-476-58375f1c-6609-4c41-8e74-43e2cb5d9ca2.jsonl",
+            "first_accepted_ms": 91234,
+            "newly_accepted_sos": [
+            ],
+            "reached_30": true,
+            "round_summary": {
+                "D": 6.111111111111111,
+                "G": 1.3611111111111112,
+                "corr_A": 0.7895848965718195,
+                "corr_B": 0.7574647700024495,
+                "event": "round_summary",
+                "quality_pass": false,
+                "sos": 3831.474190726158
+            }
+        },
+        {
+            "completion_ms_on_recorded_timeline": 4127,
+            "consumed_frames": 43,
+            "discarded_values": 0,
+            "file": "round-20260905-124735-190-47b3fafc-74fe-4e81-bc44-c29e7e445b5d.jsonl",
+            "first_accepted_ms": 1378,
+            "newly_accepted_sos": [
+            ],
+            "reached_30": true,
+            "round_summary": {
+                "D": 5.833333333333333,
+                "G": -0.4722222222222222,
+                "corr_A": 0.8028157075763143,
+                "corr_B": 0.7799167917627308,
+                "event": "round_summary",
+                "quality_pass": true,
+                "sos": 3823.179102067183
+            }
+        },
+        {
+            "completion_ms_on_recorded_timeline": 33485,
+            "consumed_frames": 356,
+            "discarded_values": 1,
+            "file": "round-20260905-124740-123-91fd04ee-9c12-471c-b3c9-edb9f243acb5.jsonl",
+            "first_accepted_ms": 1537,
+            "newly_accepted_sos": [
+            ],
+            "reached_30": true,
+            "round_summary": {
+                "D": 8.055555555555555,
+                "G": -4.388888888888889,
+                "corr_A": 0.789327565366635,
+                "corr_B": 0.623876026807391,
+                "event": "round_summary",
+                "quality_pass": false,
+                "sos": 4018.2375167472046
+            }
+        },
+        {
+            "completion_ms_on_recorded_timeline": 14325,
+            "consumed_frames": 152,
+            "discarded_values": 10,
+            "file": "round-20260905-124814-673-6a35ee95-c5e2-4a86-a758-a3610080a923.jsonl",
+            "first_accepted_ms": 3430,
+            "newly_accepted_sos": [
+            ],
+            "reached_30": true,
+            "round_summary": {
+                "D": 7.611111111111111,
+                "G": -1.4166666666666667,
+                "corr_A": 0.817482108223007,
+                "corr_B": 0.7321999872917885,
+                "event": "round_summary",
+                "quality_pass": true,
+                "sos": 4034.8341838654806
+            }
+        },
+        {
+            "completion_ms_on_recorded_timeline": 8976,
+            "consumed_frames": 95,
+            "discarded_values": 0,
+            "file": "round-20260905-124829-956-60ed4bbe-8c0e-46f6-8e3f-9be2dad7f8fc.jsonl",
+            "first_accepted_ms": 4292,
+            "newly_accepted_sos": [
+            ],
+            "reached_30": true,
+            "round_summary": {
+                "D": 7.777777777777778,
+                "G": -0.9444444444444444,
+                "corr_A": 0.7882172531367679,
+                "corr_B": 0.7389578623422011,
+                "event": "round_summary",
+                "quality_pass": false,
+                "sos": 4016.3934426229516
+            }
+        },
+        {
+            "completion_ms_on_recorded_timeline": 7101,
+            "consumed_frames": 75,
+            "discarded_values": 0,
+            "file": "round-20260905-124840-006-3fa5fa33-f655-4acb-9c29-fcbee4f29d2c.jsonl",
+            "first_accepted_ms": 3067,
+            "newly_accepted_sos": [
+            ],
+            "reached_30": true,
+            "round_summary": {
+                "D": 7.555555555555555,
+                "G": -2.75,
+                "corr_A": 0.8447697769551642,
+                "corr_B": 0.7167141629415759,
+                "event": "round_summary",
+                "quality_pass": true,
+                "sos": 3906.172839506172
+            }
+        },
+        {
+            "completion_ms_on_recorded_timeline": 6048,
+            "consumed_frames": 64,
+            "discarded_values": 0,
+            "file": "round-20260905-124847-799-a7d67c99-ceee-4fe7-b37c-b6bb4644afca.jsonl",
+            "first_accepted_ms": 1832,
+            "newly_accepted_sos": [
+            ],
+            "reached_30": true,
+            "round_summary": {
+                "D": 7.555555555555555,
+                "G": -2.7222222222222223,
+                "corr_A": 0.8571420840022651,
+                "corr_B": 0.7452953734997647,
+                "event": "round_summary",
+                "quality_pass": true,
+                "sos": 3892.3456790123455
+            }
+        },
+        {
+            "completion_ms_on_recorded_timeline": 6596,
+            "consumed_frames": 70,
+            "discarded_values": 0,
+            "file": "round-20260905-124854-450-7dd390b1-4b13-4353-a7b6-e65510bd9f9c.jsonl",
+            "first_accepted_ms": 1921,
+            "newly_accepted_sos": [
+            ],
+            "reached_30": true,
+            "round_summary": {
+                "D": 7.333333333333333,
+                "G": -3.3055555555555554,
+                "corr_A": 0.8559588532597955,
+                "corr_B": 0.7556295312106269,
+                "event": "round_summary",
+                "quality_pass": true,
+                "sos": 3895.8024691358023
+            }
+        }
+    ],
+    "raw_baseline_verified": true,
+    "scenarios": [
+        {
+            "G_max": 6,
+            "G_min": -6,
+            "attempts": [
+                {
+                    "completion_ms_on_recorded_timeline": 94795,
+                    "conditional_accepted_rounds": [
+                    ],
+                    "consumed_frames": 1010,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124559-476-58375f1c-6609-4c41-8e74-43e2cb5d9ca2.jsonl",
+                    "first_accepted_ms": 91234,
+                    "newly_accepted_sos": [
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 6.111111111111111,
+                        "G": 1.3611111111111112,
+                        "corr_A": 0.7895848965718195,
+                        "corr_B": 0.7574647700024495,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 3831.474190726158
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 4127,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183
+                    ],
+                    "consumed_frames": 43,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124735-190-47b3fafc-74fe-4e81-bc44-c29e7e445b5d.jsonl",
+                    "first_accepted_ms": 1378,
+                    "newly_accepted_sos": [
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 5.833333333333333,
+                        "G": -0.4722222222222222,
+                        "corr_A": 0.8028157075763143,
+                        "corr_B": 0.7799167917627308,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3823.179102067183
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 33485,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183
+                    ],
+                    "consumed_frames": 356,
+                    "discarded_values": 1,
+                    "file": "round-20260905-124740-123-91fd04ee-9c12-471c-b3c9-edb9f243acb5.jsonl",
+                    "first_accepted_ms": 1537,
+                    "newly_accepted_sos": [
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 8.055555555555555,
+                        "G": -4.388888888888889,
+                        "corr_A": 0.789327565366635,
+                        "corr_B": 0.623876026807391,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 4018.2375167472046
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 14325,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183
+                    ],
+                    "consumed_frames": 152,
+                    "discarded_values": 10,
+                    "file": "round-20260905-124814-673-6a35ee95-c5e2-4a86-a758-a3610080a923.jsonl",
+                    "first_accepted_ms": 3430,
+                    "newly_accepted_sos": [
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.611111111111111,
+                        "G": -1.4166666666666667,
+                        "corr_A": 0.817482108223007,
+                        "corr_B": 0.7321999872917885,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 4034.8341838654806
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 8976,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183
+                    ],
+                    "consumed_frames": 95,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124829-956-60ed4bbe-8c0e-46f6-8e3f-9be2dad7f8fc.jsonl",
+                    "first_accepted_ms": 4292,
+                    "newly_accepted_sos": [
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.777777777777778,
+                        "G": -0.9444444444444444,
+                        "corr_A": 0.7882172531367679,
+                        "corr_B": 0.7389578623422011,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 4016.3934426229516
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 7101,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183,
+                        4034.8341838654806,
+                        3906.172839506172
+                    ],
+                    "consumed_frames": 75,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124840-006-3fa5fa33-f655-4acb-9c29-fcbee4f29d2c.jsonl",
+                    "first_accepted_ms": 3067,
+                    "newly_accepted_sos": [
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.555555555555555,
+                        "G": -2.75,
+                        "corr_A": 0.8447697769551642,
+                        "corr_B": 0.7167141629415759,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3906.172839506172
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 6048,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183,
+                        4034.8341838654806,
+                        3906.172839506172,
+                        3892.3456790123455
+                    ],
+                    "consumed_frames": 64,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124847-799-a7d67c99-ceee-4fe7-b37c-b6bb4644afca.jsonl",
+                    "first_accepted_ms": 1832,
+                    "newly_accepted_sos": [
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.555555555555555,
+                        "G": -2.7222222222222223,
+                        "corr_A": 0.8571420840022651,
+                        "corr_B": 0.7452953734997647,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3892.3456790123455
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 6596,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183,
+                        4034.8341838654806,
+                        3906.172839506172,
+                        3892.3456790123455,
+                        3895.8024691358023
+                    ],
+                    "consumed_frames": 70,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124854-450-7dd390b1-4b13-4353-a7b6-e65510bd9f9c.jsonl",
+                    "first_accepted_ms": 1921,
+                    "newly_accepted_sos": [
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.333333333333333,
+                        "G": -3.3055555555555554,
+                        "corr_A": 0.8559588532597955,
+                        "corr_B": 0.7556295312106269,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3895.8024691358023
+                    }
+                }
+            ],
+            "conditional_first_five": {
+                "attempt": 8,
+                "rounds": [
+                    3823.179102067183,
+                    4034.8341838654806,
+                    3906.172839506172,
+                    3892.3456790123455,
+                    3895.8024691358023
+                ],
+                "sos": 3910.466854717396
+            },
+            "frame_A_min": 0.78,
+            "loss_count": 10,
+            "name": "baseline",
+            "observe_stability_before_G": false,
+            "round_A_min": 0.8,
+            "warmup": 14
+        },
+        {
+            "G_max": 6,
+            "G_min": -6,
+            "attempts": [
+                {
+                    "completion_ms_on_recorded_timeline": 94604,
+                    "conditional_accepted_rounds": [
+                    ],
+                    "consumed_frames": 1008,
+                    "discarded_values": 11,
+                    "file": "round-20260905-124559-476-58375f1c-6609-4c41-8e74-43e2cb5d9ca2.jsonl",
+                    "first_accepted_ms": 41052,
+                    "newly_accepted_sos": [
+                        3798.4496124031007,
+                        3798.4496124031007,
+                        3798.4496124031007,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3798.4496124031007,
+                        3828.1249999999995,
+                        3712.1212121212116,
+                        3828.1249999999995
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 6.111111111111111,
+                        "G": 1.5555555555555556,
+                        "corr_A": 0.7895848965718195,
+                        "corr_B": 0.7580583484480419,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 3829.7995953630793
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 4127,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183
+                    ],
+                    "consumed_frames": 43,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124735-190-47b3fafc-74fe-4e81-bc44-c29e7e445b5d.jsonl",
+                    "first_accepted_ms": 1378,
+                    "newly_accepted_sos": [
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 5.833333333333333,
+                        "G": -0.4722222222222222,
+                        "corr_A": 0.8028157075763143,
+                        "corr_B": 0.7799167917627308,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3823.179102067183
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 32907,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183
+                    ],
+                    "consumed_frames": 350,
+                    "discarded_values": 2,
+                    "file": "round-20260905-124740-123-91fd04ee-9c12-471c-b3c9-edb9f243acb5.jsonl",
+                    "first_accepted_ms": 1436,
+                    "newly_accepted_sos": [
+                        3828.1249999999995,
+                        4049.5867768595035,
+                        4049.5867768595035
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 8.055555555555555,
+                        "G": -4.388888888888889,
+                        "corr_A": 0.7905369871217556,
+                        "corr_B": 0.6237238922026211,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 4020.0815908714576
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 10560,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183
+                    ],
+                    "consumed_frames": 112,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124814-673-6a35ee95-c5e2-4a86-a758-a3610080a923.jsonl",
+                    "first_accepted_ms": 1734,
+                    "newly_accepted_sos": [
+                        3951.6129032258063,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        4016.3934426229503,
+                        3983.7398373983738,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4049.5867768595035
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7,
+                        "G": -4.361111111111111,
+                        "corr_A": 0.7867764473349959,
+                        "corr_B": 0.7245950808451188,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 4003.6948183689497
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 8888,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183
+                    ],
+                    "consumed_frames": 94,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124829-956-60ed4bbe-8c0e-46f6-8e3f-9be2dad7f8fc.jsonl",
+                    "first_accepted_ms": 4199,
+                    "newly_accepted_sos": [
+                        4016.3934426229503
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.777777777777778,
+                        "G": -1.2222222222222223,
+                        "corr_A": 0.7882172531367679,
+                        "corr_B": 0.7389450516543584,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 4016.3934426229516
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 6351,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183,
+                        3904.4444444444434
+                    ],
+                    "consumed_frames": 67,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124840-006-3fa5fa33-f655-4acb-9c29-fcbee4f29d2c.jsonl",
+                    "first_accepted_ms": 2203,
+                    "newly_accepted_sos": [
+                        3828.1249999999995,
+                        3858.2677165354326,
+                        3919.999999999999,
+                        3919.999999999999,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3888.8888888888882
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.611111111111111,
+                        "G": -2.9166666666666665,
+                        "corr_A": 0.840926496321587,
+                        "corr_B": 0.7095782797781245,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3904.4444444444434
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 5855,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183,
+                        3904.4444444444434,
+                        3892.3456790123455
+                    ],
+                    "consumed_frames": 62,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124847-799-a7d67c99-ceee-4fe7-b37c-b6bb4644afca.jsonl",
+                    "first_accepted_ms": 1355,
+                    "newly_accepted_sos": [
+                        3888.8888888888882,
+                        3888.8888888888882
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.555555555555555,
+                        "G": -2.7222222222222223,
+                        "corr_A": 0.8571266236345014,
+                        "corr_B": 0.7445543962627335,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3892.3456790123455
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 5852,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183,
+                        3904.4444444444434,
+                        3892.3456790123455,
+                        3900.987654320987
+                    ],
+                    "consumed_frames": 62,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124854-450-7dd390b1-4b13-4353-a7b6-e65510bd9f9c.jsonl",
+                    "first_accepted_ms": 1362,
+                    "newly_accepted_sos": [
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3919.999999999999,
+                        3919.999999999999,
+                        3919.999999999999
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.5,
+                        "G": -3.361111111111111,
+                        "corr_A": 0.8562645199184264,
+                        "corr_B": 0.7478756137610224,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3900.987654320987
+                    }
+                }
+            ],
+            "conditional_first_five": {
+            },
+            "frame_A_min": 0.78,
+            "loss_count": 10,
+            "name": "observe_before_G",
+            "observe_stability_before_G": true,
+            "round_A_min": 0.8,
+            "warmup": 14
+        }
+    ],
+    "scope": "Each attempt stops at its first 30-value round. Reuses recorded hand trajectories and input timing; not prospective hardware time/accuracy. No paired truth."
+}

@@ -267,6 +267,13 @@ private:
     int boneLagOutOfLockCount = 0;
     int boneLagRejectedFrameCount = 0;
 
+    // Enabled only by the independently built, explicitly labeled self-trial.
+#ifdef BONE_OBSERVE_BEFORE_G_EXPERIMENT
+    bool observeStabilityBeforeG = true;
+#else
+    bool observeStabilityBeforeG = false;
+#endif
+
     bool checkBoneLagStable(int lagB, int* centerOut = nullptr, int* countOut = nullptr);
     void resetBoneLagStability();
     void rejectBoneLagCandidate();

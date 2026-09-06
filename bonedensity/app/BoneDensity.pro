@@ -8,6 +8,13 @@ CONFIG += c++17
 
 TARGET = BoneDensity
 
+# Explicit isolated research build; normal builds retain the original flow.
+contains(CONFIG, observe_before_g_trial) {
+    !CONFIG(debug, debug|release): error("The posture-flow trial must be a Debug build")
+    DEFINES += BONE_OBSERVE_BEFORE_G_EXPERIMENT
+    TARGET = BoneDensity_SelfTrial
+}
+
 INCLUDEPATH += include
 
 SOURCES += \

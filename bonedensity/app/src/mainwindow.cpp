@@ -252,7 +252,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     // ------------------- 结束美化代码 -------------------
 
-    this->setWindowTitle("骨密度仪APP");
+    this->setWindowTitle(observeStabilityBeforeG
+        ? QStringLiteral("骨密度仪 · 姿态流程试测版（仅研发验证）")
+        : QStringLiteral("骨密度仪APP"));
     this->setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
     //this->showFullScreen();
     this->showMaximized();
@@ -976,7 +978,9 @@ void MainWindow::startExperimentLog()
     for (double sos : roundSosList) previousRounds.append(sos);
     const QJsonObject config{
         {"previous_accepted_rounds", previousRounds},
-        {"implementation", "state-repair-20260905-v1"}, {"build", __DATE__ " " __TIME__},
+        {"implementation", observeStabilityBeforeG
+            ? "observe-before-g-20260906-v1" : "state-repair-20260905-v1"},
+        {"build", __DATE__ " " __TIME__},
         {"round", roundSosList.size() + 1}, {"round_target", normalMeasureRounds},
         {"frame_target", processValidTarget}, {"round_cluster_tolerance", roundClusterTolerance},
         {"probe_distance_m", signalProcessor.probeDistanceCD},
@@ -2836,12 +2840,12 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
         int stableCount = 0;
         bool stableOk = false;
 
-        if (bJumpOk &&
-            notBoundary &&
-            diffOk &&
-            directionOk &&
-            corrOk &&
-            angleOk) {
+        // The isolated trial observes current lag stability before the G gate.
+        // G still gates strictValid below; no G-failing frame enters results.
+        const bool basePrechecksOk = bJumpOk && notBoundary && diffOk && directionOk &&
+            corrOk && ((!enablePatientAngleGate) || angleSignedDiffOk);
+        const bool stabilityInputOk = basePrechecksOk && (observeStabilityBeforeG || angleOk);
+        if (stabilityInputOk) {
 
             stableOk = checkBoneLagStable(
                 bRes.refinedLag,
@@ -2887,8 +2891,13 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
             {"corr_A", aRes.corr >= mCfg.frameCorrAMin},
             {"corr_B", bRes.corr >= mCfg.frameCorrBMin},
             {"D", angleSignedDiffOk}, {"G", anglePairMidGapOk},
-            {"stability_evaluated", bJumpOk && notBoundary && diffOk && directionOk && corrOk && angleOk},
+            {"stability_evaluated", stabilityInputOk},
             {"stable", stableOk}};
+        if (observeStabilityBeforeG) {
+            auto gates = evidence["gates"].toObject();
+            gates["all_prechecks_passed"] = basePrechecksOk && angleOk;
+            evidence["gates"] = gates;
+        }
 
 
         if (kDebugPerFrame) {

@@ -1,0 +1,2509 @@
+{
+    "candidate_raw_checks": [
+        {
+            "file": "round-20260905-124559-476-58375f1c-6609-4c41-8e74-43e2cb5d9ca2.jsonl",
+            "matched": true,
+            "scenario": "G8_warmup10"
+        },
+        {
+            "file": "round-20260905-124854-450-7dd390b1-4b13-4353-a7b6-e65510bd9f9c.jsonl",
+            "matched": true,
+            "scenario": "G8_warmup10"
+        },
+        {
+            "file": "round-20260905-124559-476-58375f1c-6609-4c41-8e74-43e2cb5d9ca2.jsonl",
+            "matched": true,
+            "scenario": "G12_warmup10"
+        },
+        {
+            "file": "round-20260905-124854-450-7dd390b1-4b13-4353-a7b6-e65510bd9f9c.jsonl",
+            "matched": true,
+            "scenario": "G12_warmup10"
+        },
+        {
+            "file": "round-20260905-124559-476-58375f1c-6609-4c41-8e74-43e2cb5d9ca2.jsonl",
+            "matched": true,
+            "scenario": "A075_G8"
+        },
+        {
+            "file": "round-20260905-124854-450-7dd390b1-4b13-4353-a7b6-e65510bd9f9c.jsonl",
+            "matched": true,
+            "scenario": "A075_G8"
+        },
+        {
+            "file": "round-20260905-124559-476-58375f1c-6609-4c41-8e74-43e2cb5d9ca2.jsonl",
+            "matched": true,
+            "scenario": "A075_G12"
+        },
+        {
+            "file": "round-20260905-124854-450-7dd390b1-4b13-4353-a7b6-e65510bd9f9c.jsonl",
+            "matched": true,
+            "scenario": "A075_G12"
+        },
+        {
+            "file": "round-20260905-124559-476-58375f1c-6609-4c41-8e74-43e2cb5d9ca2.jsonl",
+            "matched": true,
+            "scenario": "A075_G8_warmup10"
+        },
+        {
+            "file": "round-20260905-124854-450-7dd390b1-4b13-4353-a7b6-e65510bd9f9c.jsonl",
+            "matched": true,
+            "scenario": "A075_G8_warmup10"
+        },
+        {
+            "file": "round-20260905-124559-476-58375f1c-6609-4c41-8e74-43e2cb5d9ca2.jsonl",
+            "matched": true,
+            "scenario": "A075_G12_warmup10"
+        },
+        {
+            "file": "round-20260905-124854-450-7dd390b1-4b13-4353-a7b6-e65510bd9f9c.jsonl",
+            "matched": true,
+            "scenario": "A075_G12_warmup10"
+        }
+    ],
+    "feature_baseline_verified": true,
+    "manifest": [
+        {
+            "file": "round-20260905-124559-476-58375f1c-6609-4c41-8e74-43e2cb5d9ca2.jsonl",
+            "sha256": "caec2f24698489f8d4adf4749b42c7cd6932bee97ff3e0aa4fb7cc1d3c39d558"
+        },
+        {
+            "file": "round-20260905-124735-190-47b3fafc-74fe-4e81-bc44-c29e7e445b5d.jsonl",
+            "sha256": "fc941d0557ebf7536a42c597c38b0cb69e07d56a02545afad8237befa076bd84"
+        },
+        {
+            "file": "round-20260905-124740-123-91fd04ee-9c12-471c-b3c9-edb9f243acb5.jsonl",
+            "sha256": "90d40f9ad6099cd12aa6908e71298c795f2172a67282d6f4085590b54724a201"
+        },
+        {
+            "file": "round-20260905-124814-673-6a35ee95-c5e2-4a86-a758-a3610080a923.jsonl",
+            "sha256": "dee27148485a098fc046693dd5acaca5ecbc6cb2b2ac1510fb531975dedde929"
+        },
+        {
+            "file": "round-20260905-124829-956-60ed4bbe-8c0e-46f6-8e3f-9be2dad7f8fc.jsonl",
+            "sha256": "1a5e9b80345ff62be0b62a1f542cdc84fff94bf6d89a283a2aa7d93e5891515c"
+        },
+        {
+            "file": "round-20260905-124840-006-3fa5fa33-f655-4acb-9c29-fcbee4f29d2c.jsonl",
+            "sha256": "66db2845090e66b9aaca1cc4f9c890fbd1359d73616f8efc8b26613b7759c5d5"
+        },
+        {
+            "file": "round-20260905-124847-799-a7d67c99-ceee-4fe7-b37c-b6bb4644afca.jsonl",
+            "sha256": "52bf612175a509b74f655935bb3b93308152b5273fa55486ae58535d6c8bbf4d"
+        },
+        {
+            "file": "round-20260905-124854-450-7dd390b1-4b13-4353-a7b6-e65510bd9f9c.jsonl",
+            "sha256": "dd7c0dd211407fb97ff7bf69e0099382c0386026bf555d0211d5c3658468654f"
+        }
+    ],
+    "raw_baseline": [
+        {
+            "completion_ms_on_recorded_timeline": 94795,
+            "consumed_frames": 1010,
+            "discarded_values": 0,
+            "file": "round-20260905-124559-476-58375f1c-6609-4c41-8e74-43e2cb5d9ca2.jsonl",
+            "first_accepted_ms": 91234,
+            "newly_accepted_sos": [
+            ],
+            "reached_30": true,
+            "round_summary": {
+                "D": 6.111111111111111,
+                "G": 1.3611111111111112,
+                "corr_A": 0.7895848965718195,
+                "corr_B": 0.7574647700024495,
+                "event": "round_summary",
+                "quality_pass": false,
+                "sos": 3831.474190726158
+            }
+        },
+        {
+            "completion_ms_on_recorded_timeline": 4127,
+            "consumed_frames": 43,
+            "discarded_values": 0,
+            "file": "round-20260905-124735-190-47b3fafc-74fe-4e81-bc44-c29e7e445b5d.jsonl",
+            "first_accepted_ms": 1378,
+            "newly_accepted_sos": [
+            ],
+            "reached_30": true,
+            "round_summary": {
+                "D": 5.833333333333333,
+                "G": -0.4722222222222222,
+                "corr_A": 0.8028157075763143,
+                "corr_B": 0.7799167917627308,
+                "event": "round_summary",
+                "quality_pass": true,
+                "sos": 3823.179102067183
+            }
+        },
+        {
+            "completion_ms_on_recorded_timeline": 33485,
+            "consumed_frames": 356,
+            "discarded_values": 1,
+            "file": "round-20260905-124740-123-91fd04ee-9c12-471c-b3c9-edb9f243acb5.jsonl",
+            "first_accepted_ms": 1537,
+            "newly_accepted_sos": [
+            ],
+            "reached_30": true,
+            "round_summary": {
+                "D": 8.055555555555555,
+                "G": -4.388888888888889,
+                "corr_A": 0.789327565366635,
+                "corr_B": 0.623876026807391,
+                "event": "round_summary",
+                "quality_pass": false,
+                "sos": 4018.2375167472046
+            }
+        },
+        {
+            "completion_ms_on_recorded_timeline": 14325,
+            "consumed_frames": 152,
+            "discarded_values": 10,
+            "file": "round-20260905-124814-673-6a35ee95-c5e2-4a86-a758-a3610080a923.jsonl",
+            "first_accepted_ms": 3430,
+            "newly_accepted_sos": [
+            ],
+            "reached_30": true,
+            "round_summary": {
+                "D": 7.611111111111111,
+                "G": -1.4166666666666667,
+                "corr_A": 0.817482108223007,
+                "corr_B": 0.7321999872917885,
+                "event": "round_summary",
+                "quality_pass": true,
+                "sos": 4034.8341838654806
+            }
+        },
+        {
+            "completion_ms_on_recorded_timeline": 8976,
+            "consumed_frames": 95,
+            "discarded_values": 0,
+            "file": "round-20260905-124829-956-60ed4bbe-8c0e-46f6-8e3f-9be2dad7f8fc.jsonl",
+            "first_accepted_ms": 4292,
+            "newly_accepted_sos": [
+            ],
+            "reached_30": true,
+            "round_summary": {
+                "D": 7.777777777777778,
+                "G": -0.9444444444444444,
+                "corr_A": 0.7882172531367679,
+                "corr_B": 0.7389578623422011,
+                "event": "round_summary",
+                "quality_pass": false,
+                "sos": 4016.3934426229516
+            }
+        },
+        {
+            "completion_ms_on_recorded_timeline": 7101,
+            "consumed_frames": 75,
+            "discarded_values": 0,
+            "file": "round-20260905-124840-006-3fa5fa33-f655-4acb-9c29-fcbee4f29d2c.jsonl",
+            "first_accepted_ms": 3067,
+            "newly_accepted_sos": [
+            ],
+            "reached_30": true,
+            "round_summary": {
+                "D": 7.555555555555555,
+                "G": -2.75,
+                "corr_A": 0.8447697769551642,
+                "corr_B": 0.7167141629415759,
+                "event": "round_summary",
+                "quality_pass": true,
+                "sos": 3906.172839506172
+            }
+        },
+        {
+            "completion_ms_on_recorded_timeline": 6048,
+            "consumed_frames": 64,
+            "discarded_values": 0,
+            "file": "round-20260905-124847-799-a7d67c99-ceee-4fe7-b37c-b6bb4644afca.jsonl",
+            "first_accepted_ms": 1832,
+            "newly_accepted_sos": [
+            ],
+            "reached_30": true,
+            "round_summary": {
+                "D": 7.555555555555555,
+                "G": -2.7222222222222223,
+                "corr_A": 0.8571420840022651,
+                "corr_B": 0.7452953734997647,
+                "event": "round_summary",
+                "quality_pass": true,
+                "sos": 3892.3456790123455
+            }
+        },
+        {
+            "completion_ms_on_recorded_timeline": 6596,
+            "consumed_frames": 70,
+            "discarded_values": 0,
+            "file": "round-20260905-124854-450-7dd390b1-4b13-4353-a7b6-e65510bd9f9c.jsonl",
+            "first_accepted_ms": 1921,
+            "newly_accepted_sos": [
+            ],
+            "reached_30": true,
+            "round_summary": {
+                "D": 7.333333333333333,
+                "G": -3.3055555555555554,
+                "corr_A": 0.8559588532597955,
+                "corr_B": 0.7556295312106269,
+                "event": "round_summary",
+                "quality_pass": true,
+                "sos": 3895.8024691358023
+            }
+        }
+    ],
+    "raw_baseline_verified": true,
+    "scenarios": [
+        {
+            "G_max": 6,
+            "G_min": -6,
+            "attempts": [
+                {
+                    "completion_ms_on_recorded_timeline": 94795,
+                    "conditional_accepted_rounds": [
+                    ],
+                    "consumed_frames": 1010,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124559-476-58375f1c-6609-4c41-8e74-43e2cb5d9ca2.jsonl",
+                    "first_accepted_ms": 91234,
+                    "newly_accepted_sos": [
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 6.111111111111111,
+                        "G": 1.3611111111111112,
+                        "corr_A": 0.7895848965718195,
+                        "corr_B": 0.7574647700024495,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 3831.474190726158
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 4127,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183
+                    ],
+                    "consumed_frames": 43,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124735-190-47b3fafc-74fe-4e81-bc44-c29e7e445b5d.jsonl",
+                    "first_accepted_ms": 1378,
+                    "newly_accepted_sos": [
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 5.833333333333333,
+                        "G": -0.4722222222222222,
+                        "corr_A": 0.8028157075763143,
+                        "corr_B": 0.7799167917627308,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3823.179102067183
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 33485,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183
+                    ],
+                    "consumed_frames": 356,
+                    "discarded_values": 1,
+                    "file": "round-20260905-124740-123-91fd04ee-9c12-471c-b3c9-edb9f243acb5.jsonl",
+                    "first_accepted_ms": 1537,
+                    "newly_accepted_sos": [
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 8.055555555555555,
+                        "G": -4.388888888888889,
+                        "corr_A": 0.789327565366635,
+                        "corr_B": 0.623876026807391,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 4018.2375167472046
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 14325,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183
+                    ],
+                    "consumed_frames": 152,
+                    "discarded_values": 10,
+                    "file": "round-20260905-124814-673-6a35ee95-c5e2-4a86-a758-a3610080a923.jsonl",
+                    "first_accepted_ms": 3430,
+                    "newly_accepted_sos": [
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.611111111111111,
+                        "G": -1.4166666666666667,
+                        "corr_A": 0.817482108223007,
+                        "corr_B": 0.7321999872917885,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 4034.8341838654806
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 8976,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183
+                    ],
+                    "consumed_frames": 95,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124829-956-60ed4bbe-8c0e-46f6-8e3f-9be2dad7f8fc.jsonl",
+                    "first_accepted_ms": 4292,
+                    "newly_accepted_sos": [
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.777777777777778,
+                        "G": -0.9444444444444444,
+                        "corr_A": 0.7882172531367679,
+                        "corr_B": 0.7389578623422011,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 4016.3934426229516
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 7101,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183,
+                        4034.8341838654806,
+                        3906.172839506172
+                    ],
+                    "consumed_frames": 75,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124840-006-3fa5fa33-f655-4acb-9c29-fcbee4f29d2c.jsonl",
+                    "first_accepted_ms": 3067,
+                    "newly_accepted_sos": [
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.555555555555555,
+                        "G": -2.75,
+                        "corr_A": 0.8447697769551642,
+                        "corr_B": 0.7167141629415759,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3906.172839506172
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 6048,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183,
+                        4034.8341838654806,
+                        3906.172839506172,
+                        3892.3456790123455
+                    ],
+                    "consumed_frames": 64,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124847-799-a7d67c99-ceee-4fe7-b37c-b6bb4644afca.jsonl",
+                    "first_accepted_ms": 1832,
+                    "newly_accepted_sos": [
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.555555555555555,
+                        "G": -2.7222222222222223,
+                        "corr_A": 0.8571420840022651,
+                        "corr_B": 0.7452953734997647,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3892.3456790123455
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 6596,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183,
+                        4034.8341838654806,
+                        3906.172839506172,
+                        3892.3456790123455,
+                        3895.8024691358023
+                    ],
+                    "consumed_frames": 70,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124854-450-7dd390b1-4b13-4353-a7b6-e65510bd9f9c.jsonl",
+                    "first_accepted_ms": 1921,
+                    "newly_accepted_sos": [
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.333333333333333,
+                        "G": -3.3055555555555554,
+                        "corr_A": 0.8559588532597955,
+                        "corr_B": 0.7556295312106269,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3895.8024691358023
+                    }
+                }
+            ],
+            "conditional_first_five": {
+                "attempt": 8,
+                "rounds": [
+                    3823.179102067183,
+                    4034.8341838654806,
+                    3906.172839506172,
+                    3892.3456790123455,
+                    3895.8024691358023
+                ],
+                "sos": 3910.466854717396
+            },
+            "frame_A_min": 0.78,
+            "loss_count": 10,
+            "name": "baseline",
+            "round_A_min": 0.8,
+            "warmup": 14
+        },
+        {
+            "G_max": 8,
+            "G_min": -8,
+            "attempts": [
+                {
+                    "completion_ms_on_recorded_timeline": 94231,
+                    "conditional_accepted_rounds": [
+                    ],
+                    "consumed_frames": 1004,
+                    "discarded_values": 6,
+                    "file": "round-20260905-124559-476-58375f1c-6609-4c41-8e74-43e2cb5d9ca2.jsonl",
+                    "first_accepted_ms": 33990,
+                    "newly_accepted_sos": [
+                        4152.542372881356,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3798.4496124031007,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3712.1212121212116,
+                        3740.4580152671756,
+                        3712.1212121212116,
+                        3828.1249999999995,
+                        3828.1249999999995
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 6.166666666666667,
+                        "G": 1.3611111111111112,
+                        "corr_A": 0.79096316903281,
+                        "corr_B": 0.7578869391347716,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 3828.124999999999
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 3751,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554
+                    ],
+                    "consumed_frames": 39,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124735-190-47b3fafc-74fe-4e81-bc44-c29e7e445b5d.jsonl",
+                    "first_accepted_ms": 991,
+                    "newly_accepted_sos": [
+                        3828.1249999999995,
+                        3798.4496124031007,
+                        3828.1249999999995,
+                        3828.1249999999995
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 5.888888888888889,
+                        "G": -1,
+                        "corr_A": 0.8031976537001795,
+                        "corr_B": 0.7788580274475103,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3824.8277347114554
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 30383,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554
+                    ],
+                    "consumed_frames": 323,
+                    "discarded_values": 6,
+                    "file": "round-20260905-124740-123-91fd04ee-9c12-471c-b3c9-edb9f243acb5.jsonl",
+                    "first_accepted_ms": 1072,
+                    "newly_accepted_sos": [
+                        3828.1249999999995,
+                        3858.2677165354326,
+                        3858.2677165354326,
+                        3858.2677165354326,
+                        3828.1249999999995,
+                        3983.7398373983738,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4016.3934426229503
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 8.166666666666666,
+                        "G": -5.055555555555555,
+                        "corr_A": 0.7961087421533583,
+                        "corr_B": 0.6252463847174996,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 4023.7697391199636
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 13745,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554
+                    ],
+                    "consumed_frames": 146,
+                    "discarded_values": 14,
+                    "file": "round-20260905-124814-673-6a35ee95-c5e2-4a86-a758-a3610080a923.jsonl",
+                    "first_accepted_ms": 2030,
+                    "newly_accepted_sos": [
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4049.5867768595035,
+                        4049.5867768595035
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.611111111111111,
+                        "G": -2.2777777777777777,
+                        "corr_A": 0.8170174535747072,
+                        "corr_B": 0.7265377642738842,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 4036.6782579897335
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 8407,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554
+                    ],
+                    "consumed_frames": 89,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124829-956-60ed4bbe-8c0e-46f6-8e3f-9be2dad7f8fc.jsonl",
+                    "first_accepted_ms": 3600,
+                    "newly_accepted_sos": [
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4016.3934426229503
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.777777777777778,
+                        "G": -1,
+                        "corr_A": 0.787862801934518,
+                        "corr_B": 0.7384870719634776,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 4016.3934426229516
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 5964,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554,
+                        4036.6782579897335,
+                        3900.987654320987
+                    ],
+                    "consumed_frames": 63,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124840-006-3fa5fa33-f655-4acb-9c29-fcbee4f29d2c.jsonl",
+                    "first_accepted_ms": 2491,
+                    "newly_accepted_sos": [
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.444444444444445,
+                        "G": -3.1666666666666665,
+                        "corr_A": 0.8416853393631596,
+                        "corr_B": 0.7146363225248293,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3900.987654320987
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 4829,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554,
+                        4036.6782579897335,
+                        3900.987654320987,
+                        3890.617283950617
+                    ],
+                    "consumed_frames": 51,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124847-799-a7d67c99-ceee-4fe7-b37c-b6bb4644afca.jsonl",
+                    "first_accepted_ms": 1073,
+                    "newly_accepted_sos": [
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.5,
+                        "G": -3.0277777777777777,
+                        "corr_A": 0.8562186792851578,
+                        "corr_B": 0.7456961850348035,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3890.617283950617
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 4901,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554,
+                        4036.6782579897335,
+                        3900.987654320987,
+                        3890.617283950617,
+                        3897.5308641975303
+                    ],
+                    "consumed_frames": 52,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124854-450-7dd390b1-4b13-4353-a7b6-e65510bd9f9c.jsonl",
+                    "first_accepted_ms": 1155,
+                    "newly_accepted_sos": [
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3919.999999999999,
+                        3919.999999999999,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.333333333333333,
+                        "G": -3.5833333333333335,
+                        "corr_A": 0.8560575171273399,
+                        "corr_B": 0.7534096976011277,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3897.5308641975303
+                    }
+                }
+            ],
+            "conditional_first_five": {
+                "attempt": 8,
+                "rounds": [
+                    3824.8277347114554,
+                    4036.6782579897335,
+                    3900.987654320987,
+                    3890.617283950617,
+                    3897.5308641975303
+                ],
+                "sos": 3910.1283590340654
+            },
+            "frame_A_min": 0.78,
+            "loss_count": 10,
+            "name": "G8_warmup10",
+            "round_A_min": 0.8,
+            "warmup": 10
+        },
+        {
+            "G_max": 12,
+            "G_min": -12,
+            "attempts": [
+                {
+                    "completion_ms_on_recorded_timeline": 94231,
+                    "conditional_accepted_rounds": [
+                    ],
+                    "consumed_frames": 1004,
+                    "discarded_values": 23,
+                    "file": "round-20260905-124559-476-58375f1c-6609-4c41-8e74-43e2cb5d9ca2.jsonl",
+                    "first_accepted_ms": 33806,
+                    "newly_accepted_sos": [
+                        4224.137931034483,
+                        4152.542372881356,
+                        3828.1249999999995,
+                        3798.4496124031007,
+                        3798.4496124031007,
+                        3798.4496124031007,
+                        3798.4496124031007,
+                        3798.4496124031007,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3798.4496124031007,
+                        3798.4496124031007,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3712.1212121212116,
+                        3740.4580152671756,
+                        3712.1212121212116,
+                        3828.1249999999995,
+                        3828.1249999999995
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 6.166666666666667,
+                        "G": 1.3611111111111112,
+                        "corr_A": 0.79096316903281,
+                        "corr_B": 0.7578869391347716,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 3828.124999999999
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 3751,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554
+                    ],
+                    "consumed_frames": 39,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124735-190-47b3fafc-74fe-4e81-bc44-c29e7e445b5d.jsonl",
+                    "first_accepted_ms": 991,
+                    "newly_accepted_sos": [
+                        3828.1249999999995,
+                        3798.4496124031007,
+                        3828.1249999999995,
+                        3828.1249999999995
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 5.888888888888889,
+                        "G": -1,
+                        "corr_A": 0.8031976537001795,
+                        "corr_B": 0.7788580274475103,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3824.8277347114554
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 29535,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554
+                    ],
+                    "consumed_frames": 314,
+                    "discarded_values": 6,
+                    "file": "round-20260905-124740-123-91fd04ee-9c12-471c-b3c9-edb9f243acb5.jsonl",
+                    "first_accepted_ms": 1072,
+                    "newly_accepted_sos": [
+                        3828.1249999999995,
+                        3858.2677165354326,
+                        3858.2677165354326,
+                        3858.2677165354326,
+                        3828.1249999999995,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4016.3934426229503
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 8.222222222222221,
+                        "G": -5.305555555555555,
+                        "corr_A": 0.7952379413249807,
+                        "corr_B": 0.6244027026391259,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 4023.7697391199636
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 12723,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554
+                    ],
+                    "consumed_frames": 135,
+                    "discarded_values": 25,
+                    "file": "round-20260905-124814-673-6a35ee95-c5e2-4a86-a758-a3610080a923.jsonl",
+                    "first_accepted_ms": 1170,
+                    "newly_accepted_sos": [
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3951.6129032258063,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.666666666666667,
+                        "G": -3.361111111111111,
+                        "corr_A": 0.8162715152915895,
+                        "corr_B": 0.7217229667540088,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 4040.36640623824
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 7663,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554
+                    ],
+                    "consumed_frames": 81,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124829-956-60ed4bbe-8c0e-46f6-8e3f-9be2dad7f8fc.jsonl",
+                    "first_accepted_ms": 3229,
+                    "newly_accepted_sos": [
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4016.3934426229503
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.833333333333333,
+                        "G": -1.8611111111111112,
+                        "corr_A": 0.7878137205538757,
+                        "corr_B": 0.7382033446046127,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 4016.3934426229516
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 4842,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554,
+                        4040.36640623824,
+                        3895.8024691358023
+                    ],
+                    "consumed_frames": 51,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124840-006-3fa5fa33-f655-4acb-9c29-fcbee4f29d2c.jsonl",
+                    "first_accepted_ms": 1912,
+                    "newly_accepted_sos": [
+                        3858.2677165354326,
+                        3828.1249999999995,
+                        3858.2677165354326,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.388888888888889,
+                        "G": -3.5555555555555554,
+                        "corr_A": 0.83727631863111,
+                        "corr_B": 0.7140267493540045,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3895.8024691358023
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 3705,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554,
+                        4040.36640623824,
+                        3895.8024691358023,
+                        3895.8024691358023
+                    ],
+                    "consumed_frames": 39,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124847-799-a7d67c99-ceee-4fe7-b37c-b6bb4644afca.jsonl",
+                    "first_accepted_ms": 985,
+                    "newly_accepted_sos": [
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.444444444444445,
+                        "G": -5.083333333333333,
+                        "corr_A": 0.8536394637103623,
+                        "corr_B": 0.7392818604322425,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3895.8024691358023
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 3698,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554,
+                        4040.36640623824,
+                        3895.8024691358023,
+                        3895.8024691358023,
+                        3902.7160493827155
+                    ],
+                    "consumed_frames": 39,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124854-450-7dd390b1-4b13-4353-a7b6-e65510bd9f9c.jsonl",
+                    "first_accepted_ms": 981,
+                    "newly_accepted_sos": [
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3919.999999999999,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.666666666666667,
+                        "G": -5.055555555555555,
+                        "corr_A": 0.856728869947641,
+                        "corr_B": 0.7450438311495904,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3902.7160493827155
+                    }
+                }
+            ],
+            "conditional_first_five": {
+                "attempt": 8,
+                "rounds": [
+                    3824.8277347114554,
+                    4040.36640623824,
+                    3895.8024691358023,
+                    3895.8024691358023,
+                    3902.7160493827155
+                ],
+                "sos": 3911.9030257208033
+            },
+            "frame_A_min": 0.78,
+            "loss_count": 10,
+            "name": "G12_warmup10",
+            "round_A_min": 0.8,
+            "warmup": 10
+        },
+        {
+            "G_max": 8,
+            "G_min": -8,
+            "attempts": [
+                {
+                    "completion_ms_on_recorded_timeline": 93575,
+                    "conditional_accepted_rounds": [
+                    ],
+                    "consumed_frames": 997,
+                    "discarded_values": 13,
+                    "file": "round-20260905-124559-476-58375f1c-6609-4c41-8e74-43e2cb5d9ca2.jsonl",
+                    "first_accepted_ms": 33614,
+                    "newly_accepted_sos": [
+                        4374.999999999999,
+                        4336.283185840708,
+                        4224.137931034483,
+                        4188.0341880341875,
+                        4152.542372881356,
+                        4152.542372881356,
+                        4188.0341880341875,
+                        4188.0341880341875,
+                        4117.647058823529,
+                        4083.3333333333326,
+                        4083.3333333333326,
+                        4083.3333333333326,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3712.1212121212116,
+                        3740.4580152671756,
+                        3712.1212121212116,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3858.2677165354326,
+                        3828.1249999999995,
+                        3828.1249999999995
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 6,
+                        "G": 1.5277777777777777,
+                        "corr_A": 0.7861912142578903,
+                        "corr_B": 0.7568023934076769,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 3828.124999999999
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 4127,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183
+                    ],
+                    "consumed_frames": 43,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124735-190-47b3fafc-74fe-4e81-bc44-c29e7e445b5d.jsonl",
+                    "first_accepted_ms": 1378,
+                    "newly_accepted_sos": [
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 5.833333333333333,
+                        "G": -0.4722222222222222,
+                        "corr_A": 0.8028157075763143,
+                        "corr_B": 0.7799167917627308,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3823.179102067183
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 5666,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183
+                    ],
+                    "consumed_frames": 60,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124740-123-91fd04ee-9c12-471c-b3c9-edb9f243acb5.jsonl",
+                    "first_accepted_ms": 1436,
+                    "newly_accepted_sos": [
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3858.2677165354326,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3858.2677165354326,
+                        3858.2677165354326,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3798.4496124031007,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3798.4496124031007,
+                        3828.1249999999995,
+                        3828.1249999999995
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 6,
+                        "G": -0.9444444444444444,
+                        "corr_A": 0.7596916155332085,
+                        "corr_B": 0.703205633010326,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 3828.124999999999
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 6150,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183
+                    ],
+                    "consumed_frames": 65,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124814-673-6a35ee95-c5e2-4a86-a758-a3610080a923.jsonl",
+                    "first_accepted_ms": 2305,
+                    "newly_accepted_sos": [
+                        3983.7398373983738,
+                        4016.3934426229503,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        3983.7398373983738,
+                        4016.3934426229503,
+                        3983.7398373983738,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        4016.3934426229503,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        4016.3934426229503,
+                        3983.7398373983738
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.166666666666667,
+                        "G": -4.611111111111111,
+                        "corr_A": 0.7782151258960285,
+                        "corr_B": 0.7197991042393279,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 3994.624372473233
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 5591,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183
+                    ],
+                    "consumed_frames": 59,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124829-956-60ed4bbe-8c0e-46f6-8e3f-9be2dad7f8fc.jsonl",
+                    "first_accepted_ms": 2295,
+                    "newly_accepted_sos": [
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4049.5867768595035,
+                        4016.3934426229503
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.944444444444445,
+                        "G": -1.8611111111111112,
+                        "corr_A": 0.779620361389898,
+                        "corr_B": 0.7243200964973844,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 4040.36640623824
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 5964,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183,
+                        3900.987654320987
+                    ],
+                    "consumed_frames": 63,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124840-006-3fa5fa33-f655-4acb-9c29-fcbee4f29d2c.jsonl",
+                    "first_accepted_ms": 2491,
+                    "newly_accepted_sos": [
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.444444444444445,
+                        "G": -3.1666666666666665,
+                        "corr_A": 0.8416853393631596,
+                        "corr_B": 0.7146363225248293,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3900.987654320987
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 5483,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183,
+                        3900.987654320987,
+                        3890.617283950617
+                    ],
+                    "consumed_frames": 58,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124847-799-a7d67c99-ceee-4fe7-b37c-b6bb4644afca.jsonl",
+                    "first_accepted_ms": 1557,
+                    "newly_accepted_sos": [
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.444444444444445,
+                        "G": -3.1666666666666665,
+                        "corr_A": 0.856064140153491,
+                        "corr_B": 0.7462386944987732,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3890.617283950617
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 5380,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183,
+                        3900.987654320987,
+                        3890.617283950617,
+                        3895.8024691358023
+                    ],
+                    "consumed_frames": 57,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124854-450-7dd390b1-4b13-4353-a7b6-e65510bd9f9c.jsonl",
+                    "first_accepted_ms": 1627,
+                    "newly_accepted_sos": [
+                        3919.999999999999,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.277777777777778,
+                        "G": -4.111111111111111,
+                        "corr_A": 0.8557398197802968,
+                        "corr_B": 0.7555430158936285,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3895.8024691358023
+                    }
+                }
+            ],
+            "conditional_first_five": {
+            },
+            "frame_A_min": 0.75,
+            "loss_count": 10,
+            "name": "A075_G8",
+            "round_A_min": 0.8,
+            "warmup": 14
+        },
+        {
+            "G_max": 12,
+            "G_min": -12,
+            "attempts": [
+                {
+                    "completion_ms_on_recorded_timeline": 93575,
+                    "conditional_accepted_rounds": [
+                    ],
+                    "consumed_frames": 997,
+                    "discarded_values": 35,
+                    "file": "round-20260905-124559-476-58375f1c-6609-4c41-8e74-43e2cb5d9ca2.jsonl",
+                    "first_accepted_ms": 33706,
+                    "newly_accepted_sos": [
+                        4336.283185840708,
+                        4224.137931034483,
+                        4188.0341880341875,
+                        4152.542372881356,
+                        4152.542372881356,
+                        4188.0341880341875,
+                        4188.0341880341875,
+                        4117.647058823529,
+                        4083.3333333333326,
+                        4083.3333333333326,
+                        4083.3333333333326,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        3983.7398373983738,
+                        3798.4496124031007,
+                        3798.4496124031007,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3798.4496124031007,
+                        3798.4496124031007,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3769.230769230769,
+                        3828.1249999999995,
+                        3712.1212121212116,
+                        3740.4580152671756,
+                        3712.1212121212116,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3858.2677165354326,
+                        3828.1249999999995,
+                        3828.1249999999995
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 6,
+                        "G": 1.5277777777777777,
+                        "corr_A": 0.7861912142578903,
+                        "corr_B": 0.7568023934076769,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 3828.124999999999
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 4127,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183
+                    ],
+                    "consumed_frames": 43,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124735-190-47b3fafc-74fe-4e81-bc44-c29e7e445b5d.jsonl",
+                    "first_accepted_ms": 1378,
+                    "newly_accepted_sos": [
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 5.833333333333333,
+                        "G": -0.4722222222222222,
+                        "corr_A": 0.8028157075763143,
+                        "corr_B": 0.7799167917627308,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3823.179102067183
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 5666,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183
+                    ],
+                    "consumed_frames": 60,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124740-123-91fd04ee-9c12-471c-b3c9-edb9f243acb5.jsonl",
+                    "first_accepted_ms": 1436,
+                    "newly_accepted_sos": [
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3858.2677165354326,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3858.2677165354326,
+                        3858.2677165354326,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3798.4496124031007,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3798.4496124031007,
+                        3828.1249999999995,
+                        3828.1249999999995
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 6,
+                        "G": -0.9444444444444444,
+                        "corr_A": 0.7596916155332085,
+                        "corr_B": 0.703205633010326,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 3828.124999999999
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 4278,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183
+                    ],
+                    "consumed_frames": 45,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124814-673-6a35ee95-c5e2-4a86-a758-a3610080a923.jsonl",
+                    "first_accepted_ms": 1360,
+                    "newly_accepted_sos": [
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3951.6129032258063,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3951.6129032258063,
+                        3951.6129032258063,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        4016.3934426229503,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        4016.3934426229503,
+                        3983.7398373983738,
+                        3983.7398373983738
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7,
+                        "G": -5.527777777777778,
+                        "corr_A": 0.780482701127672,
+                        "corr_B": 0.7243928627855633,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 3983.7398373983733
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 4947,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183
+                    ],
+                    "consumed_frames": 52,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124829-956-60ed4bbe-8c0e-46f6-8e3f-9be2dad7f8fc.jsonl",
+                    "first_accepted_ms": 2106,
+                    "newly_accepted_sos": [
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4049.5867768595035
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 8.055555555555555,
+                        "G": -2.5833333333333335,
+                        "corr_A": 0.7782282479344848,
+                        "corr_B": 0.7217794703893774,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 4044.054554486746
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 4842,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183,
+                        3895.8024691358023
+                    ],
+                    "consumed_frames": 51,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124840-006-3fa5fa33-f655-4acb-9c29-fcbee4f29d2c.jsonl",
+                    "first_accepted_ms": 1912,
+                    "newly_accepted_sos": [
+                        3858.2677165354326,
+                        3828.1249999999995,
+                        3858.2677165354326,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.388888888888889,
+                        "G": -3.5555555555555554,
+                        "corr_A": 0.83727631863111,
+                        "corr_B": 0.7140267493540045,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3895.8024691358023
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 4084,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183,
+                        3895.8024691358023,
+                        3895.8024691358023
+                    ],
+                    "consumed_frames": 43,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124847-799-a7d67c99-ceee-4fe7-b37c-b6bb4644afca.jsonl",
+                    "first_accepted_ms": 1355,
+                    "newly_accepted_sos": [
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3888.8888888888882
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.5,
+                        "G": -5.416666666666667,
+                        "corr_A": 0.8543144437282549,
+                        "corr_B": 0.7391482102996,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3895.8024691358023
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 4069,
+                    "conditional_accepted_rounds": [
+                        3823.179102067183,
+                        3895.8024691358023,
+                        3895.8024691358023,
+                        3902.7160493827155
+                    ],
+                    "consumed_frames": 43,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124854-450-7dd390b1-4b13-4353-a7b6-e65510bd9f9c.jsonl",
+                    "first_accepted_ms": 1362,
+                    "newly_accepted_sos": [
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3919.999999999999,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.611111111111111,
+                        "G": -5.027777777777778,
+                        "corr_A": 0.8566154298542938,
+                        "corr_B": 0.7451048224578521,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3902.7160493827155
+                    }
+                }
+            ],
+            "conditional_first_five": {
+            },
+            "frame_A_min": 0.75,
+            "loss_count": 10,
+            "name": "A075_G12",
+            "round_A_min": 0.8,
+            "warmup": 14
+        },
+        {
+            "G_max": 8,
+            "G_min": -8,
+            "attempts": [
+                {
+                    "completion_ms_on_recorded_timeline": 93192,
+                    "conditional_accepted_rounds": [
+                    ],
+                    "consumed_frames": 993,
+                    "discarded_values": 18,
+                    "file": "round-20260905-124559-476-58375f1c-6609-4c41-8e74-43e2cb5d9ca2.jsonl",
+                    "first_accepted_ms": 33526,
+                    "newly_accepted_sos": [
+                        4414.414414414414,
+                        4374.999999999999,
+                        4336.283185840708,
+                        4224.137931034483,
+                        4188.0341880341875,
+                        4152.542372881356,
+                        4152.542372881356,
+                        4188.0341880341875,
+                        4188.0341880341875,
+                        4117.647058823529,
+                        4083.3333333333326,
+                        4083.3333333333326,
+                        4083.3333333333326,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3798.4496124031007,
+                        3828.1249999999995,
+                        3740.4580152671756,
+                        3828.1249999999995,
+                        3769.230769230769,
+                        3769.230769230769,
+                        3828.1249999999995,
+                        3712.1212121212116,
+                        3740.4580152671756,
+                        3712.1212121212116,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3858.2677165354326,
+                        3828.1249999999995
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 6,
+                        "G": 1.9444444444444444,
+                        "corr_A": 0.7906798503491053,
+                        "corr_B": 0.7579027791312554,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 3828.124999999999
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 3751,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554
+                    ],
+                    "consumed_frames": 39,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124735-190-47b3fafc-74fe-4e81-bc44-c29e7e445b5d.jsonl",
+                    "first_accepted_ms": 991,
+                    "newly_accepted_sos": [
+                        3828.1249999999995,
+                        3798.4496124031007,
+                        3828.1249999999995,
+                        3828.1249999999995
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 5.888888888888889,
+                        "G": -1,
+                        "corr_A": 0.8031976537001795,
+                        "corr_B": 0.7788580274475103,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3824.8277347114554
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 5294,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554
+                    ],
+                    "consumed_frames": 56,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124740-123-91fd04ee-9c12-471c-b3c9-edb9f243acb5.jsonl",
+                    "first_accepted_ms": 1072,
+                    "newly_accepted_sos": [
+                        3828.1249999999995,
+                        3858.2677165354326,
+                        3858.2677165354326,
+                        3858.2677165354326,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3858.2677165354326,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3858.2677165354326,
+                        3858.2677165354326,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3798.4496124031007,
+                        3828.1249999999995,
+                        3828.1249999999995
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 6,
+                        "G": -0.3611111111111111,
+                        "corr_A": 0.7598687888127269,
+                        "corr_B": 0.7029444995394347,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 3828.124999999999
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 5575,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554
+                    ],
+                    "consumed_frames": 59,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124814-673-6a35ee95-c5e2-4a86-a758-a3610080a923.jsonl",
+                    "first_accepted_ms": 1553,
+                    "newly_accepted_sos": [
+                        3983.7398373983738,
+                        3951.6129032258063,
+                        3983.7398373983738,
+                        3951.6129032258063,
+                        3983.7398373983738,
+                        4016.3934426229503,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        3983.7398373983738,
+                        4016.3934426229503,
+                        3983.7398373983738,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        4016.3934426229503,
+                        3983.7398373983738
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.166666666666667,
+                        "G": -4.194444444444445,
+                        "corr_A": 0.7796246775005694,
+                        "corr_B": 0.7212576436904711,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 3990.996194114947
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 5036,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554
+                    ],
+                    "consumed_frames": 53,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124829-956-60ed4bbe-8c0e-46f6-8e3f-9be2dad7f8fc.jsonl",
+                    "first_accepted_ms": 1922,
+                    "newly_accepted_sos": [
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4049.5867768595035,
+                        4016.3934426229503
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 8,
+                        "G": -1.7777777777777777,
+                        "corr_A": 0.7767405026467267,
+                        "corr_B": 0.7221727565405544,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 4044.054554486746
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 5494,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554,
+                        3900.987654320987
+                    ],
+                    "consumed_frames": 58,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124840-006-3fa5fa33-f655-4acb-9c29-fcbee4f29d2c.jsonl",
+                    "first_accepted_ms": 2116,
+                    "newly_accepted_sos": [
+                        3798.4496124031007,
+                        3828.1249999999995,
+                        3858.2677165354326,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.611111111111111,
+                        "G": -2.9444444444444446,
+                        "corr_A": 0.8374830468071804,
+                        "corr_B": 0.706423567890096,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3900.987654320987
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 4829,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554,
+                        3900.987654320987,
+                        3890.617283950617
+                    ],
+                    "consumed_frames": 51,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124847-799-a7d67c99-ceee-4fe7-b37c-b6bb4644afca.jsonl",
+                    "first_accepted_ms": 1073,
+                    "newly_accepted_sos": [
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.5,
+                        "G": -3.0277777777777777,
+                        "corr_A": 0.8562186792851578,
+                        "corr_B": 0.7456961850348035,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3890.617283950617
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 4901,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554,
+                        3900.987654320987,
+                        3890.617283950617,
+                        3897.5308641975303
+                    ],
+                    "consumed_frames": 52,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124854-450-7dd390b1-4b13-4353-a7b6-e65510bd9f9c.jsonl",
+                    "first_accepted_ms": 1155,
+                    "newly_accepted_sos": [
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3919.999999999999,
+                        3919.999999999999,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.333333333333333,
+                        "G": -3.5833333333333335,
+                        "corr_A": 0.8560575171273399,
+                        "corr_B": 0.7534096976011277,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3897.5308641975303
+                    }
+                }
+            ],
+            "conditional_first_five": {
+            },
+            "frame_A_min": 0.75,
+            "loss_count": 10,
+            "name": "A075_G8_warmup10",
+            "round_A_min": 0.8,
+            "warmup": 10
+        },
+        {
+            "G_max": 12,
+            "G_min": -12,
+            "attempts": [
+                {
+                    "completion_ms_on_recorded_timeline": 93192,
+                    "conditional_accepted_rounds": [
+                    ],
+                    "consumed_frames": 993,
+                    "discarded_values": 39,
+                    "file": "round-20260905-124559-476-58375f1c-6609-4c41-8e74-43e2cb5d9ca2.jsonl",
+                    "first_accepted_ms": 33706,
+                    "newly_accepted_sos": [
+                        4336.283185840708,
+                        4224.137931034483,
+                        4188.0341880341875,
+                        4152.542372881356,
+                        4152.542372881356,
+                        4188.0341880341875,
+                        4188.0341880341875,
+                        4117.647058823529,
+                        4083.3333333333326,
+                        4083.3333333333326,
+                        4083.3333333333326,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        3983.7398373983738,
+                        3828.1249999999995,
+                        3798.4496124031007,
+                        3798.4496124031007,
+                        3798.4496124031007,
+                        3798.4496124031007,
+                        3798.4496124031007,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3798.4496124031007,
+                        3798.4496124031007,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3769.230769230769,
+                        3740.4580152671756,
+                        3828.1249999999995,
+                        3769.230769230769,
+                        3769.230769230769,
+                        3828.1249999999995,
+                        3712.1212121212116,
+                        3740.4580152671756,
+                        3712.1212121212116,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3858.2677165354326,
+                        3828.1249999999995
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 6,
+                        "G": 1.9444444444444444,
+                        "corr_A": 0.7906798503491053,
+                        "corr_B": 0.7579027791312554,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 3828.124999999999
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 3751,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554
+                    ],
+                    "consumed_frames": 39,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124735-190-47b3fafc-74fe-4e81-bc44-c29e7e445b5d.jsonl",
+                    "first_accepted_ms": 991,
+                    "newly_accepted_sos": [
+                        3828.1249999999995,
+                        3798.4496124031007,
+                        3828.1249999999995,
+                        3828.1249999999995
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 5.888888888888889,
+                        "G": -1,
+                        "corr_A": 0.8031976537001795,
+                        "corr_B": 0.7788580274475103,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3824.8277347114554
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 5294,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554
+                    ],
+                    "consumed_frames": 56,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124740-123-91fd04ee-9c12-471c-b3c9-edb9f243acb5.jsonl",
+                    "first_accepted_ms": 1072,
+                    "newly_accepted_sos": [
+                        3828.1249999999995,
+                        3858.2677165354326,
+                        3858.2677165354326,
+                        3858.2677165354326,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3858.2677165354326,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3858.2677165354326,
+                        3858.2677165354326,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3828.1249999999995,
+                        3798.4496124031007,
+                        3828.1249999999995,
+                        3828.1249999999995
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 6,
+                        "G": -0.3611111111111111,
+                        "corr_A": 0.7598687888127269,
+                        "corr_B": 0.7029444995394347,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 3828.124999999999
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 3900,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554
+                    ],
+                    "consumed_frames": 41,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124814-673-6a35ee95-c5e2-4a86-a758-a3610080a923.jsonl",
+                    "first_accepted_ms": 991,
+                    "newly_accepted_sos": [
+                        3983.7398373983738,
+                        3951.6129032258063,
+                        3983.7398373983738,
+                        3951.6129032258063,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3951.6129032258063,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3951.6129032258063,
+                        3951.6129032258063,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        4016.3934426229503,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        4016.3934426229503,
+                        3983.7398373983738
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.055555555555555,
+                        "G": -6.055555555555555,
+                        "corr_A": 0.7800784288249809,
+                        "corr_B": 0.7238044571625185,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 3983.7398373983733
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 4571,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554
+                    ],
+                    "consumed_frames": 48,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124829-956-60ed4bbe-8c0e-46f6-8e3f-9be2dad7f8fc.jsonl",
+                    "first_accepted_ms": 1738,
+                    "newly_accepted_sos": [
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4049.5867768595035,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4016.3934426229503,
+                        4049.5867768595035,
+                        4016.3934426229503
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 8.055555555555555,
+                        "G": -2.7777777777777777,
+                        "corr_A": 0.7773425621115013,
+                        "corr_B": 0.7202042213044421,
+                        "event": "round_summary",
+                        "quality_pass": false,
+                        "sos": 4047.7427027352514
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 4562,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554,
+                        3900.987654320987
+                    ],
+                    "consumed_frames": 48,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124840-006-3fa5fa33-f655-4acb-9c29-fcbee4f29d2c.jsonl",
+                    "first_accepted_ms": 1353,
+                    "newly_accepted_sos": [
+                        3983.7398373983738,
+                        3983.7398373983738,
+                        4016.3934426229503,
+                        3951.6129032258063,
+                        3858.2677165354326,
+                        3858.2677165354326,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.277777777777778,
+                        "G": -4.055555555555555,
+                        "corr_A": 0.8353516383781988,
+                        "corr_B": 0.7127634108382375,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3900.987654320987
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 3705,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554,
+                        3900.987654320987,
+                        3895.8024691358023
+                    ],
+                    "consumed_frames": 39,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124847-799-a7d67c99-ceee-4fe7-b37c-b6bb4644afca.jsonl",
+                    "first_accepted_ms": 985,
+                    "newly_accepted_sos": [
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.444444444444445,
+                        "G": -5.083333333333333,
+                        "corr_A": 0.8536394637103623,
+                        "corr_B": 0.7392818604322425,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3895.8024691358023
+                    }
+                },
+                {
+                    "completion_ms_on_recorded_timeline": 3698,
+                    "conditional_accepted_rounds": [
+                        3824.8277347114554,
+                        3900.987654320987,
+                        3895.8024691358023,
+                        3902.7160493827155
+                    ],
+                    "consumed_frames": 39,
+                    "discarded_values": 0,
+                    "file": "round-20260905-124854-450-7dd390b1-4b13-4353-a7b6-e65510bd9f9c.jsonl",
+                    "first_accepted_ms": 981,
+                    "newly_accepted_sos": [
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3919.999999999999,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3919.999999999999,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882,
+                        3888.8888888888882
+                    ],
+                    "reached_30": true,
+                    "round_summary": {
+                        "D": 7.666666666666667,
+                        "G": -5.055555555555555,
+                        "corr_A": 0.856728869947641,
+                        "corr_B": 0.7450438311495904,
+                        "event": "round_summary",
+                        "quality_pass": true,
+                        "sos": 3902.7160493827155
+                    }
+                }
+            ],
+            "conditional_first_five": {
+            },
+            "frame_A_min": 0.75,
+            "loss_count": 10,
+            "name": "A075_G12_warmup10",
+            "round_A_min": 0.8,
+            "warmup": 10
+        }
+    ],
+    "scope": "Each attempt stops at its first 30-value round. Reuses recorded hand trajectories and input timing; not prospective hardware time/accuracy. No paired truth."
+}
