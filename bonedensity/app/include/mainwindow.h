@@ -267,17 +267,27 @@ private:
     int boneLagOutOfLockCount = 0;
     int boneLagRejectedFrameCount = 0;
 
-    // Enabled only by the independently built, explicitly labeled self-trial.
-#if defined(BONE_OBSERVE_BEFORE_G_EXPERIMENT) || defined(BONE_DUAL_WINDOW_A_EXPERIMENT)
+    // Production uses the replay-validated relock stack. Explicit historical
+    // experiment profiles retain their isolated behavior for comparison.
     bool observeStabilityBeforeG = true;
-#else
-    bool observeStabilityBeforeG = false;
-#endif
-#ifdef BONE_DUAL_WINDOW_A_EXPERIMENT
+#if !defined(BONE_OBSERVE_BEFORE_G_EXPERIMENT) || defined(BONE_DUAL_WINDOW_A_EXPERIMENT) || defined(BONE_COMPLETE_B_PEAK_EXPERIMENT) || defined(BONE_RELOCK_PRESERVATION_EXPERIMENT)
     bool useDualWindowAQuality = true;
 #else
     bool useDualWindowAQuality = false;
 #endif
+#ifdef BONE_COMPLETE_B_PEAK_EXPERIMENT
+    bool completeTruncatedBPeak = true;
+#else
+    bool completeTruncatedBPeak = false;
+#endif
+#if defined(BONE_RELOCK_PRESERVATION_EXPERIMENT) || (!defined(BONE_OBSERVE_BEFORE_G_EXPERIMENT) && !defined(BONE_DUAL_WINDOW_A_EXPERIMENT) && !defined(BONE_COMPLETE_B_PEAK_EXPERIMENT))
+    bool deferPartialDiscardUntilRelock = true;
+#else
+    bool deferPartialDiscardUntilRelock = false;
+#endif
+    bool partialRelockPending = false;
+    int partialPreviousLagCenter = 0;
+    int partialRelockRetentionTolerance = 2;
     static double dualWindowAQuality(const QVector<double>& early, const QVector<double>& late,
                                     int onset, int lag, double* front = nullptr, double* middle = nullptr);
 
@@ -329,6 +339,11 @@ private:
     AcquireMode acquireMode = DebugAcquireMode;
 
     bool patientMeasureRunning = false;
+
+    QTimer nextRoundTimer;
+    int nextRoundDelayMs = 1000;
+    QString pendingNextRoundPatientId;
+    int pendingNextRoundFinishedRounds = 0;
 
     // 这个变量现在不再用于“填完病人信息后自动开始检测”，保留也可以，但固定为 false
     bool pendingStartAfterPatientInfo = false;
@@ -404,6 +419,8 @@ private:
 
     void startPatientMeasurement(int targetRounds, bool offerFirstUseGuide = false);
     void stopPatientMeasurement();
+    void scheduleNextPatientRound(int finishedRounds);
+    void cancelPendingNextPatientRound();
     void resetPatientMeasurementState(int targetRounds);
 
     void resetAllPatientMeasurementData();
@@ -452,6 +469,9 @@ private:
 
     void finishOnePatientRound();
     void finishAllPatientRounds();
+    static QVector<int> selectFinalRoundIndices(const QVector<double>& values, int target);
+    bool computeFinalPatientRoundMeans(double& sos, double& a, double& b,
+                                       QVector<int>* selectedIndices = nullptr) const;
 
     void initLatestResultPanel();
     void updateLatestResultPanel(double sos,

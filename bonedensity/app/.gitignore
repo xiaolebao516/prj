@@ -1,3 +1,7 @@
 .qtcreator/
 .qtcreator/
 /delivery/
+/build
+
+# Generated build artifacts
+/build/

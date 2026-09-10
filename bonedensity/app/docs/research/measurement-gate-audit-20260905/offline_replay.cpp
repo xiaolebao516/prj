@@ -71,6 +71,32 @@ struct Case {
     int warmup=14, lossCount=10;
     bool stabilityBeforeG=false;
     bool dualWindow=false;
+    bool deferPartialUntilRelock=false;
+    bool stabilityBeforePose=false;
+    int compatibleDOnlyGrace=0;
+    // Research-only: 0 disables; otherwise learn one fixed G centre per attempt.
+    double relativeGSpan=0;
+};
+
+struct RelativeGAnchor {
+    QVector<double> values;
+    QVector<int> lags;
+    bool ready=false;
+    double center=0;
+    qint64 learnedAt=-1, previous=-1;
+    void feed(bool qualified,double g,int lag,qint64 now,double maxSpan) {
+        if(ready)return; // Never chase later motion or mix learned centres.
+        if(!qualified || !std::isfinite(g)) {values.clear();lags.clear();previous=now;return;}
+        if(previous>=0 && (now-previous>500 || now<=previous)){values.clear();lags.clear();}
+        previous=now;values.append(g);lags.append(lag);
+        if(values.size()>14){values.removeFirst();lags.removeFirst();}
+        if(values.size()<14)return;
+        const auto gb=std::minmax_element(values.begin(),values.end());
+        const auto lb=std::minmax_element(lags.begin(),lags.end());
+        if(*gb.second-*gb.first>maxSpan || *lb.second-*lb.first>5)return;
+        auto sorted=values;std::sort(sorted.begin(),sorted.end());
+        center=.5*(sorted[6]+sorted[7]);ready=true;learnedAt=now;
+    }
 };
 
 // Independent observation of the existing valley correlation window, not a new estimator.
@@ -141,7 +167,9 @@ static QJsonArray inspectFeatures(const QVector<QJsonObject>& rows) {
 }
 
 class MainWindowSafetyTests {
-    static bool featureFrame(MainWindow& w, const QJsonObject& frame, bool validate, bool stabilityBeforeG) {
+    static bool featureFrame(MainWindow& w, const QJsonObject& frame, bool validate,
+                             bool stabilityBeforeG, bool stabilityBeforePose,
+                             int compatibleDOnlyGrace, int& compatibleDOnlyRun) {
         const QString decision=frame["decision"].toString();
         if (!frame.contains("gates")) {
             require(decision=="B_pair_invalid" || decision=="A_pair_invalid" ||
@@ -154,15 +182,38 @@ class MainWindowSafetyTests {
         const int lagA=a["lag"].toInt(), lagB=b["lag"].toInt();
         const int d=lagA-lagB;
         const double g=frame["G"].toDouble();
-        const bool beforeG=std::abs(lagB-b["rough_lag"].toInt())<=70 && lagB<260 &&
+        const bool beforePose=std::abs(lagB-b["rough_lag"].toInt())<=70 && lagB<260 &&
             std::abs(d)<=18 && d>=-2 && a["corr"].toDouble()>=w.mCfg.frameCorrAMin &&
-            b["corr"].toDouble()>=w.mCfg.frameCorrBMin &&
-            d>=w.mCfg.angleSignedDiffMin && d<=w.mCfg.angleSignedDiffMax;
-        const bool pre=beforeG && g>=w.mCfg.anglePairMidGapMin && g<=w.mCfg.anglePairMidGapMax;
-        const bool observe=stabilityBeforeG ? beforeG : pre;
+            b["corr"].toDouble()>=w.mCfg.frameCorrBMin;
+        const bool dOk=d>=w.mCfg.angleSignedDiffMin && d<=w.mCfg.angleSignedDiffMax;
+        const bool gOk=g>=w.mCfg.anglePairMidGapMin && g<=w.mCfg.anglePairMidGapMax;
+        const bool beforeG=beforePose && dOk;
+        const bool pre=beforeG && gOk;
+        const bool observe=stabilityBeforePose ? beforePose : stabilityBeforeG ? beforeG : pre;
         const bool stable=observe ? w.checkBoneLagStable(lagB) : false;
         const bool accepted=pre && stable;
-        if (!observe) w.rejectBoneLagCandidate();
+        bool preserveDOnly=false;
+        if (!observe && compatibleDOnlyGrace>0 && beforePose && !dOk && gOk) {
+            int center=0;
+            if (w.boneLagLocked) {
+                center=w.lockedBoneLagCenter;
+                preserveDOnly=std::abs(lagB-center)<=w.mCfg.stableLagTolerance;
+            } else if (!w.recentBoneLagBList.isEmpty()) {
+                auto observed=w.recentBoneLagBList;
+                std::sort(observed.begin(),observed.end());
+                center=observed[observed.size()/2];
+                preserveDOnly=std::abs(lagB-center)<=w.mCfg.stableLagTolerance;
+            }
+        }
+        if (observe) {
+            compatibleDOnlyRun=0;
+        } else if (preserveDOnly && compatibleDOnlyRun<compatibleDOnlyGrace) {
+            ++compatibleDOnlyRun;
+        } else {
+            preserveDOnly=false;
+            if (!beforePose || dOk || !gOk) compatibleDOnlyRun=0;
+        }
+        if (!observe && !preserveDOnly) w.rejectBoneLagCandidate();
         if (stabilityBeforeG && accepted)
             require(frame["gates"].toObject()["stability_evaluated"].toBool(),"New flow accepted an originally precheck-failing frame");
         if (validate) {
@@ -177,18 +228,72 @@ class MainWindowSafetyTests {
         return accepted;
     }
 public:
-    static QJsonObject runFile(const QVector<QJsonObject>& rows, const Case& variant, bool raw) {
+    static QJsonObject runRawCompact(const QVector<QJsonObject>& rows) {
+        MainWindow w;
+        w.hide();
+        require(w.completeTruncatedBPeak && w.useDualWindowAQuality && w.observeStabilityBeforeG,
+                "Raw compact replay requires the B peak-completion profile");
+        const auto config=rows.first()["config"].toObject();
+        require(config["implementation"]=="dual-window-a078-20260906-v1" &&
+                config["frame_target"].toInt()==30 && config["G_min"].toDouble()==-6 &&
+                config["G_max"].toDouble()==6 && config["D_min"].toDouble()==5 &&
+                config["D_max"].toDouble()==15,"Unsupported compact raw input");
+        w.resetOneRoundMeasurementState();
+        w.patientMeasureRunning=true;
+        w.acquireMode=PatientMeasureMode;
+        QVector<qint64> retainedTimes;
+        qint64 firstAccepted=-1, completion=0;
+        int consumed=0, accepted=0, discarded=0;
+        for(const auto& frame:rows) {
+            if(frame["event"]!="frame")continue;
+            if(!w.patientMeasureRunning)break;
+            ++consumed;completion=frame["elapsed_ms"].toInteger();
+            const int before=w.currentRoundSosList.size();
+            const int beforeCandidates=w.candidateRoundList.size();
+            w.samplesA=decode(frame,"raw_BC");w.samplesB=decode(frame,"raw_BD");
+            w.samplesC=decode(frame,"raw_AC");w.samplesD=decode(frame,"raw_AD");
+            w.plotSamples();
+            const bool finished=w.candidateRoundList.size()>beforeCandidates;
+            const bool counted=finished || w.currentRoundSosList.size()>before;
+            if(counted) {
+                ++accepted;
+                if(firstAccepted<0)firstAccepted=completion;
+                retainedTimes.append(completion);
+            } else if(w.currentRoundSosList.size()<before) {
+                discarded+=before;
+                retainedTimes.clear();
+            }
+        }
+        const bool reached=!w.patientMeasureRunning && !w.candidateRoundList.isEmpty();
+        QJsonObject summary;
+        if(reached) {
+            const auto& c=w.candidateRoundList.last();
+            summary={{"sos",c.sos},{"A",c.a},{"B",c.b},{"corr_A",c.corrA},{"corr_B",c.corrB},
+                     {"quality_pass",true}};
+        }
+        const qint64 firstRetained=reached && retainedTimes.size()>=30
+            ? retainedTimes[retainedTimes.size()-30] : -1;
+        w.stopPatientMeasurement();w.closeRoundFinishedTip();
+        return {{"consumed_frames",consumed},{"first_accepted_ms",firstAccepted},
+                {"first_retained_ms",firstRetained},{"completion_ms_on_recorded_timeline",completion},
+                {"reached_30",reached},{"accepted_events",accepted},
+                {"discarded_values",discarded},{"round_summary",summary}};
+    }
+
+    static QJsonObject runFile(const QVector<QJsonObject>& rows, const Case& variant, bool raw, bool includeProgress=false) {
         MainWindow w;
         w.hide();
         w.observeStabilityBeforeG=variant.stabilityBeforeG;
         w.useDualWindowAQuality=variant.dualWindow;
+        w.deferPartialDiscardUntilRelock=variant.deferPartialUntilRelock;
         const auto config=rows.first()["config"].toObject();
+        const bool dualInput=config["implementation"]=="dual-window-a078-20260906-v1";
         require(config["implementation"]=="state-repair-20260905-v1" ||
-                config["implementation"]=="observe-before-g-20260906-v1", "Unsupported input version");
+                config["implementation"]=="observe-before-g-20260906-v1" || dualInput, "Unsupported input version");
         require(config["B_only"].toBool() && config["angle_gate_enabled"].toBool() &&
                 config["SOS_offset"].toDouble()==0 && config["frame_target"].toInt()==30 &&
                 config["D_min"].toDouble()==5 && config["D_max"].toDouble()==15 &&
-                config["frame_corr_A"].toDouble()==.78 && config["round_corr_A"].toDouble()==.8 &&
+                config["frame_corr_A"].toDouble()==.78 && config["round_corr_A"].toDouble()==(dualInput ? .78 : .8) &&
                 config["frame_corr_B"].toDouble()==.55 && config["round_corr_B"].toDouble()==.55 &&
                 config["G_min"].toDouble()==-6 && config["G_max"].toDouble()==6 &&
                 config["warmup"].toInt()==14 && config["lock_need"].toInt()==10 &&
@@ -212,8 +317,10 @@ public:
         QVector<QJsonObject> expected;
         QVector<qint64> recordedTimes;
         QVector<double> newlyAccepted;
+        QJsonArray progressTrace;
         qint64 completionMs=0, firstAcceptedMs=-1;
-        int consumed=0;
+        int consumed=0, compatibleDOnlyRun=0;
+        RelativeGAnchor relativeAnchor;
         const bool baseline=variant.name=="baseline";
         for (const auto& frame : rows) {
             if (frame["event"]!="frame") continue;
@@ -229,9 +336,28 @@ public:
                         w.samplesA.size()==w.samplesD.size(), "Raw channel sizes differ");
                 w.plotSamples();
             } else {
-                accepted=featureFrame(w,frame,baseline,variant.stabilityBeforeG);
+                if(variant.relativeGSpan>0) {
+                    const auto a=frame["A"].toObject(),b=frame["B"].toObject();
+                    const int lag=b["lag"].toInt(),d=a["lag"].toInt()-lag;
+                    const bool qualified=frame.contains("gates") &&
+                        std::abs(lag-b["rough_lag"].toInt())<=70 && lag<260 &&
+                        std::abs(d)<=18 && d>=-2 &&
+                        a["corr"].toDouble()>=w.mCfg.frameCorrAMin &&
+                        b["corr"].toDouble()>=w.mCfg.frameCorrBMin &&
+                        d>=w.mCfg.angleSignedDiffMin && d<=w.mCfg.angleSignedDiffMax;
+                    relativeAnchor.feed(qualified,frame["G"].toDouble(),lag,
+                        frame["elapsed_ms"].toInteger(),variant.relativeGSpan);
+                    w.mCfg.anglePairMidGapMin=relativeAnchor.ready?relativeAnchor.center-6:1;
+                    w.mCfg.anglePairMidGapMax=relativeAnchor.ready?relativeAnchor.center+6:0;
+                }
+                accepted=featureFrame(w,frame,baseline,variant.stabilityBeforeG,
+                                      variant.stabilityBeforePose,
+                                      variant.compatibleDOnlyGrace, compatibleDOnlyRun);
                 if (accepted && frame["decision"]!="accepted") newlyAccepted.append(frame["sos_patient"].toDouble());
                 if (accepted && firstAcceptedMs<0) firstAcceptedMs=frame["elapsed_ms"].toInteger();
+                if (accepted && includeProgress) progressTrace.append(QJsonObject{
+                    {"sequence",frame["sequence"]},{"elapsed_ms",frame["elapsed_ms"]},
+                    {"sos",frame["sos_patient"]}});
             }
             completionMs=frame["elapsed_ms"].toInteger();
         }
@@ -271,9 +397,16 @@ public:
             require(equivalent(summary,originalSummary), "Baseline round summary mismatch");
         }
         w.closeRoundFinishedTip();
-        return {{"consumed_frames",consumed},{"completion_ms_on_recorded_timeline",completionMs},
+        QJsonObject result{{"consumed_frames",consumed},{"completion_ms_on_recorded_timeline",completionMs},
             {"first_accepted_ms",firstAcceptedMs},{"reached_30",reachedTarget},{"round_summary",summary},
             {"discarded_values",discarded},{"newly_accepted_sos",array(newlyAccepted)}};
+        if(includeProgress){require(!raw,"Progress trace currently supports cached replay only");result["accepted_trace_including_discarded"]=progressTrace;}
+        if(variant.relativeGSpan>0) {
+            result["relative_G_anchor"]=QJsonObject{{"ready",relativeAnchor.ready},
+                {"center",relativeAnchor.ready?QJsonValue(relativeAnchor.center):QJsonValue()},
+                {"learned_ms",relativeAnchor.learnedAt},{"learning_span",variant.relativeGSpan}};
+        }
+        return result;
     }
 };
 

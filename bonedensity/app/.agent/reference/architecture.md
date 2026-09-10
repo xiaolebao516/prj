@@ -14,12 +14,15 @@ Read this file only for architecture, measurement-pipeline, persistence, calibra
 
 ## Patient Measurement Data Flow
 
-Serial waveform → signal processing → frame acceptance → lag-B stability lock → accepted-frame accumulation → per-round trimmed summary and quality gate → candidate-round clustering → final trimmed result → bone-health derivation → measurement snapshot persistence/report.
+Serial waveform → signal processing → frame acceptance → lag-B stability lock → accepted-frame accumulation → per-round trimmed summary and quality gate → candidate-round clustering → exact-five final mean → bone-health derivation → measurement snapshot persistence/report.
 
 - Current patient SOS output is B-channel based; A participates in posture and quality diagnostics.
 - Rejected frames and rounds do not enter the next aggregation level.
 - Starting a new round resets round-local stability and diagnostic state before acquisition.
+- The formal/default profile uses the replay-validated relock stack: A quality is the lower of its front and middle correlation windows at the same selected lag, with the evaluated round A limit; frames failing G may update position-stability observation but can never count as valid values; after a partial round loses lock, saved values are retained only if a new strict-D-qualified cluster and every saved B-derived lag are all within two samples. A different cluster discards the old partial values before its current frame can count. B-peak boundary completion remains disabled.
+- Accepted rounds 1-4 stop acquisition and schedule the existing guarded start path after one second; Space/button can start immediately and cancels the pending timer. Rejected rounds and round 5 do not auto-restart.
 - `Utils::trimmedMeanValue` uses an arithmetic mean when fewer than 10 values are supplied. Thus a 30-value round uses its requested trimming, but the normal five-round final aggregation does not trim extremes; do not infer behavior solely from the helper name.
+- Current source finalization selects exactly five indices from the accepted pool: smallest SOS range, then smallest absolute deviation from its median, then deterministic stable order. SOS/A/B share the indices; exactly-five input retains acquisition-order means. All candidates/pools remain intact and Debug `final_round_selection` records the source pool and selected indices. This is a final cardinality correction, not narrower frame gates or an accuracy claim. Verification: `tests/mainwindow_safety_tests.cpp` exact-five cases; existing deployed binaries may predate this source change.
 
 ## Configuration and Change Impact
 

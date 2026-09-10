@@ -20,6 +20,18 @@ contains(CONFIG, dual_window_a_trial) {
     DEFINES += BONE_DUAL_WINDOW_A_EXPERIMENT
     TARGET = BoneDensity_DualWindowTrial
 }
+contains(CONFIG, b_peak_completion_trial) {
+    contains(CONFIG, observe_before_g_trial)|contains(CONFIG, dual_window_a_trial)|contains(CONFIG, relock_preservation_trial): error("Select only one trial profile")
+    !CONFIG(debug, debug|release): error("The B peak-completion trial must be a Debug build")
+    DEFINES += BONE_COMPLETE_B_PEAK_EXPERIMENT
+    TARGET = BoneDensity_BPeakTrial
+}
+contains(CONFIG, relock_preservation_trial) {
+    contains(CONFIG, observe_before_g_trial)|contains(CONFIG, dual_window_a_trial)|contains(CONFIG, b_peak_completion_trial): error("Select only one trial profile")
+    !CONFIG(debug, debug|release): error("The relock-preservation trial must be a Debug build")
+    DEFINES += BONE_RELOCK_PRESERVATION_EXPERIMENT
+    TARGET = BoneDensity_RelockTrial
+}
 
 INCLUDEPATH += include
 

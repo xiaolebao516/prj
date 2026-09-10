@@ -389,7 +389,8 @@ int SignalProcessor::refineLagByPositiveCrossCorrelation(
     int lagMax,
     int prePts,
     int postPts,
-    double* bestCorrOut)
+    double* bestCorrOut,
+    int clippedPeakExtension)
 {
     int n = qMin(early.size(), late.size());
 
@@ -510,6 +511,34 @@ int SignalProcessor::refineLagByPositiveCrossCorrelation(
         if (corr > maxCorr) {
             maxCorr = corr;
             maxLag = lag;
+        }
+    }
+
+    // A maximum at a locally derived boundary may be only the rising edge of
+    // the same correlation peak. Complete that peak once, within the original
+    // physical/forced range; never turn this into a full-range search.
+    const int extension = qBound(0, clippedPeakExtension, 15);
+    int completedMin = searchLagMin;
+    int completedMax = searchLagMax;
+    if (extension > 0 && maxCorr > 0.0) {
+        if (maxLag == searchLagMin && searchLagMin > lagMin) {
+            completedMin = qMax(lagMin, searchLagMin - extension);
+        }
+        if (maxLag == searchLagMax && searchLagMax < lagMax) {
+            completedMax = qMin(lagMax, searchLagMax + extension);
+        }
+        if (completedMin != searchLagMin || completedMax != searchLagMax) {
+            maxCorr = -1.0;
+            maxLag = roughLag;
+            for (int lag = completedMin; lag <= completedMax; ++lag) {
+                const double corr = calcCorr(lag);
+                if (corr > 0.0 && corr > maxCorr) {
+                    maxCorr = corr;
+                    maxLag = lag;
+                }
+            }
+            searchLagMin = completedMin;
+            searchLagMax = completedMax;
         }
     }
 
@@ -692,7 +721,8 @@ PairResult SignalProcessor::estimatePairSpeed(
     double vMax,
     const QString& pairName,
     int forcedLagMin,
-    int forcedLagMax) const
+    int forcedLagMax,
+    int clippedPeakExtension) const
 {
     PairResult res;
 
@@ -741,7 +771,8 @@ PairResult SignalProcessor::estimatePairSpeed(
         lagMax,
         20,
         120,
-        &bestCorr
+        &bestCorr,
+        clippedPeakExtension
         );
 
     int absLag = std::abs(refinedLag);

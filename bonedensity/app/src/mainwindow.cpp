@@ -253,10 +253,17 @@ MainWindow::MainWindow(QWidget *parent)
     // ------------------- 结束美化代码 -------------------
 
     if (useDualWindowAQuality) mCfg.roundCorrAMin = 0.78;
-    this->setWindowTitle(useDualWindowAQuality
-        ? QStringLiteral("骨密度仪 · 双段评分试测版（仅研发验证）") : observeStabilityBeforeG
-        ? QStringLiteral("骨密度仪 · 姿态流程试测版（仅研发验证）")
-        : QStringLiteral("骨密度仪APP"));
+#ifdef BONE_COMPLETE_B_PEAK_EXPERIMENT
+    this->setWindowTitle(QStringLiteral("骨密度仪 · B峰补全试测版（仅研发验证）"));
+#elif defined(BONE_RELOCK_PRESERVATION_EXPERIMENT)
+    this->setWindowTitle(QStringLiteral("骨密度仪 · 稳定簇续接试测版（仅研发验证）"));
+#elif defined(BONE_DUAL_WINDOW_A_EXPERIMENT)
+    this->setWindowTitle(QStringLiteral("骨密度仪 · 双段评分试测版（仅研发验证）"));
+#elif defined(BONE_OBSERVE_BEFORE_G_EXPERIMENT)
+    this->setWindowTitle(QStringLiteral("骨密度仪 · 姿态流程试测版（仅研发验证）"));
+#else
+    this->setWindowTitle(QStringLiteral("骨密度仪APP"));
+#endif
     this->setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
     //this->showFullScreen();
     this->showMaximized();
@@ -349,6 +356,28 @@ MainWindow::MainWindow(QWidget *parent)
     autoTimer = new QTimer(this);
     connect(autoTimer,&QTimer::timeout,this,&MainWindow::sendCmd);
 
+    nextRoundTimer.setSingleShot(true);
+    connect(&nextRoundTimer, &QTimer::timeout, this, [this]() {
+        const bool stillEligible =
+            !patientMeasureRunning &&
+            patientDataWritable &&
+            !hasPendingMeasurement &&
+            hasCurrentPatient() &&
+            currentPatient.id == pendingNextRoundPatientId &&
+            pendingNextRoundFinishedRounds > 0 &&
+            pendingNextRoundFinishedRounds == roundSosList.size() &&
+            pendingNextRoundFinishedRounds < normalMeasureRounds &&
+            serial && serial->isOpen();
+        if (!stillEligible) {
+            cancelPendingNextPatientRound();
+            updatePatientSelectionUi();
+            return;
+        }
+
+        closeRoundFinishedTip();
+        startPatientMeasurement(normalMeasureRounds, false);
+    });
+
     // 自适应屏幕分辨率：设计稿 1920x1080，按屏幕等比缩放
     QScreen *screen = QGuiApplication::primaryScreen();
     if (screen) {
@@ -411,6 +440,7 @@ void MainWindow::clearFrameAssembly()
 
 void MainWindow::resetDisconnectedAcquisitionState()
 {
+    cancelPendingNextPatientRound();
     if (experimentLog.active()) {
         experimentLog.write({{"event", "disconnected"}});
         experimentLog.close();
@@ -433,6 +463,7 @@ void MainWindow::resetDisconnectedAcquisitionState()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    cancelPendingNextPatientRound();
     const bool patientMeasurementWasRunning = patientMeasureRunning;
     const bool patientTimerWasActive =
         patientMeasurementWasRunning && autoTimer && autoTimer->isActive();
@@ -887,6 +918,8 @@ bool MainWindow::hasCurrentPatient() const
 
 void MainWindow::startPatientMeasurement(int targetRounds, bool offerFirstUseGuide)
 {
+    cancelPendingNextPatientRound();
+
     if (!hasCurrentPatient()) {
         pendingStartAfterPatientInfo = false;
 
@@ -1005,10 +1038,23 @@ void MainWindow::startExperimentLog()
     experimentLogWarningShown = false;
     QJsonArray previousRounds;
     for (double sos : roundSosList) previousRounds.append(sos);
+#ifdef BONE_COMPLETE_B_PEAK_EXPERIMENT
+    const char* implementation="b-peak-completion-20260908-v1";
+#elif defined(BONE_RELOCK_PRESERVATION_EXPERIMENT)
+    const char* implementation="relock-preservation-20260908-v1";
+#elif defined(BONE_DUAL_WINDOW_A_EXPERIMENT)
+    const char* implementation="dual-window-a078-20260906-v1";
+#elif defined(BONE_OBSERVE_BEFORE_G_EXPERIMENT)
+    const char* implementation="observe-before-g-20260906-v1";
+#else
+    const char* implementation="production-relock-auto-next-20260908-v1";
+#endif
     const QJsonObject config{
         {"previous_accepted_rounds", previousRounds},
-        {"implementation", useDualWindowAQuality ? "dual-window-a078-20260906-v1" : observeStabilityBeforeG
-            ? "observe-before-g-20260906-v1" : "state-repair-20260905-v1"},
+        {"implementation", implementation},
+        {"B_clipped_peak_extension", completeTruncatedBPeak ? 15 : 0},
+        {"partial_relock_retention_lag", deferPartialDiscardUntilRelock
+            ? partialRelockRetentionTolerance : 0},
         {"build", __DATE__ " " __TIME__},
         {"round", roundSosList.size() + 1}, {"round_target", normalMeasureRounds},
         {"frame_target", processValidTarget}, {"round_cluster_tolerance", roundClusterTolerance},
@@ -1040,6 +1086,8 @@ void MainWindow::checkExperimentLogError()
 
 void MainWindow::stopPatientMeasurement()
 {
+    cancelPendingNextPatientRound();
+
     if (experimentLog.active()) {
         experimentLog.write({{"event", "stop"}, {"partial_values", processValidCount},
                              {"accepted_rounds", roundSosList.size()}});
@@ -1058,6 +1106,34 @@ void MainWindow::stopPatientMeasurement()
     updatePatientSelectionUi();
 }
 
+void MainWindow::scheduleNextPatientRound(int finishedRounds)
+{
+    cancelPendingNextPatientRound();
+    if (finishedRounds <= 0 ||
+        finishedRounds >= normalMeasureRounds ||
+        finishedRounds != roundSosList.size() ||
+        patientMeasureRunning ||
+        !patientDataWritable ||
+        hasPendingMeasurement ||
+        !hasCurrentPatient() ||
+        !serial || !serial->isOpen()) {
+        updatePatientSelectionUi();
+        return;
+    }
+
+    pendingNextRoundPatientId = currentPatient.id;
+    pendingNextRoundFinishedRounds = finishedRounds;
+    nextRoundTimer.start(nextRoundDelayMs);
+    updatePatientSelectionUi();
+}
+
+void MainWindow::cancelPendingNextPatientRound()
+{
+    if (nextRoundTimer.isActive()) nextRoundTimer.stop();
+    pendingNextRoundPatientId.clear();
+    pendingNextRoundFinishedRounds = 0;
+}
+
 // Keep the dedicated measurement button synchronized after the legacy reset.
 void MainWindow::resetPatientMeasurementState(int targetRounds)
 {
@@ -1067,6 +1143,7 @@ void MainWindow::resetPatientMeasurementState(int targetRounds)
 
 void MainWindow::resetAllPatientMeasurementData()
 {
+    cancelPendingNextPatientRound();
     if (experimentLog.active()) {
         experimentLog.write({{"event", "reset_all"}});
         experimentLog.close();
@@ -1182,7 +1259,8 @@ void MainWindow::showRoundFinishedTip(int finishedRounds,
 
     if (accepted) {
         measureTipBox->setText(
-            QString("第 %1/%2 轮测量完成。\n\n请再次点击「开始检测」进行下一轮测量。")
+            QString("第 %1/%2 轮测量完成。\n\n"
+                    "1 秒后将自动开始下一轮；也可点击「立即开始下一轮」。")
                 .arg(finishedRounds)
                 .arg(totalRounds));
     } else {
@@ -1406,6 +1484,17 @@ void MainWindow::finishOnePatientRound()
     for (double sos : roundSosList) acceptedSos.append(sos);
     experimentLog.write({{"event", "round_cluster"}, {"accepted_sos", acceptedSos},
                          {"candidate_count", candidateRoundList.size()}});
+    if (finished >= normalMeasureRounds) {
+        double sos=0, a=0, b=0;
+        QVector<int> selected;
+        if (computeFinalPatientRoundMeans(sos, a, b, &selected)) {
+            QJsonArray indices;
+            for (int index : selected) indices.append(index);
+            experimentLog.write({{"event", "final_round_selection"},
+                {"source_accepted_sos", acceptedSos}, {"selected_indices", indices},
+                {"final_sos", sos}, {"final_A", a}, {"final_B", b}});
+        }
+    }
 
     qDebug() << "One patient round accepted:"
              << "acceptedRoundCount =" << finished
@@ -1439,9 +1528,9 @@ void MainWindow::finishOnePatientRound()
         return;
     }
 
-    // 还没满 5 次：停住，等待再次点击「开始检测」
+    // 还没满 5 次：先明确停止采集，再留出 1 秒让操作者保持姿势。
     ui->lblProcessStatus->setText(
-        QString("第 %1/%2 轮完成｜请再次点击“开始检测”进行下一轮")
+        QString("第 %1/%2 轮完成｜1 秒后自动开始下一轮")
             .arg(finished)
             .arg(normalMeasureRounds));
 
@@ -1450,6 +1539,53 @@ void MainWindow::finishOnePatientRound()
         );
 
     showRoundFinishedTip(finished, normalMeasureRounds);
+    scheduleNextPatientRound(finished);
+}
+
+QVector<int> MainWindow::selectFinalRoundIndices(const QVector<double>& values, int target)
+{
+    if (target <= 0 || values.size() < target) return {};
+    QVector<int> order;
+    for (int i=0; i<values.size(); ++i) {
+        if (!std::isfinite(values[i])) return {};
+        order.append(i);
+    }
+    if (values.size() == target) return order;
+    std::stable_sort(order.begin(), order.end(), [&](int a, int b) {
+        return values[a] < values[b];
+    });
+    int bestStart=-1;
+    double bestRange=0, bestDeviation=0;
+    for (int start=0; start+target<=order.size(); ++start) {
+        const double range=values[order[start+target-1]]-values[order[start]];
+        const double median=target%2 ? values[order[start+target/2]]
+            : .5*(values[order[start+target/2-1]]+values[order[start+target/2]]);
+        double deviation=0;
+        for (int k=0; k<target; ++k) deviation+=std::abs(values[order[start+k]]-median);
+        if (bestStart<0 || range<bestRange || (range==bestRange && deviation<bestDeviation)) {
+            bestStart=start; bestRange=range; bestDeviation=deviation;
+        }
+    }
+    auto selected=order.mid(bestStart,target);
+    // Preserve acquisition order and the same companion-value indices.
+    std::sort(selected.begin(),selected.end());
+    return selected;
+}
+
+bool MainWindow::computeFinalPatientRoundMeans(double& sos, double& a, double& b,
+                                              QVector<int>* selectedIndices) const
+{
+    if (roundAList.size()!=roundSosList.size() || roundBList.size()!=roundSosList.size()) return false;
+    const auto selected=selectFinalRoundIndices(roundSosList,normalMeasureRounds);
+    if (selected.size()!=normalMeasureRounds || selected.isEmpty()) return false;
+    double sumSos=0,sumA=0,sumB=0;
+    for (int index : selected) {
+        if (!std::isfinite(roundAList[index]) || !std::isfinite(roundBList[index])) return false;
+        sumSos+=roundSosList[index]; sumA+=roundAList[index]; sumB+=roundBList[index];
+    }
+    sos=sumSos/selected.size(); a=sumA/selected.size(); b=sumB/selected.size();
+    if (selectedIndices) *selectedIndices=selected;
+    return true;
 }
 
 void MainWindow::finishAllPatientRounds()
@@ -1478,9 +1614,13 @@ void MainWindow::finishAllPatientRounds()
         return;
     }
 
-    double finalSos = Utils::trimmedMeanValue(roundSosList, 0.2);
-    double finalA   = Utils::trimmedMeanValue(roundAList, 0.2);
-    double finalB   = Utils::trimmedMeanValue(roundBList, 0.2);
+    double finalSos=0, finalA=0, finalB=0;
+    QVector<int> selectedIndices;
+    if (!computeFinalPatientRoundMeans(finalSos, finalA, finalB, &selectedIndices)) {
+        stopPatientMeasurement();
+        ui->lblProcessStatus->setText(QStringLiteral("测量数据不完整，未生成结果，请重新检测。"));
+        return;
+    }
 
     stopPatientMeasurement();
 
@@ -1552,7 +1692,9 @@ void MainWindow::finishAllPatientRounds()
     showPatientMeasureFinishedDialog(completedMeasurement);
 
     qDebug() << "All patient rounds finished:"
-             << "rounds =" << roundSosList.size()
+             << "rounds =" << selectedIndices.size()
+             << "sourceRounds =" << roundSosList.size()
+             << "selectedIndices =" << selectedIndices
              << "finalSos =" << finalSos
              << "finalA =" << finalA
              << "finalB =" << finalB
@@ -2569,7 +2711,10 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
         pickBC,
         vMin,
         vMax,
-        "B_pair / BD->BC"
+        "B_pair / BD->BC",
+        -1,
+        -1,
+        completeTruncatedBPeak ? 15 : 0
         );
     evidence["B"] = pairEvidence(bRes);
     evidence["decision"] = "B_pair_invalid";
@@ -3137,6 +3282,8 @@ void MainWindow::resetBoneLagStability()
     lockedBoneLagCenter = 0;
 
     boneLagOutOfLockCount = 0;
+    partialRelockPending = false;
+    partialPreviousLagCenter = 0;
 
     if (kDebugPerFrame) {
         qDebug() << "Bone lag stability reset.";
@@ -3261,8 +3408,19 @@ void MainWindow::rejectBoneLagCandidate()
     // Reuse the existing sustained-loss count; no new tuning constant.
     if (++boneLagRejectedFrameCount >= mCfg.boneLagUnlockCount) {
         experimentLog.write({{"event", "sustained_precheck_loss"}});
+        const bool deferDiscard = deferPartialDiscardUntilRelock && processValidCount > 0
+            && (boneLagLocked || partialRelockPending);
+        const int previousCenter = boneLagLocked ? lockedBoneLagCenter : partialPreviousLagCenter;
         resetBoneLagStability();
-        discardPartialRound();
+        if (deferDiscard) {
+            partialRelockPending = true;
+            partialPreviousLagCenter = previousCenter;
+            experimentLog.write({{"event", "partial_discard_deferred"},
+                                 {"previous_lag", previousCenter},
+                                 {"preserved_values", processValidCount}});
+        } else {
+            discardPartialRound();
+        }
     }
 }
 
@@ -3337,6 +3495,31 @@ bool MainWindow::checkBoneLagStable(int lagB, int* centerOut, int* countOut)
         boneLagLocked = true;
         lockedBoneLagCenter = center;
         boneLagOutOfLockCount = 0;
+
+        if (partialRelockPending) {
+            const int previousCenter = partialPreviousLagCenter;
+            bool sameCluster = std::abs(center - previousCenter) <= partialRelockRetentionTolerance;
+            for (double sosB : std::as_const(currentRoundBList)) {
+                if (!std::isfinite(sosB) || sosB <= 0.0) {
+                    sameCluster = false;
+                    break;
+                }
+                const int sampleLag = qRound(signalProcessor.probeDistanceCD
+                    / (sosB * signalProcessor.samplePeriod));
+                if (std::abs(sampleLag - center) > partialRelockRetentionTolerance) {
+                    sameCluster = false;
+                    break;
+                }
+            }
+            partialRelockPending = false;
+            partialPreviousLagCenter = 0;
+            experimentLog.write({{"event", sameCluster ? "partial_relock_retained" : "partial_relock_discarded"},
+                                 {"previous_lag", previousCenter}, {"new_lag", center},
+                                 {"preserved_values", processValidCount}});
+            if (!sameCluster) {
+                discardPartialRound();
+            }
+        }
 
         bool currentInCluster =
             (std::abs(lagB - lockedBoneLagCenter) <= mCfg.stableLagTolerance);
@@ -4498,36 +4681,46 @@ void MainWindow::updatePatientSelectionUi()
     const bool selected = hasCurrentPatient();
     const bool connected = serial && serial->isOpen();
     const bool debugAcquisitionRunning = autoRunning && !patientMeasureRunning;
+    const bool nextRoundPending = nextRoundTimer.isActive();
     ui->btnPatientInfo->setText(selected ? "更换患者" : "建立档案");
     ui->btnPatientInfo->setEnabled(
-        patientDataWritable && !patientMeasureRunning && !debugAcquisitionRunning);
+        patientDataWritable && !patientMeasureRunning && !debugAcquisitionRunning &&
+        !nextRoundPending);
     ui->btnStartMeasurement->setEnabled(
         patientDataWritable &&
         (patientMeasureRunning || (!hasPendingMeasurement && selected && connected)));
-    ui->btnStartMeasurement->setText(patientMeasureRunning ? "停止检测" : "开始检测");
+    ui->btnStartMeasurement->setText(patientMeasureRunning
+        ? QStringLiteral("停止检测")
+        : nextRoundPending ? QStringLiteral("立即开始下一轮")
+                           : QStringLiteral("开始检测"));
     ui->btnMeasurementGuide->setEnabled(
-        !patientMeasureRunning && !debugAcquisitionRunning);
+        !patientMeasureRunning && !debugAcquisitionRunning && !nextRoundPending);
     ui->pushButton->setEnabled(
-        connected && !patientMeasureRunning && !debugAcquisitionRunning);
-    ui->triggerButton->setEnabled(connected && !patientMeasureRunning);
-    ui->btnReport->setEnabled(!patientMeasureRunning && !debugAcquisitionRunning);
-    ui->pushButton_2->setEnabled(!patientMeasureRunning);
-    if (gainSliderA) gainSliderA->setEnabled(!patientMeasureRunning);
-    if (gainSliderB) gainSliderB->setEnabled(!patientMeasureRunning);
-    if (gainSliderC) gainSliderC->setEnabled(!patientMeasureRunning);
-    if (gainSliderD) gainSliderD->setEnabled(!patientMeasureRunning);
+        connected && !patientMeasureRunning && !debugAcquisitionRunning &&
+        !nextRoundPending);
+    ui->triggerButton->setEnabled(
+        connected && !patientMeasureRunning && !nextRoundPending);
+    ui->btnReport->setEnabled(
+        !patientMeasureRunning && !debugAcquisitionRunning && !nextRoundPending);
+    ui->pushButton_2->setEnabled(!patientMeasureRunning && !nextRoundPending);
+    if (gainSliderA) gainSliderA->setEnabled(!patientMeasureRunning && !nextRoundPending);
+    if (gainSliderB) gainSliderB->setEnabled(!patientMeasureRunning && !nextRoundPending);
+    if (gainSliderC) gainSliderC->setEnabled(!patientMeasureRunning && !nextRoundPending);
+    if (gainSliderD) gainSliderD->setEnabled(!patientMeasureRunning && !nextRoundPending);
     // 正常完成时结果已自动保存；仅在自动保存失败时保留重试入口。
     ui->btnSaveResult->setVisible(hasPendingMeasurement);
-    ui->btnSaveResult->setEnabled(patientDataWritable);
-    ui->btnArchive->setEnabled(!patientMeasureRunning && !debugAcquisitionRunning);
-    ui->btnAdd->setEnabled(patientDataWritable);
-    ui->btnDeleteSelected->setEnabled(patientDataWritable);
-    ui->btnFormSave->setEnabled(patientDataWritable);
-    ui->btnDetailSave->setEnabled(patientDataWritable);
-    ui->btnDetailDelete->setEnabled(patientDataWritable);
-    ui->btnPatientNewSave->setEnabled(patientDataWritable);
+    ui->btnSaveResult->setEnabled(patientDataWritable && !nextRoundPending);
+    ui->btnArchive->setEnabled(
+        !patientMeasureRunning && !debugAcquisitionRunning && !nextRoundPending);
+    ui->btnAdd->setEnabled(patientDataWritable && !nextRoundPending);
+    ui->btnDeleteSelected->setEnabled(patientDataWritable && !nextRoundPending);
+    ui->btnFormSave->setEnabled(patientDataWritable && !nextRoundPending);
+    ui->btnDetailSave->setEnabled(patientDataWritable && !nextRoundPending);
+    ui->btnDetailDelete->setEnabled(patientDataWritable && !nextRoundPending);
+    ui->btnPatientNewSave->setEnabled(patientDataWritable && !nextRoundPending);
     if (QAction* action = findChild<QAction*>(QStringLiteral("manageAccountsAction"))) {
-        action->setEnabled(!patientMeasureRunning && !debugAcquisitionRunning);
+        action->setEnabled(
+            !patientMeasureRunning && !debugAcquisitionRunning && !nextRoundPending);
     }
 }
 

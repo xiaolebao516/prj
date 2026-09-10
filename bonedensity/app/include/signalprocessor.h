@@ -49,7 +49,8 @@ public:
         int lagMax,
         int prePts,
         int postPts,
-        double* bestCorrOut);
+        double* bestCorrOut,
+        int clippedPeakExtension = 0);
 
     static ValleyResult findFirstProminentValley(const QVector<double>& x,
                                                   int start,
@@ -68,7 +69,8 @@ public:
                                   double vMax,
                                   const QString& pairName,
                                   int forcedLagMin = -1,
-                                  int forcedLagMax = -1) const;
+                                  int forcedLagMax = -1,
+                                  int clippedPeakExtension = 0) const;
 
     PairResult estimatePairSpeedByValley(const QVector<double>& early,
                                           const QVector<double>& late,

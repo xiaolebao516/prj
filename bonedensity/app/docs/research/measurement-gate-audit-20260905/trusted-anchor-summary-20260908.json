@@ -1,0 +1,248 @@
+{
+  "scope": "Validated recorded-trajectory counterfactual; not prospective speed, participant comparison, or accuracy.",
+  "logs": 63,
+  "damaged_prefixes": 2,
+  "verified_gates": 24764,
+  "feature_changes": 31,
+  "restored_prechecks": 17,
+  "completed": {
+    "baseline": 59,
+    "candidate": 59
+  },
+  "discarded": {
+    "baseline": 263,
+    "candidate": 267
+  },
+  "earlier_completions": 5,
+  "later_completions": 0,
+  "completion_gain_ms_nonzero": [
+    376,
+    654,
+    98,
+    186,
+    96
+  ],
+  "max_abs_round_sos_delta": 1.844074124252984,
+  "longest_first_round": {
+    "baseline": 474789,
+    "candidate": 474789
+  },
+  "changes": [
+    {
+      "file": "round-20260907-081556-102-dbfa34ae-ec06-4724-8680-058af05c50be.jsonl",
+      "damaged_prefix_only": false,
+      "completion_ms_on_recorded_timeline": [
+        288417,
+        288041
+      ],
+      "baseline_first_retained_ms": 282420,
+      "baseline_round_sos": 3919.999999999999,
+      "candidate_first_retained_ms": 282420,
+      "candidate_round_sos": 3919.999999999999,
+      "feature_changes": 4,
+      "newly_accepted_sos_including_discarded": [
+        3919.999999999999,
+        3919.999999999999,
+        3919.999999999999,
+        3919.999999999999
+      ]
+    },
+    {
+      "file": "round-20260907-083518-102-7ae0fd8d-ca84-4f75-8980-2c4b214b5d71.jsonl",
+      "damaged_prefix_only": false,
+      "completion_ms_on_recorded_timeline": [
+        16817,
+        16163
+      ],
+      "discarded_values": [
+        2,
+        4
+      ],
+      "baseline_first_retained_ms": 13344,
+      "baseline_round_sos": 3951.612903225805,
+      "candidate_first_retained_ms": 13070,
+      "candidate_round_sos": 3951.612903225805,
+      "feature_changes": 12,
+      "newly_accepted_sos_including_discarded": [
+        3951.6129032258063,
+        3951.6129032258063,
+        3951.6129032258063,
+        3951.6129032258063,
+        3951.6129032258063,
+        3951.6129032258063,
+        3951.6129032258063,
+        3951.6129032258063,
+        3951.6129032258063
+      ]
+    },
+    {
+      "file": "round-20260907-083535-869-2e86ef7e-6ef9-41a1-b35f-cd8ae909daaf.jsonl",
+      "damaged_prefix_only": false,
+      "first_accepted_ms": [
+        19540,
+        19438
+      ],
+      "completion_ms_on_recorded_timeline": [
+        22726,
+        22628
+      ],
+      "baseline_first_retained_ms": 19540,
+      "baseline_round_sos": 4152.542372881357,
+      "candidate_first_retained_ms": 19438,
+      "candidate_round_sos": 4152.542372881357,
+      "feature_changes": 2,
+      "newly_accepted_sos_including_discarded": [
+        4152.542372881356
+      ]
+    },
+    {
+      "file": "round-20260907-095440-357-0d0ef02e-ef89-448c-a006-99bfb54926b9.jsonl",
+      "damaged_prefix_only": false,
+      "completion_ms_on_recorded_timeline": [
+        75790,
+        75604
+      ],
+      "baseline_first_retained_ms": 69696,
+      "baseline_round_sos": 4034.8341838654806,
+      "candidate_first_retained_ms": 69037,
+      "candidate_round_sos": 4036.6782579897335,
+      "feature_changes": 4,
+      "newly_accepted_sos_including_discarded": [
+        4083.3333333333326
+      ]
+    },
+    {
+      "file": "round-20260907-104713-463-2b2f995c-5391-40ac-b193-5fa01cf1dec0.jsonl",
+      "damaged_prefix_only": false,
+      "baseline_first_retained_ms": 83856,
+      "baseline_round_sos": 3913.086419753086,
+      "candidate_first_retained_ms": 83856,
+      "candidate_round_sos": 3913.086419753086,
+      "feature_changes": 1,
+      "newly_accepted_sos_including_discarded": []
+    },
+    {
+      "file": "round-20260907-110354-869-231ae5ee-6a06-4c36-83de-4ecb1e7b5509.jsonl",
+      "damaged_prefix_only": false,
+      "first_accepted_ms": [
+        43922,
+        42130
+      ],
+      "discarded_values": [
+        5,
+        7
+      ],
+      "baseline_first_retained_ms": 161195,
+      "baseline_round_sos": 3828.124999999999,
+      "candidate_first_retained_ms": 161195,
+      "candidate_round_sos": 3828.124999999999,
+      "feature_changes": 7,
+      "newly_accepted_sos_including_discarded": [
+        4083.3333333333326,
+        4083.3333333333326
+      ]
+    },
+    {
+      "file": "round-20260907-110646-476-f29aed5c-90f4-4beb-9898-6674dc8a38dc.jsonl",
+      "damaged_prefix_only": false,
+      "completion_ms_on_recorded_timeline": [
+        31546,
+        31450
+      ],
+      "baseline_first_retained_ms": 25263,
+      "baseline_round_sos": 3691.9634945950725,
+      "candidate_first_retained_ms": 24882,
+      "candidate_round_sos": 3691.9634945950725,
+      "feature_changes": 1,
+      "newly_accepted_sos_including_discarded": [
+        3684.210526315789
+      ]
+    }
+  ],
+  "conditional_final_sequences": [
+    {
+      "file": "round-20260907-082101-926-6aaa5a21-81be-4f19-98eb-bb722e95a860.jsonl",
+      "incomplete_sequence": false,
+      "baseline_existing_final": 3945.290322580644,
+      "baseline_exact_five": 3945.290322580644,
+      "candidate_existing_final": 3945.290322580644,
+      "candidate_exact_five": 3945.290322580644
+    },
+    {
+      "file": "round-20260907-083559-491-7ff19f44-d358-4453-b3a1-c53a1b2d4bf7.jsonl",
+      "incomplete_sequence": false,
+      "baseline_existing_final": 3983.542520947961,
+      "baseline_exact_five": 3949.742550561282,
+      "candidate_existing_final": 3983.542520947961,
+      "candidate_exact_five": 3949.742550561282
+    },
+    {
+      "file": "round-20260907-092033-893-63fa28e1-7af3-47fd-975d-b8462f9ed0b6.jsonl",
+      "incomplete_sequence": false,
+      "baseline_existing_final": 4273.401986295946,
+      "baseline_exact_five": 4273.401986295946,
+      "candidate_existing_final": 4273.401986295946,
+      "candidate_exact_five": 4273.401986295946
+    },
+    {
+      "file": "round-20260907-092551-757-ccc17f41-99fb-48b7-a645-230f5c105378.jsonl",
+      "incomplete_sequence": false,
+      "baseline_existing_final": 4080.1692570844034,
+      "baseline_exact_five": 4080.1692570844034,
+      "candidate_existing_final": 4080.1692570844034,
+      "candidate_exact_five": 4080.1692570844034
+    },
+    {
+      "file": "round-20260907-093522-232-897f14fd-cb7d-434f-a9d2-348c59f0ae52.jsonl",
+      "incomplete_sequence": true
+    },
+    {
+      "file": "round-20260907-094352-692-45c64565-6b89-4538-9817-f33a73f0fc55.jsonl",
+      "incomplete_sequence": false,
+      "baseline_existing_final": 4562.633970676499,
+      "baseline_exact_five": 4562.633970676499,
+      "candidate_existing_final": 4562.633970676499,
+      "candidate_exact_five": 4562.633970676499
+    },
+    {
+      "file": "round-20260907-095620-647-95cefd6a-395e-42ff-a5cf-1cf3701fb0a3.jsonl",
+      "incomplete_sequence": false,
+      "baseline_existing_final": 4064.8206886963794,
+      "baseline_exact_five": 4064.8206886963794,
+      "candidate_existing_final": 4065.18950352123,
+      "candidate_exact_five": 4065.18950352123
+    },
+    {
+      "file": "round-20260907-104911-487-78a6d4a4-a20f-401c-9123-24396537f2c5.jsonl",
+      "incomplete_sequence": false,
+      "baseline_existing_final": 3908.2636399840694,
+      "baseline_exact_five": 3908.2636399840694,
+      "candidate_existing_final": 3908.2636399840694,
+      "candidate_exact_five": 3908.2636399840694
+    },
+    {
+      "file": "round-20260907-110301-272-c3cb8179-a268-475a-a127-d62800e3b78e.jsonl",
+      "incomplete_sequence": false,
+      "baseline_existing_final": 3545.887443279961,
+      "baseline_exact_five": 3545.887443279961,
+      "candidate_existing_final": 3545.887443279961,
+      "candidate_exact_five": 3545.887443279961
+    },
+    {
+      "file": "round-20260907-110730-196-28a22e85-4881-40d4-8f9c-ff427e867a9b.jsonl",
+      "incomplete_sequence": false,
+      "baseline_existing_final": 3743.753488221944,
+      "baseline_exact_five": 3743.753488221944,
+      "candidate_existing_final": 3743.753488221944,
+      "candidate_exact_five": 3743.753488221944
+    },
+    {
+      "file": "round-20260907-111518-727-b0cbfa04-f59c-4ad2-a733-d21eb6d4934d.jsonl",
+      "incomplete_sequence": false,
+      "baseline_existing_final": 4310.606052935338,
+      "baseline_exact_five": 4310.606052935338,
+      "candidate_existing_final": 4310.606052935338,
+      "candidate_exact_five": 4310.606052935338
+    }
+  ]
+}

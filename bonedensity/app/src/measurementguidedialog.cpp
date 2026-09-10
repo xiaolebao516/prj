@@ -223,7 +223,7 @@ MeasurementGuideDialog::MeasurementGuideDialog(Mode mode, QWidget* parent)
             "<li>最终目标是让两条进度条均稳定在中线，然后保持探头不动。</li>"
             "<li>每轮累计 30 个有效值；姿势和信号稳定时通常约 5 秒，共完成 5 轮。</li>"
             "</ol>"),
-        QStringLiteral("每轮结束后，按空格或点击“开始检测”继续下一轮。")));
+        QStringLiteral("每轮完成后等待 1 秒会自动开始下一轮；也可按空格或点击按钮立即继续。")));
     pages_->addWidget(createPage(
         1,
         QStringLiteral("2　先调整右侧 D：空间位置"),
@@ -242,7 +242,7 @@ MeasurementGuideDialog::MeasurementGuideDialog(Mode mode, QWidget* parent)
             "<li>保持右侧 D 稳定在中线，小幅调整探头左右倾角。</li>"
             "<li>观察左侧 G 进度条，使 G 也稳定在中线。</li>"
             "<li>两条均在中线后保持姿势，系统自动累计本轮 30 个有效值。</li>"
-            "<li>完成一轮后按空格或点击“开始检测”，重复至 5 轮完成。</li>"
+            "<li>完成一轮后保持探头不动，等待 1 秒自动进入下一轮；也可按空格或点击按钮立即继续。</li>"
             "</ol>"),
         QStringLiteral("最终判断始终以右侧 D、左侧 G 两条均稳定在中线为准。")));
     root->addWidget(pages_, 1);
