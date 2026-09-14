@@ -5,7 +5,7 @@
 #include <QLabel>
 #include <QPainter>
 #include <QPainterPath>
-#include <QPixmap>
+#include <QProgressBar>
 #include <QPushButton>
 #include <QSaveFile>
 #include <QStackedWidget>
@@ -16,7 +16,7 @@
 
 namespace {
 
-constexpr int kGuideVersion = 1;
+constexpr int kGuideVersion = 2;
 
 class GuideIllustrationWidget : public QWidget
 {
@@ -24,143 +24,79 @@ public:
     explicit GuideIllustrationWidget(int pageIndex, QWidget* parent = nullptr)
         : QWidget(parent), pageIndex_(pageIndex)
     {
-        setMinimumSize(300, 300);
-
-        const QStringList replacementPaths = {
-            QStringLiteral(":/images/measurement-guide-prepare.png"),
-            QStringLiteral(":/images/measurement-guide-position.png"),
-            QStringLiteral(":/images/measurement-guide-tilt.png")
-        };
-        if (pageIndex_ >= 0 && pageIndex_ < replacementPaths.size()) {
-            replacement_.load(replacementPaths.at(pageIndex_));
-        }
+        setMinimumSize(280, 220);
     }
 
 protected:
     void paintEvent(QPaintEvent*) override
     {
-        QPainter painter(this);
-        painter.setRenderHint(QPainter::Antialiasing, true);
-        painter.fillRect(rect(), QColor(241, 247, 251));
-
-        if (!replacement_.isNull()) {
-            const QPixmap scaled = replacement_.scaled(
-                size() - QSize(24, 24), Qt::KeepAspectRatio,
-                Qt::SmoothTransformation);
-            painter.drawPixmap(QPoint((width() - scaled.width()) / 2,
-                                      (height() - scaled.height()) / 2),
-                               scaled);
-            return;
+        QPainter p(this);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.fillRect(rect(), QColor("#f2f5f8"));
+        // Same shapes and view directions as the approved preview; keep aspect ratio.
+        const qreal scale = qMin(width() / 410.0, height() / 238.0);
+        p.translate((width() - 410 * scale) / 2, (height() - 238 * scale) / 2);
+        p.scale(scale, scale);
+        const QColor blue("#147bbf");
+        QPainterPath arm;
+        if (pageIndex_ < 2) {
+            arm.moveTo(35,116); arm.quadTo(25,134,36,163);
+            arm.quadTo(47,181,71,178); arm.lineTo(338,164);
+            arm.quadTo(369,161,376,145); arm.quadTo(378,125,351,121);
+            arm.lineTo(75,101); arm.quadTo(45,98,35,116);
+        } else {
+            arm.moveTo(60,194); arm.quadTo(82,137,205,137);
+            arm.quadTo(328,137,350,194); arm.lineTo(350,220); arm.lineTo(60,220);
         }
-
-        painter.save();
-        painter.scale(width() / 360.0, height() / 300.0);
-
-        painter.save();
-        painter.translate(180, 174);
-        painter.rotate(-10);
-        painter.setPen(Qt::NoPen);
-        painter.setBrush(QColor(242, 199, 165));
-        painter.drawRoundedRect(QRectF(-126, -31, 252, 62), 30, 30);
-        painter.restore();
-
+        arm.closeSubpath();
+        p.setPen(QPen(QColor("#c59d7b"), 1.5));
+        p.setBrush(QColor("#efd0b7")); p.drawPath(arm);
+        auto probe = [&p]() {
+            p.setPen(QPen(QColor("#879bad"), 2)); p.setBrush(QColor("#f8fafc"));
+            p.drawRoundedRect(QRectF(-77,-25,154,50),18,18);
+            p.setPen(Qt::NoPen); p.setBrush(QColor("#879bad"));
+            p.drawRoundedRect(QRectF(-52,-16,13,32),5,5);
+            p.drawRoundedRect(QRectF(39,-16,13,32),5,5);
+            p.setPen(QPen(QColor("#147bbf"),3)); p.drawLine(-26,0,26,0);
+        };
         if (pageIndex_ == 0) {
-            painter.save();
-            painter.translate(180, 174);
-            painter.rotate(-10);
-            painter.setBrush(QColor(70, 167, 219, 95));
-            painter.drawEllipse(QRectF(-45, -23, 96, 46));
-            painter.restore();
-            drawDrop(painter, QPointF(86, 76), 17);
-            drawDrop(painter, QPointF(119, 52), 12);
+            p.setPen(Qt::NoPen); p.setBrush(QColor(20,123,191,56));
+            p.drawEllipse(QRectF(132,105,150,34));
+            p.save(); p.translate(207,91); probe(); p.restore();
+            QPainterPath drop;
+            drop.moveTo(106,39); drop.cubicTo(99,53,94,57,94,64);
+            drop.cubicTo(94,80,118,80,118,64); drop.cubicTo(118,57,112,49,106,39);
+            p.setPen(Qt::NoPen); p.setBrush(QColor(20,123,191,150)); p.drawPath(drop);
+            p.setPen(QPen(blue,3)); p.drawLine(147,205,267,205);
+            p.drawLine(147,205,157,199); p.drawLine(147,205,157,211);
+            p.drawLine(267,205,257,199); p.drawLine(267,205,257,211);
+        } else if (pageIndex_ == 1) {
+            p.setPen(QPen(QColor("#879bad"),2,Qt::DashLine)); p.drawLine(53,142,362,142);
+            p.save(); p.translate(205,142); p.rotate(-28); p.setOpacity(.28); probe(); p.restore();
+            p.save(); p.translate(205,142); probe(); p.restore();
+            p.setPen(QPen(blue,3)); p.setBrush(Qt::NoBrush);
+            QPainterPath rotation; rotation.moveTo(154,55); rotation.quadTo(219,27,278,75);
+            p.drawPath(rotation); p.drawLine(278,75,263,73); p.drawLine(278,75,275,60);
+            p.setPen(QPen(QColor("#879bad"),2,Qt::DashLine)); p.drawLine(101,207,312,207);
+        } else {
+            p.setPen(QPen(QColor(20,123,191,76),9)); p.setBrush(Qt::NoBrush);
+            QPainterPath gel; gel.moveTo(166,141); gel.quadTo(205,132,244,141); p.drawPath(gel);
+            p.setPen(QPen(QColor("#879bad"),2)); p.setBrush(QColor("#f8fafc"));
+            p.save(); p.translate(205,142); p.rotate(-14); p.setOpacity(.3);
+            p.drawRoundedRect(QRectF(-35,-91,70,88),12,12); p.restore();
+            p.drawRoundedRect(QRectF(170,51,70,88),12,12);
+            p.setPen(Qt::NoPen); p.setBrush(QColor("#879bad"));
+            p.drawRoundedRect(QRectF(175,132,60,11),4,4);
+            p.setPen(QPen(blue,3)); p.setBrush(Qt::NoBrush);
+            QPainterPath tilt; tilt.moveTo(137,76); tilt.quadTo(129,100,140,119);
+            tilt.moveTo(275,76); tilt.quadTo(283,100,272,119); p.drawPath(tilt);
+            p.drawLine(137,76,127,84); p.drawLine(137,76,142,88);
+            p.drawLine(275,76,270,88); p.drawLine(275,76,285,84);
         }
-
-        painter.save();
-        const QPointF probeCenter = pageIndex_ == 1
-            ? QPointF(154, 105) : QPointF(190, 105);
-        painter.translate(probeCenter);
-        if (pageIndex_ == 2) painter.rotate(-15);
-        painter.setPen(QPen(QColor(140, 152, 167), 2));
-        painter.setBrush(QColor(229, 233, 239));
-        painter.drawRoundedRect(QRectF(-31, -58, 62, 116), 15, 15);
-        painter.setPen(Qt::NoPen);
-        painter.setBrush(QColor(125, 137, 152));
-        painter.drawRoundedRect(QRectF(-24, 52, 48, 15), 5, 5);
-        painter.restore();
-
-        painter.setPen(QPen(QColor(45, 126, 201), 4,
-                            Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        painter.setBrush(QColor(45, 126, 201));
-        if (pageIndex_ == 1) {
-            drawDoubleArrow(painter, QPointF(94, 255), QPointF(270, 255));
-            drawMiniMeter(painter, QRectF(316, 65, 20, 150));
-        } else if (pageIndex_ == 2) {
-            QPainterPath arc;
-            arc.moveTo(105, 102);
-            arc.cubicTo(125, 32, 245, 22, 275, 96);
-            painter.drawPath(arc);
-            drawArrowHead(painter, QPointF(275, 96), QPointF(254, 75));
-            drawMiniMeter(painter, QRectF(24, 65, 20, 150));
-        }
-
-        painter.restore();
     }
 
 private:
-    static void drawDrop(QPainter& painter, const QPointF& center, qreal size)
-    {
-        QPainterPath drop;
-        drop.moveTo(center.x(), center.y() - size);
-        drop.cubicTo(center.x() - size, center.y(),
-                     center.x() - size * 0.7, center.y() + size,
-                     center.x(), center.y() + size);
-        drop.cubicTo(center.x() + size * 0.7, center.y() + size,
-                     center.x() + size, center.y(),
-                     center.x(), center.y() - size);
-        painter.setPen(Qt::NoPen);
-        painter.setBrush(QColor(54, 160, 220, 150));
-        painter.drawPath(drop);
-    }
-
-    static void drawArrowHead(QPainter& painter,
-                              const QPointF& tip,
-                              const QPointF& directionPoint)
-    {
-        const QLineF direction(directionPoint, tip);
-        const qreal angle = direction.angle() * 3.14159265358979323846 / 180.0;
-        const qreal length = 13.0;
-        QPolygonF head;
-        head << tip
-             << tip - QPointF(std::cos(angle - 0.55) * length,
-                              -std::sin(angle - 0.55) * length)
-             << tip - QPointF(std::cos(angle + 0.55) * length,
-                              -std::sin(angle + 0.55) * length);
-        painter.drawPolygon(head);
-    }
-
-    static void drawDoubleArrow(QPainter& painter,
-                                const QPointF& left,
-                                const QPointF& right)
-    {
-        painter.drawLine(left, right);
-        drawArrowHead(painter, right, left);
-        drawArrowHead(painter, left, right);
-    }
-
-    static void drawMiniMeter(QPainter& painter, const QRectF& meter)
-    {
-        painter.save();
-        painter.setPen(QPen(QColor(148, 160, 174), 1));
-        painter.setBrush(QColor(232, 237, 242));
-        painter.drawRoundedRect(meter, 3, 3);
-        painter.setPen(QPen(QColor(48, 49, 51), 2));
-        painter.drawLine(QPointF(meter.left(), meter.center().y()),
-                         QPointF(meter.right(), meter.center().y()));
-        painter.restore();
-    }
-
     int pageIndex_ = 0;
-    QPixmap replacement_;
 };
 
 QLabel* wrappedLabel(const QString& text, const QString& objectName)
@@ -175,8 +111,8 @@ QLabel* wrappedLabel(const QString& text, const QString& objectName)
 
 } // namespace
 
-MeasurementGuideDialog::MeasurementGuideDialog(Mode mode, QWidget* parent)
-    : QDialog(parent), mode_(mode)
+MeasurementGuideDialog::MeasurementGuideDialog(Mode mode, QWidget* parent, double corrAThreshold)
+    : QDialog(parent), mode_(mode), corrAThreshold_(corrAThreshold)
 {
     setObjectName(QStringLiteral("measurementGuideDialog"));
     setWindowTitle(QStringLiteral("检测操作教学"));
@@ -190,9 +126,9 @@ MeasurementGuideDialog::MeasurementGuideDialog(Mode mode, QWidget* parent)
         "QLabel#guideSubtitle { color: #606266; }"
         "QLabel#guideHeading { font-size: 18px; font-weight: bold; color: #303133; }"
         "QLabel#guideBody { font-size: 14px; color: #303133; line-height: 1.6; }"
-        "QLabel#guideEmphasis { background: #ECF5FF; border-left: 4px solid #409EFF;"
+        "QLabel#guideEmphasis { background: #ECF5FF; border-left: 4px solid #147bbf;"
         " padding: 10px; color: #303133; }"
-        "QPushButton#guideNextButton { background: #409EFF; color: white;"
+        "QPushButton#guideNextButton { background: #147bbf; color: white;"
         " border: none; border-radius: 5px; padding: 8px 18px; }"
         "QPushButton#guideSkipButton { background: transparent; color: #909399;"
         " border: 1px solid #DCDFE6; border-radius: 5px; padding: 8px 16px; }"));
@@ -211,40 +147,39 @@ MeasurementGuideDialog::MeasurementGuideDialog(Mode mode, QWidget* parent)
     root->addWidget(title);
     root->addWidget(subtitle);
 
+    auto* steps = new QHBoxLayout;
+    const QStringList names = {QStringLiteral("① 准备与贴合"), QStringLiteral("② 长轴方向 · corrA"),
+                               QStringLiteral("③ 倾角与计数")};
+    for (int index = 0; index < names.size(); ++index) {
+        stepButtons_[index] = new QPushButton(names[index]);
+        stepButtons_[index]->setObjectName(QStringLiteral("guideStep%1").arg(index + 1));
+        steps->addWidget(stepButtons_[index], 1);
+        connect(stepButtons_[index], &QPushButton::clicked, this, [this, index]() {
+            pages_->setCurrentIndex(index);
+            refreshNavigation();
+        });
+    }
+    root->addLayout(steps);
     pages_ = new QStackedWidget;
     pages_->setObjectName(QStringLiteral("measurementGuidePages"));
     pages_->addWidget(createPage(
-        0,
-        QStringLiteral("1　测量前准备"),
-        QStringLiteral(
-            "<ol>"
-            "<li>在前臂桡骨测试部位涂抹足量耦合剂，使皮肤与探头之间均匀覆盖。</li>"
-            "<li>将探头充分贴合测试部位，先调整右侧 D，再调整左侧 G。</li>"
-            "<li>最终目标是让两条进度条均稳定在中线，然后保持探头不动。</li>"
-            "<li>每轮累计 30 个有效值；姿势和信号稳定时通常约 5 秒，共完成 5 轮。</li>"
-            "</ol>"),
-        QStringLiteral("每轮完成后等待 1 秒会自动开始下一轮；也可按空格或点击按钮立即继续。")));
+        0, QStringLiteral("放到位，贴合好"),
+        QStringLiteral("<p>在前臂桡骨测试部位涂抹足量耦合剂，使皮肤与探头之间充分、均匀覆盖。</p>"
+                       "<p>探头放到对应位置，长轴大致沿桡骨方向，保持充分贴合，避免明显倾斜或翘起。</p>"),
+        QStringLiteral("<b>接下来主要看 corrA</b><br>不用一开始同时追着每个进度条调整。")));
     pages_->addWidget(createPage(
-        1,
-        QStringLiteral("2　先调整右侧 D：空间位置"),
-        QStringLiteral(
-            "<ol>"
-            "<li>保持探头与皮肤充分贴合，不要大幅抬起或转动。</li>"
-            "<li>沿测试部位小幅移动探头，同时观察右侧 D 进度条。</li>"
-            "<li>找到 D 稳定在中线的位置后，保持当前位置。</li>"
-            "</ol>"),
-        QStringLiteral("动作幅度要小；不使用固定“向左、向右”指令，避免探头旋转后方向相反。")));
+        1, QStringLiteral("先调整长轴方向，让 corrA 达标"),
+        QStringLiteral("<p>保持充分贴合，在皮肤表面小幅旋转探头，使探头长轴大致沿桡骨方向，同时观察 corrA。</p>"
+                       "<p>要求 ≥ %1；达到要求即可，不必追求满格。</p>"
+                       "<p>corrA 是信号相关性，不是角度，也不是准确率。</p>")
+            .arg(corrAThreshold_, 0, 'f', 2),
+        QStringLiteral("<b>已经开始连续计数？</b><br>请保持姿势，不必再刻意调整 G。")));
     pages_->addWidget(createPage(
-        2,
-        QStringLiteral("3　再调整左侧 G：左右倾角"),
-        QStringLiteral(
-            "<ol>"
-            "<li>保持右侧 D 稳定在中线，小幅调整探头左右倾角。</li>"
-            "<li>观察左侧 G 进度条，使 G 也稳定在中线。</li>"
-            "<li>两条均在中线后保持姿势，系统自动累计本轮 30 个有效值。</li>"
-            "<li>完成一轮后保持探头不动，等待 1 秒自动进入下一轮；也可按空格或点击按钮立即继续。</li>"
-            "</ol>"),
-        QStringLiteral("最终判断始终以右侧 D、左侧 G 两条均稳定在中线为准。")));
+        2, QStringLiteral("仍未计数，再小幅调整倾角"),
+        QStringLiteral("<p>corrA 已达标但仍未计数时，尽量保持已找到的位置与长轴方向，小幅改变倾角，参考 G 辅助调整。</p>"
+                       "<p>若仍不能推进，再查看 D 是否满足要求，并检查探头贴合。不要持续盲目调整同一个方向。</p>"
+                       "<p>每轮累计 30 个有效值，共 5 轮。每轮完成后等待 1 秒自动进入下一轮，也可按空格或点击按钮立即继续。</p>"),
+        QStringLiteral("<b>连续计数后，保持探头不动</b><br>提示仅供参考，以有效值计数为准。")));
     root->addWidget(pages_, 1);
 
     QHBoxLayout* footer = new QHBoxLayout;
@@ -256,10 +191,10 @@ MeasurementGuideDialog::MeasurementGuideDialog(Mode mode, QWidget* parent)
     backButton_->setObjectName(QStringLiteral("guideBackButton"));
     nextButton_ = new QPushButton;
     nextButton_->setObjectName(QStringLiteral("guideNextButton"));
+    footer->addWidget(backButton_);
     footer->addWidget(pageIndicator_);
     footer->addStretch();
     footer->addWidget(skipButton_);
-    footer->addWidget(backButton_);
     footer->addWidget(nextButton_);
     root->addLayout(footer);
 
@@ -317,7 +252,13 @@ QWidget* MeasurementGuideDialog::createPage(int pageIndex,
         new GuideIllustrationWidget(pageIndex, page);
     illustration->setObjectName(
         QStringLiteral("measurementGuideIllustration%1").arg(pageIndex + 1));
-    layout->addWidget(illustration, 44);
+    auto* figure = new QVBoxLayout;
+    const QStringList views = {QStringLiteral("充分贴合 · 均匀涂抹耦合剂"),
+                               QStringLiteral("俯视图 · 在皮肤表面小幅旋转"),
+                               QStringLiteral("沿探头长轴看 · 仅示意倾角微调")};
+    figure->addWidget(illustration, 1);
+    figure->addWidget(wrappedLabel(views[pageIndex], QStringLiteral("guideViewLabel")));
+    layout->addLayout(figure, 44);
 
     QWidget* copy = new QWidget(page);
     QVBoxLayout* copyLayout = new QVBoxLayout(copy);
@@ -327,7 +268,19 @@ QWidget* MeasurementGuideDialog::createPage(int pageIndex,
     QLabel* bodyLabel = wrappedLabel(bodyHtml, QStringLiteral("guideBody"));
     QLabel* emphasisLabel = wrappedLabel(emphasis, QStringLiteral("guideEmphasis"));
     copyLayout->addWidget(headingLabel);
-    copyLayout->addWidget(bodyLabel, 1);
+    copyLayout->addWidget(bodyLabel);
+    if (pageIndex == 1) {
+        auto* example = new QProgressBar;
+        example->setObjectName(QStringLiteral("guideCorrAExample"));
+        example->setRange(0, 1000);
+        example->setValue(846);
+        example->setFormat(QStringLiteral("示意 corrA 0.846"));
+        example->setStyleSheet(QStringLiteral(
+            "QProgressBar {border:1px solid #dbe4ed; border-radius:5px; background:#e8edf3;"
+            " text-align:center; min-height:24px;} QProgressBar::chunk {background:#a8d9cc;}"));
+        copyLayout->addWidget(example);
+    }
+    copyLayout->addStretch();
     copyLayout->addWidget(emphasisLabel);
     layout->addWidget(copy, 56);
     return page;
@@ -361,7 +314,12 @@ void MeasurementGuideDialog::refreshNavigation()
 {
     const int page = pages_->currentIndex();
     const int count = pages_->count();
-    const QString active = QStringLiteral("<font color='#409EFF'>●</font>");
+    for (int index = 0; index < count; ++index) {
+        stepButtons_[index]->setStyleSheet(index == page
+            ? QStringLiteral("background:#e9f4fc; color:#147bbf; border:1px solid #147bbf; border-radius:6px; padding:9px;")
+            : QStringLiteral("background:#f2f5f8; color:#5e7083; border:1px solid transparent; border-radius:6px; padding:9px;"));
+    }
+    const QString active = QStringLiteral("<font color='#147bbf'>●</font>");
     const QString inactive = QStringLiteral("<font color='#C0C4CC'>○</font>");
     QString dots;
     for (int index = 0; index < count; ++index) {
@@ -377,7 +335,7 @@ void MeasurementGuideDialog::refreshNavigation()
     if (page == count - 1) {
         nextButton_->setText(mode_ == Mode::Automatic
                                  ? QStringLiteral("知道了，开始检测")
-                                 : QStringLiteral("知道了"));
+                                 : QStringLiteral("知道了，返回检测"));
     } else {
         nextButton_->setText(QStringLiteral("下一步"));
     }

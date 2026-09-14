@@ -2,6 +2,7 @@
 
 #include <QDialog>
 #include <QString>
+#include "types.h"
 
 class QLabel;
 class QPushButton;
@@ -18,7 +19,8 @@ public:
         Manual
     };
 
-    explicit MeasurementGuideDialog(Mode mode, QWidget* parent = nullptr);
+    explicit MeasurementGuideDialog(Mode mode, QWidget* parent = nullptr,
+                                    double corrAThreshold = MeasureConfig{}.frameCorrAMin);
 
     static int currentGuideVersion();
     static bool isCurrentVersionSeen(const QString& settingsPath);
@@ -38,6 +40,8 @@ private:
     void refreshNavigation();
 
     Mode mode_;
+    double corrAThreshold_;
+    QPushButton* stepButtons_[3] = {};
     QStackedWidget* pages_ = nullptr;
     QLabel* pageIndicator_ = nullptr;
     QPushButton* skipButton_ = nullptr;

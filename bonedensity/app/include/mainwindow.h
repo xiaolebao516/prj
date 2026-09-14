@@ -485,6 +485,15 @@ private:
 
     void initProcessPanel();
     void addMiddleLineToProgressBar(QProgressBar *bar);
+    bool eventFilter(QObject* watched, QEvent* event) override;
+    void updateCorrAFeedback(double corrA);
+    void clearFeedbackReadings();
+    QProgressBar* barCorrA = nullptr;
+    QLabel* lblCorrAValue = nullptr;
+    QLabel* lblCorrAStatus = nullptr;
+    QLabel* lblCorrAThreshold = nullptr;
+    QLabel* lblGStatus = nullptr;
+    QLabel* lblDStatus = nullptr;
 
     void updateProcessPanel(double sosA,
                             double sosB,

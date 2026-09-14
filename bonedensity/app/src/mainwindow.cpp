@@ -808,8 +808,7 @@ void MainWindow::on_triggerButton_clicked()
         ui->barPairB->setValue(500);
         ui->barMeasureProgress->setValue(0);
         ui->barMeasureProgress->setFormat("有效值：%v / %m");
-        ui->lblPairAValue->setText("D=--\n目标=10.0");
-        ui->lblPairBValue->setText("G=--\n目标=0.0");
+        clearFeedbackReadings();
         ui->lblProcessStatus->setText("检测已手动停止");
         ui->lblProcessStatus->setStyleSheet(
             "font-size: 12px; color: #E6A23C; font-weight: bold;"
@@ -868,8 +867,7 @@ void MainWindow::on_btnAcquireWaveform_clicked()
         ui->barPairB->setValue(500);
         ui->barMeasureProgress->setValue(0);
         ui->barMeasureProgress->setFormat("有效值：%v / %m");
-        ui->lblPairAValue->setText("D=--\n目标=10.0");
-        ui->lblPairBValue->setText("G=--\n目标=0.0");
+        clearFeedbackReadings();
         ui->lblProcessStatus->setText("检测已手动停止");
         ui->lblProcessStatus->setStyleSheet(
             "font-size: 12px; color: #E6A23C; font-weight: bold;"
@@ -1087,6 +1085,7 @@ void MainWindow::checkExperimentLogError()
 void MainWindow::stopPatientMeasurement()
 {
     cancelPendingNextPatientRound();
+    clearFeedbackReadings();
 
     if (experimentLog.active()) {
         experimentLog.write({{"event", "stop"}, {"partial_values", processValidCount},
@@ -1195,8 +1194,7 @@ void MainWindow::resetAllPatientMeasurementData()
     ui->barMeasureProgress->setFormat("有效值：%v / %m");
     ui->barMeasureProgress->setTextVisible(true);
 
-    ui->lblPairAValue->setText("D=--\n目标=10.0");
-    ui->lblPairBValue->setText("G=--\n目标=0.0");
+    clearFeedbackReadings();
     ui->lblProcessStatus->setText("等待开始测量");
     ui->lblProcessStatus->setStyleSheet(
         "font-size: 12px; color: #606266;"
@@ -1235,8 +1233,7 @@ void MainWindow::resetOneRoundMeasurementState()
     ui->barMeasureProgress->setFormat("有效值：%v / %m");
     ui->barMeasureProgress->setTextVisible(true);
 
-    ui->lblPairAValue->setText("D=--\n目标=10.0");
-    ui->lblPairBValue->setText("G=--\n目标=0.0");
+    clearFeedbackReadings();
     if (seriesSpeed) {
         seriesSpeed->clear();
     }
@@ -1326,6 +1323,7 @@ void MainWindow::handlePatientMeasureValue(double sosA,
         return;
     }
 
+    updateCorrAFeedback(corrA);
     updateProcessPanel(
         sosA,
         sosB,
@@ -2852,6 +2850,7 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
         // 病人检测模式：显示一高一低，但不计入有效值
         if (patientMeasureRunning && acquireMode == PatientMeasureMode) {
             rejectBoneLagCandidate();
+            updateCorrAFeedback(aRes.corr);
             updateProcessPanel(
                 aRes.sos,
                 bRes.sos,
@@ -3825,8 +3824,7 @@ void MainWindow::on_btnStartMeasurement_clicked()
         ui->barPairB->setValue(500);
         ui->barMeasureProgress->setValue(0);
         ui->barMeasureProgress->setFormat("有效值：%v / %m");
-        ui->lblPairAValue->setText("D=--\n目标=10.0");
-        ui->lblPairBValue->setText("G=--\n目标=0.0");
+        clearFeedbackReadings();
         ui->lblProcessStatus->setText("检测已手动停止");
         ui->lblProcessStatus->setStyleSheet(
             "font-size: 12px; color: #E6A23C; font-weight: bold;"
@@ -3883,7 +3881,7 @@ bool MainWindow::runMeasurementGuide(bool automatic)
     MeasurementGuideDialog dialog(
         automatic ? MeasurementGuideDialog::Mode::Automatic
                   : MeasurementGuideDialog::Mode::Manual,
-        this);
+        this, mCfg.frameCorrAMin);
     const bool accepted = dialog.exec() == QDialog::Accepted;
 
     if (automatic && accepted) {
@@ -4211,6 +4209,141 @@ void MainWindow::setSpeedDebugInvalid(const QString& reason)
 void MainWindow::initProcessPanel()
 {
     processValidCount = 0;
+    // This layout replaces only the approved process area, not the reference chart.
+    ui->lblProcessTitle->hide();
+    ui->lblGateStats->hide();
+    auto* outer = new QVBoxLayout(ui->grpProcessArea);
+    outer->setContentsMargins(8, 20, 8, 8);
+    outer->addWidget(ui->widgetBalanceArea);
+    auto* root = new QVBoxLayout(ui->widgetBalanceArea);
+    root->setContentsMargins(0, 0, 0, 0);
+    root->setSpacing(7);
+    ui->widgetBalanceArea->setStyleSheet(QStringLiteral(
+        "QLabel { color:#24364a; font-size:12px; background:transparent; }"
+        "QFrame#corrACard { background:white; border:1px solid #147bbf; border-radius:7px; }"
+        "QFrame#gCard { background:white; border:1px solid #dbe4ed; border-radius:7px; }"));
+    auto* header = new QHBoxLayout;
+    ui->lblProcessStatus->setWordWrap(true);
+    ui->lblProcessStatus->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+    header->addWidget(ui->lblProcessStatus, 1);
+    ui->btnMeasurementGuide->setMinimumSize(82, 28);
+    ui->btnMeasurementGuide->setStyleSheet(QStringLiteral(
+        "QPushButton { color:#147bbf; background:#e9f4fc; border:1px solid #c5deef;"
+        " border-radius:5px; padding:4px 8px; font-size:12px; }"
+        "QPushButton:disabled { color:#929ba5; background:#edf0f3; }"));
+    header->addWidget(ui->btnMeasurementGuide);
+    root->addLayout(header);
+    ui->barMeasureProgress->setFixedHeight(20);
+    root->addWidget(ui->barMeasureProgress);
+
+    auto label = [](const QString& text, const QString& name) {
+        auto* value = new QLabel(text);
+        value->setObjectName(name);
+        value->setWordWrap(true);
+        return value;
+    };
+    auto* cards = new QHBoxLayout;
+    cards->setSpacing(8);
+    auto* aCard = new QFrame;
+    aCard->setObjectName(QStringLiteral("corrACard"));
+    auto* aLayout = new QVBoxLayout(aCard);
+    aLayout->setContentsMargins(10, 9, 10, 9);
+    aLayout->setSpacing(5);
+    auto* aTitle = label(QStringLiteral("① 优先调整  corrA"), QStringLiteral("corrATitle"));
+    aTitle->setStyleSheet(QStringLiteral("color:#147bbf; font-size:14px; font-weight:bold;"));
+    aLayout->addWidget(aTitle);
+    auto* aBody = new QHBoxLayout;
+    aBody->setSpacing(10);
+    auto* scale = new QVBoxLayout;
+    scale->setSpacing(2);
+    scale->addWidget(label(QStringLiteral("1.00"), QStringLiteral("corrAScaleTop")), 0, Qt::AlignHCenter);
+    barCorrA = new QProgressBar;
+    barCorrA->setObjectName(QStringLiteral("barCorrA"));
+    barCorrA->setOrientation(Qt::Vertical);
+    barCorrA->setRange(0, 1000);
+    barCorrA->setTextVisible(false);
+    barCorrA->setFixedWidth(40);
+    barCorrA->setMinimumHeight(82);
+    scale->addWidget(barCorrA, 1);
+    scale->addWidget(label(QStringLiteral("0.00"), QStringLiteral("corrAScaleBottom")), 0, Qt::AlignHCenter);
+    aBody->addLayout(scale);
+    auto* aValues = new QVBoxLayout;
+    aValues->setSpacing(5);
+    aValues->addStretch();
+    lblCorrAValue = label(QStringLiteral("—"), QStringLiteral("lblCorrAValue"));
+    lblCorrAValue->setStyleSheet(QStringLiteral("font-size:28px; font-weight:bold;"));
+    lblCorrAValue->setWordWrap(false);
+    lblCorrAStatus = label(QStringLiteral("等待信号"), QStringLiteral("lblCorrAStatus"));
+    lblCorrAThreshold = label(QString(), QStringLiteral("lblCorrAThreshold"));
+    aValues->addWidget(lblCorrAValue);
+    aValues->addWidget(lblCorrAStatus);
+    aValues->addWidget(lblCorrAThreshold);
+    aValues->addWidget(label(QStringLiteral("达到要求即可\n不必追求满格"), QStringLiteral("corrAHelp")));
+    aValues->addStretch();
+    aBody->addLayout(aValues, 1);
+    aLayout->addLayout(aBody, 1);
+    ui->lblPositionGuide->setText(QStringLiteral("先调整探头长轴方向"));
+    ui->lblPositionGuide->setWordWrap(true);
+    ui->lblPositionGuide->setStyleSheet(QStringLiteral("font-size:12px; font-weight:bold; color:#147bbf;"));
+    aLayout->addWidget(ui->lblPositionGuide);
+    aLayout->addWidget(label(QStringLiteral("沿桡骨方向小幅旋转，观察 corrA。"), QStringLiteral("corrAAction")));
+    cards->addWidget(aCard, 3);
+
+    auto* gCard = new QFrame;
+    gCard->setObjectName(QStringLiteral("gCard"));
+    auto* gLayout = new QVBoxLayout(gCard);
+    gLayout->setContentsMargins(10, 9, 10, 9);
+    gLayout->setSpacing(5);
+    ui->lblBPairTitle->setText(QStringLiteral("② 辅助调整  G"));
+    ui->lblBPairTitle->setWordWrap(true);
+    ui->lblBPairTitle->setStyleSheet(QStringLiteral("font-size:14px; font-weight:bold;"));
+    gLayout->addWidget(ui->lblBPairTitle);
+    auto* gBody = new QHBoxLayout;
+    gBody->setSpacing(8);
+    ui->barPairB->setFixedWidth(28);
+    ui->barPairB->setMinimumHeight(100);
+    ui->barPairB->setTextVisible(false);
+    gBody->addWidget(ui->barPairB);
+    auto* gValues = new QVBoxLayout;
+    gValues->addStretch();
+    ui->lblPairBValue->setStyleSheet(QStringLiteral("font-size:17px; font-weight:bold;"));
+    ui->lblPairBValue->setWordWrap(false);
+    gValues->addWidget(ui->lblPairBValue);
+    lblGStatus = label(QStringLiteral("等待信号"), QStringLiteral("lblGStatus"));
+    gValues->addWidget(lblGStatus);
+    gValues->addStretch();
+    gBody->addLayout(gValues, 1);
+    gLayout->addLayout(gBody, 1);
+    auto* gAction = label(QStringLiteral("未计数，再微调倾角"), QStringLiteral("gAction"));
+    gAction->setStyleSheet(QStringLiteral("font-weight:bold;"));
+    gLayout->addWidget(gAction);
+    gLayout->addWidget(label(QStringLiteral("保持已找到的位置与长轴方向。"), QStringLiteral("gHelp")));
+    cards->addWidget(gCard, 2);
+    root->addLayout(cards, 1);
+
+    auto* auxiliary = new QHBoxLayout;
+    auxiliary->setSpacing(8);
+    ui->lblAPairTitle->setText(QStringLiteral("辅助 D"));
+    ui->lblAPairTitle->setStyleSheet(QStringLiteral("font-size:12px;"));
+    ui->barPairA->setOrientation(Qt::Horizontal);
+    ui->barPairA->setFixedSize(64, 10);
+    ui->barPairA->setTextVisible(false);
+    ui->lblPairAValue->setStyleSheet(QStringLiteral("font-size:12px;"));
+    lblDStatus = label(QStringLiteral("等待信号"), QStringLiteral("lblDStatus"));
+    auxiliary->addWidget(ui->lblAPairTitle);
+    auxiliary->addWidget(ui->barPairA);
+    auxiliary->addWidget(ui->lblPairAValue);
+    auxiliary->addWidget(lblDStatus);
+    auxiliary->addStretch();
+    root->addLayout(auxiliary);
+    ui->lblPositionGuideNote->setText(QStringLiteral(
+        "优先让 corrA 达到要求；连续计数后保持稳定。提示仅供参考，以有效值计数为准。"));
+    ui->lblPositionGuideNote->setWordWrap(true);
+    ui->lblPositionGuideNote->setStyleSheet(QStringLiteral(
+        "color:#315c7a; background:#e9f4fc; border-left:3px solid #147bbf; padding:6px; font-size:12px;"));
+    root->addWidget(ui->lblPositionGuideNote);
+    ui->verticalLayout_2->setStretch(0, 4);
+    ui->verticalLayout_2->setStretch(1, 5);
 
     // ======================================================
     // 1. 两个竖向进度条
@@ -4237,19 +4370,13 @@ void MainWindow::initProcessPanel()
     // ======================================================
     // 3. 文本初始化
     // ======================================================
-    ui->lblPairAValue->setText("D=--\n目标=10.0");
-    ui->lblPairBValue->setText("G=--\n目标=0.0");
+    ui->lblPairAValue->setText("D=--");
+    ui->lblPairBValue->setText("G=--");
     ui->lblProcessStatus->setText("等待开始测量");
-    ui->lblProcessStatus->setWordWrap(false);
+    ui->lblProcessStatus->setWordWrap(true);
     ui->lblProcessStatus->setMinimumHeight(0);
     ui->lblGateStats->setText("");
     ui->lblGateStats->setWordWrap(true);
-    ui->lblPositionGuide->setText(
-        QStringLiteral("先调右侧 D：空间位置\n再调左侧 G：左右倾角"));
-    ui->lblPositionGuide->setStyleSheet(
-        QStringLiteral("font-size: 13px; font-weight: bold; color: #303133;"));
-    ui->lblPositionGuideNote->setText(
-        QStringLiteral("最终使右侧 D、左侧 G 均稳定在中线"));
 
     // ======================================================
     // 4. 进度条样式
@@ -4262,14 +4389,19 @@ void MainWindow::initProcessPanel()
             text-align: center;
         }
         QProgressBar::chunk {
-            background-color: #00C853;
+            background-color: #168368;
             border-radius: 3px;
         }
     )";
 
-    ui->barPairA->setStyleSheet(barStyle);
-    ui->barPairB->setStyleSheet(barStyle);
+    ui->barPairA->setStyleSheet(QString(barStyle).replace("#168368", "#147bbf"));
+    ui->barPairB->setStyleSheet(QString(barStyle).replace("#168368", "#147bbf"));
     ui->barMeasureProgress->setStyleSheet(barStyle);
+    barCorrA->setStyleSheet(barStyle);
+    for (auto* bar : {ui->barPairA, ui->barPairB, barCorrA}) {
+        bar->installEventFilter(this);
+    }
+    clearFeedbackReadings();
 
     // ======================================================
     // 5. 给两个竖条加 50% 中线
@@ -4277,6 +4409,7 @@ void MainWindow::initProcessPanel()
     QTimer::singleShot(0, this, [this]() {
         addMiddleLineToProgressBar(ui->barPairA);
         addMiddleLineToProgressBar(ui->barPairB);
+        addMiddleLineToProgressBar(barCorrA);
     });
 }
 
@@ -4286,15 +4419,14 @@ void MainWindow::addMiddleLineToProgressBar(QProgressBar *bar)
         return;
     }
 
-    // 防止重复添加中线
-    if (bar->findChild<QFrame*>("middleLine")) {
-        return;
+    QFrame *line = bar->findChild<QFrame*>("middleLine");
+    if (!line) {
+        line = new QFrame(bar);
+        line->setObjectName("middleLine");
+        line->setFrameShape(QFrame::NoFrame);
+        line->setStyleSheet("background-color: #63758a;");
+        line->setAttribute(Qt::WA_TransparentForMouseEvents);
     }
-
-    QFrame *line = new QFrame(bar);
-    line->setObjectName("middleLine");
-    line->setFrameShape(QFrame::NoFrame);
-    line->setStyleSheet("background-color: #E6A23C;");
 
     int w = bar->width();
     int h = bar->height();
@@ -4312,10 +4444,59 @@ void MainWindow::addMiddleLineToProgressBar(QProgressBar *bar)
         return;
     }
 
-    // 50% 中线
-    line->setGeometry(0, h / 2 - 1, w, 2);
+    const double position = bar == barCorrA ? qBound(0.0, mCfg.frameCorrAMin, 1.0) : 0.5;
+    if (bar->orientation() == Qt::Vertical)
+        line->setGeometry(0, qBound(0, qRound((h - 2) * (1.0 - position)), h - 2), w, 2);
+    else
+        line->setGeometry(qRound((w - 2) * position), 0, 2, h);
     line->raise();
     line->show();
+}
+
+bool MainWindow::eventFilter(QObject* watched, QEvent* event)
+{
+    if (event->type() == QEvent::Resize &&
+        (watched == barCorrA || watched == ui->barPairA || watched == ui->barPairB)) {
+        addMiddleLineToProgressBar(qobject_cast<QProgressBar*>(watched));
+    }
+    return QMainWindow::eventFilter(watched, event);
+}
+
+void MainWindow::updateCorrAFeedback(double corrA)
+{
+    if (!barCorrA) return;
+    lblCorrAThreshold->setText(QStringLiteral("要求 ≥ %1").arg(mCfg.frameCorrAMin, 0, 'f', 2));
+    addMiddleLineToProgressBar(barCorrA);
+    const bool available = std::isfinite(corrA);
+    barCorrA->setEnabled(available);
+    barCorrA->setValue(available ? qRound(qBound(0.0, corrA, 1.0) * 1000) : 0);
+    lblCorrAValue->setText(available ? QString::number(corrA, 'f', 3) : QStringLiteral("—"));
+    lblCorrAValue->setToolTip(available ? QString::number(corrA, 'g', 12) : QString());
+    const bool meets = available && corrA >= mCfg.frameCorrAMin;
+    lblCorrAStatus->setText(!available ? QStringLiteral("等待信号")
+                                     : meets ? QStringLiteral("已达标") : QStringLiteral("未达标"));
+    const QString statusStyle = QStringLiteral("color:%1; font-size:12px;")
+        .arg(!available ? "#738194" : meets ? "#168368" : "#a66b14");
+    if (lblCorrAStatus->styleSheet() != statusStyle) lblCorrAStatus->setStyleSheet(statusStyle);
+    const QString barStyle = QStringLiteral(
+        "QProgressBar {border:1px solid #cad4df; border-radius:4px; background:#e8edf3;}"
+        "QProgressBar::chunk {background:%1; border-radius:3px;}")
+        .arg(!available ? "#bdc7d2" : meets ? "#168368" : "#d4a34b");
+    if (barCorrA->styleSheet() != barStyle) barCorrA->setStyleSheet(barStyle);
+}
+
+void MainWindow::clearFeedbackReadings()
+{
+    if (!barCorrA) return;
+    updateCorrAFeedback(qQNaN());
+    ui->barPairA->setEnabled(false);
+    ui->barPairB->setEnabled(false);
+    ui->barPairA->setValue(0);
+    ui->barPairB->setValue(0);
+    ui->lblPairAValue->setText(QStringLiteral("D=--"));
+    ui->lblPairBValue->setText(QStringLiteral("G=--"));
+    lblGStatus->setText(QStringLiteral("等待信号"));
+    lblDStatus->setText(QStringLiteral("等待信号"));
 }
 
 void MainWindow::updateProcessPanel(double sosA,
@@ -4385,15 +4566,13 @@ void MainWindow::updateProcessPanel(double sosA,
     int signedLagDiff = lagA - lagB;
 
     ui->lblPairAValue->setText(
-        QString("D=%1\n目标=%2")
+        QString("D=%1")
             .arg(signedLagDiff)
-            .arg(mCfg.angleSignedDiffTarget, 0, 'f', 1)
         );
 
     ui->lblPairBValue->setText(
-        QString("G=%1\n目标=%2")
+        QString("G=%1")
             .arg(pairMidGap, 0, 'f', 1)
-            .arg(mCfg.anglePairMidGapTarget, 0, 'f', 1)
         );
 
     // ======================================================
@@ -4422,6 +4601,8 @@ void MainWindow::updateProcessPanel(double sosA,
 
     // 姿态计算保留不变；文字不再随每帧跳变。
     Q_UNUSED(angleOk);
+    lblDStatus->setText(angleSignedDiffOk ? QStringLiteral("满足要求") : QStringLiteral("未满足"));
+    lblGStatus->setText(anglePairMidGapOk ? QStringLiteral("满足要求") : QStringLiteral("未满足"));
     ui->lblGateStats->setText("");
 }
 
@@ -4429,10 +4610,7 @@ void MainWindow::updateProcessInvalid(const QString& reason)
 {
     Q_UNUSED(reason);
     rejectBoneLagCandidate();
-    ui->barPairA->setEnabled(false);
-    ui->barPairB->setEnabled(false);
-    ui->lblPairAValue->setText("D=--");
-    ui->lblPairBValue->setText("G=--");
+    clearFeedbackReadings();
 }
 
 void MainWindow::on_btnShowResult_clicked() {

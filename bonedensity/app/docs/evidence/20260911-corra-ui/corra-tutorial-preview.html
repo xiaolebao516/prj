@@ -1,0 +1,209 @@
+<div id="bone-corra-preview" aria-label="骨密度仪检测与操作教学界面草稿">
+  <style>
+    #bone-corra-preview { --bd-bg:light-dark(#f2f5f8,#182029); --bd-panel:light-dark(#ffffff,#222d38); --bd-ink:light-dark(#24364a,#e6edf5); --bd-sub:light-dark(#5e7083,#b6c5d5); --bd-line:light-dark(#dbe4ed,#3b4c5e); --bd-blue:light-dark(#147bbf,#64baf1); --bd-blue-soft:light-dark(#e9f4fc,#243f54); --bd-green:light-dark(#168368,#58c7a4); --bd-green-soft:light-dark(#e7f5ee,#243f39); --bd-amber:light-dark(#a66b14,#f0bf6a); --bd-amber-soft:light-dark(#fff4df,#473b28); --bd-track:light-dark(#e8edf3,#364758); --bd-probe:light-dark(#f8fafc,#d5e0ea); --bd-skin:light-dark(#efd0b7,#bc9477); --bd-skin-line:light-dark(#c59d7b,#a77a57); font:14px/1.6 "Microsoft YaHei","PingFang SC",sans-serif;color:var(--bd-ink);width:100%; }
+    #bone-corra-preview * { box-sizing:border-box; }
+    #bone-corra-preview [hidden] { display:none!important; }
+    #bone-corra-preview button { font:inherit;cursor:pointer;min-height:38px;padding:8px 16px;border:1px solid var(--bd-line);border-radius:7px;background:var(--bd-panel);color:var(--bd-ink); }
+    #bone-corra-preview button:hover { border-color:var(--bd-blue); }
+    #bone-corra-preview button:focus-visible { outline:3px solid var(--bd-blue);outline-offset:3px; }
+    #bone-corra-preview button:disabled { opacity:.45;cursor:default; }
+    #bone-corra-preview button.bd-primary { background:var(--bd-blue);border-color:var(--bd-blue);color:light-dark(#fff,#122330);font-weight:500; }
+    #bone-corra-preview button.bd-quiet { background:transparent;border-color:transparent;color:var(--bd-sub); }
+    #bone-corra-preview .bd-window { background:var(--bd-bg);border:1px solid var(--bd-line);border-radius:12px;overflow:hidden; }
+    #bone-corra-preview .bd-titlebar { display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 22px;background:var(--bd-panel);border-bottom:1px solid var(--bd-line);flex-wrap:wrap; }
+    #bone-corra-preview .bd-brand { display:flex;align-items:center;gap:9px;font-weight:500; }
+    #bone-corra-preview .bd-brand i { color:var(--bd-blue); }
+    #bone-corra-preview .bd-muted { color:var(--bd-sub);font-size:12px; }
+    #bone-corra-preview .bd-number { font-variant-numeric:tabular-nums; }
+    #bone-corra-preview h2,#bone-corra-preview h3,#bone-corra-preview p { margin:0; }
+    #bone-corra-preview h2 { font-size:21px;font-weight:500; }
+    #bone-corra-preview h3 { font-size:16px;font-weight:500; }
+    #bone-corra-preview .bd-page { padding:22px; }
+    #bone-corra-preview .bd-head { display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:18px;flex-wrap:wrap; }
+    #bone-corra-preview .bd-eyebrow { color:var(--bd-sub);font-size:12px;margin-bottom:4px; }
+    #bone-corra-preview .bd-card { background:var(--bd-panel);border:1px solid var(--bd-line);border-radius:10px; }
+    #bone-corra-preview .bd-round { padding:16px 20px;margin-bottom:16px;display:grid;grid-template-columns:minmax(150px,1fr) minmax(200px,1.8fr);gap:22px;align-items:center; }
+    #bone-corra-preview .bd-round strong { font-size:21px;font-weight:500; }
+    #bone-corra-preview .bd-row { display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap; }
+    #bone-corra-preview .bd-round-track { height:9px;background:var(--bd-track);border-radius:5px;overflow:hidden;margin-top:8px; }
+    #bone-corra-preview .bd-round-fill { height:100%;background:var(--bd-blue);width:46.67%; }
+    #bone-corra-preview .bd-meters { display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:16px; }
+    #bone-corra-preview .bd-meter-panel { padding:19px 22px;min-width:0; }
+    #bone-corra-preview .bd-a { border-color:var(--bd-blue); }
+    #bone-corra-preview .bd-step-label { display:inline-flex;align-items:center;gap:7px;color:var(--bd-blue);font-weight:500;font-size:12px;margin-bottom:7px; }
+    #bone-corra-preview .bd-dot { width:19px;height:19px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:var(--bd-blue-soft); }
+    #bone-corra-preview .bd-meter-body { display:flex;align-items:center;justify-content:center;gap:28px;margin:22px 0 15px;min-height:228px; }
+    #bone-corra-preview .bd-scale-wrap { position:relative;width:124px;height:206px;flex:0 0 124px; }
+    #bone-corra-preview .bd-track { position:absolute;left:26px;bottom:0;width:64px;height:206px;border-radius:7px;background:var(--bd-track);overflow:hidden; }
+    #bone-corra-preview .bd-fill { position:absolute;bottom:0;left:0;width:100%;background:var(--bd-green);height:84.6%; }
+    #bone-corra-preview .bd-threshold { position:absolute;top:22%;left:18px;width:84px;height:2px;background:var(--bd-ink);z-index:2; }
+    #bone-corra-preview .bd-threshold::after { content:"0.78";position:absolute;right:-34px;top:-9px;font-size:12px;color:var(--bd-ink); }
+    #bone-corra-preview .bd-scale-top,#bone-corra-preview .bd-scale-bottom { position:absolute;left:0;font-size:12px;color:var(--bd-sub); }
+    #bone-corra-preview .bd-scale-top { top:-9px; } #bone-corra-preview .bd-scale-bottom { bottom:-9px; }
+    #bone-corra-preview .bd-value-block { min-width:132px; }
+    #bone-corra-preview .bd-big-value { font-size:42px;line-height:1.2;font-weight:500;letter-spacing:-1px;margin-bottom:9px; }
+    #bone-corra-preview .bd-badge { display:inline-flex;align-items:center;gap:5px;background:var(--bd-green-soft);color:var(--bd-green);border-radius:5px;padding:3px 9px;font-size:12px; }
+    #bone-corra-preview .bd-badge[data-tone="wait"] { background:var(--bd-amber-soft);color:var(--bd-amber); }
+    #bone-corra-preview .bd-badge[data-tone="none"] { background:var(--bd-track);color:var(--bd-sub); }
+    #bone-corra-preview .bd-a-note { margin-top:9px;font-size:12px;color:var(--bd-sub); }
+    #bone-corra-preview .bd-action-line { padding-top:13px;border-top:1px solid var(--bd-line);font-weight:500; }
+    #bone-corra-preview .bd-action-sub { color:var(--bd-sub);font-size:12px;margin-top:3px; }
+    #bone-corra-preview .bd-g .bd-meter-body { gap:20px; }
+    #bone-corra-preview .bd-g .bd-scale-wrap { width:64px;flex-basis:64px; }
+    #bone-corra-preview .bd-g .bd-track { width:38px;left:10px; }
+    #bone-corra-preview .bd-g .bd-fill { background:var(--bd-blue);height:46.44%; }
+    #bone-corra-preview .bd-center { position:absolute;top:50%;left:3px;width:52px;height:2px;background:var(--bd-ink); }
+    #bone-corra-preview .bd-g .bd-big-value { font-size:30px; }
+    #bone-corra-preview .bd-g .bd-value-block { min-width:80px; }
+    #bone-corra-preview .bd-aux { margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:18px;padding:13px 19px;flex-wrap:wrap; }
+    #bone-corra-preview .bd-d-group { display:flex;align-items:center;gap:14px;flex-wrap:wrap; }
+    #bone-corra-preview .bd-d-track { width:115px;height:7px;background:var(--bd-track);position:relative; }
+    #bone-corra-preview .bd-d-track::before { content:"";position:absolute;left:50%;top:-4px;height:15px;width:2px;background:var(--bd-sub); }
+    #bone-corra-preview .bd-d-marker { position:absolute;left:50%;top:-2px;width:4px;height:11px;background:var(--bd-blue); }
+    #bone-corra-preview .bd-reminder { border-left:3px solid var(--bd-blue);padding:9px 12px;background:var(--bd-blue-soft);margin:15px 0;font-size:13px; }
+    #bone-corra-preview .bd-bottom { display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap; }
+    #bone-corra-preview .bd-status { display:flex;align-items:center;gap:7px; }
+    #bone-corra-preview .bd-status-dot { width:7px;height:7px;background:var(--bd-green);border-radius:50%; }
+    #bone-corra-preview .bd-guide { background:var(--bd-panel); }
+    #bone-corra-preview .bd-steps { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:17px 0 24px; }
+    #bone-corra-preview .bd-steps button { display:flex;align-items:center;justify-content:center;gap:7px;font-size:13px;background:var(--bd-bg);border-color:transparent;padding:10px 8px; }
+    #bone-corra-preview .bd-steps button[aria-current="step"] { background:var(--bd-blue-soft);color:var(--bd-blue);border-color:var(--bd-blue); }
+    #bone-corra-preview .bd-guide-content { display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:27px;align-items:center;min-height:324px; }
+    #bone-corra-preview .bd-figure { margin:0;min-width:0; }
+    #bone-corra-preview .bd-figure-stage { background:var(--bd-bg);border-radius:10px;padding:14px 10px; }
+    #bone-corra-preview .bd-figure svg { width:100%;height:auto;display:block; }
+    #bone-corra-preview .bd-figure-caption { display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:10px 2px;font-size:12px;color:var(--bd-sub); }
+    #bone-corra-preview .bd-guide-text h3 { font-size:20px;margin-bottom:15px; }
+    #bone-corra-preview .bd-guide-text p { margin:0 0 13px; }
+    #bone-corra-preview .bd-tip { padding:12px 14px;border-radius:7px;background:var(--bd-blue-soft);font-size:13px; }
+    #bone-corra-preview .bd-tip strong { font-weight:500;display:block;margin-bottom:3px; }
+    #bone-corra-preview .bd-corra-example { display:flex;align-items:center;gap:12px;margin:15px 0; }
+    #bone-corra-preview .bd-corra-example-track { height:13px;background:var(--bd-track);position:relative;flex:1;min-width:40px; }
+    #bone-corra-preview .bd-corra-example-fill { width:84.6%;height:100%;background:var(--bd-green); }
+    #bone-corra-preview .bd-corra-example-track::after { content:"";position:absolute;left:78%;top:-5px;width:2px;height:23px;background:var(--bd-ink); }
+    #bone-corra-preview .bd-guide-footer { display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--bd-line);margin-top:25px;padding-top:17px; }
+    #bone-corra-preview .bd-guide-buttons { display:flex;align-items:center;gap:8px;flex-wrap:wrap; }
+    #bone-corra-preview .bd-motion-line { stroke:var(--bd-blue);stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round; }
+    #bone-corra-preview .bd-skin { fill:var(--bd-skin);stroke:var(--bd-skin-line);stroke-width:2; }
+    #bone-corra-preview .bd-probe { fill:var(--bd-probe);stroke:var(--bd-sub);stroke-width:2; }
+    #bone-corra-preview .bd-probe-foot { fill:var(--bd-sub); }
+    #bone-corra-preview .bd-bone-axis { fill:none;stroke:var(--bd-blue);stroke-width:2;stroke-dasharray:7 6; }
+    @media(max-width:760px) { #bone-corra-preview .bd-page{padding:16px;} #bone-corra-preview .bd-meter-panel{padding:16px;} #bone-corra-preview .bd-meter-body{gap:15px;} #bone-corra-preview .bd-big-value{font-size:34px;} #bone-corra-preview .bd-value-block{min-width:110px;} #bone-corra-preview .bd-guide-content{grid-template-columns:1fr;gap:13px;} #bone-corra-preview .bd-figure{max-width:460px;width:100%;justify-self:center;} }
+    @media(max-width:550px) { #bone-corra-preview .bd-meters,#bone-corra-preview .bd-round{grid-template-columns:1fr;} #bone-corra-preview .bd-round{gap:12px;} #bone-corra-preview .bd-g .bd-meter-body{min-height:128px;margin:10px 0;} #bone-corra-preview .bd-g .bd-scale-wrap,#bone-corra-preview .bd-g .bd-track{height:112px;} #bone-corra-preview .bd-titlebar{padding:11px 15px;} #bone-corra-preview .bd-steps{gap:5px;} #bone-corra-preview .bd-steps button{flex-direction:column;font-size:12px;} #bone-corra-preview .bd-guide-buttons{margin-left:auto;} }
+    @media(pointer:coarse) { #bone-corra-preview button{min-height:44px;} }
+  </style>
+  <div class="bd-window">
+    <header class="bd-titlebar">
+      <div class="bd-brand"><i data-lucide="activity" aria-hidden="true"></i> 骨密度仪</div>
+      <span class="bd-muted">界面草稿 · 数值为示意</span>
+    </header>
+    <section id="bd-measure" class="bd-page" aria-label="测量进度条预览">
+      <div class="bd-head"><div><p class="bd-eyebrow">当前档案：演示对象　／　测量部位：桡骨</p><h2>检测过程</h2></div><button type="button" id="bd-open-guide">操作教学</button></div>
+      <div class="bd-round bd-card">
+        <div><p class="bd-eyebrow">当前轮次</p><strong class="bd-number" id="bd-round-label">第 2 / 5 轮</strong></div>
+        <div><div class="bd-row"><span>本轮有效值</span><span class="bd-number" id="bd-count-label">14 / 30</span></div><div class="bd-round-track" role="progressbar" aria-label="本轮有效值" aria-valuemin="0" aria-valuemax="30" aria-valuenow="14" id="bd-count-track"><div class="bd-round-fill" id="bd-count-fill"></div></div></div>
+      </div>
+      <div class="bd-meters">
+        <section class="bd-card bd-meter-panel bd-a" aria-label="主要指标 corrA">
+          <div class="bd-step-label"><span class="bd-dot">1</span> 优先观察</div><h3>波形相关性 <span class="bd-muted">corrA</span></h3>
+          <div class="bd-meter-body">
+            <div class="bd-scale-wrap"><span class="bd-scale-top">1.0</span><span class="bd-scale-bottom">0</span><div class="bd-track" role="meter" aria-label="corrA，要求不低于0.78" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0.846" id="bd-a-meter"><div class="bd-fill" id="bd-a-fill"></div></div><div class="bd-threshold" aria-hidden="true"></div></div>
+            <div class="bd-value-block"><div class="bd-big-value bd-number" id="bd-a-value">0.846</div><span class="bd-badge" id="bd-a-state">已达标</span><p class="bd-a-note">要求 ≥ 0.78<br>达到要求即可，不必追求满格</p></div>
+          </div>
+          <p class="bd-action-line">先调整探头长轴方向</p><p class="bd-action-sub">使探头长轴大致沿桡骨方向，小幅旋转并观察corrA。</p>
+        </section>
+        <section class="bd-card bd-meter-panel bd-g" aria-label="次要指标 G">
+          <div class="bd-step-label"><span class="bd-dot">2</span> 需要时辅助</div><h3>倾角辅助 <span class="bd-muted">G</span></h3>
+          <div class="bd-meter-body"><div class="bd-scale-wrap"><div class="bd-track" aria-hidden="true"><div class="bd-fill" id="bd-g-fill"></div></div><div class="bd-center" aria-hidden="true"></div></div><div class="bd-value-block"><div class="bd-big-value bd-number" id="bd-g-value">−2.5</div><span class="bd-muted" id="bd-g-state">满足要求</span></div></div>
+          <p class="bd-action-line">未计数时，再微调倾角</p><p class="bd-action-sub">尽量保持已找到的位置与长轴方向。</p>
+        </section>
+      </div>
+      <div class="bd-aux bd-card" aria-label="D辅助显示"><div class="bd-d-group"><span>辅助 <b style="font-weight:500">D</b></span><span class="bd-number" id="bd-d-value">9</span><div class="bd-d-track" id="bd-d-track" aria-hidden="true"><span class="bd-d-marker" id="bd-d-marker"></span></div><span class="bd-muted" id="bd-d-state">满足要求</span></div><span class="bd-muted">仍未计数时再查看</span></div>
+      <p class="bd-reminder">优先让corrA达到要求；开始连续计数后，请保持探头稳定。</p>
+      <div class="bd-bottom"><span class="bd-status" aria-live="polite"><span class="bd-status-dot" id="bd-status-dot"></span><span id="bd-status-text">正在采集，请保持稳定</span></span><button type="button" id="bd-pause">暂停检测</button></div>
+    </section>
+    <section id="bd-guide" class="bd-page bd-guide" aria-label="检测操作教学预览" hidden>
+      <div class="bd-head"><div><p class="bd-eyebrow">第一次使用，从这里开始</p><h2>检测操作教学</h2></div><button class="bd-quiet" type="button" id="bd-close-guide" aria-label="关闭操作教学">关闭</button></div>
+      <nav class="bd-steps" aria-label="教程步骤"><button type="button" data-page="0" aria-current="step"><span>01</span>准备与放置</button><button type="button" data-page="1"><span>02</span>先调corrA</button><button type="button" data-page="2"><span>03</span>微调与采集</button></nav>
+      <div class="bd-guide-content" id="bd-guide-content">
+        <figure class="bd-figure"><div class="bd-figure-stage" id="bd-illustration"></div><figcaption class="bd-figure-caption"><span id="bd-view-label">放置示意</span><span>动作示意 · 非比例图</span></figcaption></figure>
+        <div class="bd-guide-text" id="bd-guide-copy"></div>
+      </div>
+      <footer class="bd-guide-footer"><div class="bd-guide-buttons"><button type="button" id="bd-prev" disabled>上一步</button><span class="bd-muted bd-number" id="bd-page-number">1 / 3</span></div><div class="bd-guide-buttons"><button class="bd-quiet" type="button" id="bd-skip">跳过教程</button><button class="bd-primary" type="button" id="bd-next">下一步</button></div></footer>
+    </section>
+  </div>
+  <script>
+    (() => {
+      const root = document.getElementById('bone-corra-preview');
+      const el = id => root.querySelector('#' + id);
+      const settings = { state:'计数中', auxiliary:'小进度条', fontScale:14 };
+      let page=0, previousState='计数中';
+      const scenes = {
+        '计数中': {a:.846,g:-2.5,d:9,n:14,label:'正在采集，请保持稳定',tone:'ok'},
+        'corrA未达标': {a:.642,g:-2.5,d:9,n:0,label:'本轮尚未计入有效值',tone:'wait'},
+        'corrA达标但G未满足': {a:.846,g:16,d:9,n:0,label:'本轮尚未计入有效值',tone:'ok'},
+        '信号不可用': {a:null,g:null,d:null,n:14,label:'信号不可用，请检查探头贴合',tone:'none'},
+        '轮间等待': {a:null,g:null,d:null,n:30,label:'本轮完成，1秒后自动开始下一轮',tone:'none'},
+        '已暂停': {a:null,g:null,d:null,n:14,label:'检测已暂停',tone:'none'}
+      };
+      function render() {
+        const s=scenes[settings.state];
+        root.style.fontSize=settings.fontScale+'px';
+        el('bd-a-value').textContent=s.a===null?'—':s.a.toFixed(3);
+        el('bd-a-fill').style.height=(s.a===null?0:Math.max(0,s.a)*100)+'%';
+        el('bd-a-fill').style.background=s.tone==='ok'?'var(--bd-green)':'var(--bd-amber)';
+        if(s.a===null) { el('bd-a-meter').removeAttribute('aria-valuenow');el('bd-a-meter').setAttribute('aria-valuetext','无当前读数'); }
+        else {el('bd-a-meter').setAttribute('aria-valuenow',s.a);el('bd-a-meter').removeAttribute('aria-valuetext');}
+        el('bd-a-state').textContent=s.a===null?'无当前读数':s.a>=.78?'已达标':'未达标';
+        el('bd-a-state').dataset.tone=s.tone;
+        el('bd-g-value').textContent=s.g===null?'—':s.g.toFixed(1).replace('-','−');
+        el('bd-g-state').textContent=s.g===null?'无当前读数':Math.abs(s.g)<=6?'满足要求':'未满足，需微调';
+        const gp=s.g===null?0:50+Math.sign(s.g)*Math.min(48,32*Math.pow(Math.min(1,Math.abs(s.g)/12),1.4));
+        el('bd-g-fill').style.height=gp+'%';
+        el('bd-d-value').textContent=s.d===null?'—':s.d;
+        el('bd-d-state').textContent=s.d===null?'无当前读数':s.d>=5&&s.d<=15?'满足要求':'未满足';
+        el('bd-d-marker').hidden=s.d===null;
+        el('bd-d-track').hidden=settings.auxiliary==='仅数值';
+        el('bd-count-label').textContent=s.n+' / 30';el('bd-count-fill').style.width=(s.n/30*100)+'%';el('bd-count-track').setAttribute('aria-valuenow',s.n);
+        el('bd-status-text').textContent=s.label;
+        el('bd-status-dot').style.background=s.a===null?'var(--bd-sub)':s.n?'var(--bd-green)':'var(--bd-amber)';
+        el('bd-pause').textContent=settings.state==='已暂停'?'继续检测':'暂停检测';
+        el('bd-pause').disabled=settings.state==='轮间等待';
+      }
+      const arm = '<path class="bd-skin" d="M35 116 Q25 134 36 163 Q47 181 71 178 L338 164 Q369 161 376 145 Q378 125 351 121 L75 101 Q45 98 35 116Z"/>';
+      const probe = '<rect class="bd-probe" x="-77" y="-25" width="154" height="50" rx="18"/><rect class="bd-probe-foot" x="-52" y="-16" width="13" height="32" rx="5"/><rect class="bd-probe-foot" x="39" y="-16" width="13" height="32" rx="5"/><path d="M-26 0 H26" stroke="var(--bd-blue)" stroke-width="3"/>';
+      const svg = (name,body) => '<svg viewBox="0 0 410 238" role="img" aria-label="'+name+'"><title>'+name+'</title>'+body+'</svg>';
+      const pages=[
+        {view:'侧上方视角 · 先保证充分贴合',
+          image:svg('探头与前臂之间均匀涂抹耦合剂',arm+'<ellipse cx="207" cy="122" rx="75" ry="17" fill="var(--bd-blue)" opacity=".22"/><g transform="translate(207 91)">'+probe+'</g><path d="M106 39 C99 53 94 57 94 64 A12 12 0 0 0 118 64 C118 57 112 49 106 39Z" fill="var(--bd-blue)" opacity=".6"/><path class="bd-motion-line" d="M147 205 H267 M147 205 l10 -6 M147 205 l10 6 M267 205 l-10 -6 M267 205 l-10 6"/>'),
+          copy:'<h3>放到位，贴合好</h3><p>在测量部位涂抹足量耦合剂，使探头与皮肤之间充分、均匀接触。</p><p>把探头放到指定测量位置，长轴大致沿桡骨方向，避免明显歪斜或翘起。</p><div class="bd-tip"><strong>接下来主要看corrA</strong>不用一开始同时追着每个进度条调整。</div>'},
+        {view:'俯视图 · 在皮肤表面小幅旋转',
+          image:svg('俯视前臂，小幅旋转探头，使其长轴沿桡骨方向',arm+'<path class="bd-bone-axis" d="M53 142 H362"/><g transform="translate(205 142) rotate(-28)" opacity=".28">'+probe+'</g><g transform="translate(205 142)">'+probe+'</g><path class="bd-motion-line" d="M154 55 Q219 27 278 75 M278 75 l-15 -2 M278 75 l-3 -15"/><path class="bd-bone-axis" d="M101 207 H312"/>'),
+          copy:'<h3>先调整长轴方向，让corrA达标</h3><p>保持充分贴合，小幅旋转探头，使探头长轴大致沿桡骨方向，同时观察corrA。</p><div class="bd-corra-example"><span class="bd-number">corrA 0.846</span><div class="bd-corra-example-track" aria-hidden="true"><div class="bd-corra-example-fill"></div></div></div><p class="bd-muted">要求 ≥ 0.78；达到要求即可，不必追求满格。</p><div class="bd-tip"><strong>已经开始连续计数？</strong>请保持姿势，不必再刻意调整G。</div>'},
+        {view:'沿探头长轴看 · 仅示意倾角微调',
+          image:svg('保持位置，小幅倾斜探头；开始连续计数后保持不动','<path class="bd-skin" d="M60 194 Q82 137 205 137 Q328 137 350 194 L350 220 H60Z"/><path d="M166 141 Q205 132 244 141" stroke="var(--bd-blue)" stroke-width="9" opacity=".3" fill="none"/><g transform="translate(205 142) rotate(-14)" opacity=".3"><rect class="bd-probe" x="-35" y="-91" width="70" height="88" rx="12"/></g><rect class="bd-probe" x="170" y="51" width="70" height="88" rx="12"/><rect class="bd-probe-foot" x="175" y="132" width="60" height="11" rx="4"/><path class="bd-motion-line" d="M137 76 Q129 100 140 119 M137 76 l-10 8 M137 76 l5 12 M275 76 Q283 100 272 119 M275 76 l-5 12 M275 76 l10 8"/>'),
+          copy:'<h3>仍未计数，再小幅调整倾角</h3><p>corrA已达标但仍未计数时，尽量保持已找到的位置与长轴方向，小幅改变倾角，参考G辅助调整。</p><p>若仍不能推进，再查看D是否满足要求，并检查探头贴合。不要持续盲目调整同一个方向。</p><div class="bd-tip"><strong>连续计数后，保持探头不动</strong>每轮累计30个有效值，共5轮。每轮完成后等待1秒自动继续，也可按空格或点击按钮立即继续。</div>'}
+      ];
+      function renderGuide() {
+        const p=pages[page];el('bd-illustration').innerHTML=p.image;el('bd-guide-copy').innerHTML=p.copy;el('bd-view-label').textContent=p.view;
+        el('bd-page-number').textContent=(page+1)+' / 3';el('bd-prev').disabled=page===0;el('bd-next').textContent=page===2?'知道了，返回检测':'下一步';el('bd-skip').hidden=page===2;
+        root.querySelectorAll('[data-page]').forEach(b=>{if(Number(b.dataset.page)===page)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');});
+      }
+      function showGuide() {page=0;el('bd-measure').hidden=true;el('bd-guide').hidden=false;renderGuide();}
+      function closeGuide() {el('bd-guide').hidden=true;el('bd-measure').hidden=false;el('bd-open-guide').focus();}
+      el('bd-open-guide').addEventListener('click',showGuide);
+      ['bd-close-guide','bd-skip'].forEach(id=>el(id).addEventListener('click',closeGuide));
+      el('bd-next').addEventListener('click',()=>{if(page===2)closeGuide();else{page++;renderGuide();}});
+      el('bd-prev').addEventListener('click',()=>{page=Math.max(0,page-1);renderGuide();});
+      root.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>{page=Number(b.dataset.page);renderGuide();}));
+      root.addEventListener('keydown',e=>{if(e.key==='Escape'&&!el('bd-guide').hidden)closeGuide();});
+      el('bd-pause').addEventListener('click',()=>{if(settings.state==='已暂停')settings.state=previousState;else{previousState=settings.state;settings.state='已暂停';}render();});
+      render();renderGuide();
+      if(globalThis.Tweak) {
+        const tweak=new Tweak({container:root,onChange:render});
+        tweak.addSelect(settings,'state',{label:'预览状态',options:['计数中','corrA未达标','corrA达标但G未满足','信号不可用','轮间等待']});
+        tweak.addSelect(settings,'auxiliary',{label:'D辅助显示',options:['小进度条','仅数值']});
+      }
+    })();
+  </script>
+</div>

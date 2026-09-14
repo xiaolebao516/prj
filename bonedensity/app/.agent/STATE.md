@@ -6,11 +6,11 @@
 
 ## Stage
 
-`research-gap`
+`verification`
 
 ## Status
 
-`2026-09-10 axis follow-up analyzed: long contains seven same-B/small-B-centre G jumps of58.5–65.5 despite high old A/B scores; short mixes tilt/sliding and quality degradation with an unknown transition. Prioritize feature identity, not G widening. Research-only; no product change approved.`
+`2026-09-12 corrA-primary/G-secondary/D-small Qt UI and tutorial implemented, software verified and canonical Debug deployed. Actual probe usability remains external acceptance. Relative-G research remains paused; no algorithm change.`
 
 ## Active Milestone
 
@@ -18,18 +18,35 @@
 
 ## Current Task
 
-`Analyze new long/short CSVs after removing exact historical prefixes, separate known motion descriptions from unknown phase timing, and test whether G jumps persist with stable B and high old quality. Findings in axis-trials-findings-20260910.md; raw-wave confirmation and exact short phase boundary remain unavailable.`
+`Hand off the verified UI increment for real-device usability feedback. Normal executable and existing data are ready; do not resume algorithm research without a new request.`
 
 ## Model Recommendation
 
-- Model Capability: `DEEP`
+- Model Capability: `BALANCED`
 - Reasoning Effort: `high`
 - Switch Benefit: `unknown`
-- Reason: uncertain feature-selection and cross-person generalization with clinically consequential output risks; descriptive evidence must be separated from full-flow and accuracy claims. No automatic model switch.
+- Reason: approved local UI implementation and verification; no algorithm design or parameter selection. No automatic model switch.
 
 ## Plan Status
 
-`draft`
+`approved`
+
+2026-09-11 preview-only approval: user confirmed observations during actual Start Measurement, then requested “先把更新后的进度条和教程ui做好给我看看” and explicitly no one-shot full implementation. Prepared a local interactive mockup, not a hardware-connected program. No need to re-ask the already answered corrA observation source.
+
+## Approved UI Plan
+
+- Current review deliverable: self-contained interactive measurement/tutorial preview at docs/evidence/20260911-corra-ui/corra-tutorial-preview.html; show illustrative data only, actual-gate corrA0.78 presentation, retained G centre, D aid, three tutorial pages with schematic top/end views and next/back/skip/return.
+- Approved implementation: localized Qt UI/layout and tutorial content/diagrams using the actual effective patient aRes.corr; preserve every gate, SOS formula, sampling cadence, round protections and1s handoff. Add failing focused UI assertions, implement, run isolated fixed-toolchain regressions and offscreen captures, inspect actual layouts, then canonical build with runtime XML hash preservation.
+- Prototype checks: HTML/JS structure and IDs; static DOM transitions for all3 pages,5 display states, no-stale-readings, pause/resume and D visual alternatives passed. This is not browser-rendered or actual Qt/hardware acceptance.
+
+## UI Approval Evidence
+
+2026-09-14 Git handoff: user requested “帮我同步到git，然后大概总结下这段时间的改动和成果”. This explicitly authorizes committing and pushing the reviewed UI/tutorial source, tests and evidence on the current upstream branch. Exclude the unrelated summer ZIP; do not change algorithms or claim hardware acceptance. Pre-commit full suite rerun:54 passed,0 failed,1 optional capture skipped; diff check passes.
+
+- User: “这个UI我认可，可以按这个继续”. This approves the reviewed hierarchy, wording, schematic diagrams and Qt integration/build. No further mockup approval is needed.
+- No authorization to change algorithms, thresholds, runtime XML, Git commit or remote state. Older research approvals below remain historical/paused, not current scope.
+
+2026-09-11 discussion only: user reports corrA is a strong practical predictor of smooth valid-value progress and relates it to aligning the probe long axis with the radius. Proposed information priority is corrA first, G second, D reduced or removed visually, plus substantial tutorial revision. Prefer retaining small D feedback because unchanged D can still block progress. Any diagram/UI implementation, scoring or threshold change requires a reviewed exact plan. The prior short-axis/G-centre field observation is retained as the user's operating evidence; do not ask for repetition of that experiment.
 
 2026-09-10 analysis scope: user supplied11 legacy CSVs and clarified location=translation, angle=long-axis tilt, approximate references wyl3850/lhy3800/haj3800/yrc3900. Analysis and research artifacts only; no threshold, formula, product source/build, desktop/device, schema or Git mutation is authorized.
 
@@ -196,6 +213,8 @@ D. Run focused regressions, canonical build and scope review, then hand off self
 
 ## Current Judgment
 
+2026-09-11 UI proposal: current patient path uses the effective aRes.corr (dual-window minimum on the valley branch, actual fallback score otherwise), frame threshold0.78. The primary bar must show this gate input, not a CSV/debug/legacy peak score. CorrA is correlation, not a measured angle or accuracy percentage. Promote it as an actionable primary cue without claiming it alone guarantees counting or accurateSOS. D display priority may decrease but its gate remains: prior D-grace replay shifted3828.12 to4053.58. Teach initial coupling/placement, long-axis alignment using corrA, then small tilt adjustments if needed; actual counting/hold-still is the operational feedback, with unresolved gate status visible instead of unreadable per-frame instruction text. Await discussion before UI mockup/implementation; no core change.
+
 2026-09-10 axis refinement: repeatable large G-centre jumps with high old correlation and unchanged B strengthen the feature-switching investigation, not proof of picker error or no physical motion. Long-axis movement also coincides with large G jumps, so do not treat rawG as a simple calibrated axis sensor. Short tilt/sliding boundary and angular magnitude are unknown; do not compare axis sensitivities using pooled ranges or guess contact labels from scores. Prioritize actual A landmark/branch reliability and separate signal availability from pose validity; do not offsetG by65, smooth away uncertainty or auto-zero arbitrary stable poses. See axis-trials-findings-20260910.md.
 
 2026-09-10 superseding refinement: a universal G=f(SOS) or unconditional stable-centre adaptation is not supported. Reference-near data can have nonzero G, but stable high-quality data can also deviate by hundreds of m/s. Prioritize actual landmark/branch and quality reliability; only then evaluate G-relative motion as auxiliary to independently validated signal criteria. D and A bottlenecks must be included, not simply lowered. Existing CSVs answer the direction question but omit raw waves, short-axis phase labels, build identity and acceptance events; do not report hypothetical static pass counts as actual progress or5-round accuracy. See legacy-batch-findings-20260910.md.
@@ -252,6 +271,16 @@ Evidence and concrete next-change recommendations: `docs/research/measurement-ga
 
 ## Verification Status
 
+Current UI increment evidence: `docs/evidence/20260911-corra-ui/verification.md`.
+
+| Criterion | Status | Result / evidence |
+| --- | --- | --- |
+| `SC-31` | passed (software) | Actual pipeline/display consistency, unrounded threshold boundary, unchanged G/D mapping, no admission from corrA alone, invalid/stop/reset clearing, marker resize and non-overlap tests pass; actual Qt captures inspected at1920×1080 and1366×768. |
+| `SC-32` | passed (software); real-device usability pending | Three approved diagrams/instruction pages implemented. Version1→2, manual/automatic/skip/close/navigation and1s/Space continuation tests pass. Actual Qt tutorial captures at900×620 and760×560 inspected. |
+| `SC-33` | passed (software); hardware external | Final main-window suite54/0/1, focused captures, canonical fixed-toolchain build and diff checks pass. All4 runtime XML hashes unchanged; prior EXE preserved and hash matched. No algorithm, threshold, schema, desktop/device or Git mutation. |
+
+Earlier rows below are historical; SC8/SC14 still require actual-user/device evidence and are not resolved by this UI increment.
+
 2026-09-10 research verification: source inventory, exact cumulative prefixes, per-file arithmetic, selected-frame counterexamples and input SHA-256 preservation checked. Reproducible script runs successfully. This is not a product build/test or new hardware acceptance; all prior external acceptance boundaries remain.
 
 | Criterion | Status | Result / evidence |
@@ -289,7 +318,7 @@ Evidence and concrete next-change recommendations: `docs/research/measurement-ga
 
 ## Next Actions
 
-`Present the completed CSV findings. Next candidate work should use existing raw recordings to audit actual A/B landmark selection and quality, explicitly testing both reference-near and stable-deviating segments. If targeted new evidence is needed, obtain a small phase-labelled raw recording separating translation/long-axis/short-axis motion, not more anonymous CSV volume. Do not deploy universal widened/self-zeroed G, remove independent safeguards, or change product/build/runtime/Git state without a new exact approved plan.`
+`Synchronize the reviewed increment to the current Git upstream under the 2026-09-14 authorization and provide a plain-language meeting summary. User may assess corrA-first guidance with the instrument; actual positioning benefit and accuracy remain external.`
 
 ## Iteration Control
 

@@ -115,6 +115,7 @@ private slots:
     void speedSeriesKeepsOnlyRecentPoints();
     void disconnectedControlsAndPlaceholdersAreSafe();
     void positionGuideTracksExistingBarsWithoutChangingThem();
+    void corrAFeedbackBindingAndResponsiveLayout();
     void measurementStatusIsVisibleAndOperatorFacing();
     void measurementGuideHasThreeApprovedPagesAndPortableMarker();
     void measurementGuideFirstUseAndSpaceContinue();
@@ -701,8 +702,11 @@ void MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions()
         return signal;
     };
     const auto bc = wave(928), bd = wave(800);
-    for (int shift = -50; shift <= 20; ++shift)
+    QVector<QString> displayedCorrA;
+    for (int shift = -50; shift <= 20; ++shift) {
         window.detectAndPlotSpeed(bc, bd, wave(937 + shift), wave(800 + shift));
+        displayedCorrA.append(window.lblCorrAValue->toolTip());
+    }
     window.stopPatientMeasurement();
     QFile file(path);
     QVERIFY(file.open(QIODevice::ReadOnly));
@@ -718,6 +722,10 @@ void MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions()
             QVERIFY(row.contains("A_feature_branch"));
             const auto a = row.value("A").toObject();
             const auto b = row.value("B").toObject();
+            bool displayed = false;
+            const double actualDisplay = displayedCorrA.at(frames - 1).toDouble(&displayed);
+            QVERIFY(displayed);
+            QVERIFY(std::abs(actualDisplay - a.value("corr").toDouble()) < 1e-10);
             QCOMPARE(row.value("D").toInt(), a.value("lag").toInt() - b.value("lag").toInt());
             QCOMPARE(row.value("G").toDouble(), .5 *
                 (b.value("early_feature").toInt() + b.value("late_feature").toInt() -
@@ -824,34 +832,21 @@ void MainWindowSafetyTests::positionGuideTracksExistingBarsWithoutChangingThem()
     MainWindow window;
     window.hide();
 
-    QCOMPARE(window.ui->barPairB->geometry(), QRect(30, 30, 81, 201));
-    QCOMPARE(window.ui->barPairA->geometry(), QRect(370, 30, 81, 201));
-    QCOMPARE(window.ui->lblBPairTitle->text(), QStringLiteral("G 倾角平衡"));
-    QCOMPARE(window.ui->lblAPairTitle->text(), QStringLiteral("D 位置平衡"));
+    QVERIFY2(window.findChild<QProgressBar*>(QStringLiteral("barCorrA")),
+             "The approved primary corrA meter must exist in the actual Qt window");
+
+    QCOMPARE(window.ui->barPairB->orientation(), Qt::Vertical);
+    QCOMPARE(window.ui->barPairA->orientation(), Qt::Horizontal);
+    QCOMPARE(window.ui->lblBPairTitle->text(), QStringLiteral("② 辅助调整  G"));
+    QCOMPARE(window.ui->lblAPairTitle->text(), QStringLiteral("辅助 D"));
     QCOMPARE(window.ui->lblPositionGuide->text(),
-             QStringLiteral("先调右侧 D：空间位置\n再调左侧 G：左右倾角"));
+             QStringLiteral("先调整探头长轴方向"));
     QCOMPARE(window.ui->lblPositionGuideNote->text(),
-             QStringLiteral("最终使右侧 D、左侧 G 均稳定在中线"));
+             QStringLiteral("优先让 corrA 达到要求；连续计数后保持稳定。提示仅供参考，以有效值计数为准。"));
     QVERIFY(window.ui->lblPositionGuide->styleSheet().contains(
-        QStringLiteral("font-weight: bold")));
-    QVERIFY(!window.ui->lblPositionGuide->geometry().intersects(
-        window.ui->barPairB->geometry()));
-    QVERIFY(!window.ui->lblPositionGuide->geometry().intersects(
-        window.ui->barPairA->geometry()));
-    QVERIFY(!window.ui->lblPositionGuideNote->geometry().intersects(
-        window.ui->barPairB->geometry()));
-    QVERIFY(!window.ui->lblPositionGuideNote->geometry().intersects(
-        window.ui->barPairA->geometry()));
+        QStringLiteral("font-weight:bold")));
     QCOMPARE(window.ui->btnMeasurementGuide->text(),
              QStringLiteral("操作教学"));
-    QVERIFY(!window.ui->btnMeasurementGuide->geometry().intersects(
-        window.ui->barPairB->geometry()));
-    QVERIFY(!window.ui->btnMeasurementGuide->geometry().intersects(
-        window.ui->barPairA->geometry()));
-    QVERIFY(!window.ui->btnMeasurementGuide->geometry().intersects(
-        window.ui->lblPositionGuide->geometry()));
-    QVERIFY(!window.ui->btnMeasurementGuide->geometry().intersects(
-        window.ui->lblPositionGuideNote->geometry()));
 
     const QString fixedGuide = window.ui->lblPositionGuide->text();
     const QString fixedNote = window.ui->lblPositionGuideNote->text();
@@ -863,13 +858,103 @@ void MainWindowSafetyTests::positionGuideTracksExistingBarsWithoutChangingThem()
     QCOMPARE(window.ui->barMeasureProgress->value(), 1);
 }
 
+void MainWindowSafetyTests::corrAFeedbackBindingAndResponsiveLayout()
+{
+    MainWindow window;
+    window.setAttribute(Qt::WA_DontShowOnScreen);
+    window.ui->stackedWidget->setCurrentWidget(window.ui->pageMain);
+    window.show();
+    auto* corrA = window.findChild<QProgressBar*>(QStringLiteral("barCorrA"));
+    QVERIFY(corrA);
+    const auto mapped = [](double value, double target, double scale) {
+        const int offset = qRound(320 * std::pow(qMin(std::abs(value-target)/scale, 1.0), 1.4));
+        return 500 + (value > target ? offset : value < target ? -offset : 0);
+    };
+    for (const auto g : {-60., -12., -6., 0., 6., 12., 20.}) {
+        window.updateProcessPanel(0, 0, 107, 100, 7, g, false);
+        QCOMPARE(window.ui->barPairA->value(), mapped(7, window.mCfg.angleSignedDiffTarget, 6));
+        QCOMPARE(window.ui->barPairB->value(), mapped(g, window.mCfg.anglePairMidGapTarget, 12));
+    }
+    window.patientMeasureRunning = true;
+    window.acquireMode = PatientMeasureMode;
+    window.handlePatientMeasureValue(3900, 3900, 3900, 109, 100, 9, 0, .7799, .98, false);
+    QCOMPARE(window.lblCorrAStatus->text(), QStringLiteral("未达标"));
+    QCOMPARE(window.processValidCount, 0);
+    window.handlePatientMeasureValue(3900, 3900, 3900, 109, 100, 9, 0, .846, .98, false);
+    QCOMPARE(corrA->value(), 846);
+    QCOMPARE(window.lblCorrAValue->text(), QStringLiteral("0.846"));
+    QCOMPARE(window.lblCorrAStatus->text(), QStringLiteral("已达标"));
+    QCOMPARE(window.processValidCount, 0); // corrA alone never admits a value
+    window.updateCorrAFeedback(window.mCfg.frameCorrAMin);
+    QCOMPARE(window.lblCorrAStatus->text(), QStringLiteral("已达标"));
+    window.updateCorrAFeedback(-.2);
+    QCOMPARE(corrA->value(), 0);
+    QCOMPARE(window.lblCorrAValue->text(), QStringLiteral("-0.200"));
+    window.updateCorrAFeedback(1);
+    QCOMPARE(corrA->value(), 1000);
+    const double threshold = window.mCfg.frameCorrAMin;
+    window.mCfg.frameCorrAMin = .81;
+    window.updateCorrAFeedback(.8);
+    QVERIFY(window.lblCorrAThreshold->text().contains(QStringLiteral("0.81")));
+    QCOMPARE(window.lblCorrAStatus->text(), QStringLiteral("未达标"));
+    QCOMPARE(window.mCfg.frameCorrAMin, .81);
+    window.mCfg.frameCorrAMin = threshold;
+    window.updateCorrAFeedback(.846);
+    window.updateProcessPanel(0, 0, 109, 100, 9, 0, true);
+    window.ui->lblProcessStatus->setText(QStringLiteral("当前第 2/5 轮"));
+    const QString captureDir = qEnvironmentVariable("BONE_UI_CAPTURE_DIR");
+    for (const auto size : {QSize(1920,1080), QSize(1366,768)}) {
+        window.resize(size);
+        window.scheduleResponsiveLayout();
+        QTest::qWait(100);
+        auto* area = window.ui->grpProcessArea;
+        auto* aCard = window.findChild<QFrame*>(QStringLiteral("corrACard"));
+        auto* gCard = window.findChild<QFrame*>(QStringLiteral("gCard"));
+        QVERIFY(aCard && gCard);
+        QVERIFY(aCard->width() > gCard->width());
+        for (auto* child : {static_cast<QWidget*>(corrA), static_cast<QWidget*>(window.ui->barPairB),
+                           static_cast<QWidget*>(window.ui->barPairA),
+                           static_cast<QWidget*>(window.ui->lblPositionGuideNote),
+                           static_cast<QWidget*>(window.ui->lblProcessStatus)}) {
+            QVERIFY2(area->rect().contains(QRect(child->mapTo(area,QPoint()),child->size())),
+                     qPrintable(child->objectName()));
+        }
+        QVERIFY(!area->geometry().intersects(window.ui->grpReferenceCurveArea->geometry()));
+        auto* line = corrA->findChild<QFrame*>(QStringLiteral("middleLine"));
+        QVERIFY(line);
+        QCOMPARE(line->y(), qRound((corrA->height()-2)*(1-threshold)));
+        auto* dLine = window.ui->barPairA->findChild<QFrame*>(QStringLiteral("middleLine"));
+        QVERIFY(dLine);
+        QCOMPARE(dLine->width(), 2);
+        if (!captureDir.isEmpty()) {
+            QVERIFY(QDir().mkpath(captureDir));
+            QVERIFY(window.grab().save(QDir(captureDir).filePath(QStringLiteral("feedback-%1.png").arg(size.width()))));
+            if (size.width() == 1920)
+                QVERIFY(area->grab().save(QDir(captureDir).filePath(QStringLiteral("feedback-panel.png"))));
+        }
+    }
+    window.updateProcessInvalid(QStringLiteral("测试无效帧"));
+    QCOMPARE(window.ui->barMeasureProgress->value(), 1);
+    QVERIFY(!corrA->isEnabled());
+    QCOMPARE(corrA->value(), 0);
+    QCOMPARE(window.lblCorrAValue->text(), QStringLiteral("—"));
+    QCOMPARE(window.ui->lblPairAValue->text(), QStringLiteral("D=--"));
+    for (int action = 0; action < 3; ++action) {
+        window.updateCorrAFeedback(.9);
+        if (action == 0) window.stopPatientMeasurement();
+        if (action == 1) window.resetOneRoundMeasurementState();
+        if (action == 2) window.resetAllPatientMeasurementData();
+        QVERIFY(!corrA->isEnabled());
+        QCOMPARE(window.lblCorrAValue->text(), QStringLiteral("—"));
+    }
+}
+
 void MainWindowSafetyTests::measurementStatusIsVisibleAndOperatorFacing()
 {
     MainWindow window;
     window.hide();
 
-    QVERIFY(window.ui->widgetBalanceArea->rect().contains(
-        window.ui->lblProcessStatus->geometry()));
+    QVERIFY(window.ui->lblProcessStatus->wordWrap());
 
     const auto hasDeveloperWording = [](const QString& text) {
         return text.contains(QStringLiteral("Gap"), Qt::CaseInsensitive) ||
@@ -913,6 +998,12 @@ void MainWindowSafetyTests::measurementGuideHasThreeApprovedPagesAndPortableMark
         directory.filePath(QStringLiteral("measurement-guide.ini"));
 
     QVERIFY(!MeasurementGuideDialog::isCurrentVersionSeen(settingsPath));
+    QFile oldMarker(settingsPath);
+    QVERIFY(oldMarker.open(QIODevice::WriteOnly));
+    oldMarker.write("version=1\n");
+    oldMarker.close();
+    QVERIFY(MeasurementGuideDialog::currentGuideVersion() > 1);
+    QVERIFY(!MeasurementGuideDialog::isCurrentVersionSeen(settingsPath));
     QString errorMessage;
     QVERIFY2(MeasurementGuideDialog::markCurrentVersionSeen(
                  settingsPath, &errorMessage),
@@ -928,13 +1019,13 @@ void MainWindowSafetyTests::measurementGuideHasThreeApprovedPagesAndPortableMark
     QCOMPARE(pages->count(), 3);
     QVERIFY(pages->widget(0)->findChild<QLabel*>(
         QStringLiteral("guideBody"))->text().contains(
-        QStringLiteral("右侧 D")));
+        QStringLiteral("贴合")));
     QVERIFY(pages->widget(1)->findChild<QLabel*>(
         QStringLiteral("guideHeading"))->text().contains(
-        QStringLiteral("右侧 D")));
+        QStringLiteral("corrA")));
     QVERIFY(pages->widget(2)->findChild<QLabel*>(
         QStringLiteral("guideHeading"))->text().contains(
-        QStringLiteral("左侧 G")));
+        QStringLiteral("倾角")));
     QVERIFY(pages->widget(2)->findChild<QLabel*>(
         QStringLiteral("guideBody"))->text().contains(
         QStringLiteral("等待 1 秒自动进入下一轮")));
@@ -964,6 +1055,15 @@ void MainWindowSafetyTests::measurementGuideHasThreeApprovedPagesAndPortableMark
     capture(QStringLiteral("measurement-guide-3.png"));
     QCOMPARE(pages->currentIndex(), 2);
     QCOMPARE(next->text(), QStringLiteral("知道了，开始检测"));
+    auto* back = dialog.findChild<QPushButton*>(QStringLiteral("guideBackButton"));
+    back->click();
+    QCOMPARE(pages->currentIndex(), 1);
+    dialog.findChild<QPushButton*>(QStringLiteral("guideStep1"))->click();
+    QCOMPARE(pages->currentIndex(), 0);
+    dialog.resize(760, 560);
+    capture(QStringLiteral("measurement-guide-small.png"));
+    dialog.findChild<QPushButton*>(QStringLiteral("guideSkipButton"))->click();
+    QCOMPARE(dialog.result(), int(QDialog::Accepted));
 }
 
 void MainWindowSafetyTests::measurementGuideFirstUseAndSpaceContinue()
