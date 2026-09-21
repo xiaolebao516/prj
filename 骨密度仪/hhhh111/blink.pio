@@ -1,0 +1,156 @@
+;
+; Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
+;
+; SPDX-License-Identifier: BSD-3-Clause
+;
+
+; SET pin 0 should be mapped to your LED GPIO
+
+
+.program rx_prog1
+.side_set 1                      ; 用 1 位 sideset 驱动 PIN_CLK
+
+.wrap_target
+    pull    block      side 0b0  ;等待输入
+    set     y, 8       side 0b0  ;设置y寄存器是8，用在后面的循环
+    mov     x, osr     side 0b0  ;写采样次数，1000就是采1000个点
+    wait 1 gpio 30     side 0b0  ;等待开启，以上几步后面都是side 0b0，意思是clk都是低，还没有发时钟信号
+
+delay_loop:
+    nop                side 0b1 
+    jmp y-- delay_loop side 0b0  ;这里循环8次，主要是side 0b0,side 0b1的循环，可以发8个时钟出去
+
+rx1_loop:  
+    in      pins, 12   side 0b1 ;低电平，此时采的数据是前面八个循环clk里第一个上升沿采到的数据，延时了8个周期才到，下面就是4句一循环（后面的side是时钟），上面的时钟也是4句一循环
+
+    jmp   x-- rx1_loop side 0b0
+.wrap
+
+
+% c-sdk {
+// this is a raw helper function for use by the user which sets up the GPIO output, and configures the SM to output on a particular pin
+
+void pio_rx1_init(PIO pio, uint sm, uint offset, uint pin_base, uint pin_clk, uint pin_bits, float clkdiv) {
+    pio_sm_config c1 = rx_prog1_program_get_default_config(offset);
+
+    for (int i = 0; i < 12; i++) {
+        pio_gpio_init(pio, pin_base + i);
+        pio_sm_set_consecutive_pindirs(pio, sm, pin_base + i, 1, false); // input
+    }
+    sm_config_set_in_pins(&c1, pin_base);
+
+    pio_gpio_init(pio, pin_clk);
+    sm_config_set_out_pins(&c1, pin_clk, 1);
+    pio_sm_set_consecutive_pindirs(pio, sm, pin_clk, 1, true);
+    sm_config_set_sideset_pins(&c1, pin_clk);
+    gpio_put(pin_clk, false);
+    sm_config_set_in_shift(&c1, false, true, 12);
+
+    sm_config_set_clkdiv(&c1, clkdiv);
+    pio_sm_init(pio, sm, offset, &c1);
+
+}
+%}
+
+.program rx_prog2
+.side_set 1                      ; 用 1 位 sideset 驱动 PIN_CLK
+
+.wrap_target
+    pull    block      side 0b0  ;等待输入
+    set     y, 8       side 0b0  ;设置y寄存器是8，用在后面的循环
+    mov     x, osr     side 0b0  ;写采样次数，1000就是采1000个点
+    wait 1 gpio 30     side 0b0  ;等待开启，以上几步后面都是side 0b0，意思是clk都是低，还没有发时钟信号
+
+delay_loop:
+    nop                side 0b1 
+    jmp y-- delay_loop side 0b0  ;这里循环8次，主要是side 0b0,side 0b1的循环，可以发8个时钟出去
+
+rx2_loop:  
+    in      pins, 12   side 0b1  ;低电平，此时采的数据是前面八个循环clk里第一个上升沿采到的数据，延时了8个周期才到，下面就是4句一循环（后面的side是时钟），上面的时钟也是4句一循环
+       
+    jmp   x-- rx2_loop side 0b0 
+.wrap
+
+
+
+% c-sdk {
+// this is a raw helper function for use by the user which sets up the GPIO output, and configures the SM to output on a particular pin
+
+void pio_rx2_init(PIO pio, uint sm, uint offset, uint pin_base, uint pin_clk, uint pin_bits, float clkdiv) {
+    pio_sm_config c2 = rx_prog2_program_get_default_config(offset);
+
+    for (int i = 0; i < 12; i++) {
+        pio_gpio_init(pio, pin_base + i);
+        pio_sm_set_consecutive_pindirs(pio, sm, pin_base + i, 1, false); // input
+    }
+    sm_config_set_in_pins(&c2, pin_base);
+    pio_gpio_init(pio, pin_clk);
+    sm_config_set_out_pins(&c2, pin_clk, 1);
+    pio_sm_set_consecutive_pindirs(pio, sm, pin_clk, 1, true);
+    sm_config_set_sideset_pins(&c2, pin_clk);
+    gpio_put(pin_clk, false);
+    sm_config_set_in_shift(&c2, false, true, 12);
+
+    sm_config_set_clkdiv(&c2, clkdiv);
+    pio_sm_init(pio, sm, offset, &c2);
+
+}
+%}
+
+.program trigger_prog
+.wrap_target
+
+    pull block
+    set pins, 1
+.wrap
+
+% c-sdk {
+void pio_tr_init(PIO pio, uint sm, uint offset, uint pin) {
+    pio_sm_config c3 = trigger_prog_program_get_default_config(offset);
+    pio_gpio_init(pio, pin);
+    pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);
+    sm_config_set_set_pins(&c3, pin, 1);
+    sm_config_set_out_shift(&c3, true, false, 32);  
+    sm_config_set_clkdiv(&c3, 1.0f);               
+    pio_sm_init(pio, sm, offset, &c3);
+}
+%}
+
+.program pulse_prog
+; SM1: 控制 HDL6V5583 脉冲输出
+; 使用8个GPIO作为输出（pin_base..pin_base+7）
+; 周期=800ns (1.25MHz)，分4步，每步200ns (50 tick)
+.wrap_target
+    pull block     
+    nop         [15]
+
+    out pins, 8 [31]
+    nop         [17]
+    ;nop         [31]
+    ;nop         [31]        
+    out pins, 8 [31]
+    nop         [17]
+    ;nop         [31]
+    ;nop         [31]         
+    out pins, 8 [31]
+    nop         [17]        
+    out pins, 8 [31]
+    nop         [17]
+    mov osr,  ~null
+    out pins, 8
+.wrap
+
+% c-sdk {
+void pio_pulse_init(PIO pio, uint sm, uint offset, uint pin_base, uint pin_sync) {
+    pio_sm_config c = pulse_prog_program_get_default_config(offset);
+    
+    for(int i=0;i<8;i++){ 
+        pio_gpio_init(pio, pin_base+i); 
+        pio_sm_set_consecutive_pindirs(pio, sm, pin_base+i, 1, true); 
+    }
+    sm_config_set_out_pins(&c, pin_base-16, 8);
+    sm_config_set_out_shift(&c, true, false, 32);  
+    sm_config_set_clkdiv(&c, 1.0f);               
+    pio_sm_init(pio, sm, offset, &c);
+}
+%}

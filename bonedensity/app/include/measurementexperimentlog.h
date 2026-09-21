@@ -10,7 +10,8 @@
 #include <QVector>
 #include <QtEndian>
 
-// Development evidence only. No patient/account identifiers are accepted here.
+// Development evidence. Patient measurement config may include the explicitly
+// approved archive ID/name snapshot; never add account or other clinical fields.
 // Buffered QFile writes, no per-frame flush, no automatic deletion/overwrite.
 class MeasurementExperimentLog
 {

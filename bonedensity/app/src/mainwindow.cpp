@@ -252,7 +252,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     // ------------------- 结束美化代码 -------------------
 
+#if defined(BONE_COMPLETE_B_PEAK_EXPERIMENT) || defined(BONE_RELOCK_PRESERVATION_EXPERIMENT) || defined(BONE_DUAL_WINDOW_A_EXPERIMENT)
     if (useDualWindowAQuality) mCfg.roundCorrAMin = 0.78;
+#endif
 #ifdef BONE_COMPLETE_B_PEAK_EXPERIMENT
     this->setWindowTitle(QStringLiteral("骨密度仪 · B峰补全试测版（仅研发验证）"));
 #elif defined(BONE_RELOCK_PRESERVATION_EXPERIMENT)
@@ -262,7 +264,7 @@ MainWindow::MainWindow(QWidget *parent)
 #elif defined(BONE_OBSERVE_BEFORE_G_EXPERIMENT)
     this->setWindowTitle(QStringLiteral("骨密度仪 · 姿态流程试测版（仅研发验证）"));
 #else
-    this->setWindowTitle(QStringLiteral("骨密度仪APP"));
+    this->setWindowTitle(QStringLiteral("骨密度仪APP · 首波一致性试测"));
 #endif
     this->setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
     //this->showFullScreen();
@@ -1034,6 +1036,14 @@ void MainWindow::startExperimentLog()
 {
 #ifndef QT_NO_DEBUG
     experimentLogWarningShown = false;
+    // Freeze the approved identity fields for the entire measurement, including
+    // failed/retried rounds. A rename must not relabel an existing session.
+    if (experimentSessionId.isEmpty() ||
+        experimentSubjectSnapshot.value("archive_id").toString() != currentPatient.id) {
+        experimentSessionId = QUuid::createUuid().toString(QUuid::WithoutBraces);
+        experimentSubjectSnapshot = QJsonObject{{"archive_id", currentPatient.id},
+                                               {"name", currentPatient.name}};
+    }
     QJsonArray previousRounds;
     for (double sos : roundSosList) previousRounds.append(sos);
 #ifdef BONE_COMPLETE_B_PEAK_EXPERIMENT
@@ -1045,11 +1055,15 @@ void MainWindow::startExperimentLog()
 #elif defined(BONE_OBSERVE_BEFORE_G_EXPERIMENT)
     const char* implementation="observe-before-g-20260906-v1";
 #else
-    const char* implementation="production-relock-auto-next-20260908-v1";
+    const char* implementation="onset-consistency-20260915-v1";
 #endif
     const QJsonObject config{
+        {"recording_profile", "subject-linked-20260918-v1"},
+        {"measurement_session_id", experimentSessionId},
+        {"subject", experimentSubjectSnapshot},
         {"previous_accepted_rounds", previousRounds},
         {"implementation", implementation},
+        {"B_onset_forward_limit", enforceBOnsetConsistency ? bOnsetForwardLimit : 0},
         {"B_clipped_peak_extension", completeTruncatedBPeak ? 15 : 0},
         {"partial_relock_retention_lag", deferPartialDiscardUntilRelock
             ? partialRelockRetentionTolerance : 0},
@@ -1148,6 +1162,8 @@ void MainWindow::resetAllPatientMeasurementData()
         experimentLog.close();
         checkExperimentLogError();
     }
+    experimentSessionId.clear();
+    experimentSubjectSnapshot = QJsonObject();
     if (autoTimer && autoTimer->isActive()) {
         autoTimer->stop();
     }
@@ -2693,6 +2709,26 @@ void MainWindow::detectAndPlotSpeed(const QVector<double>& filBC,
     if (acquireMode == CalibrationAcquireMode) {
         processCalibrationFrame(filBC, filBD, filAC, filAD,
                                 pickBC, pickBD, pickAC, pickAD);
+        return;
+    }
+
+    const auto arrivalEvidence = [](const ArrivalResult& pick) {
+        return QJsonObject{{"valid", pick.valid}, {"first_hit", pick.firstHit},
+            {"onset", pick.onset}, {"peak", pick.peak}, {"threshold", pick.threshold},
+            {"forward_shift", pick.valid ? QJsonValue(pick.onset-pick.firstHit) : QJsonValue()}};
+    };
+    evidence["B_arrivals"] = QJsonObject{{"BD", arrivalEvidence(pickBD)},
+                                          {"BC", arrivalEvidence(pickBC)}};
+    const bool inconsistentBOnset =
+        (pickBD.valid && !pickBD.onsetConsistent(bOnsetForwardLimit)) ||
+        (pickBC.valid && !pickBC.onsetConsistent(bOnsetForwardLimit));
+    if (patientMeasureRunning && acquireMode == PatientMeasureMode &&
+        enforceBOnsetConsistency && inconsistentBOnset) {
+        evidence["decision"] = "B_onset_inconsistent";
+        evidence["B_onset_forward_limit"] = bOnsetForwardLimit;
+        const QString reason = QStringLiteral("首波定位不一致，本帧未计入；请重新贴合探头");
+        setSpeedDebugInvalid(reason);
+        updateProcessInvalid(reason);
         return;
     }
 

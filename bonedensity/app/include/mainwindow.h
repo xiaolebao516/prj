@@ -101,6 +101,12 @@ protected:
 
 private:
     friend class MainWindowSafetyTests;
+    static constexpr int bOnsetForwardLimit = 40;
+#if defined(BONE_COMPLETE_B_PEAK_EXPERIMENT) || defined(BONE_RELOCK_PRESERVATION_EXPERIMENT) || defined(BONE_DUAL_WINDOW_A_EXPERIMENT) || defined(BONE_OBSERVE_BEFORE_G_EXPERIMENT)
+    bool enforceBOnsetConsistency = false;
+#else
+    bool enforceBOnsetConsistency = true;
+#endif
     Ui::MainWindow *ui;
     QSerialPort *serial;
     bool serialErrorHandled = false;
@@ -296,6 +302,8 @@ private:
     void rejectBoneLagCandidate();
     void discardPartialRound();
     MeasurementExperimentLog experimentLog;
+    QString experimentSessionId;
+    QJsonObject experimentSubjectSnapshot;
     bool experimentLogWarningShown = false;
     void startExperimentLog();
     void checkExperimentLogError();

@@ -27,6 +27,8 @@ Numeric values in code are executable authority. This reference intentionally do
 
 ## Evidence Collection
 
+Current Debug experiment starts may include the user-authorized `config.subject` archive ID/name snapshot and `measurement_session_id` (`recording_profile=subject-linked-20260918-v1`). One five-round measurement and its retries share the snapshot/session; reset or a new completed measurement creates a new session. Match reference values by archive/name, not by SOS proximity. Older logs have no identity mapping; never infer their participant. Operating steps: [subject-linked-measurements.md](../../../docs/guides/subject-linked-measurements.md).
+
 1. Record the commit/worktree state, build identity, device/probe identifier, test medium, temperature source, coupling method, and operator action.
 2. Capture the smallest reproducible output excerpt, including raw frame count and all emitted diagnostic lines.
 3. Separate code-path inspection, actual software run, and supervised hardware/laboratory evidence.

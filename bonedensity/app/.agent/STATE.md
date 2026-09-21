@@ -10,7 +10,7 @@
 
 ## Status
 
-`2026-09-12 corrA-primary/G-secondary/D-small Qt UI and tutorial implemented, software verified and canonical Debug deployed. Actual probe usability remains external acceptance. Relative-G research remains paused; no algorithm change.`
+`2026-09-19 subject-linked recording software verified and built: SC37/38/39 software pass; full58/0/1 including75-log Qt replay. Current algorithm/parameters and110 original runtime/data files preserved. Ready for supervised multi-person acquisition.`
 
 ## Active Milestone
 
@@ -18,18 +18,40 @@
 
 ## Current Task
 
-`Hand off the verified UI increment for real-device usability feedback. Normal executable and existing data are ready; do not resume algorithm research without a new request.`
+`Review wyl subject-linked fixed-pose follow-up; distinguish final-output repeatability from per-round variation and historical-reference accuracy.`
+
+## Current Judgment
+
+2026-09-20 wyl trial:25 subject-linked files, one archive,5 sessions (4 completed,1 incomplete fifth round). User confirms basically no probe replacement between full measurements. Complete SOS3845.5408/3867.8368/3840.8519/3840.3046; mean3848.6335, range27.5322, sampleSD13.0161. Actual gain1024 across all25 files, not1241; A0.78/G[-12,0]/onset40 unchanged.768 accepted samples3769–4016,11 onset rejects;15 samples>3950 were subsequently discarded, none in720 final-round samples. Last session round range98.87, so final stability partly reflects aggregation. Historical3850 is not contemporaneous truth. No replacement/cross-person claim or immediate repeat-measurement request. Evidence: docs/research/wyl-fixed-pose-20260920.md. Preserve this1024 baseline for comparable follow-up; no source changes.
+
+2026-09-18 implementation approval: user explicitly requests archive-name mapping into new experiment logs, offers individual reference values and supervised multi-person trials, and asks for implementation then instructions. SC37–39 added to Loop; Debug-only additive metadata with frozen archive ID/name and session UUID, reset/patient-switch lifecycle, same-ID rename protection. No clinical XML schema or algorithm/parameter change. Existing user-authorized Qt path exception applies. App closed by user for build. Plan: failing lifecycle test, localized implementation, complete main-window regressions, canonical build, runtime/input hash preservation and concise collection guide. No commit/push.
+
+User answered subject-mapping request: cannot assign historical recordings to people; approximate individual references mostly3800–3900. Do not ask again or infer identities. Use3800–3900 only as a descriptive cohort reference band, never input to matching/gating or proof of personal accuracy. No pooled3850 error or cross-subject repeatability claims. Existing waveform reconstruction, same-record counterfactuals and within-round diagnostics remain usable; no new collection requested.
+
+Critical 2026-09-18 correction: user states recordings contain different participants with different historical references (e.g.3800/3900). Subject mapping is not known. Never use pooled3850 error or cross-session spread as accuracy/stability objective; previous numerical groups are descriptive only. Pending async request for non-identifying record/time/order-to-subject/reference mapping. Candidate matching itself never uses reference SOS, so reference-free raw replay, known-delay controls and same-record retention checks may continue. Latest joint-study metrics were being prepared with an unjustified common-reference assumption; remove those fields before reporting. No accuracy tuning/deployment until mapping/evidence sufficient.
+
+2026-09-18 follow-up approval: user accepted using existing recordings first after clarifying that waveform/round resets cannot identify probe replacement. No repeat acquisition is required now. Approved bounded offline SC-34 candidate comparison: B first-hit onset, B ratio0.30, B edge extension5, and B local correlation maximum; recompute downstream A/D/G and round states across101 logs, preserve original per-file thresholds and onset40 safeguard. Add known-delay synthetic controls. Reject candidates with completion/output regressions, do not deploy or tune toward3850.
+
+2026-09-18 approved research continuation: user approved offline onset/search investigation and requested a suitable G range. Reuse SC-34 research boundary; no product/gain/G default changes, build, device operation or Git delivery authorized. Analyze the new onset-guard26 logs plus earlier75 logs as retrospective checks. Verify original raw features and per-frame/round state first, compare a prespecified G range panel with guard fixed at40, report completion loss/output changes rather than optimize to historical3850. Inspect small onset alternatives offline and prepare controlled gain/replacement measurements. User reports no gross SOS outliers in the new trial; this is limited user feedback, not accuracy acceptance. Current stage retains verification of the active Loop; research is a bounded SC-34 extension.
+
+Implementation update: user's “那先试试1” authorizes this candidate, and tool-path exception was separately approved. ArrivalResult now records firstHit without changing selected onset/lag. Patient-only rejection runs before B/stability; calibration returns before it. Existing research profile macros retain their prior guard-disabled behavior. Current Debug log identity is onset-consistency-20260915-v1 and title includes 首波一致性试测. Main-window test expectations now reflect user A0.78/G[-12,0]. Initial C++ verification identified a replay-harness omission of logged frame A0.80 in one historical build, plus intentionally zero-noise legacy fixtures and old identity expectation; these were corrected without weakening product gates. Canonical runtime is newly built at build/debug/debug/BoneDensity.exe, with no clinical XML copied. Qt Creator's prior EXE and four XML hashes, and all75 source log hashes, remain unchanged.
+
+Latest verified evidence: `docs/research/measurement-wave-audit-20260915/README.md` and `summary.json`. Logs identify production build/parameters. Both dates reproduce 18362 B results, 15601 A results, per-frame acceptance/lock/count state and 72 round summaries. All 162 accepted frames below3000 have BC onset86–120 samples after firstHit; other accepted frames have B-channel maximum23. Offline L30/40/60/80 early rejection removes all162: September15 preserves all34 round summaries and their completion frames (including4 quality rejects), with2 additional discarded-later normal frames suppressed; September14 removes3 ~2520 quality-passing rounds and preserves the other35 summaries/completion frames. No cross-attempt candidate finalization or hardware accuracy claim. Original35/40 input files and audited product-source hashes unchanged. Raw0/4095 flat segments are a separate signal-integrity clue, not a proven cause of3600 bias. Historical3850 remains unpaired. No product or parameter edits in this research increment; previous formal0.80/±6 test assertions are still stale and must be reconciled when implementation resumes.
+
+Operating context: logs are beside the Qt Creator runtime under `build/Desktop_Qt_6_5_3_MinGW_64_bit_Debug/debug/measurement-experiments/`. Contemporary paired reference readings and reference availability remain unestablished. Installed tools are under D:/QT6.5.3, while project scripts mandate D:/Qt; this research used Python only. No product build, commit or push authorized by the research request.
 
 ## Model Recommendation
 
 - Model Capability: `BALANCED`
 - Reasoning Effort: `high`
 - Switch Benefit: `unknown`
-- Reason: approved local UI implementation and verification; no algorithm design or parameter selection. No automatic model switch.
+- Reason: approved raw-wave reconstruction, causal code-path diagnosis and bounded offline candidate evaluation; no automatic model switch.
 
 ## Plan Status
 
 `approved`
+
+User approved the concrete onset-consistency proposal with “那先试试1” and separately permitted the installed same-version toolchain paths. Plan: focused failing tests and75-log C++ replay; expose firstHit without changing arrival calculation; reject abnormal patient B onset before stability with explicit logging; verify regression/calibration/build and preserve existing runtime/data. Gain/other parameter tuning remains out of scope.
 
 2026-09-11 preview-only approval: user confirmed observations during actual Start Measurement, then requested “先把更新后的进度条和教程ui做好给我看看” and explicitly no one-shot full implementation. Prepared a local interactive mockup, not a hardware-connected program. No need to re-ask the already answered corrA observation source.
 
@@ -71,6 +93,8 @@ Revision evidence: the user reported that per-frame text changes too quickly to 
 Replacement approval evidence: after reviewing the interactive UI and abstract diagram storyboards, the user said “可以先拿这个替代……可以先按这个做一版”. This approves the reviewed UI and temporary abstract assets for a first implementation, while reserving final generated or photographed image replacement for later review.
 
 ## Plan and Steps
+
+2026-09-18 approved SC-34 continuation (complete offline): verify new raw features and101 original state replays; compare ten G ranges with guard40 and preserve per-file other parameters; inspect three B-only onset sensitivity variants; review conditional round/final outcomes; publish reproducible evidence and controlled collection instructions. Deployment and prospective measurement remain separate.
 
 2026-09-08 revised G research: preserve the requested raw display-scale idea but suspend the -6/+6 universal target-band implementation. Prove the current feature definition and its SOS/lagB dependence; compare same-landmark onset/peak/valley alternatives only where their source features are valid; on the existing raw63-trajectory set, measure per-stable-cluster availability/dispersion and replay a bounded relative-center candidate without selecting toward3900 or another target result. Retain warmup14, D/A/B quality, B-lag stability, round clustering and formal behavior. Return to planning with one exact candidate, risk boundary and hardware acceptance method; no product edit during research-gap.
 
@@ -142,6 +166,14 @@ D. Run focused regressions, canonical build and scope review, then hand off self
 9. Run existing regressions, the canonical Debug build, screenshot inspection, and real-device usability acceptance. `software verification completed; user visual and real-device acceptance pending`
 
 ## Progress
+
+2026-09-19 subject linkage delivered: approved ID/name snapshots and per-measurement UUID added to Debug configs, same-session rename protection and automatic next-round grouping verified. Full58/0/1; canonical build SHA2564cb4316b0af7ee98c9eff662b096933425483bfd775293e3dcd2660c319058e8.110 pre-existing runtime/data files unchanged. No numerical algorithm/parameter change, clinical schema change, commit or push. SC37–39 evidence and collection guide delivered.
+
+Latest joint study: joint_peak/joint_short_peak/short_B_plateau retain18/10/25 of25 latest rounds,25/17/30 of34 oldSep15,25/15/35 of35 guard-enabled oldSep14. ShortB retains5 latest sessions but coarse3800–3900 coverage remains3/5 and two below-band records move farther down; no candidate deployed. Mixed-subject correction removes uniform3850 and pooled repeatability metrics; subject assignment unavailable per user. Evidence: joint-validation.md/joint-results.json;101 logs/product hashes preserved.
+
+Latest continuation: four full B candidates fail recorded-retention/output checks. Latest baseline25 rounds versus first_hit17,ratio30 zero,edge5 16,local_peak4. Same751 originally accepted frames attribute losses primarily to G45 / G642+D58 / D119 / D285 respectively (overlapping). Known-delay controls reveal current empirical platform picks128 as126; peak-only fixes synthetic delay but fails real-record retention, so no deployment. No repeat measurement request. Full evidence: candidate-validation.md and candidates-results.json.
+
+2026-09-18: SC-34 research extension complete. New26 logs/4485 raw frames plus75 previously validated logs reproduce101 original attempts and97 round summaries. Candidate[-12,2] preserves all common-baseline rounds without delay across all3 groups; latest25 rounds retained,15 earlier by0.932–4.153s, maximum single-round change under8m/s and conditional five-round final change under1.6m/s. Tightening to[-8,0] retains13/25 latest rounds within recorded endpoints and does not separate SOS groups. Product/input hashes unchanged. Report, script, machine-readable results and inspected plot: docs/research/g-range-onset-20260918/. No source change/build/commit/push.
 
 - 2026-09-10 axis follow-up: long2041 contains1494 exact old rows;547 new split into an84-row early segment and463 recent rows. Short575 spans87.2s and mixes short-axis tilt/sliding with reported contact instability. In long,7 adjacent pairs have unchanged B lag, B-centre delta<=2, G jumps58.5–65.5 within200ms, all with oldA>=.78/B>=.55 on both frames. CSV1935–1937 holds B3828.12 while G-69→-4→-69.5 in188ms, A centre1234.5→1169.5→1234, D1→5→1. Short4 comparable jumps never have both-frame quality pass. Hash-checked analysis/report saved as axis-trials-*20260910*. No matching dated rawJSONL found in localbuild tree, including ignored files. No product/Git writes.
 
@@ -271,6 +303,21 @@ Evidence and concrete next-change recommendations: `docs/research/measurement-ga
 
 ## Verification Status
 
+- `SC-37`: passed focused test. Debug start records only approved ID/name snapshot, Unicode escaping and profile; no name in filename.
+- `SC-38`: passed focused test. Retry/real auto-next timer retain session/snapshot; completed restart/reset/same-name other archive create new ID; first log unchanged after rename.
+- `SC-39`: passed software; supervised acquisition pending. RED missing-profile failure, GREEN3/0/0, full58/0/1 including actual75-log replay, canonical build and110 preserved hashes. Evidence: docs/evidence/20260919-subject-recording/verification.md; guide: docs/guides/subject-linked-measurements.md.
+
+- `SC-34` joint continuation: passed as research, no deployment candidate passed.101 original state baselines matched; three joint/window candidates plus known-delay controls evaluated. A fallback window-isolation issue corrected and all101 rerun. No pooled-reference accuracy or subject-repeatability claims.
+
+- `SC-34` full-candidate continuation: passed as research, all4 deployment candidates rejected. Original101 raw feature/state baselines match; candidate B changes propagate through A/D/G and round state;21 known-delay controls run. Product/input hashes preserved. Evidence: docs/research/g-range-onset-20260918/candidate-validation.md.
+
+- `SC-34` extension (2026-09-18): passed offline; raw/new and original-state baselines,97 summaries, five original finals, ten G scenarios and product/input preservation checks passed. B-only onset variants are diagnostic, not full candidate validation. See docs/research/g-range-onset-20260918/README.md.
+
+- `SC-35`: passed (software). Actual low-frame RED2-versus0, GREEN rejection/diagnostics,40/41 boundaries, invalid metadata and existing expiry/clearing regressions pass; calibration branch unchanged.
+- `SC-36`: passed (software), real-device acceptance pending. Actual C++/Qt75-log baseline/candidate replay matches frame sequences, values, state, summaries and completion frames; main-window57/0/1, calibration16/0/0, canonical Debug build and preservation checks pass. Evidence: `docs/evidence/20260915-onset-guard/verification.md`. Trial guide: `docs/guides/onset-consistency-trial.md`.
+
+- `SC-34`: passed (offline research). Raw feature/state reconstruction, input/source preservation and two inspected figures complete. See `docs/research/measurement-wave-audit-20260915/README.md`. No canonical app build, Qt execution, new device measurement, prospective accuracy, or deployed onset gate claimed.
+
 Current UI increment evidence: `docs/evidence/20260911-corra-ui/verification.md`.
 
 | Criterion | Status | Result / evidence |
@@ -318,7 +365,7 @@ Earlier rows below are historical; SC8/SC14 still require actual-user/device evi
 
 ## Next Actions
 
-`Synchronize the reviewed increment to the current Git upstream under the 2026-09-14 authorization and provide a plain-language meeting summary. User may assess corrA-first guidance with the instrument; actual positioning benefit and accuracy remain external.`
+`Keep the observed gain1024/A0.78/G[-12,0]/onset40 as the comparable baseline; no immediate repeat acquisition requested. User may later provide separate-person/reference or explicitly marked replacement data. Do not infer replacement from these logs: user confirmed basically fixed pose. Preserve incomplete session and discarded high-frame evidence. No commit/push requested.`
 
 ## Iteration Control
 

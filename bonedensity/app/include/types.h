@@ -57,12 +57,12 @@ struct MeasureConfig {
     double frameCorrBMin = 0.55;
     double frameCorrAMin = 0.78;
     double roundCorrBMin = 0.55;
-    double roundCorrAMin = 0.80;
+    double roundCorrAMin = 0.78;
     // 姿态门控
     double angleSignedDiffMin = 5.0;
     double angleSignedDiffMax = 15.0;
-    double anglePairMidGapMin = -6.0;
-    double anglePairMidGapMax = 6.0;
+    double anglePairMidGapMin = -12.0;
+    double anglePairMidGapMax = 0;
     double anglePairMidGapTarget = 0.0;
     double angleSignedDiffTarget = 9.0;
     // 稳定性门控
@@ -83,12 +83,18 @@ struct GateConfig {
 
 struct ArrivalResult {
     bool valid = false;
+    int firstHit = -1;
     int onset = -1;
     int peak = -1;
     double noiseMean = 0;
     double noiseStd = 0;
     double threshold = 0;
     double peakEnv = 0;
+
+    bool onsetConsistent(int maximumForwardShift) const {
+        return valid && firstHit >= 0 && onset >= 0
+            && onset - firstHit <= maximumForwardShift;
+    }
 };
 
 struct PairResult {

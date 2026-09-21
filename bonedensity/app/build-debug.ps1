@@ -1,8 +1,10 @@
+param(
+    [string]$qtRoot = "D:\Qt\6.5.3\mingw_64",
+    [string]$mingwRoot = "D:\Qt\Tools\mingw1120_64"
+)
 $ErrorActionPreference = "Stop"
 
 $projectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$qtRoot = "D:\Qt\6.5.3\mingw_64"
-$mingwRoot = "D:\Qt\Tools\mingw1120_64"
 $buildDir = Join-Path $projectRoot "build\debug"
 $exePath = Join-Path $buildDir "debug\BoneDensity.exe"
 $portableAssets = Join-Path $projectRoot "portable"

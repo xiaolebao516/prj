@@ -7,3 +7,26 @@
 /Release/
 .cache/
 7100/8.RK-ZYNQ7100-F开发板网盘资料/
+
+# ==========================================
+# 核心缓存与生成物文件夹（精准匹配 xxxx.cache 等）
+# ==========================================
+*.cache/
+*.runs/
+*.sim/
+*.hw/
+*.ip_user_files/
+
+# 如果你用了 Block Design (BD)，自动生成的各类中间硬件描述文件也可以过滤
+*.srcs/sources_1/bd/*/hdl/
+*.srcs/sources_1/bd/*/hw_handoff/
+*.srcs/sources_1/bd/*/ip/
+*.srcs/sources_1/bd/*/ipshared/
+
+# ==========================================
+# 杂碎日志与备份文件
+# ==========================================
+*.log
+*.jou
+*.str
+*.backup

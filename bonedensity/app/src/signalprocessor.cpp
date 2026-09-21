@@ -338,6 +338,7 @@ ArrivalResult SignalProcessor::detectFirstArrivalSmart(
     if (firstHit < 0) {
         return res;
     }
+    res.firstHit = firstHit;
 
     // 第二步：在 firstHit 后面找第一个包络峰
     int peakSearchEnd = qMin(searchEnd, firstHit + peakLookAhead);

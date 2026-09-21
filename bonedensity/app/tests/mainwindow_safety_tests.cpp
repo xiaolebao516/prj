@@ -90,6 +90,10 @@ class MainWindowSafetyTests : public QObject
     Q_OBJECT
 
 private slots:
+    void experimentSubjectSnapshotAndSessions();
+    void onsetConsistencyBoundaries();
+    void onsetGuardRejectsRecordedLowFrame();
+    void onsetGuardMatchesRecordedBatch();
     void clippedBPeakSearchCanBeCompletedWithoutFullRangeScan();
     void partialRoundWaitsForRelockBeforeDiscarding();
     void finalResultUsesExactlyFiveRecordedRounds();
@@ -378,6 +382,9 @@ void MainWindowSafetyTests::observeBeforeGPreservesAcceptanceAndExpiry()
     };
     const auto bc=wave(928),bd=wave(800);
     MainWindow probe;
+    // Isolate the pre-existing stability flow from the new onset rejection.
+    // This zero-noise synthetic packet has an artificially early threshold hit.
+    probe.enforceBOnsetConsistency=false;
     probe.useDualWindowAQuality=false;
     probe.observeStabilityBeforeG=false;
     probe.patientMeasureRunning=true;
@@ -406,6 +413,7 @@ void MainWindowSafetyTests::observeBeforeGPreservesAcceptanceAndExpiry()
     for (bool experimental:{false,true}) {
         MainWindow window;
         // This regression isolates the original/observe-before-G flows.
+        window.enforceBOnsetConsistency=false;
         window.deferPartialDiscardUntilRelock=false;
         window.observeStabilityBeforeG=experimental;
         window.useDualWindowAQuality=false;
@@ -479,8 +487,10 @@ void MainWindowSafetyTests::experimentBuildIdentity()
     QVERIFY(window.deferPartialDiscardUntilRelock);
     QCOMPARE(window.partialRelockRetentionTolerance,2);
     QCOMPARE(window.mCfg.roundCorrAMin,.78);
+    QCOMPARE(window.mCfg.anglePairMidGapMin,-12.0);
+    QCOMPARE(window.mCfg.anglePairMidGapMax,0.0);
     QVERIFY(window.observeStabilityBeforeG);
-    QCOMPARE(window.windowTitle(),QStringLiteral("骨密度仪APP"));
+    QCOMPARE(window.windowTitle(),QStringLiteral("骨密度仪APP · 首波一致性试测"));
 #endif
 #ifndef QT_NO_DEBUG
     window.startExperimentLog();
@@ -503,9 +513,10 @@ void MainWindowSafetyTests::experimentBuildIdentity()
 #elif defined(BONE_OBSERVE_BEFORE_G_EXPERIMENT)
     const QString expectedImplementation=QStringLiteral("observe-before-g-20260906-v1");
 #else
-    const QString expectedImplementation=QStringLiteral("production-relock-auto-next-20260908-v1");
+    const QString expectedImplementation=QStringLiteral("onset-consistency-20260915-v1");
 #endif
     QCOMPARE(config.value("implementation").toString(),expectedImplementation);
+    QCOMPARE(config.value("B_onset_forward_limit").toInt(),window.enforceBOnsetConsistency ? 40 : 0);
 #endif
 }
 
@@ -681,6 +692,8 @@ void MainWindowSafetyTests::experimentRecordingCoversFeatureDecisions()
     QVERIFY(directory.isValid());
     MainWindow window;
     // This existing fixture explicitly locks down default-flow behavior.
+    // Zero-noise synthetic packets exercise legacy feature logging separately.
+    window.enforceBOnsetConsistency=false;
     window.observeStabilityBeforeG = false;
     window.useDualWindowAQuality = false;
     window.mCfg.roundCorrAMin = .80;
@@ -1951,6 +1964,9 @@ void MainWindowSafetyTests::capturePagesWhenRequested()
     capture(window.ui->pagePatientForm, QStringLiteral("patient-form.png"));
     capture(window.ui->pagePatientDetail, QStringLiteral("patient-detail.png"));
 }
+
+#include "onset_guard_cases.inc"
+#include "subject_recording_cases.inc"
 
 QTEST_MAIN(MainWindowSafetyTests)
 #include "mainwindow_safety_tests.moc"

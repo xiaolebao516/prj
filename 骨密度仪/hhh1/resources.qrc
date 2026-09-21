@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/Radius.bmp</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,232 @@
+{
+  "scope": "Overlapping precheck failures on the same751 original accepted frames. Does not evaluate stability or imply truth. Full state replay is separate.",
+  "counts": {
+    "first_hit": {
+      "original_accepted_frames": 751,
+      "all_prechecks_pass": 706,
+      "G_failed": 45
+    },
+    "ratio30": {
+      "original_accepted_frames": 751,
+      "G_failed": 642,
+      "all_prechecks_pass": 97,
+      "D_failed": 58
+    },
+    "edge5": {
+      "original_accepted_frames": 751,
+      "all_prechecks_pass": 632,
+      "D_failed": 119
+    },
+    "local_peak": {
+      "original_accepted_frames": 751,
+      "all_prechecks_pass": 466,
+      "D_failed": 285
+    }
+  },
+  "examples": {
+    "ratio30": {
+      "file": "round-20260915-090806-580-0cbf3cff-7d74-468d-a48b-9b2f9b1ebf7f.jsonl",
+      "sequence": 2204,
+      "failed": [
+        "G"
+      ],
+      "before": {
+        "A": {
+          "corr": 0.8528421595760338,
+          "early_feature": 1036,
+          "lag": 142,
+          "late_feature": 1173,
+          "rough_lag": 137,
+          "sos": 3450.7042253521126,
+          "valid": true
+        },
+        "B": {
+          "corr": 0.9290967660993016,
+          "early_feature": 1050,
+          "lag": 134,
+          "late_feature": 1156,
+          "rough_lag": 106,
+          "sos": 3656.7164179104475,
+          "valid": true
+        },
+        "D": 8,
+        "G": -1.5,
+        "sos_patient": 3656.7164179104475
+      },
+      "after": {
+        "A": {
+          "early_feature": 1036,
+          "late_feature": 1173,
+          "rough_lag": 137,
+          "lag": 142,
+          "corr": 0.8528421595760338,
+          "sos": 3450.704225352112
+        },
+        "B": {
+          "early_feature": 1072,
+          "late_feature": 1177,
+          "rough_lag": 105,
+          "lag": 133,
+          "corr": 0.8888205346110213,
+          "sos": 3684.210526315789
+        },
+        "D": 9,
+        "G": 20.0,
+        "sos_patient": 3684.210526315789
+      }
+    },
+    "local_peak": {
+      "file": "round-20260915-090806-580-0cbf3cff-7d74-468d-a48b-9b2f9b1ebf7f.jsonl",
+      "sequence": 2262,
+      "failed": [
+        "D"
+      ],
+      "before": {
+        "A": {
+          "corr": 0.8625634304556965,
+          "early_feature": 1023,
+          "lag": 140,
+          "late_feature": 1159,
+          "rough_lag": 136,
+          "sos": 3499.9999999999995,
+          "valid": true
+        },
+        "B": {
+          "corr": 0.9072077349314078,
+          "early_feature": 1036,
+          "lag": 133,
+          "late_feature": 1142,
+          "rough_lag": 106,
+          "sos": 3684.210526315789,
+          "valid": true
+        },
+        "D": 7,
+        "G": -2,
+        "sos_patient": 3684.210526315789
+      },
+      "after": {
+        "A": {
+          "early_feature": 1023,
+          "late_feature": 1159,
+          "rough_lag": 136,
+          "lag": 140,
+          "corr": 0.8625634304556971,
+          "sos": 3499.9999999999995
+        },
+        "B": {
+          "early_feature": 1036,
+          "late_feature": 1142,
+          "rough_lag": 106,
+          "lag": 136,
+          "corr": 0.938887968224778,
+          "sos": 3602.941176470588
+        },
+        "D": 4,
+        "G": -2.0,
+        "sos_patient": 3602.941176470588
+      }
+    },
+    "first_hit": {
+      "file": "round-20260915-090806-580-0cbf3cff-7d74-468d-a48b-9b2f9b1ebf7f.jsonl",
+      "sequence": 2281,
+      "failed": [
+        "G"
+      ],
+      "before": {
+        "A": {
+          "corr": 0.8612880586243901,
+          "early_feature": 1022,
+          "lag": 140,
+          "late_feature": 1159,
+          "rough_lag": 137,
+          "sos": 3499.9999999999995,
+          "valid": true
+        },
+        "B": {
+          "corr": 0.9339301676285816,
+          "early_feature": 1037,
+          "lag": 134,
+          "late_feature": 1144,
+          "rough_lag": 107,
+          "sos": 3656.7164179104475,
+          "valid": true
+        },
+        "D": 6,
+        "G": 0,
+        "sos_patient": 3656.7164179104475
+      },
+      "after": {
+        "A": {
+          "early_feature": 1022,
+          "late_feature": 1159,
+          "rough_lag": 137,
+          "lag": 140,
+          "corr": 0.8612880586243902,
+          "sos": 3499.9999999999995
+        },
+        "B": {
+          "early_feature": 1038,
+          "late_feature": 1144,
+          "rough_lag": 106,
+          "lag": 133,
+          "corr": 0.9135545135874511,
+          "sos": 3684.210526315789
+        },
+        "D": 7,
+        "G": 0.5,
+        "sos_patient": 3684.210526315789
+      }
+    },
+    "edge5": {
+      "file": "round-20260915-091248-514-9321a973-7acc-416b-8620-a51105fd2c94.jsonl",
+      "sequence": 20,
+      "failed": [
+        "D"
+      ],
+      "before": {
+        "A": {
+          "corr": 0.8200324603584079,
+          "early_feature": 1051,
+          "lag": 134,
+          "late_feature": 1182,
+          "rough_lag": 131,
+          "sos": 3656.7164179104475,
+          "valid": true
+        },
+        "B": {
+          "corr": 0.8495353445518699,
+          "early_feature": 1056,
+          "lag": 127,
+          "late_feature": 1155,
+          "rough_lag": 99,
+          "sos": 3858.2677165354326,
+          "valid": true
+        },
+        "D": 7,
+        "G": -11,
+        "sos_patient": 3858.2677165354326
+      },
+      "after": {
+        "A": {
+          "early_feature": 1051,
+          "late_feature": 1182,
+          "rough_lag": 131,
+          "lag": 134,
+          "corr": 0.820032460358408,
+          "sos": 3656.7164179104475
+        },
+        "B": {
+          "early_feature": 1056,
+          "late_feature": 1155,
+          "rough_lag": 99,
+          "lag": 130,
+          "corr": 0.919173746460783,
+          "sos": 3769.2307692307686
+        },
+        "D": 4,
+        "G": -11.0,
+        "sos_patient": 3769.2307692307686
+      }
+    }
+  }
+}
