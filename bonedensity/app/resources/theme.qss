@@ -259,3 +259,28 @@ QFrame#loginCard {
 QLabel#loginTitle { font-size: 24px; font-weight: bold; color: #1A2330; }
 QFrame#loginCard QLineEdit { font-size: 15px; padding: 6px 10px; }
 QFrame#loginCard QPushButton { font-size: 16px; }
+
+/* ---- account menu ---- */
+QToolButton#accountButton {
+    border: none;
+    background: transparent;
+    color: #5B6573;
+    font-size: 13px;
+    padding: 5px 22px 5px 8px;
+    border-radius: 6px;
+}
+QToolButton#accountButton:hover { background: #EEF1F5; color: #1A2330; }
+QToolButton#accountButton:disabled { color: #8A94A3; }
+QToolButton#accountButton::menu-indicator {
+    image: url(:/icons/chevron-down.png);
+    subcontrol-origin: padding;
+    subcontrol-position: right center;
+    right: 8px;
+    width: 9px;
+    height: 5px;
+}
+QMenu { background: #FFFFFF; border: 1px solid #E1E6EC; padding: 4px; }
+QMenu::item { padding: 6px 24px 6px 14px; border-radius: 4px; color: #1A2330; }
+QMenu::item:selected { background: #E8F0FA; color: #1D5FA8; }
+QMenu::item:disabled { color: #8A94A3; }
+QMenu::separator { height: 1px; background: #E1E6EC; margin: 4px 8px; }

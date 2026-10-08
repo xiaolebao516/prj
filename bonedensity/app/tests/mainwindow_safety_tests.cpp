@@ -27,6 +27,8 @@
 #include <QTimer>
 #include <QStackedWidget>
 #include <QGroupBox>
+#include <QMenu>
+#include <QToolButton>
 #include <QStyleOption>
 #include <cmath>
 #include <limits>
@@ -182,6 +184,7 @@ private slots:
     void mainLayoutFitsCommonWindowSizes();
     void dataBackupSnapshotsOnceAndPrunes();
     void deletionsAreBackedUpFirst();
+    void accountMenuSwitchesOperatorSafely();
     void capturePagesWhenRequested();
 };
 
@@ -2220,6 +2223,7 @@ void MainWindowSafetyTests::capturePagesWhenRequested()
 #include "ui_refresh_cases.inc"
 #include "sos_reference_cases.inc"
 #include "data_backup_cases.inc"
+#include "workflow_cases.inc"
 
 QTEST_MAIN(MainWindowSafetyTests)
 #include "mainwindow_safety_tests.moc"

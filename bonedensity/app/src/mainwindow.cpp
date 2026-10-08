@@ -48,6 +48,10 @@ static constexpr bool kDebugPerFrame = false;
 #include <QDialogButtonBox>
 #include <QTableWidget>
 #include <QPushButton>
+#include <QToolButton>
+#include <QMenu>
+#include <QDesktopServices>
+#include <QUrl>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QUuid>
@@ -313,8 +317,7 @@ void MainWindow::on_btnLogin_clicked() {
         if (QAction* action = findChild<QAction*>("manageAccountsAction")) {
             action->setVisible(currentAccount.role == "admin");
         }
-        if (btnManageAccounts) btnManageAccounts->setVisible(currentAccount.role == "admin");
-        if (lblAccount) lblAccount->setText(QStringLiteral("账号 %1").arg(currentAccount.username));
+        updateAccountUi();
         ui->stackedWidget->setCurrentWidget(ui->pageMain);
         scheduleResponsiveLayout();
         backupDataDaily();
@@ -4878,7 +4881,7 @@ void MainWindow::updatePatientSelectionUi()
     ui->btnArchive->setEnabled(!navigationLocked);
     ui->btnArchive->setToolTip(navigationLocked ? QStringLiteral("检测或采集进行中，暂不能打开档案") : QString());
     ui->btnAdd->setEnabled(patientDataWritable && !nextRoundPending);
-    if (btnManageAccounts) btnManageAccounts->setEnabled(!navigationLocked);
+    if (btnAccount) btnAccount->setEnabled(!navigationLocked);
     if (QAction* action = findChild<QAction*>(QStringLiteral("manageAccountsAction"))) {
         action->setEnabled(!navigationLocked);
     }
@@ -5308,15 +5311,19 @@ void MainWindow::setupToolbar()
     row->addWidget(ui->pushButton_2);
     row->addStretch(1);
 
-    btnManageAccounts = new QPushButton(QStringLiteral("账号管理"), toolbar);
-    btnManageAccounts->setObjectName(QStringLiteral("btnManageAccounts"));
-    btnManageAccounts->setProperty("variant", QStringLiteral("link"));
-    btnManageAccounts->setVisible(false);
-    connect(btnManageAccounts, &QPushButton::clicked, this, &MainWindow::manageAccounts);
-    row->addWidget(btnManageAccounts);
-    lblAccount = captionLabel(QString(), toolbar);
-    lblAccount->setObjectName(QStringLiteral("accountLabel"));
-    row->addWidget(lblAccount);
+    btnAccount = new QToolButton(toolbar);
+    btnAccount->setObjectName(QStringLiteral("accountButton"));
+    btnAccount->setPopupMode(QToolButton::InstantPopup);
+    btnAccount->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    auto* accountMenu = new QMenu(btnAccount);
+    accountMenu->setObjectName(QStringLiteral("accountMenu"));
+    actManageAccounts = accountMenu->addAction(QStringLiteral("账号管理…"), this, &MainWindow::manageAccounts);
+    accountMenu->addAction(QStringLiteral("打开数据文件夹"), this, &MainWindow::openDataFolder);
+    accountMenu->addSeparator();
+    accountMenu->addAction(QStringLiteral("切换账号"), this, &MainWindow::switchAccount);
+    btnAccount->setMenu(accountMenu);
+    row->addWidget(btnAccount);
+    updateAccountUi();
 
     for (QPushButton* button : {ui->connectButton, ui->pushButton, ui->triggerButton,
                                 ui->btnArchive, ui->btnReport, ui->pushButton_2}) {
@@ -5925,6 +5932,53 @@ void MainWindow::showReportFrom(QWidget* returnPage, const PatientInfo& patient,
 {
     reportReturnPage = returnPage;
     showReport(patient, measurement);
+}
+
+// ==================== 账号菜单 ====================
+
+void MainWindow::updateAccountUi()
+{
+    if (!btnAccount) return;
+    const bool loggedIn = !currentAccount.username.isEmpty();
+    btnAccount->setText(loggedIn ? QStringLiteral("账号 %1").arg(currentAccount.username)
+                                 : QStringLiteral("未登录"));
+    if (actManageAccounts) actManageAccounts->setVisible(currentAccount.role == QStringLiteral("admin"));
+}
+
+void MainWindow::openDataFolder()
+{
+    const QString folder = QFileInfo(xmlFilePath).absolutePath();
+    if (!QDesktopServices::openUrl(QUrl::fromLocalFile(folder))) {
+        QMessageBox::information(this, QStringLiteral("数据文件夹"),
+                                 QStringLiteral("数据保存在：\n%1").arg(QDir::toNativeSeparators(folder)));
+    }
+}
+
+void MainWindow::switchAccount()
+{
+    // The operator is written into every result, so a running or unsaved
+    // measurement has to be finished under the account that started it.
+    if (patientMeasureRunning || hasIncompletePatientRounds() || nextRoundTimer.isActive()) {
+        QMessageBox::information(this, QStringLiteral("检测进行中"),
+                                 QStringLiteral("请先完成或停止当前检测，再切换账号。"));
+        return;
+    }
+    if (hasPendingMeasurement) {
+        QMessageBox::warning(this, QStringLiteral("检测结果尚未保存"),
+                             QStringLiteral("本次检测结果尚未保存，请先保存后再切换账号。"));
+        return;
+    }
+    if (autoRunning) on_triggerButton_clicked();   // stop debug auto acquisition
+
+    // The next operator starts without the previous person's selection.
+    clearCurrentPatient();
+    currentAccount = AccountInfo();
+    updateAccountUi();
+    ui->editUsername->clear();
+    ui->editPassword->clear();
+    ui->lblLoginMsg->clear();
+    ui->stackedWidget->setCurrentWidget(ui->pageLogin);
+    ui->editUsername->setFocus();
 }
 
 // ==================== 数据备份 ====================

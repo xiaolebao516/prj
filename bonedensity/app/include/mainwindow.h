@@ -36,6 +36,8 @@ class QCloseEvent;
 class QCheckBox;
 class QDateEdit;
 class QPushButton;
+class QToolButton;
+class QAction;
 class QPrinter;
 class CalibrationDialog;
 class MeasurementGuideDialog;
@@ -107,6 +109,11 @@ private:
     QVector<quint16> samplesB;
     QVector<quint16> samplesC;
     QVector<quint16> samplesD;
+
+    // ---- account menu ----
+    void updateAccountUi();
+    void openDataFolder();
+    void switchAccount();
 
     // ---- data backups (DataBackup): daily at first login, and before deletions ----
     QString backupRoot() const;
@@ -204,8 +211,8 @@ private:
 
     QWidget* mainBlock = nullptr;            // 前两列（波形/参考图/趋势/检测过程）
     QLabel* lblDeviceStatus = nullptr;
-    QLabel* lblAccount = nullptr;
-    QPushButton* btnManageAccounts = nullptr;
+    QToolButton* btnAccount = nullptr;      // "账号 xxx" menu: 账号管理 / 打开数据文件夹 / 切换账号
+    QAction* actManageAccounts = nullptr;
     QPushButton* btnNewPatient = nullptr;
     QLabel* lblPatientMeta = nullptr;
     QLabel* lblStartHint = nullptr;
