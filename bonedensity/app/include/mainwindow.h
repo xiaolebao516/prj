@@ -2,6 +2,7 @@
 #include <QMainWindow>
 #include <QSerialPort>
 #include <QTimer>
+#include <QElapsedTimer>
 #include <QByteArray>
 #include <QString>
 #include <QVector>
@@ -32,7 +33,9 @@ QT_END_NAMESPACE
 
 class QMessageBox;
 class QCloseEvent;
-class QResizeEvent;
+class QCheckBox;
+class QDateEdit;
+class QPushButton;
 class QPrinter;
 class CalibrationDialog;
 class MeasurementGuideDialog;
@@ -60,44 +63,25 @@ private slots:
     // ✅ 页面切换
     void on_btnArchive_clicked();   // 切换到档案管理
     void on_btnBackFromArchive_clicked();      // 从档案返回主页面
-    void on_btnPatientInfo_clicked(); //主界面进入选择患者信息
+    void on_btnPatientInfo_clicked(); // 从档案选择或更换被测者
     void on_btnStartMeasurement_clicked();
     void on_btnMeasurementGuide_clicked();
-    void on_btnBackToMain_clicked(); //选择患者信息进入主界面
 
-    // 患者信息页面
-    void on_btnPatientNewSave_clicked();
-    void on_btnImportFromDB_clicked();
     void updateCurrentPatientUI();
     void on_btnSaveResult_clicked();
     void on_btnSelectPatient_clicked();
     void on_btnViewHistory_clicked();
 
-    // ✅ 档案管理逻辑
+    // 档案管理
     void on_btnShowAll_clicked();
     void on_btnSearchName_clicked();
-    void on_btnSearchID_clicked();
-    void on_btnSearchDate_clicked();
     void on_btnAdd_clicked();
     void on_table_cellDoubleClicked(int row, int column);
     void on_btnDeleteSelected_clicked();
-    // ✅ 新增：日期级联更新槽函数
-    void updateDayCombo();
     void scheduleResponsiveLayout();
-
-    // ✅ 新增页和详情页的交互
-    void on_btnFormSave_clicked();
-    void on_btnFormBack_clicked();
-    void on_btnDetailBack_clicked();
-    void on_btnDetailSave_clicked();
-    void on_btnDetailDelete_clicked();
-
-    // ✅ 新增：处理“显示结果”按钮点击
-    void on_btnShowResult_clicked();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
-    void resizeEvent(QResizeEvent *event) override;
 
 private:
     friend class MainWindowSafetyTests;
@@ -124,7 +108,16 @@ private:
     QVector<quint16> samplesC;
     QVector<quint16> samplesD;
 
-    QTimer *rxTimer;
+    // ---- device link feedback (display only; command timing is unchanged) ----
+    void applyPortList(const QList<QPair<QString, QString>>& ports);
+    void noteCommandSent();
+    void noteDeviceFrameReceived();
+    void checkDeviceResponse();
+    QTimer deviceWatchdog;
+    QElapsedTimer awaitingFrameSince;
+    bool awaitingDeviceFrame = false;
+    bool deviceUnresponsive = false;
+    int deviceResponseTimeoutMs = 2500;
 
     quint16 gain_tmp = 0;
     quint16 idx_tmp = 0;
@@ -140,14 +133,17 @@ private:
     QQueue<quint16> frameGroupOrder;
     static constexpr int maxIncompleteFrameGroups = 16;
 
-    QSlider *gainSliderA;
-    QSlider *gainSliderB;
-    QSlider *gainSliderC;
-    QSlider *gainSliderD;
+    QSlider *gainSliderA = nullptr;
+    QSlider *gainSliderB = nullptr;
+    QSlider *gainSliderC = nullptr;
+    QSlider *gainSliderD = nullptr;
 
     QChart *chartA, *chartB, *chartC, *chartD;
     QLineSeries *seriesA, *seriesB, *seriesC, *seriesD;
     QChartView *viewA, *viewB, *viewC, *viewD;
+    static constexpr qint64 liveWaveformRefreshIntervalMs = 250;
+    QElapsedTimer liveWaveformRenderTimer;
+    bool shouldRefreshLiveWaveforms();
 
     QTimer *autoTimer;
     bool autoRunning = false;
@@ -170,7 +166,52 @@ private:
 
     PatientInfo currentPatient;   // 当前正在测量的患者
 
-    ArchiveMode archiveMode = NormalMode;  // 默认普通模式
+    // ================== 界面布局（UI-REFRESH-001）==================
+    static constexpr int ArchiveIdColumn = 0;
+    static constexpr int ArchiveNameColumn = 1;
+    static constexpr int ArchiveGenderColumn = 2;
+    static constexpr int ArchiveBirthColumn = 3;
+    static constexpr int ArchiveLatestColumn = 4;
+    static constexpr int ArchiveSosColumn = 5;
+    static constexpr int ArchiveCountColumn = 6;
+    static constexpr int ArchiveColumnCount = 7;
+
+    void applyTheme();
+    void setupLoginPage();
+    void setupMainLayout();
+    void setupToolbar();
+    void setupRightColumn();
+    void setupArchivePage();
+    void fitReferenceChartHeight();
+    void updatePartImage();
+    void updateResultPanel();
+    void refreshPatientDerivedViews();
+    void updateArchiveSelectionBar();
+    QString selectedArchivePatientId() const;
+    void openNewPatientDialog(bool makeCurrent);
+    void openEditPatientDialog(const QString& patientId);
+    bool createPatient(const PatientInfo& patient, bool makeCurrent);
+    bool updatePatient(const PatientInfo& patient);
+    bool deleteMeasurementRecord(const QString& recordId);
+    void showReportFrom(QWidget* returnPage, const PatientInfo& patient,
+                        const MeasurementRecord& measurement);
+
+    QWidget* mainBlock = nullptr;            // 前两列（波形/参考图/趋势/检测过程）
+    QLabel* lblDeviceStatus = nullptr;
+    QLabel* lblAccount = nullptr;
+    QPushButton* btnManageAccounts = nullptr;
+    QPushButton* btnNewPatient = nullptr;
+    QLabel* lblPatientMeta = nullptr;
+    QLabel* lblStartHint = nullptr;
+    QLabel* lblResultNote = nullptr;
+    QLabel* lblRecentHistory = nullptr;
+    QLabel* lblArchiveSelection = nullptr;
+    QLabel* lblCheckedCount = nullptr;
+    QPushButton* btnEditPatient = nullptr;
+    QCheckBox* chkDateFilter = nullptr;
+    QDateEdit* dateFilter = nullptr;
+    QList<QLabel*> gainValueLabels;
+    QWidget* reportReturnPage = nullptr;
 
     void setupChart();
     void plotSamples();
@@ -180,25 +221,13 @@ private:
     // ✅ XML相关
     void loadPatients();
     bool savePatients(const QList<PatientInfo>& patients);
-    bool validatePatientFields(const QDate& birthDate,
-                               const QString& height,
-                               const QString& weight);
     void refreshTable(const QList<PatientInfo> &list);
-    int editingIndex = -1;
-    // ✅ 新增：表单/详情页填充 & 查找
-    void clearNewForm();
-    //int  findPatientIndexById(const QString& id) const;
-    //void fillDetailPage(const PatientInfo& p, int index);
-    void fillDetailPage(const PatientInfo& p, int index);
 
     void on_btnAcquireWaveform_clicked();   // “获取波形”按钮
     void parseIncomingData();               // 解析rxBuffer里的下位机帧
     void clearFrameAssembly();
     void resetDisconnectedAcquisitionState();
     void onGainSliderChanged(int value);    // 任意一条增益滑条被拉
-
-    // ✅ 新增：初始化搜索界面的辅助函数
-    void initSearchControls();
 
     // ✅ 新增：声速图表相关成员变量
     QChart *chartSpeed;
@@ -451,6 +480,9 @@ private:
     void showReport(const PatientInfo& patient, const MeasurementRecord& measurement);
     ReportData buildReportData(const PatientInfo& patient,
                                const MeasurementRecord& measurement) const;
+    AgeSosChartData buildAgeSosChartData(const PatientInfo& patient,
+                                         const MeasurementRecord& focalMeasurement,
+                                         bool cutoffAtFocal) const;
     bool renderReportToPrinter(QPrinter* printer);
     bool saveMeasurements(const QList<MeasurementRecord>& measurements);
     bool savePatientData(const QList<PatientInfo>& patients,
@@ -482,12 +514,6 @@ private:
                                        QVector<int>* selectedIndices = nullptr) const;
 
     void initLatestResultPanel();
-    void updateLatestResultPanel(double sos,
-                                 double tScore,
-                                 double zScore,
-                                 const QString& strength,
-                                 double risk,
-                                 int boneAge);
 
     void showPatientMeasureFinishedDialog(const MeasurementRecord& completedMeasurement);
 

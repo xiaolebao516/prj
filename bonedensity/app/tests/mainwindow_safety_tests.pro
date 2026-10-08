@@ -1,4 +1,5 @@
 QT += core gui widgets serialport charts printsupport testlib xml
+include(../version.pri)
 CONFIG += c++17 testcase console
 CONFIG -= app_bundle
 
@@ -18,7 +19,9 @@ SOURCES += \
     ../src/reportwidget.cpp \
     ../src/signalprocessor.cpp \
     ../src/bonehealth.cpp \
-    ../src/utils.cpp
+    ../src/sosreference.cpp \
+    ../src/utils.cpp \
+    ../src/patientformdialog.cpp
 
 HEADERS += \
     ../include/measurementexperimentlog.h \
@@ -34,7 +37,9 @@ HEADERS += \
     ../include/types.h \
     ../include/signalprocessor.h \
     ../include/bonehealth.h \
-    ../include/utils.h
+    ../include/sosreference.h \
+    ../include/utils.h \
+    ../include/patientformdialog.h
 
 FORMS += ../ui/mainwindow.ui
 RESOURCES += ../resources/resources.qrc

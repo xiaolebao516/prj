@@ -8,17 +8,25 @@ static constexpr bool kDebugPerFrame = false;
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "bonehealth.h"
+#include "sosreference.h"
 #include "agesoschartwidget.h"
 #include "reportwidget.h"
 #include "calibrationdialog.h"
 #include "measurementguidedialog.h"
 #include "utils.h"
+#include "patientformdialog.h"
 
 #include <QtSerialPort/QSerialPortInfo>
 #include <QMessageBox>
 #include <QCloseEvent>
 #include <QDoubleValidator>
 #include <QResizeEvent>
+#include <QCheckBox>
+#include <QDateEdit>
+#include <QHeaderView>
+#include <QScreen>
+#include <QSignalBlocker>
+#include <QStyle>
 #include <QtCharts/QValueAxis>
 #include <QRegularExpression>
 #include <QInputDialog>
@@ -28,7 +36,9 @@ static constexpr bool kDebugPerFrame = false;
 #include <QFileDialog>
 #include <QFileInfo>
 #include <algorithm>
+#include <utility>
 #include <cmath> // 确保包含 math 头文件
+#include <limits>
 #include <QFrame>
 #include <QGridLayout>
 #include <QBoxLayout>
@@ -64,46 +74,75 @@ int ageOnDate(const QString& birthDay, const QDate& date)
     return age;
 }
 
-void installPatientFormLayout(
-    QWidget* page,
-    const QList<QPair<QWidget*, QWidget*>>& rows,
-    const QList<QPushButton*>& buttons)
+QDateTime parsedMeasurementDateTime(const QString& value)
 {
-    auto* layout = new QGridLayout(page);
-    layout->setContentsMargins(28, 24, 28, 24);
-    layout->setHorizontalSpacing(24);
-    layout->setVerticalSpacing(18);
-    layout->setColumnStretch(0, 1);
-    layout->setColumnMinimumWidth(1, 130);
-    layout->setColumnStretch(2, 3);
-    layout->setColumnStretch(3, 1);
-    layout->setRowStretch(0, 1);
+    QDateTime dateTime = QDateTime::fromString(value, Qt::ISODate);
+    if (!dateTime.isValid())
+        dateTime = QDateTime::fromString(value, QStringLiteral("yyyy-MM-dd HH:mm"));
+    return dateTime;
+}
 
-    int rowIndex = 1;
-    for (const auto& row : rows) {
-        QWidget* label = row.first;
-        QWidget* field = row.second;
-        label->setMinimumWidth(120);
-        field->setMinimumSize(320, 42);
-        field->setMaximumWidth(680);
-        field->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-        layout->addWidget(label, rowIndex, 1, Qt::AlignVCenter);
-        layout->addWidget(field, rowIndex, 2);
-        ++rowIndex;
-    }
+int measurementAge(const MeasurementRecord& record, const PatientInfo& patient)
+{
+    bool ok = false;
+    const int storedAge = record.patientAge.trimmed().toInt(&ok);
+    if (ok && storedAge >= 0 && storedAge <= 100) return storedAge;
 
-    auto* buttonLayout = new QHBoxLayout();
-    buttonLayout->setContentsMargins(0, 12, 0, 0);
-    buttonLayout->setSpacing(24);
-    buttonLayout->addStretch();
-    for (QPushButton* button : buttons) {
-        button->setMinimumSize(150, 58);
-        button->setMaximumSize(190, 70);
-        buttonLayout->addWidget(button);
-    }
-    buttonLayout->addStretch();
-    layout->addLayout(buttonLayout, rowIndex, 1, 1, 2);
-    layout->setRowStretch(rowIndex + 1, 1);
+    const QDateTime measuredAt = parsedMeasurementDateTime(record.measuredAt);
+    const QString birthDay = record.patientBirthDay.trimmed().isEmpty()
+        ? patient.birthDay : record.patientBirthDay;
+    return ageOnDate(birthDay, measuredAt.date());
+}
+
+QString measurementGender(const MeasurementRecord& record, const PatientInfo& patient)
+{
+    return record.patientGender.trimmed().isEmpty()
+        ? patient.gender : record.patientGender;
+}
+
+// Saved records keep the values computed when they were measured; screens and
+// reports show them re-derived from the stored SOS with the current reference,
+// so the numbers always agree with the age-SOS chart.
+MeasurementRecord withCurrentReference(const MeasurementRecord& record, const PatientInfo& patient)
+{
+    bool ok = false;
+    const double sos = record.sos.trimmed().toDouble(&ok);
+    if (!ok || !std::isfinite(sos) || sos <= 0.0) return record;
+
+    const BoneHealth::DerivedResult derived = BoneHealth::deriveResult(
+        sos, measurementGender(record, patient), measurementAge(record, patient));
+    MeasurementRecord shown = record;
+    // A diagnosis that is just the generated verdict is replaced; free text is kept.
+    if (record.diagnosis.trimmed().isEmpty() || record.diagnosis == record.boneStrength)
+        shown.diagnosis = derived.diagnosis;
+    shown.tScore = derived.tScore;
+    shown.zScore = derived.zScore;
+    shown.boneStrength = derived.strength;
+    shown.fractureRisk = derived.fractureRisk;
+    shown.boneAge = derived.boneAge;
+    return shown;
+}
+
+bool sameMeasurement(const MeasurementRecord& left, const MeasurementRecord& right)
+{
+    if (!left.id.trimmed().isEmpty() && !right.id.trimmed().isEmpty())
+        return left.id == right.id;
+    return left.patientId == right.patientId &&
+           left.measuredAt == right.measuredAt &&
+           left.sos == right.sos;
+}
+
+bool sameSexProfile(AgeSosChartWidget::Profile left, AgeSosChartWidget::Profile right)
+{
+    const bool leftFemale = left == AgeSosChartWidget::Profile::Girl ||
+                            left == AgeSosChartWidget::Profile::Woman;
+    const bool rightFemale = right == AgeSosChartWidget::Profile::Girl ||
+                             right == AgeSosChartWidget::Profile::Woman;
+    const bool leftMale = left == AgeSosChartWidget::Profile::Boy ||
+                          left == AgeSosChartWidget::Profile::Man;
+    const bool rightMale = right == AgeSosChartWidget::Profile::Boy ||
+                           right == AgeSosChartWidget::Profile::Man;
+    return (leftFemale && rightFemale) || (leftMale && rightMale);
 }
 
 } // namespace
@@ -114,18 +153,6 @@ MainWindow::MainWindow(QWidget *parent)
     serial(new QSerialPort(this))
 {
     ui->setupUi(this);
-    for (QLineEdit* edit : {ui->eHeight, ui->eWeight,
-                            ui->editHeight, ui->editWeight,
-                            ui->dHeight, ui->dWeight}) {
-        auto* validator = new QDoubleValidator(0.1, 999.9, 1, edit);
-        validator->setNotation(QDoubleValidator::StandardNotation);
-        edit->setValidator(validator);
-    }
-    for (QDateEdit* edit : {ui->eBirth, ui->dateBirth, ui->dBirth}) {
-        edit->setDisplayFormat(QStringLiteral("yyyy-MM-dd"));
-        edit->setMinimumDate(QDate(1900, 1, 1));
-        edit->setMaximumDate(QDate::currentDate());
-    }
     accountsFilePath = QCoreApplication::applicationDirPath() + "/accounts.xml";
     measurementGuideSettingsPath =
         QCoreApplication::applicationDirPath() + "/measurement-guide.ini";
@@ -147,110 +174,7 @@ MainWindow::MainWindow(QWidget *parent)
     manageAccountsAction->setVisible(false);
     connect(manageAccountsAction, &QAction::triggered, this, &MainWindow::manageAccounts);
 
-    // ------------------- 开始美化代码 -------------------
-
-    // 1. 设置主窗口背景色 (告别灰色)
-    this->setStyleSheet("QMainWindow { background-color: #F5F7FA; }");
-
-    // 2. 定义全局样式表 (建议放在单独的 QString 变量中，方便修改)
-    QString qss = R"(
-    /* 全局字体 */
-    QWidget {
-        font-family: 'Microsoft YaHei', 'Segoe UI';
-        font-size: 14px;
-        color: #333333;
-    }
-
-    /* ---------------- 按钮美化 ---------------- */
-    QPushButton {
-        background-color: #FFFFFF;
-        border: 1px solid #DCDFE6;
-        border-radius: 6px;       /* 圆角 */
-        padding: 8px 16px;        /* 内边距，让按钮变胖一点 */
-        color: #606266;
-        font-weight: bold;
-    }
-    QPushButton:hover {
-        background-color: #ECF5FF; /* 悬停变淡蓝 */
-        color: #409EFF;
-        border-color: #C6E2FF;
-    }
-    QPushButton:pressed {
-        background-color: #409EFF; /* 按下变深蓝 */
-        color: #FFFFFF;
-        border-color: #409EFF;
-    }
-    QPushButton:disabled {
-        background-color: #EBEEF5;
-        color: #A8ABB2;
-        border-color: #DCDFE6;
-    }
-
-    /* 特殊按钮：比如"获取波形"、"保存"这种主要操作，可以单独设为蓝色背景 */
-    /* 你需要在 UI 设计器里给这些按钮的 styleSheet 属性单独加，或者用 objectName 区分 */
-    QPushButton#btnAcquireWaveform, QPushButton#btnLogin {
-        background-color: #409EFF;
-        color: white;
-        border: none;
-    }
-    QPushButton#btnAcquireWaveform:hover, QPushButton#btnLogin:hover {
-        background-color: #66B1FF;
-    }
-
-    /* ---------------- 输入框美化 ---------------- */
-    QLineEdit, QDateEdit, QComboBox {
-        border: 1px solid #DCDFE6;
-        border-radius: 4px;
-        padding: 5px;  /* 文字不要紧贴边框 */
-        background-color: #FFFFFF;
-        selection-background-color: #409EFF;
-    }
-    QLineEdit:focus, QDateEdit:focus, QComboBox:focus {
-        border: 1px solid #409EFF; /* 选中时边框变蓝 */
-    }
-
-    /* ---------------- 表格美化 (TableWidget) ---------------- */
-    QTableWidget {
-        background-color: #FFFFFF;
-        border: 1px solid #EBEEF5;
-        gridline-color: #EBEEF5;
-        selection-background-color: #ECF5FF; /* 选中行背景淡蓝 */
-        selection-color: #606266;            /* 选中行文字颜色 */
-    }
-    QHeaderView::section {
-        background-color: #F5F7FA;  /* 表头背景灰白 */
-        border: none;
-        border-bottom: 1px solid #EBEEF5;
-        border-right: 1px solid #EBEEF5;
-        padding: 8px;
-        font-weight: bold;
-    }
-
-    /* ---------------- 标签 ---------------- */
-    QLabel {
-        color: #303133;
-    }
-
-    /* ---------------- 分组框 ---------------- */
-    QGroupBox {
-        border: 1px solid #DCDFE6;
-        border-radius: 6px;
-        margin-top: 10px; /* 给标题留位置 */
-        padding-top: 10px;
-    }
-    QGroupBox::title {
-        subcontrol-origin: margin;
-        subcontrol-position: top left;
-        padding: 0 5px;
-        color: #409EFF; /* 标题蓝色 */
-        font-weight: bold;
-    }
-)";
-
-    // 应用样式表到整个应用程序窗口
-    this->setStyleSheet(qss);
-
-    // ------------------- 结束美化代码 -------------------
+    applyTheme();
 
 #if defined(BONE_COMPLETE_B_PEAK_EXPERIMENT) || defined(BONE_RELOCK_PRESERVATION_EXPERIMENT) || defined(BONE_DUAL_WINDOW_A_EXPERIMENT)
     if (useDualWindowAQuality) mCfg.roundCorrAMin = 0.78;
@@ -264,7 +188,7 @@ MainWindow::MainWindow(QWidget *parent)
 #elif defined(BONE_OBSERVE_BEFORE_G_EXPERIMENT)
     this->setWindowTitle(QStringLiteral("骨密度仪 · 姿态流程试测版（仅研发验证）"));
 #else
-    this->setWindowTitle(QStringLiteral("骨密度仪APP · 首波一致性试测"));
+    this->setWindowTitle(QStringLiteral("超声骨密度仪"));
 #endif
     this->setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
     //this->showFullScreen();
@@ -273,6 +197,9 @@ MainWindow::MainWindow(QWidget *parent)
     // ✅ 默认显示主页面
     ui->stackedWidget->setCurrentWidget(ui->pageLogin);
 
+    deviceWatchdog.setInterval(500);
+    connect(&deviceWatchdog, &QTimer::timeout, this, &MainWindow::checkDeviceResponse);
+    deviceWatchdog.start();
     connect(&scanTimer, &QTimer::timeout, this, &MainWindow::scanPorts);
     scanTimer.start(1000);
     scanPorts();
@@ -280,6 +207,8 @@ MainWindow::MainWindow(QWidget *parent)
     //connect(serial, &QSerialPort::readyRead, this, &MainWindow::handleSerialReadyRead);
     connect(serial, &QSerialPort::errorOccurred, this, &MainWindow::handleSerialError);
 
+    setupLoginPage();
+    setupMainLayout();
     setupChart();
     setupSpeedChart(); // ✅ 初始化声速趋势图
     setupSpeedDebugPanel();  // ✅ 初始化声速调试显示区域
@@ -293,16 +222,18 @@ MainWindow::MainWindow(QWidget *parent)
             this, &MainWindow::on_btnAcquireWaveform_clicked);
     connect(ui->btnReport, &QPushButton::clicked, this, [this]() {
         if (!hasCurrentPatient()) {
-            QMessageBox::information(this, "报表", "请先选择患者。");
+            QMessageBox::information(this, "报表", "请先选择被测者。");
             return;
         }
         const MeasurementRecord* latest = latestMeasurementForPatient(currentPatient.id);
         if (!latest) {
-            QMessageBox::information(this, "报表", "当前患者还没有已保存的检测结果。");
+            QMessageBox::information(this, "报表", "当前被测者还没有已保存的检测结果。");
             return;
         }
-        showReport(currentPatient, *latest);
+        showReportFrom(ui->pageMain, currentPatient, *latest);
     });
+    connect(ui->editUsername, &QLineEdit::returnPressed, this, &MainWindow::on_btnLogin_clicked);
+    connect(ui->editPassword, &QLineEdit::returnPressed, this, &MainWindow::on_btnLogin_clicked);
     connect(ui->pushButton_2, &QPushButton::clicked,
             this, &MainWindow::openCalibrationDialog);
     // ✅ 初始化滤波器
@@ -318,42 +249,6 @@ MainWindow::MainWindow(QWidget *parent)
     updatePatientSelectionUi();
 
 
-    // ✅ 档案管理按钮连接
-
-    ui->dateBirth->setDisplayFormat("yyyy-MM-dd");
-    ui->dBirth->setDisplayFormat("yyyy-MM-dd");
-    ui->dateCheck->setVisible(false);
-    ui->editDiag->setVisible(false);
-    ui->dCheck->setVisible(false);
-    ui->dDiag->setVisible(false);
-    ui->label_7->setVisible(false);
-    ui->label_8->setVisible(false);
-    ui->label_9->setVisible(false);
-    ui->label_11->setVisible(false);
-    ui->dID->setReadOnly(true);
-    ui->btnSelectPatient->setVisible(false);
-    ui->btnViewHistory->setVisible(false);
-
-    installPatientFormLayout(
-        ui->pagePatientForm,
-        {{ui->label, ui->editName},
-         {ui->label_18, ui->editID},
-         {ui->label_2, ui->comboGender},
-         {ui->label_3, ui->dateBirth},
-         {ui->label_5, ui->editHeight},
-         {ui->label_6, ui->editWeight}},
-        {ui->btnFormSave, ui->btnFormBack});
-    installPatientFormLayout(
-        ui->pagePatientDetail,
-        {{ui->label_16, ui->dName},
-         {ui->label_13, ui->dID},
-         {ui->label_14, ui->dGender},
-         {ui->label_17, ui->dBirth},
-         {ui->label_12, ui->dHeight},
-         {ui->label_10, ui->dWeight}},
-        {ui->btnDetailSave, ui->btnDetailDelete, ui->btnDetailBack});
-
-    initSearchControls(); // ✅ 初始化下拉框
 
     autoTimer = new QTimer(this);
     connect(autoTimer,&QTimer::timeout,this,&MainWindow::sendCmd);
@@ -417,6 +312,8 @@ void MainWindow::on_btnLogin_clicked() {
         if (QAction* action = findChild<QAction*>("manageAccountsAction")) {
             action->setVisible(currentAccount.role == "admin");
         }
+        if (btnManageAccounts) btnManageAccounts->setVisible(currentAccount.role == "admin");
+        if (lblAccount) lblAccount->setText(QStringLiteral("账号 %1").arg(currentAccount.username));
         ui->stackedWidget->setCurrentWidget(ui->pageMain);
         scheduleResponsiveLayout();
         return;
@@ -459,12 +356,16 @@ void MainWindow::resetDisconnectedAcquisitionState()
     samplesD.clear();
     chReceived[0] = chReceived[1] = chReceived[2] = chReceived[3] = false;
     clearFrameAssembly();
+    awaitingDeviceFrame = false;
+    deviceUnresponsive = false;
     ui->triggerButton->setText(QStringLiteral("自动采集"));
     updatePatientSelectionUi();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    const bool nextRoundWasPending = nextRoundTimer.isActive();
+    const int pendingFinishedRounds = pendingNextRoundFinishedRounds;
     cancelPendingNextPatientRound();
     const bool patientMeasurementWasRunning = patientMeasureRunning;
     const bool patientTimerWasActive =
@@ -497,6 +398,12 @@ void MainWindow::closeEvent(QCloseEvent *event)
         if (patientTimerWasActive) autoTimer->start(80);
         updatePatientSelectionUi();
     };
+    // Cancelling the close must not lose the guarded 1 s automatic next round.
+    const auto restoreAfterCancel = [this, &resumePatientMeasurement,
+                                     nextRoundWasPending, pendingFinishedRounds]() {
+        resumePatientMeasurement();
+        if (nextRoundWasPending) scheduleNextPatientRound(pendingFinishedRounds);
+    };
 
     if (hasPendingMeasurement) {
         const QMessageBox::StandardButton choice = QMessageBox::warning(
@@ -509,7 +416,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
             if (trySavePendingMeasurement()) event->accept();
             else {
                 event->ignore();
-                resumePatientMeasurement();
+                restoreAfterCancel();
             }
             return;
         }
@@ -518,7 +425,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
             return;
         }
         event->ignore();
-        resumePatientMeasurement();
+        restoreAfterCancel();
         return;
     }
 
@@ -526,7 +433,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
         const QMessageBox::StandardButton choice = QMessageBox::warning(
             this,
             QStringLiteral("检测尚未完成"),
-            QStringLiteral("当前患者已完成 %1/%2 次测量，本组检测尚未完成。"
+            QStringLiteral("当前被测者已完成 %1/%2 次测量，本组检测尚未完成。"
                            "退出会丢失本组进度，是否仍要退出？")
                 .arg(roundSosList.size())
                 .arg(normalMeasureRounds),
@@ -535,7 +442,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
         if (choice == QMessageBox::Discard) event->accept();
         else {
             event->ignore();
-            resumePatientMeasurement();
+            restoreAfterCancel();
         }
         return;
     }
@@ -546,20 +453,153 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::manageAccounts()
 {
     if (currentAccount.role != "admin") return;
-    QDialog dialog(this); dialog.setWindowTitle("账号管理"); dialog.resize(600, 360);
-    QVBoxLayout layout(&dialog); QTableWidget table(&dialog); table.setColumnCount(3);
-    table.setEditTriggers(QAbstractItemView::NoEditTriggers);
-    table.setHorizontalHeaderLabels({"账号", "状态", "角色"});
-    const QList<AccountInfo>& accounts = accountStore.accounts(); table.setRowCount(accounts.size());
-    for (int i=0;i<accounts.size();++i) { table.setItem(i,0,new QTableWidgetItem(accounts[i].username)); table.setItem(i,1,new QTableWidgetItem(accounts[i].enabled?"启用":"停用")); table.setItem(i,2,new QTableWidgetItem(accounts[i].role)); }
-    layout.addWidget(&table); QHBoxLayout buttons; QPushButton add("创建",&dialog), toggle("启用/停用",&dialog), reset("重置密码",&dialog), remove("删除",&dialog), close("关闭",&dialog);
-    buttons.addWidget(&add);buttons.addWidget(&toggle);buttons.addWidget(&reset);buttons.addWidget(&remove);buttons.addStretch();buttons.addWidget(&close);layout.addLayout(&buttons);
-    auto selected = [&table](){ return table.currentRow() >= 0 ? table.item(table.currentRow(),0)->text() : QString(); };
-    connect(&close,&QPushButton::clicked,&dialog,&QDialog::accept);
-    connect(&add,&QPushButton::clicked,&dialog,[this,&dialog](){ bool ok=false; QString name=QInputDialog::getText(&dialog,"创建账号","账号：",QLineEdit::Normal,QString(),&ok); if(!ok)return; QString pass=QInputDialog::getText(&dialog,"创建账号","密码：",QLineEdit::Password,QString(),&ok); if(!ok)return; QString error; if(!accountStore.createUser(name,pass,&error)){QMessageBox::warning(&dialog,"失败",error);return;} dialog.accept(); });
-    connect(&toggle,&QPushButton::clicked,&dialog,[this,&dialog,selected](){QString name=selected();if(name.isEmpty())return;for(const AccountInfo&a:accountStore.accounts())if(a.username==name){QString e;if(!accountStore.setEnabled(name,!a.enabled,&e)){QMessageBox::warning(&dialog,"失败",e);return;}dialog.accept();return;}});
-    connect(&reset,&QPushButton::clicked,&dialog,[this,&dialog,selected](){bool ok=false;QString name=selected();if(name.isEmpty())return;QString pass=QInputDialog::getText(&dialog,"重置密码","新密码：",QLineEdit::Password,QString(),&ok);if(!ok)return;QString e;if(!accountStore.resetPassword(name,pass,&e)){QMessageBox::warning(&dialog,"失败",e);return;}dialog.accept();});
-    connect(&remove,&QPushButton::clicked,&dialog,[this,&dialog,selected](){QString name=selected();if(name.isEmpty()||QMessageBox::question(&dialog,"确认删除","确定删除账号？")!=QMessageBox::Yes)return;QString e;if(!accountStore.deleteUser(name,&e)){QMessageBox::warning(&dialog,"失败",e);return;}dialog.accept();});
+
+    QDialog dialog(this);
+    dialog.setObjectName(QStringLiteral("accountDialog"));
+    dialog.setWindowTitle(QStringLiteral("账号管理"));
+    dialog.resize(620, 420);
+    auto* layout = new QVBoxLayout(&dialog);
+    layout->setContentsMargins(22, 18, 22, 18);
+    layout->setSpacing(12);
+
+    auto* header = new QHBoxLayout;
+    auto* title = new QLabel(QStringLiteral("账号管理"), &dialog);
+    title->setProperty("role", QStringLiteral("dialogTitle"));
+    auto* note = new QLabel(QStringLiteral("账号用于区分操作人；密码只以加密摘要保存在本机"), &dialog);
+    note->setProperty("role", QStringLiteral("caption"));
+    header->addWidget(title);
+    header->addStretch();
+    header->addWidget(note, 0, Qt::AlignBottom);
+    layout->addLayout(header);
+
+    auto* table = new QTableWidget(&dialog);
+    table->setObjectName(QStringLiteral("accountTable"));
+    table->setColumnCount(3);
+    table->setHorizontalHeaderLabels({QStringLiteral("账号"), QStringLiteral("状态"), QStringLiteral("角色")});
+    table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    table->setSelectionMode(QAbstractItemView::SingleSelection);
+    table->verticalHeader()->hide();
+    table->setShowGrid(false);
+    table->setFrameShape(QFrame::NoFrame);
+    table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    table->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    auto* tableCard = new QFrame(&dialog);
+    tableCard->setObjectName(QStringLiteral("tableCard"));
+    auto* tableLayout = new QVBoxLayout(tableCard);
+    tableLayout->setContentsMargins(0, 0, 0, 0);
+    tableLayout->addWidget(table);
+    layout->addWidget(tableCard, 1);
+
+    auto* buttons = new QHBoxLayout;
+    buttons->setSpacing(8);
+    auto* add = new QPushButton(QStringLiteral("新建账号"), &dialog);
+    add->setProperty("variant", QStringLiteral("primary"));
+    auto* toggle = new QPushButton(QStringLiteral("停用"), &dialog);
+    auto* reset = new QPushButton(QStringLiteral("重置密码"), &dialog);
+    auto* remove = new QPushButton(QStringLiteral("删除"), &dialog);
+    remove->setProperty("variant", QStringLiteral("dangerOutline"));
+    auto* close = new QPushButton(QStringLiteral("关闭"), &dialog);
+    buttons->addWidget(add);
+    buttons->addWidget(toggle);
+    buttons->addWidget(reset);
+    buttons->addWidget(remove);
+    buttons->addStretch();
+    buttons->addWidget(close);
+    layout->addLayout(buttons);
+
+    const auto selected = [table]() {
+        const int row = table->currentRow();
+        return row >= 0 && table->item(row, 0) && table->selectionModel()->isRowSelected(row, QModelIndex())
+            ? table->item(row, 0)->text() : QString();
+    };
+    const auto updateButtons = [this, selected, toggle, reset, remove]() {
+        const QString name = selected();
+        bool enabled = true;
+        for (const AccountInfo& account : accountStore.accounts()) {
+            if (account.username == name) enabled = account.enabled;
+        }
+        toggle->setText(enabled ? QStringLiteral("停用") : QStringLiteral("启用"));
+        for (QPushButton* button : {toggle, reset, remove}) button->setEnabled(!name.isEmpty());
+    };
+    // Actions keep the dialog open and refresh the list in place.
+    const auto reload = [this, table, updateButtons](const QString& keepSelected) {
+        const QList<AccountInfo>& accounts = accountStore.accounts();
+        table->setRowCount(accounts.size());
+        for (int i = 0; i < accounts.size(); ++i) {
+            table->setItem(i, 0, new QTableWidgetItem(accounts[i].username));
+            auto* state = new QTableWidgetItem(accounts[i].enabled ? QStringLiteral("启用") : QStringLiteral("已停用"));
+            state->setForeground(accounts[i].enabled ? QColor(0x1B, 0x7A, 0x4B) : QColor(0x9A, 0x5B, 0x00));
+            table->setItem(i, 1, state);
+            table->setItem(i, 2, new QTableWidgetItem(accounts[i].role == QStringLiteral("admin")
+                                                          ? QStringLiteral("管理员") : QStringLiteral("普通账号")));
+            if (accounts[i].username == keepSelected) table->selectRow(i);
+        }
+        updateButtons();
+    };
+    reload(QString());
+    connect(table, &QTableWidget::itemSelectionChanged, &dialog, updateButtons);
+    connect(close, &QPushButton::clicked, &dialog, &QDialog::accept);
+
+    connect(add, &QPushButton::clicked, &dialog, [this, &dialog, reload]() {
+        bool ok = false;
+        const QString name = QInputDialog::getText(&dialog, QStringLiteral("新建账号"), QStringLiteral("账号："),
+                                                   QLineEdit::Normal, QString(), &ok);
+        if (!ok) return;
+        const QString pass = QInputDialog::getText(&dialog, QStringLiteral("新建账号"), QStringLiteral("密码："),
+                                                   QLineEdit::Password, QString(), &ok);
+        if (!ok) return;
+        QString error;
+        if (!accountStore.createUser(name, pass, &error)) {
+            QMessageBox::warning(&dialog, QStringLiteral("新建失败"), error);
+            return;
+        }
+        reload(name.trimmed());
+    });
+    connect(toggle, &QPushButton::clicked, &dialog, [this, &dialog, selected, reload]() {
+        const QString name = selected();
+        if (name.isEmpty()) return;
+        for (const AccountInfo& account : accountStore.accounts()) {
+            if (account.username != name) continue;
+            QString error;
+            if (!accountStore.setEnabled(name, !account.enabled, &error)) {
+                QMessageBox::warning(&dialog, QStringLiteral("操作失败"), error);
+                return;
+            }
+            reload(name);
+            return;
+        }
+    });
+    connect(reset, &QPushButton::clicked, &dialog, [this, &dialog, selected, reload]() {
+        const QString name = selected();
+        if (name.isEmpty()) return;
+        bool ok = false;
+        const QString pass = QInputDialog::getText(&dialog, QStringLiteral("重置密码"),
+                                                   QStringLiteral("账号 %1 的新密码：").arg(name),
+                                                   QLineEdit::Password, QString(), &ok);
+        if (!ok) return;
+        QString error;
+        if (!accountStore.resetPassword(name, pass, &error)) {
+            QMessageBox::warning(&dialog, QStringLiteral("重置失败"), error);
+            return;
+        }
+        reload(name);
+        QMessageBox::information(&dialog, QStringLiteral("重置密码"), QStringLiteral("密码已重置。"));
+    });
+    connect(remove, &QPushButton::clicked, &dialog, [this, &dialog, selected, reload]() {
+        const QString name = selected();
+        if (name.isEmpty()) return;
+        if (QMessageBox::question(&dialog, QStringLiteral("确认删除"),
+                                  QStringLiteral("确定删除账号“%1”？").arg(name)) != QMessageBox::Yes) {
+            return;
+        }
+        QString error;
+        if (!accountStore.deleteUser(name, &error)) {
+            QMessageBox::warning(&dialog, QStringLiteral("删除失败"), error);
+            return;
+        }
+        reload(QString());
+    });
     dialog.exec();
 }
 
@@ -641,90 +681,46 @@ void MainWindow::stopCalibrationAcquisition()
 }
 
 // ================= 串口扫描等原有代码 =======================================================================================
-void MainWindow::resizeEvent(QResizeEvent *event)
-{
-    QMainWindow::resizeEvent(event);
-
-    if (!ui || !ui->pageMain || !ui->mainBodyWidget) return;
-
-    const int pageWidth = ui->pageMain->width();
-    const int pageHeight = ui->pageMain->height();
-    if (pageWidth <= 0 || pageHeight <= 0) return;
-
-    const int margin = 10;
-    const int toolbarHeight = 62;
-    const int bodyTop = toolbarHeight + 10;
-    const int bodyHeight = qMax(1, pageHeight - bodyTop - margin);
-    const int bodyWidth = qMax(1, pageWidth - margin * 2);
-
-    ui->layoutWidget_2->setGeometry(margin, 0, bodyWidth, toolbarHeight);
-    ui->mainBodyWidget->setGeometry(margin, bodyTop, bodyWidth, bodyHeight);
-    ui->layoutWidget->setGeometry(ui->mainBodyWidget->rect());
-
-    // The child layouts are updated by Qt after this event. Adjust them once more
-    // on the next event-loop turn so the first display uses final parent sizes.
-    QTimer::singleShot(0, this, [this]() {
-        if (!ui || !ui->mainBodyWidget) return;
-
-        ui->layoutWidget_3->setGeometry(ui->grpWaveArea->contentsRect());
-
-        const QRect speedRect = ui->grpSpeedArea->contentsRect();
-        QFrame *speedPanel = ui->grpSpeedArea->findChild<QFrame*>("speedDebugPanel");
-        const int panelHeight = speedPanel ? 52 : 0;
-        const int panelGap = speedPanel ? 4 : 0;
-        if (speedPanel) {
-            speedPanel->setGeometry(speedRect.x(), speedRect.y(),
-                                    speedRect.width(), panelHeight);
-        }
-        ui->chartViewSpeed->setGeometry(speedRect.x(),
-                                        speedRect.y() + panelHeight + panelGap,
-                                        speedRect.width(),
-                                        qMax(1, speedRect.height() - panelHeight - panelGap));
-
-        ui->chartViewReference->setGeometry(ui->grpReferenceCurveArea->contentsRect());
-
-        // The right column contains fixed-position child widgets in the .ui file.
-        // Recalculate their vertical areas so the image remains visible at smaller heights.
-        const QRect rightRect = ui->rightColumnWidget->rect();
-        const int rightWidth = qMax(1, rightRect.width());
-        const int rightHeight = qMax(1, rightRect.height());
-        const int infoHeight = qMin(341, qMax(341, rightHeight * 38 / 100));
-        const int resultHeight = qMin(331, qMax(260, rightHeight * 34 / 100));
-        const int imageY = infoHeight + resultHeight;
-        const int imageHeight = qMax(1, rightHeight - imageY);
-
-        ui->grpPatientInfoRight->setGeometry(0, 0, rightWidth, infoHeight);
-        ui->grpLatestResultRight->setGeometry(0, infoHeight, rightWidth, resultHeight);
-        ui->grpPartImageRight->setGeometry(0, imageY, rightWidth, imageHeight);
-        ui->label_32->setGeometry(ui->grpPartImageRight->contentsRect());
-    });
-}
-
 void MainWindow::scheduleResponsiveLayout()
 {
+    // Layouts own all geometry; only the aspect-driven reference height and
+    // the scaled part image need a pass after Qt has settled the sizes.
     QTimer::singleShot(0, this, [this]() {
         if (!ui) return;
-        QResizeEvent event(size(), size());
-        resizeEvent(&event);
+        fitReferenceChartHeight();
+        updatePartImage();
     });
 }
 
 void MainWindow::scanPorts() {
-    QString current = ui->comboPort->currentData().toString();
-    ui->comboPort->blockSignals(true);
-    ui->comboPort->clear();
-
+    QList<QPair<QString, QString>> ports;
     const auto infos = QSerialPortInfo::availablePorts();
-    for (const QSerialPortInfo &info : infos) {
-        // 文本：COM11 - USB Serial Device
-        // data：COM11   ✅ 只存端口名
-        ui->comboPort->addItem(info.portName() + " - " + info.description(),
-                               info.portName());
-    }
+    for (const QSerialPortInfo &info : infos) ports.append({info.portName(), info.description()});
+    applyPortList(ports);
+}
 
-    int idx = ui->comboPort->findData(current);
-    if (idx >= 0) ui->comboPort->setCurrentIndex(idx);
-    ui->comboPort->blockSignals(false);
+// Rebuild the port list only when it actually changed and the user is not
+// looking at the open drop-down, so the selection never flickers away.
+void MainWindow::applyPortList(const QList<QPair<QString, QString>>& ports)
+{
+    QComboBox* combo = ui->comboPort;
+    bool unchanged = combo->count() == ports.size();
+    for (int i = 0; unchanged && i < ports.size(); ++i) {
+        unchanged = combo->itemData(i).toString() == ports[i].first &&
+                    combo->itemText(i) == ports[i].first + " - " + ports[i].second;
+    }
+    if (unchanged) return;
+    if (combo->view() && combo->view()->isVisible()) return;
+
+    const QString current = combo->currentData().toString();
+    QSignalBlocker blocker(combo);
+    combo->clear();
+    for (const auto& port : ports) {
+        // 文本：COM11 - USB Serial Device；data 只存端口名
+        combo->addItem(port.first + " - " + port.second, port.first);
+    }
+    const int idx = combo->findData(current);
+    if (idx >= 0) combo->setCurrentIndex(idx);
 }
 
 
@@ -813,7 +809,7 @@ void MainWindow::on_triggerButton_clicked()
         clearFeedbackReadings();
         ui->lblProcessStatus->setText("检测已手动停止");
         ui->lblProcessStatus->setStyleSheet(
-            "font-size: 12px; color: #E6A23C; font-weight: bold;"
+            "font-size: 14px; color: #9A5B00; font-weight: bold;"
             );
         return;
     }
@@ -851,6 +847,7 @@ void MainWindow::sendCmd() {
     cmd.append((char)((idx16 >> 8) & 0xFF));
 
     serial->write(cmd);
+    noteCommandSent();
     // 注意：自动模式下不要加 waitForBytesWritten，会阻塞界面
     // 也不要在这里 clear() rxBuffer，否则会把正在接收的数据清掉
 }
@@ -872,7 +869,7 @@ void MainWindow::on_btnAcquireWaveform_clicked()
         clearFeedbackReadings();
         ui->lblProcessStatus->setText("检测已手动停止");
         ui->lblProcessStatus->setStyleSheet(
-            "font-size: 12px; color: #E6A23C; font-weight: bold;"
+            "font-size: 14px; color: #9A5B00; font-weight: bold;"
             );
         return;
     }
@@ -898,6 +895,7 @@ void MainWindow::on_btnAcquireWaveform_clicked()
 
     rxBuffer.clear();
     serial->write(cmd);
+    noteCommandSent();
     serial->waitForBytesWritten(50);
 
     qDebug() << "TX CMD" << cmd.toHex(' ');
@@ -922,9 +920,7 @@ void MainWindow::startPatientMeasurement(int targetRounds, bool offerFirstUseGui
 
     if (!hasCurrentPatient()) {
         pendingStartAfterPatientInfo = false;
-
-        clearNewForm();
-        ui->stackedWidget->setCurrentWidget(ui->pagePatientSelect);
+        on_btnPatientInfo_clicked();
         return;
     }
 
@@ -998,7 +994,7 @@ void MainWindow::startPatientMeasurement(int targetRounds, bool offerFirstUseGui
             .arg(normalMeasureRounds));
 
     ui->lblProcessStatus->setStyleSheet(
-        "font-size: 12px; color: #409EFF; font-weight: bold;"
+        "font-size: 14px; color: #1D5FA8; font-weight: bold;"
         );
 
     autoTimer->start(80);
@@ -1472,7 +1468,7 @@ void MainWindow::finishOnePatientRound()
                 .arg(rejectedRound)
                 .arg(normalMeasureRounds));
         ui->lblProcessStatus->setStyleSheet(
-            "font-size: 12px; color: #E6A23C; font-weight: bold;"
+            "font-size: 14px; color: #9A5B00; font-weight: bold;"
             );
 
         showRoundFinishedTip(roundSosList.size(), normalMeasureRounds, false);
@@ -1549,7 +1545,7 @@ void MainWindow::finishOnePatientRound()
             .arg(normalMeasureRounds));
 
     ui->lblProcessStatus->setStyleSheet(
-        "font-size: 12px; color: #409EFF; font-weight: bold;"
+        "font-size: 14px; color: #1D5FA8; font-weight: bold;"
         );
 
     showRoundFinishedTip(finished, normalMeasureRounds);
@@ -1611,7 +1607,7 @@ void MainWindow::finishAllPatientRounds()
         ui->lblProcessStatus->setText(
             QStringLiteral("上一次检测结果尚未保存，请先点击“保存结果”。"));
         ui->lblProcessStatus->setStyleSheet(
-            "font-size: 12px; color: #E6A23C; font-weight: bold;");
+            "font-size: 14px; color: #9A5B00; font-weight: bold;");
         updatePatientSelectionUi();
         return;
     }
@@ -1623,7 +1619,7 @@ void MainWindow::finishAllPatientRounds()
                 .arg(normalMeasureRounds)
             );
         ui->lblProcessStatus->setStyleSheet(
-            "font-size: 12px; color: #E6A23C; font-weight: bold;"
+            "font-size: 14px; color: #9A5B00; font-weight: bold;"
             );
         return;
     }
@@ -1638,31 +1634,14 @@ void MainWindow::finishAllPatientRounds()
 
     stopPatientMeasurement();
 
-    int age = BoneHealth::calcPatientAge(
-        QDate::fromString(currentPatient.birthDay, "yyyy-MM-dd"));
-
-    double youngMean = currentPatient.gender.contains("男") ? 4150.0 : 4137.0;
-    double youngSd   = 115.2;
-
-    double ageMean = BoneHealth::calcAgeReferenceMean(age);
-    if (currentPatient.gender.contains("男")) {
-        ageMean += 20.0;
-    }
-
-    double ageSd = 115.2;
-
-    double tScore = (finalSos - youngMean) / youngSd;
-    double zScore = (finalSos - ageMean) / ageSd;
-
-    QString strength = BoneHealth::classifyBoneStrength(tScore);
-    double risk = BoneHealth::calcRelativeFractureRisk(tScore);
-    int boneAge = BoneHealth::estimateBoneAgeFromSos(finalSos, currentPatient.gender);
+    const QDate birthDate = QDate::fromString(currentPatient.birthDay, "yyyy-MM-dd");
+    const int age = birthDate.isValid() ? BoneHealth::calcPatientAge(birthDate) : -1;
+    const BoneHealth::DerivedResult derived =
+        BoneHealth::deriveResult(finalSos, currentPatient.gender, age);
 
     currentPatient.checkDate = QDate::currentDate().toString("yyyy-MM-dd");
     currentPatient.speedOfSound = QString::number(finalSos, 'f', 1);
-    currentPatient.diagprompt = strength;
-
-    updateLatestResultPanel(finalSos, tScore, zScore, strength, risk, boneAge);
+    currentPatient.diagprompt = derived.strength;
 
     pendingMeasurement = MeasurementRecord();
     pendingMeasurement.id = QUuid::createUuid().toString(QUuid::WithoutBraces);
@@ -1671,18 +1650,18 @@ void MainWindow::finishAllPatientRounds()
     pendingMeasurement.operatorName = currentAccount.username;
     pendingMeasurement.part = QString::fromUtf8("桡骨");
     pendingMeasurement.sos = QString::number(finalSos, 'f', 1);
-    pendingMeasurement.tScore = QString::number(tScore, 'f', 2);
-    pendingMeasurement.zScore = QString::number(zScore, 'f', 2);
-    pendingMeasurement.diagnosis = strength;
+    pendingMeasurement.tScore = derived.tScore;
+    pendingMeasurement.zScore = derived.zScore;
+    pendingMeasurement.diagnosis = derived.diagnosis;
     pendingMeasurement.patientName = currentPatient.name;
     pendingMeasurement.patientGender = currentPatient.gender;
     pendingMeasurement.patientBirthDay = currentPatient.birthDay;
     pendingMeasurement.patientHeight = currentPatient.height;
     pendingMeasurement.patientWeight = currentPatient.weight;
-    pendingMeasurement.patientAge = QString::number(age);
-    pendingMeasurement.boneStrength = strength;
-    pendingMeasurement.fractureRisk = QString::number(risk, 'f', 1);
-    pendingMeasurement.boneAge = QString::number(boneAge);
+    pendingMeasurement.patientAge = age >= 0 ? QString::number(age) : QString();
+    pendingMeasurement.boneStrength = derived.strength;
+    pendingMeasurement.fractureRisk = derived.fractureRisk;
+    pendingMeasurement.boneAge = derived.boneAge;
     hasPendingMeasurement = true;
     const MeasurementRecord completedMeasurement = pendingMeasurement;
     QList<MeasurementRecord> savedMeasurements = measurementList;
@@ -1691,16 +1670,15 @@ void MainWindow::finishAllPatientRounds()
         measurementList = savedMeasurements;
         hasPendingMeasurement = false;
         pendingMeasurement = MeasurementRecord();
-        refreshTable(patientList);
     }
-    updatePatientSelectionUi();
+    refreshPatientDerivedViews();
 
     ui->lblProcessStatus->setText(
         QString("5 次测量完成：最终 SOS=%1 m/s")
             .arg(finalSos, 0, 'f', 1)
         );
     ui->lblProcessStatus->setStyleSheet(
-        "font-size: 12px; color: #67C23A; font-weight: bold;"
+        "font-size: 14px; color: #1B7A4B; font-weight: bold;"
         );
 
     showPatientMeasureFinishedDialog(completedMeasurement);
@@ -1712,39 +1690,17 @@ void MainWindow::finishAllPatientRounds()
              << "finalSos =" << finalSos
              << "finalA =" << finalA
              << "finalB =" << finalB
-             << "T =" << tScore
-             << "Z =" << zScore
-             << "strength =" << strength
-             << "risk =" << risk
-             << "boneAge =" << boneAge;
+             << "T =" << derived.tScore
+             << "Z =" << derived.zScore
+             << "strength =" << derived.strength
+             << "risk =" << derived.fractureRisk
+             << "boneAge =" << derived.boneAge;
 }
 
 
 void MainWindow::initLatestResultPanel()
 {
-    ui->lblLatestPart->setText("桡骨");
-    ui->lblLatestSOS->setText("--");
-    ui->lblLatestT->setText("--");
-    ui->lblLatestZ->setText("--");
-    ui->lblLatestStrength->setText("--");
-    ui->lblLatestRisk->setText("--");
-    ui->lblLatestBoneAge->setText("--");
-}
-
-void MainWindow::updateLatestResultPanel(double sos,
-                                         double tScore,
-                                         double zScore,
-                                         const QString& strength,
-                                         double risk,
-                                         int boneAge)
-{
-    ui->lblLatestPart->setText("桡骨");
-    ui->lblLatestSOS->setText(QString("%1 m/s").arg(sos, 0, 'f', 1));
-    ui->lblLatestT->setText(QString("%1").arg(tScore, 0, 'f', 2));
-    ui->lblLatestZ->setText(QString("%1").arg(zScore, 0, 'f', 2));
-    ui->lblLatestStrength->setText(strength);
-    ui->lblLatestRisk->setText(QString("%1").arg(risk, 0, 'f', 1));
-    ui->lblLatestBoneAge->setText(QString("%1 岁").arg(boneAge));
+    updateResultPanel();
 }
 
 void MainWindow::showPatientMeasureFinishedDialog(
@@ -1752,9 +1708,9 @@ void MainWindow::showPatientMeasureFinishedDialog(
 {
     if (hasPendingMeasurement) {
         QMessageBox::warning(this, "结果保存失败",
-                             "本次报表已经生成，但检测结果尚未保存，请返回主界面后重试保存。");
+                             "本次报表已经生成，但检测结果尚未保存，请返回主界面在“测量结果”中重试保存。");
     }
-    showReport(currentPatient, completedMeasurement);
+    showReportFrom(ui->pageMain, currentPatient, completedMeasurement);
 }
 
 void MainWindow::setupReportPage()
@@ -1764,7 +1720,8 @@ void MainWindow::setupReportPage()
     pageLayout->setSpacing(10);
 
     QHBoxLayout* toolbar = new QHBoxLayout();
-    QPushButton* backButton = new QPushButton("返回主界面", ui->pageReport);
+    QPushButton* backButton = new QPushButton("返回", ui->pageReport);
+    backButton->setObjectName(QStringLiteral("reportBackButton"));
     QPushButton* exportButton = new QPushButton("导出 PDF", ui->pageReport);
     QPushButton* printButton = new QPushButton("打印", ui->pageReport);
     toolbar->addWidget(backButton);
@@ -1777,7 +1734,7 @@ void MainWindow::setupReportPage()
     pageLayout->addWidget(reportWidget, 1);
 
     connect(backButton, &QPushButton::clicked, this, [this]() {
-        ui->stackedWidget->setCurrentWidget(ui->pageMain);
+        ui->stackedWidget->setCurrentWidget(reportReturnPage ? reportReturnPage : ui->pageMain);
         scheduleResponsiveLayout();
     });
     connect(printButton, &QPushButton::clicked, this, [this]() {
@@ -1820,8 +1777,9 @@ void MainWindow::setupReportPage()
 }
 
 ReportData MainWindow::buildReportData(const PatientInfo& patient,
-                                       const MeasurementRecord& measurement) const
+                                       const MeasurementRecord& savedMeasurement) const
 {
+    const MeasurementRecord measurement = withCurrentReference(savedMeasurement, patient);
     auto fallback = [](const QString& snapshot, const QString& current) {
         return snapshot.trimmed().isEmpty() ? current : snapshot;
     };
@@ -1872,6 +1830,75 @@ ReportData MainWindow::buildReportData(const PatientInfo& patient,
         diagnosisParts << measurement.diagnosis;
     }
     data.diagnosis = diagnosisParts.join("；");
+    data.ageSosChart = buildAgeSosChartData(patient, measurement, true);
+    return data;
+}
+
+AgeSosChartData MainWindow::buildAgeSosChartData(
+    const PatientInfo& patient,
+    const MeasurementRecord& focalMeasurement,
+    bool cutoffAtFocal) const
+{
+    AgeSosChartData data;
+    data.hasPatient = !patient.id.trimmed().isEmpty();
+    data.gender = measurementGender(focalMeasurement, patient);
+    data.focalAge = measurementAge(focalMeasurement, patient);
+    const AgeSosChartWidget::Profile focalProfile =
+        AgeSosChartWidget::profileFor(data.gender, data.focalAge);
+    const QDateTime focalDateTime = parsedMeasurementDateTime(focalMeasurement.measuredAt);
+
+    QList<MeasurementRecord> candidates = measurementsForPatient(patient.id);
+    bool focalPresent = false;
+    for (const MeasurementRecord& record : std::as_const(candidates)) {
+        if (sameMeasurement(record, focalMeasurement)) {
+            focalPresent = true;
+            break;
+        }
+    }
+    if (!focalPresent) candidates.append(focalMeasurement);
+
+    for (const MeasurementRecord& record : std::as_const(candidates)) {
+        const bool isFocal = sameMeasurement(record, focalMeasurement);
+        const QDateTime recordDateTime = parsedMeasurementDateTime(record.measuredAt);
+        if (cutoffAtFocal) {
+            if (focalDateTime.isValid()) {
+                if (!isFocal && (!recordDateTime.isValid() || recordDateTime > focalDateTime))
+                    continue;
+            } else if (!isFocal) {
+                continue;
+            }
+        }
+
+        data.hasMeasurementRecords = true;
+        const int age = measurementAge(record, patient);
+        const QString gender = measurementGender(record, patient);
+        const AgeSosChartWidget::Profile recordProfile =
+            AgeSosChartWidget::profileFor(gender, age);
+        bool sosOk = false;
+        const double sos = record.sos.trimmed().toDouble(&sosOk);
+        if (!sosOk || !std::isfinite(sos) || recordProfile == AgeSosChartWidget::Profile::None)
+            continue;
+
+        if (recordProfile != focalProfile) {
+            if (sameSexProfile(recordProfile, focalProfile) &&
+                AgeSosChartWidget::supportsPoint(gender, age, sos)) {
+                ++data.omittedOtherProfileCount;
+            }
+            continue;
+        }
+        if (!AgeSosChartWidget::supportsPoint(gender, age, sos)) continue;
+        data.points.append({age, sos, record.measuredAt, isFocal});
+    }
+
+    std::stable_sort(data.points.begin(), data.points.end(),
+                     [](const AgeSosMeasurementPoint& left,
+                        const AgeSosMeasurementPoint& right) {
+        const QDateTime leftTime = parsedMeasurementDateTime(left.measuredAt);
+        const QDateTime rightTime = parsedMeasurementDateTime(right.measuredAt);
+        if (leftTime.isValid() && rightTime.isValid()) return leftTime < rightTime;
+        if (leftTime.isValid() != rightTime.isValid()) return leftTime.isValid();
+        return left.measuredAt < right.measuredAt;
+    });
     return data;
 }
 
@@ -2021,6 +2048,7 @@ void MainWindow::parseIncomingData() {
 
             frameGroups.remove(idx);
             frameGroupOrder.removeAll(idx);
+            noteDeviceFrameReceived();
             plotSamples();
         }
 
@@ -2103,6 +2131,10 @@ void MainWindow::plotSamples()
     detectAndPlotSpeed(filBC, filBD, filAC, filAD);
 
     // 6. 画图
+    if (!shouldRefreshLiveWaveforms()) {
+        return;
+    }
+
     QVector<QPointF> ptsA, ptsB, ptsC, ptsD;
     ptsA.reserve(n);
     ptsB.reserve(n);
@@ -2110,6 +2142,10 @@ void MainWindow::plotSamples()
     ptsD.reserve(n);
 
     for (int i = 0; i < n; ++i) {
+        if (!std::isfinite(filBC[i]) || !std::isfinite(filBD[i])
+            || !std::isfinite(filAC[i]) || !std::isfinite(filAD[i])) {
+            return;
+        }
         ptsA.append(QPointF(i, filBC[i] + 2048.0));
         ptsB.append(QPointF(i, filBD[i] + 2048.0));
         ptsC.append(QPointF(i, filAC[i] + 2048.0));
@@ -2121,19 +2157,12 @@ void MainWindow::plotSamples()
     seriesC->replace(ptsC);
     seriesD->replace(ptsD);
 
-    auto setFixedAxisY = [&](QChart *chart) {
-        auto *axisY = qobject_cast<QValueAxis*>(chart->axisY());
-        if (axisY) axisY->setRange(0, 4095);
-    };
-
-    setFixedAxisY(chartA);
-    setFixedAxisY(chartB);
-    setFixedAxisY(chartC);
-    setFixedAxisY(chartD);
-
     auto updateAxisX = [&](QChart *chart, int count) {
         auto *axisX = qobject_cast<QValueAxis*>(chart->axisX());
-        if (axisX) axisX->setRange(0, count - 1);
+        const qreal maximum = count - 1;
+        if (axisX && (axisX->min() != 0.0 || axisX->max() != maximum)) {
+            axisX->setRange(0, maximum);
+        }
     };
 
     updateAxisX(chartA, n);
@@ -2592,30 +2621,42 @@ void MainWindow::printAngleFeatureDebug(const QVector<double>& filBC,
         );
 }
 
+bool MainWindow::shouldRefreshLiveWaveforms()
+{
+    if (liveWaveformRenderTimer.isValid()
+        && liveWaveformRenderTimer.elapsed() < liveWaveformRefreshIntervalMs) {
+        return false;
+    }
+
+    liveWaveformRenderTimer.restart();
+    return true;
+}
+
 void MainWindow::appendSpeedPoint(double speedAvg)
 {
+    if (!std::isfinite(speedAvg) || !seriesSpeed || !chartSpeed) {
+        return;
+    }
+
     seriesSpeed->append(speedPointIndex, speedAvg);
     const int excessPoints = seriesSpeed->count() - 50;
     if (excessPoints > 0) seriesSpeed->removePoints(0, excessPoints);
     speedPointIndex++;
 
     auto *axisX = qobject_cast<QValueAxis*>(chartSpeed->axisX());
-    auto *axisY = qobject_cast<QValueAxis*>(chartSpeed->axisY());
-
     if (axisX) {
+        qreal minimum = 0.0;
+        qreal maximum = 50.0;
         if (speedPointIndex < 50) {
-            axisX->setRange(0, 50);
+            minimum = 0.0;
         } else {
-            axisX->setRange(speedPointIndex - 50, speedPointIndex);
+            minimum = speedPointIndex - 50;
+            maximum = speedPointIndex;
         }
 
-        axisX->setTickCount(6);
-    }
-
-    if (axisY) {
-        axisY->setRange(2000, 5000);
-        axisY->setTickCount(4);
-        axisY->setLabelFormat("%.0f");
+        if (axisX->min() != minimum || axisX->max() != maximum) {
+            axisX->setRange(minimum, maximum);
+        }
     }
 }
 
@@ -3666,18 +3707,32 @@ void MainWindow::handleSerialError(QSerialPort::SerialPortError error) {
 
 void MainWindow::setupChart()
 {
+    // Same four QChart/QLineSeries channels as before; only the light theme,
+    // channel labels and gain read-outs are new. Antialiasing stays off (SC-44).
     QVBoxLayout *vbox = new QVBoxLayout();
-    vbox->setSpacing(2);
-    vbox->setContentsMargins(2, 2, 2, 2);
+    vbox->setSpacing(6);
+    vbox->setContentsMargins(0, 0, 0, 0);
+
+    struct ChannelStyle { QString name; QColor color; };
+    const ChannelStyle styles[4] = {
+        {QStringLiteral("A"), QColor(0x1D, 0x5F, 0xA8)},
+        {QStringLiteral("B"), QColor(0x1B, 0x7A, 0x4B)},
+        {QStringLiteral("C"), QColor(0x9A, 0x5B, 0x00)},
+        {QStringLiteral("D"), QColor(0x6B, 0x3F, 0xA0)}};
+    const QColor gridColor(0xEE, 0xF1, 0xF5);
+    const QColor axisColor(0xD5, 0xDB, 0xE3);
+    const QColor labelColor(0x5B, 0x65, 0x73);
+    int channelIndex = 0;
 
     auto createChannel = [&](QLineSeries **seriesPtr,
                              QChart **chartPtr,
                              QChartView **viewPtr,
                              QSlider **sliderPtr) {
+        const ChannelStyle& style = styles[channelIndex++];
+
         // 1. 曲线
         *seriesPtr = new QLineSeries();
-
-        QPen pen(QColor(0, 229, 255));
+        QPen pen(style.color);
         pen.setWidth(2);
         (*seriesPtr)->setPen(pen);
 
@@ -3685,106 +3740,83 @@ void MainWindow::setupChart()
         *chartPtr = new QChart();
         (*chartPtr)->addSeries(*seriesPtr);
         (*chartPtr)->legend()->hide();
-
-        // 关键：尽量压缩边距
         (*chartPtr)->setMargins(QMargins(0, 0, 0, 0));
         (*chartPtr)->layout()->setContentsMargins(0, 0, 0, 0);
         (*chartPtr)->setBackgroundRoundness(0);
-        (*chartPtr)->setBackgroundBrush(QBrush(QColor(30, 30, 30)));
+        (*chartPtr)->setBackgroundBrush(QBrush(Qt::white));
+        (*chartPtr)->setPlotAreaBackgroundBrush(QBrush(QColor(0xF7, 0xF9, 0xFB)));
+        (*chartPtr)->setPlotAreaBackgroundVisible(true);
 
-        // 3. X 轴：去掉 Sample Index 和数字标签，节省高度
+        // 3. X 轴：不显示横坐标数字，节省高度
         QValueAxis *axisX = new QValueAxis();
         axisX->setTitleText("");
         axisX->setLabelFormat("%d");
-        axisX->setLabelsVisible(false);       // 不显示横坐标数字
+        axisX->setLabelsVisible(false);
         axisX->setGridLineVisible(true);
-        axisX->setGridLineColor(QColor(80, 80, 80));
-        axisX->setLinePenColor(QColor(120, 120, 120));
+        axisX->setGridLineColor(gridColor);
+        axisX->setLinePenColor(axisColor);
         (*chartPtr)->setAxisX(axisX, *seriesPtr);
 
-        // 4. Y 轴：去掉 Amplitude，只保留少量刻度
+        // 4. Y 轴：只保留 0 / 中间 / 4095
         QValueAxis *axisY = new QValueAxis();
         axisY->setTitleText("");
         axisY->setRange(0, 4095);
-        axisY->setTickCount(3);               // 只保留 0 / 中间 / 4095
+        axisY->setTickCount(3);
         axisY->setLabelFormat("%.0f");
-        axisY->setLabelsColor(Qt::white);
-        axisY->setGridLineColor(QColor(80, 80, 80));
-        axisY->setLinePenColor(QColor(120, 120, 120));
+        axisY->setLabelsColor(labelColor);
+        QFont axisFont = axisY->labelsFont();
+        axisFont.setPointSize(7);
+        axisY->setLabelsFont(axisFont);
+        axisY->setGridLineColor(gridColor);
+        axisY->setLinePenColor(axisColor);
         (*chartPtr)->setAxisY(axisY, *seriesPtr);
 
         // 5. 图表视图
         *viewPtr = new QChartView(*chartPtr);
-        (*viewPtr)->setRenderHint(QPainter::Antialiasing);
+        (*viewPtr)->setRenderHint(QPainter::Antialiasing, false);
         (*viewPtr)->setStyleSheet("background: transparent;");
-        (*viewPtr)->setMinimumHeight(90);
-        (*viewPtr)->setMaximumHeight(125);
+        (*viewPtr)->setMinimumHeight(44);
+        (*viewPtr)->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-        // 6. 增益滑条
+        // 6. 增益滑条（四条联动，共用一个增益）
         *sliderPtr = new QSlider(Qt::Vertical);
         (*sliderPtr)->setRange(0, 1241);
         (*sliderPtr)->setValue(globalGain);
         (*sliderPtr)->setInvertedAppearance(false);
         (*sliderPtr)->setTickPosition(QSlider::NoTicks);
         (*sliderPtr)->setFixedWidth(24);
+        (*sliderPtr)->setMinimumHeight(24);
         (*sliderPtr)->setCursor(Qt::PointingHandCursor);
+        (*sliderPtr)->setObjectName(QStringLiteral("gainSlider%1").arg(style.name));
+        (*sliderPtr)->setToolTip(QStringLiteral("增益（四个通道联动）"));
+        connect(*sliderPtr, &QSlider::valueChanged, this, &MainWindow::onGainSliderChanged);
 
-        QString sliderStyle = R"(
-            QSlider:vertical {
-                background: transparent;
-                min-width: 24px;
-            }
-            QSlider::groove:vertical {
-                background: #E0E0E0;
-                width: 4px;
-                border-radius: 2px;
-                margin: 0px 10px;
-            }
-            QSlider::handle:vertical {
-                background: #FFFFFF;
-                border: 2px solid #409EFF;
-                height: 14px;
-                margin: 0 -5px;
-                border-radius: 8px;
-            }
-            QSlider::handle:vertical:hover {
-                background: #409EFF;
-                border: 2px solid #409EFF;
-            }
-            QSlider::add-page:vertical {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                                            stop:0 #409EFF, stop:1 #36D1DC);
-                width: 4px;
-                border-radius: 2px;
-                margin: 0px 10px;
-            }
-            QSlider::sub-page:vertical {
-                background: #E4E7ED;
-                width: 4px;
-                border-radius: 2px;
-                margin: 0px 10px;
-            }
-        )";
+        auto* channelLabel = new QLabel(style.name);
+        channelLabel->setObjectName(QStringLiteral("channelLabel%1").arg(style.name));
+        channelLabel->setFixedWidth(18);
+        channelLabel->setAlignment(Qt::AlignCenter);
+        channelLabel->setStyleSheet(QStringLiteral("font-weight:bold; font-size:14px; color:%1;")
+                                        .arg(style.color.name()));
 
-        (*sliderPtr)->setStyleSheet(sliderStyle);
+        auto* gainValue = new QLabel(QString::number(globalGain));
+        gainValue->setProperty("role", QStringLiteral("tiny"));
+        gainValue->setAlignment(Qt::AlignCenter);
+        gainValueLabels.append(gainValue);
+        auto* gainColumn = new QVBoxLayout();
+        gainColumn->setSpacing(0);
+        gainColumn->addWidget(*sliderPtr, 1, Qt::AlignHCenter);
+        gainColumn->addWidget(gainValue);
 
-        connect(*sliderPtr,
-                &QSlider::valueChanged,
-                this,
-                &MainWindow::onGainSliderChanged);
-
-        // 7. 一行：左边图，右边滑条
+        // 7. 一行：通道名 + 图 + 增益
         QHBoxLayout *hbox = new QHBoxLayout();
-        hbox->setContentsMargins(2, 0, 2, 2);
-        hbox->setSpacing(4);
-
+        hbox->setContentsMargins(0, 0, 0, 0);
+        hbox->setSpacing(6);
+        hbox->addWidget(channelLabel);
         hbox->addWidget(*viewPtr, 1);
-        hbox->addWidget(*sliderPtr, 0, Qt::AlignHCenter);
-
-        vbox->addLayout(hbox);
+        hbox->addLayout(gainColumn);
+        vbox->addLayout(hbox, 1);
     };
 
-    // 注意：这里不再显示 A→C/A→D/B→C/B→D 文字，只创建四路图
     createChannel(&seriesA, &chartA, &viewA, &gainSliderA);
     createChannel(&seriesB, &chartB, &viewB, &gainSliderB);
     createChannel(&seriesC, &chartC, &viewC, &gainSliderC);
@@ -3793,7 +3825,7 @@ void MainWindow::setupChart()
     QWidget *container = new QWidget();
     container->setLayout(vbox);
 
-    // 关键：不要再套 QScrollArea，避免右侧滚轮
+    // 不套 QScrollArea，避免出现滚动条
     ui->verticalLayoutChart->setContentsMargins(0, 0, 0, 0);
     ui->verticalLayoutChart->setSpacing(0);
     ui->verticalLayoutChart->addWidget(container);
@@ -3821,6 +3853,7 @@ void MainWindow::onGainSliderChanged(int value)
         gainSliderC->setValue(value);
         gainSliderD->setValue(value);
     }
+    for (QLabel* label : gainValueLabels) label->setText(QString::number(value));
 
     // 状态栏提示当前增益
     statusBar()->showMessage(
@@ -3836,13 +3869,7 @@ void MainWindow::onGainSliderChanged(int value)
 void MainWindow::on_btnPatientInfo_clicked()
 {
     if (patientMeasureRunning) return;
-    ui->eName->clear();
-    ui->eID->clear();
-    ui->eGender->setCurrentIndex(0);
-    ui->eBirth->setDate(QDate::currentDate());
-    ui->eHeight->clear();
-    ui->eWeight->clear();
-    ui->stackedWidget->setCurrentWidget(ui->pagePatientSelect);
+    on_btnArchive_clicked();
 }
 
 void MainWindow::on_btnStartMeasurement_clicked()
@@ -3863,14 +3890,14 @@ void MainWindow::on_btnStartMeasurement_clicked()
         clearFeedbackReadings();
         ui->lblProcessStatus->setText("检测已手动停止");
         ui->lblProcessStatus->setStyleSheet(
-            "font-size: 12px; color: #E6A23C; font-weight: bold;"
+            "font-size: 14px; color: #9A5B00; font-weight: bold;"
             );
         return;
     }
 
     if (hasPendingMeasurement) {
         statusBar()->showMessage(
-            QStringLiteral("上一次检测结果尚未保存，请先点击“保存结果”再开始新的检测。"),
+            QStringLiteral("上一次检测结果尚未保存，请先在“测量结果”中点击“重试保存”。"),
             8000);
         updatePatientSelectionUi();
         return;
@@ -3888,9 +3915,7 @@ void MainWindow::on_btnStartMeasurement_clicked()
     // 不弹 OK 小窗口，也不自动开始测量
     if (!hasCurrentPatient()) {
         pendingStartAfterPatientInfo = false;
-
-        clearNewForm();
-        ui->stackedWidget->setCurrentWidget(ui->pagePatientSelect);
+        on_btnPatientInfo_clicked();
         return;
     }
 
@@ -3938,66 +3963,22 @@ bool MainWindow::runMeasurementGuide(bool automatic)
     return accepted;
 }
 
-void MainWindow::on_btnPatientNewSave_clicked()
-{
-    PatientInfo p;
-    p.name     = ui->eName->text().trimmed();
-    p.id       = ui->eID->text().trimmed();
-    p.gender   = ui->eGender->currentText();
-    p.birthDay = ui->eBirth->date().toString("yyyy-MM-dd");
-    p.height   = ui->eHeight->text().trimmed();
-    p.weight   = ui->eWeight->text().trimmed();
-
-    if (p.name.isEmpty() || p.id.isEmpty()) {
-        QMessageBox::warning(this, "错误", "姓名和ID不能为空");
-        return;
-    }
-    if (!validatePatientFields(ui->eBirth->date(), p.height, p.weight)) return;
-
-    for (const PatientInfo& existing : patientList) {
-        if (existing.id == p.id) {
-            QMessageBox::warning(this, "重复 ID", "该编号已存在，请从档案中选择患者。");
-            return;
-        }
-    }
-    if (!confirmPatientChange(p.id)) return;
-
-    QList<PatientInfo> candidate = patientList;
-    candidate.append(p);
-    if (!savePatients(candidate)) return;
-    patientList = candidate;
-    applyCurrentPatient(p);
-    ui->stackedWidget->setCurrentWidget(ui->pageMain);
-    scheduleResponsiveLayout();
-}
-
-void MainWindow::on_btnBackToMain_clicked() {
-    ui->stackedWidget->setCurrentWidget(ui->pageMain);
-    scheduleResponsiveLayout();
-}
-
-void MainWindow::on_btnImportFromDB_clicked() {
-    if (patientMeasureRunning) {
-        QMessageBox::warning(this, "检测进行中", "检测进行中不能切换患者。");
-        return;
-    }
-    archiveMode = ImportMode;        // 标记为导入模式
-    ui->btnSelectPatient->setVisible(true);
-    ui->btnViewHistory->setVisible(false);
-    statusBar()->showMessage("请单击选中患者，再点击“选择患者”；也可以双击患者行直接导入", 5000);
-    refreshTable(patientList);
-    ui->stackedWidget->setCurrentWidget(ui->pageArchive);
-}
-
 void MainWindow::updateCurrentPatientUI() {
-    const QString empty = "--";
-    ui->labelName->setText("姓名: " + (currentPatient.name.isEmpty() ? empty : currentPatient.name));
-    ui->labelID->setText("ID: " + (currentPatient.id.isEmpty() ? empty : currentPatient.id));
-    ui->labelGender->setText("性别: " + (currentPatient.gender.isEmpty() ? empty : currentPatient.gender));
-    ui->labelBirth->setText("出生日期: " + (currentPatient.birthDay.isEmpty() ? empty : currentPatient.birthDay));
-    ui->labelHeight->setText("身高: " + (currentPatient.height.isEmpty() ? empty : currentPatient.height));
-    ui->labelWeight->setText("体重: " + (currentPatient.weight.isEmpty() ? empty : currentPatient.weight));
-
+    const QString empty = QStringLiteral("--");
+    const auto value = [&empty](const QString& text, const QString& unit = QString()) {
+        return text.trimmed().isEmpty() ? empty : text + unit;
+    };
+    ui->labelName->setText(currentPatient.name.isEmpty() ? QStringLiteral("未选择") : currentPatient.name);
+    QStringList meta;
+    if (!currentPatient.gender.isEmpty()) meta << currentPatient.gender;
+    const int age = ageOnDate(currentPatient.birthDay, QDate::currentDate());
+    if (age >= 0) meta << QStringLiteral("%1 岁").arg(age);
+    if (lblPatientMeta) lblPatientMeta->setText(meta.join(QStringLiteral(" · ")));
+    ui->labelID->setText(QStringLiteral("编号　%1").arg(value(currentPatient.id)));
+    ui->labelGender->setText(QStringLiteral("性别　%1").arg(value(currentPatient.gender)));
+    ui->labelBirth->setText(QStringLiteral("出生　%1").arg(value(currentPatient.birthDay)));
+    ui->labelHeight->setText(QStringLiteral("身高　%1").arg(value(currentPatient.height, QStringLiteral(" cm"))));
+    ui->labelWeight->setText(QStringLiteral("体重　%1").arg(value(currentPatient.weight, QStringLiteral(" kg"))));
 }
 
 
@@ -4024,7 +4005,7 @@ bool MainWindow::trySavePendingMeasurement()
     measurementList = candidate;
     hasPendingMeasurement = false;
     pendingMeasurement = MeasurementRecord();
-    updatePatientSelectionUi();
+    refreshPatientDerivedViews();
     return true;
 }
 
@@ -4034,7 +4015,7 @@ void MainWindow::on_btnSaveResult_clicked() {
         return;
     }
     if (!trySavePendingMeasurement()) return;
-    QMessageBox::information(this, "成功", "测量结果已保存。");
+    statusBar()->showMessage(QStringLiteral("测量结果已保存。"), 5000);
 }
 
 void MainWindow::setupSpeedChart()
@@ -4045,7 +4026,7 @@ void MainWindow::setupSpeedChart()
     seriesSpeed = new QLineSeries();
     seriesSpeed->setName("声速趋势");
 
-    QPen pen(QColor(255, 215, 0));   // 黄色线
+    QPen pen(QColor(0x1D, 0x5F, 0xA8));
     pen.setWidth(2);
     seriesSpeed->setPen(pen);
 
@@ -4063,9 +4044,8 @@ void MainWindow::setupSpeedChart()
     chartSpeed->setMargins(QMargins(2, 2, 2, 2));
     chartSpeed->setBackgroundRoundness(0);
 
-    // 深色背景
-    chartSpeed->setBackgroundBrush(QBrush(QColor(30, 30, 30)));
-    chartSpeed->setPlotAreaBackgroundBrush(QBrush(QColor(30, 30, 30)));
+    chartSpeed->setBackgroundBrush(QBrush(Qt::white));
+    chartSpeed->setPlotAreaBackgroundBrush(QBrush(QColor(0xF7, 0xF9, 0xFB)));
     chartSpeed->setPlotAreaBackgroundVisible(true);
 
     // ======================================================
@@ -4077,9 +4057,9 @@ void MainWindow::setupSpeedChart()
     axisX->setTickCount(6);          // 0,10,20,30,40,50
     axisX->setLabelFormat("%d");
 
-    axisX->setLabelsColor(Qt::white);
-    axisX->setGridLineColor(QColor(80, 80, 80));
-    axisX->setLinePenColor(QColor(120, 120, 120));
+    axisX->setLabelsColor(QColor(0x5B, 0x65, 0x73));
+    axisX->setGridLineColor(QColor(0xEE, 0xF1, 0xF5));
+    axisX->setLinePenColor(QColor(0xD5, 0xDB, 0xE3));
 
     QFont fontX = axisX->labelsFont();
     fontX.setPointSize(8);
@@ -4097,9 +4077,9 @@ void MainWindow::setupSpeedChart()
     axisY->setTickCount(4);          // 2000,3000,4000,5000
     axisY->setLabelFormat("%.0f");
 
-    axisY->setLabelsColor(Qt::white);
-    axisY->setGridLineColor(QColor(80, 80, 80));
-    axisY->setLinePenColor(QColor(120, 120, 120));
+    axisY->setLabelsColor(QColor(0x5B, 0x65, 0x73));
+    axisY->setGridLineColor(QColor(0xEE, 0xF1, 0xF5));
+    axisY->setLinePenColor(QColor(0xD5, 0xDB, 0xE3));
 
     QFont fontY = axisY->labelsFont();
     fontY.setPointSize(8);
@@ -4112,94 +4092,44 @@ void MainWindow::setupSpeedChart()
     // 5. 绑定到 UI
     // ======================================================
     ui->chartViewSpeed->setChart(chartSpeed);
-    ui->chartViewSpeed->setRenderHint(QPainter::Antialiasing);
+    ui->chartViewSpeed->setRenderHint(QPainter::Antialiasing, false);
     ui->chartViewSpeed->setStyleSheet("background: transparent;");
 }
 
 void MainWindow::setupSpeedDebugPanel()
 {
     QWidget *host = ui->chartViewSpeed->parentWidget();
-
-    if (!host) {
-        return;
-    }
+    if (!host) return;
 
     QFrame *panel = new QFrame(host);
     panel->setObjectName("speedDebugPanel");
-    panel->setFrameShape(QFrame::StyledPanel);
-    panel->setMaximumHeight(60);
-    panel->setMinimumHeight(52);
+    auto *grid = new QGridLayout(panel);
+    grid->setContentsMargins(12, 6, 12, 6);
+    grid->setHorizontalSpacing(18);
+    grid->setVerticalSpacing(0);
 
-    panel->setStyleSheet(R"(
-        QFrame#speedDebugPanel {
-            background-color: #FFFFFF;
-            border: 1px solid #DCDFE6;
-            border-radius: 6px;
-        }
-        QLabel {
-            border: none;
-            background: transparent;
-            color: #303133;
-        }
-    )");
-
-    QGridLayout *grid = new QGridLayout(panel);
-    grid->setContentsMargins(6, 2, 6, 2);
-    grid->setHorizontalSpacing(10);
-    grid->setVerticalSpacing(1);
-
-    QLabel *title = new QLabel("声速调试值");
-    title->setStyleSheet("font-size: 13px; font-weight: bold; color: #409EFF;");
-
-    lblSosA = new QLabel("A：-- m/s");
-    lblSosB = new QLabel("B：-- m/s");
-    lblSosAvg = new QLabel("平均：-- m/s");
+    lblSosA = new QLabel("--");
+    lblSosB = new QLabel("--");
+    lblSosAvg = new QLabel("--");
     lblSosInfo = new QLabel("等待测量...");
-
-    QString valueStyle = "font-size: 12px; font-weight: bold; color: #303133;";
-    lblSosA->setStyleSheet(valueStyle);
-    lblSosB->setStyleSheet(valueStyle);
-    lblSosAvg->setStyleSheet(valueStyle);
-    lblSosInfo->setStyleSheet("font-size: 11px; color: #606266;");
-
-    grid->addWidget(title,     0, 0);
-    grid->addWidget(lblSosA,   1, 0);
-    grid->addWidget(lblSosB,   1, 1);
-    grid->addWidget(lblSosAvg, 1, 2);
-    grid->addWidget(lblSosInfo, 2, 0, 1, 3);
-
-    // 优先插入到 chartViewSpeed 所在布局里
-    QLayout *layout = host->layout();
-
-    if (QBoxLayout *box = qobject_cast<QBoxLayout*>(layout)) {
-        int idx = box->indexOf(ui->chartViewSpeed);
-
-        if (idx >= 0) {
-            box->insertWidget(idx, panel, 0);
-        } else {
-            box->insertWidget(0, panel, 0);
-        }
-
-        return;
+    lblSosInfo->setObjectName("speedDebugInfo");
+    const QStringList captions = {QStringLiteral("通道 A"), QStringLiteral("通道 B（输出）"),
+                                  QStringLiteral("平均 m/s")};
+    const QList<QLabel*> values = {lblSosA, lblSosB, lblSosAvg};
+    for (int i = 0; i < values.size(); ++i) {
+        auto *caption = new QLabel(captions[i]);
+        caption->setProperty("role", QStringLiteral("caption"));
+        values[i]->setProperty("role", QStringLiteral("statValue"));
+        grid->addWidget(caption, 0, i);
+        grid->addWidget(values[i], 1, i);
     }
 
-    // 如果父控件没有布局，退回固定位置，但注意 parent 是 chartViewSpeed 的父控件，
-    // 不是 pageMain，所以不会再跑到窗口最上面。
-    QRect oldRect = ui->chartViewSpeed->geometry();
-
-    int panelHeight = 46;
-    int gap = 4;
-
-    panel->setGeometry(oldRect.x(),
-                       oldRect.y(),
-                       oldRect.width(),
-                       panelHeight);
-
-    ui->chartViewSpeed->setGeometry(oldRect.x(),
-                                    oldRect.y() + panelHeight + gap,
-                                    oldRect.width(),
-                                    qMax(120, oldRect.height() - panelHeight - gap));
-
+    if (QBoxLayout *box = qobject_cast<QBoxLayout*>(host->layout())) {
+        const int idx = box->indexOf(ui->chartViewSpeed);
+        box->insertWidget(idx >= 0 ? idx : 0, panel, 0);
+        box->insertWidget((idx >= 0 ? idx : 0) + 1, lblSosInfo, 0);
+        return;
+    }
     panel->show();
 }
 
@@ -4216,9 +4146,9 @@ void MainWindow::updateSpeedDebugPanel(double sosA,
         return;
     }
 
-    lblSosA->setText(QString("A：%1").arg(sosA, 0, 'f', 0));
-    lblSosB->setText(QString("B：%1").arg(sosB, 0, 'f', 0));
-    lblSosAvg->setText(QString("平均：%1 m/s").arg(sosAvg, 0, 'f', 0));
+    lblSosA->setText(QString::number(sosA, 'f', 0));
+    lblSosB->setText(QString::number(sosB, 'f', 0));
+    lblSosAvg->setText(QString::number(sosAvg, 'f', 0));
 
     lblSosInfo->setText(
         QString("lagA=%1  lagB=%2  diff=%3  corrA=%4  corrB=%5")
@@ -4229,7 +4159,9 @@ void MainWindow::updateSpeedDebugPanel(double sosA,
             .arg(corrB, 0, 'f', 2)
         );
 
-    lblSosInfo->setStyleSheet("font-size: 11px; color: #67C23A;");
+    lblSosInfo->setProperty("state", QStringLiteral("ok"));
+    lblSosInfo->style()->unpolish(lblSosInfo);
+    lblSosInfo->style()->polish(lblSosInfo);
 }
 
 void MainWindow::setSpeedDebugInvalid(const QString& reason)
@@ -4239,7 +4171,9 @@ void MainWindow::setSpeedDebugInvalid(const QString& reason)
     }
 
     lblSosInfo->setText("无效：" + reason);
-    lblSosInfo->setStyleSheet("font-size: 11px; color: #F56C6C;");
+    lblSosInfo->setProperty("state", QStringLiteral("bad"));
+    lblSosInfo->style()->unpolish(lblSosInfo);
+    lblSosInfo->style()->polish(lblSosInfo);
 }
 
 void MainWindow::initProcessPanel()
@@ -4249,24 +4183,24 @@ void MainWindow::initProcessPanel()
     ui->lblProcessTitle->hide();
     ui->lblGateStats->hide();
     auto* outer = new QVBoxLayout(ui->grpProcessArea);
-    outer->setContentsMargins(8, 20, 8, 8);
+    outer->setContentsMargins(14, 38, 14, 12);
     outer->addWidget(ui->widgetBalanceArea);
     auto* root = new QVBoxLayout(ui->widgetBalanceArea);
     root->setContentsMargins(0, 0, 0, 0);
     root->setSpacing(7);
     ui->widgetBalanceArea->setStyleSheet(QStringLiteral(
-        "QLabel { color:#24364a; font-size:12px; background:transparent; }"
-        "QFrame#corrACard { background:white; border:1px solid #147bbf; border-radius:7px; }"
-        "QFrame#gCard { background:white; border:1px solid #dbe4ed; border-radius:7px; }"));
+        "QLabel { color:#1A2330; font-size:13px; background:transparent; }"
+        "QFrame#corrACard { background:white; border:1.5px solid #9CC3EE; border-radius:8px; }"
+        "QFrame#gCard { background:white; border:1px solid #E1E6EC; border-radius:8px; }"));
     auto* header = new QHBoxLayout;
     ui->lblProcessStatus->setWordWrap(true);
     ui->lblProcessStatus->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
     header->addWidget(ui->lblProcessStatus, 1);
     ui->btnMeasurementGuide->setMinimumSize(82, 28);
     ui->btnMeasurementGuide->setStyleSheet(QStringLiteral(
-        "QPushButton { color:#147bbf; background:#e9f4fc; border:1px solid #c5deef;"
-        " border-radius:5px; padding:4px 8px; font-size:12px; }"
-        "QPushButton:disabled { color:#929ba5; background:#edf0f3; }"));
+        "QPushButton { color:#1D5FA8; background:#E7F0FA; border:none;"
+        " border-radius:8px; padding:4px 12px; font-size:13px; font-weight:bold; }"
+        "QPushButton:disabled { color:#A3ACB8; background:#F2F4F7; }"));
     header->addWidget(ui->btnMeasurementGuide);
     root->addLayout(header);
     ui->barMeasureProgress->setFixedHeight(20);
@@ -4286,7 +4220,7 @@ void MainWindow::initProcessPanel()
     aLayout->setContentsMargins(10, 9, 10, 9);
     aLayout->setSpacing(5);
     auto* aTitle = label(QStringLiteral("① 优先调整  corrA"), QStringLiteral("corrATitle"));
-    aTitle->setStyleSheet(QStringLiteral("color:#147bbf; font-size:14px; font-weight:bold;"));
+    aTitle->setStyleSheet(QStringLiteral("color:#1D5FA8; font-size:14px; font-weight:bold;"));
     aLayout->addWidget(aTitle);
     auto* aBody = new QHBoxLayout;
     aBody->setSpacing(10);
@@ -4320,7 +4254,7 @@ void MainWindow::initProcessPanel()
     aLayout->addLayout(aBody, 1);
     ui->lblPositionGuide->setText(QStringLiteral("先调整探头长轴方向"));
     ui->lblPositionGuide->setWordWrap(true);
-    ui->lblPositionGuide->setStyleSheet(QStringLiteral("font-size:12px; font-weight:bold; color:#147bbf;"));
+    ui->lblPositionGuide->setStyleSheet(QStringLiteral("font-size:13px; font-weight:bold; color:#1D5FA8;"));
     aLayout->addWidget(ui->lblPositionGuide);
     aLayout->addWidget(label(QStringLiteral("沿桡骨方向小幅旋转，观察 corrA。"), QStringLiteral("corrAAction")));
     cards->addWidget(aCard, 3);
@@ -4376,10 +4310,8 @@ void MainWindow::initProcessPanel()
         "优先让 corrA 达到要求；连续计数后保持稳定。提示仅供参考，以有效值计数为准。"));
     ui->lblPositionGuideNote->setWordWrap(true);
     ui->lblPositionGuideNote->setStyleSheet(QStringLiteral(
-        "color:#315c7a; background:#e9f4fc; border-left:3px solid #147bbf; padding:6px; font-size:12px;"));
+        "color:#174D8A; background:#EEF4FB; border-radius:8px; padding:8px 12px; font-size:13px;"));
     root->addWidget(ui->lblPositionGuideNote);
-    ui->verticalLayout_2->setStretch(0, 4);
-    ui->verticalLayout_2->setStretch(1, 5);
 
     // ======================================================
     // 1. 两个竖向进度条
@@ -4419,19 +4351,20 @@ void MainWindow::initProcessPanel()
     // ======================================================
     QString barStyle = R"(
         QProgressBar {
-            border: 1px solid #BFCBD9;
-            border-radius: 4px;
-            background-color: #EEEEEE;
+            border: none;
+            border-radius: 6px;
+            background-color: #EEF1F5;
+            color: #1A2330;
             text-align: center;
         }
         QProgressBar::chunk {
             background-color: #168368;
-            border-radius: 3px;
+            border-radius: 6px;
         }
     )";
 
-    ui->barPairA->setStyleSheet(QString(barStyle).replace("#168368", "#147bbf"));
-    ui->barPairB->setStyleSheet(QString(barStyle).replace("#168368", "#147bbf"));
+    ui->barPairA->setStyleSheet(QString(barStyle).replace("#168368", "#1D5FA8"));
+    ui->barPairB->setStyleSheet(QString(barStyle).replace("#168368", "#1D5FA8"));
     ui->barMeasureProgress->setStyleSheet(barStyle);
     barCorrA->setStyleSheet(barStyle);
     for (auto* bar : {ui->barPairA, ui->barPairB, barCorrA}) {
@@ -4494,6 +4427,10 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
     if (event->type() == QEvent::Resize &&
         (watched == barCorrA || watched == ui->barPairA || watched == ui->barPairB)) {
         addMiddleLineToProgressBar(qobject_cast<QProgressBar*>(watched));
+    }
+    if (event->type() == QEvent::Resize) {
+        if (watched == mainBlock || watched == ui->grpReferenceCurveArea) fitReferenceChartHeight();
+        else if (watched == ui->label_32) updatePartImage();
     }
     return QMainWindow::eventFilter(watched, event);
 }
@@ -4649,35 +4586,20 @@ void MainWindow::updateProcessInvalid(const QString& reason)
     clearFeedbackReadings();
 }
 
-void MainWindow::on_btnShowResult_clicked() {
-    // 可以在这里写跳转逻辑
-    // 比如：ui->stackedWidget->setCurrentWidget(ui->pageResult);
-
-    // 暂时先弹窗提示，证明按钮好使
-    QMessageBox::information(this, "结果", "正在跳转到测量结果分析界面...\n(界面开发中)");
-
-    // 如果你想测试跳转到已有页面（比如档案页），可以解开下面这行：
-    // ui->stackedWidget->setCurrentWidget(ui->pageArchive);
-}
-
-
 // ==================== 档案管理 ===============================================================================================
 void MainWindow::on_btnArchive_clicked() {
     if (patientMeasureRunning) {
-        QMessageBox::warning(this, "检测进行中", "检测进行中不能编辑或删除患者。");
+        QMessageBox::warning(this, "检测进行中", "检测进行中不能编辑或删除档案。");
         return;
     }
-    ui->btnViewHistory->setVisible(true);
-    refreshTable(patientList);   // ✅ 进入档案页时刷新表格
+    refreshTable(patientList);
     ui->stackedWidget->setCurrentWidget(ui->pageArchive);
+    ui->editSearchKeyword->setFocus(Qt::OtherFocusReason);
 }
 
 void MainWindow::on_btnBackFromArchive_clicked() {
-    ui->btnSelectPatient->setVisible(false);
-    ui->btnViewHistory->setVisible(false);
     ui->stackedWidget->setCurrentWidget(ui->pageMain);
     scheduleResponsiveLayout();
-    archiveMode = NormalMode;
 }
 
 void MainWindow::loadPatients() {
@@ -4823,10 +4745,10 @@ void MainWindow::applyCurrentPatient(const PatientInfo& patient)
     pendingMeasurement = MeasurementRecord();
     pendingStartAfterPatientInfo = false;
     resetAllPatientMeasurementData();
-    initLatestResultPanel();
     updateCurrentPatientUI();
     updatePatientSelectionUi();
     updateAgeSosReference();
+    updateResultPanel();
 }
 
 bool MainWindow::selectCurrentPatient(const PatientInfo& patient)
@@ -4837,6 +4759,7 @@ bool MainWindow::selectCurrentPatient(const PatientInfo& patient)
         updateCurrentPatientUI();
         updatePatientSelectionUi();
         updateAgeSosReference();
+        updateResultPanel();
         return true;
     }
     if (!confirmPatientChange(patient.id)) return false;
@@ -4851,10 +4774,10 @@ void MainWindow::clearCurrentPatient()
     pendingMeasurement = MeasurementRecord();
     pendingStartAfterPatientInfo = false;
     resetAllPatientMeasurementData();
-    initLatestResultPanel();
     updateCurrentPatientUI();
     updatePatientSelectionUi();
     updateAgeSosReference();
+    updateResultPanel();
 }
 
 void MainWindow::updateAgeSosReference()
@@ -4865,29 +4788,34 @@ void MainWindow::updateAgeSosReference()
         return;
     }
 
-    const MeasurementRecord* latest = latestMeasurementForPatient(currentPatient.id);
+    const MeasurementRecord* latest = nullptr;
+    QDateTime latestTime;
+    for (const MeasurementRecord& record : measurementList) {
+        if (record.patientId != currentPatient.id) continue;
+        const int age = measurementAge(record, currentPatient);
+        const QString gender = measurementGender(record, currentPatient);
+        bool sosOk = false;
+        const double sos = record.sos.trimmed().toDouble(&sosOk);
+        if (!sosOk || !AgeSosChartWidget::supportsPoint(gender, age, sos)) continue;
+        const QDateTime time = parsedMeasurementDateTime(record.measuredAt);
+        if (!latest || (time.isValid() && (!latestTime.isValid() || time > latestTime)) ||
+            (!time.isValid() && !latestTime.isValid() && record.measuredAt > latest->measuredAt)) {
+            latest = &record;
+            latestTime = time;
+        }
+    }
     if (!latest) {
         const int age = ageOnDate(currentPatient.birthDay, QDate::currentDate());
-        ui->chartViewReference->setReferenceData(currentPatient.gender, age, false);
+        AgeSosChartData data;
+        data.hasPatient = true;
+        data.hasMeasurementRecords = !measurementsForPatient(currentPatient.id).isEmpty();
+        data.gender = currentPatient.gender;
+        data.focalAge = age;
+        ui->chartViewReference->setChartData(data);
         return;
     }
-
-    const QString gender = latest->patientGender.trimmed().isEmpty()
-        ? currentPatient.gender : latest->patientGender;
-
-    bool ageOk = false;
-    int age = latest->patientAge.trimmed().toInt(&ageOk);
-    if (!ageOk) {
-        QDate measuredDate = QDateTime::fromString(latest->measuredAt, Qt::ISODate).date();
-        if (!measuredDate.isValid()) {
-            measuredDate = QDate::fromString(latest->measuredAt.left(10), QStringLiteral("yyyy-MM-dd"));
-        }
-        const QString birthDay = latest->patientBirthDay.trimmed().isEmpty()
-            ? currentPatient.birthDay : latest->patientBirthDay;
-        age = ageOnDate(birthDay, measuredDate);
-    }
-
-    ui->chartViewReference->setReferenceData(gender, age, true, latest->sos);
+    ui->chartViewReference->setChartData(
+        buildAgeSosChartData(currentPatient, *latest, false));
 }
 
 void MainWindow::updatePatientSelectionUi()
@@ -4896,10 +4824,13 @@ void MainWindow::updatePatientSelectionUi()
     const bool connected = serial && serial->isOpen();
     const bool debugAcquisitionRunning = autoRunning && !patientMeasureRunning;
     const bool nextRoundPending = nextRoundTimer.isActive();
-    ui->btnPatientInfo->setText(selected ? "更换患者" : "建立档案");
-    ui->btnPatientInfo->setEnabled(
-        patientDataWritable && !patientMeasureRunning && !debugAcquisitionRunning &&
-        !nextRoundPending);
+    const bool navigationLocked = patientMeasureRunning || debugAcquisitionRunning || nextRoundPending;
+    const bool hasSavedResult = selected && latestMeasurementForPatient(currentPatient.id);
+
+    ui->btnPatientInfo->setText(selected ? QStringLiteral("更换") : QStringLiteral("从档案选择"));
+    ui->btnPatientInfo->setEnabled(patientDataWritable && !navigationLocked);
+    if (btnNewPatient) btnNewPatient->setEnabled(patientDataWritable && !navigationLocked);
+
     ui->btnStartMeasurement->setEnabled(
         patientDataWritable &&
         (patientMeasureRunning || (!hasPendingMeasurement && selected && connected)));
@@ -4907,76 +4838,138 @@ void MainWindow::updatePatientSelectionUi()
         ? QStringLiteral("停止检测")
         : nextRoundPending ? QStringLiteral("立即开始下一轮")
                            : QStringLiteral("开始检测"));
-    ui->btnMeasurementGuide->setEnabled(
-        !patientMeasureRunning && !debugAcquisitionRunning && !nextRoundPending);
-    ui->pushButton->setEnabled(
-        connected && !patientMeasureRunning && !debugAcquisitionRunning &&
-        !nextRoundPending);
-    ui->triggerButton->setEnabled(
-        connected && !patientMeasureRunning && !nextRoundPending);
-    ui->btnReport->setEnabled(
-        !patientMeasureRunning && !debugAcquisitionRunning && !nextRoundPending);
+    ui->btnStartMeasurement->setProperty("variant", patientMeasureRunning
+        ? QStringLiteral("danger") : QStringLiteral("primary"));
+
+    QString hint;
+    if (patientMeasureRunning) hint = QStringLiteral("检测中不能更换被测者；5 次完成后自动保存。");
+    else if (nextRoundPending) hint = QStringLiteral("1 秒后自动开始下一次，也可以立即开始。");
+    else if (!connected && !selected) hint = QStringLiteral("请先连接设备，并从档案选择或新建被测者。");
+    else if (!connected) hint = QStringLiteral("请先在上方连接设备。");
+    else if (!selected) hint = QStringLiteral("请先从档案选择或新建被测者。");
+    else if (!patientDataWritable) hint = QStringLiteral("档案处于只读保护，不能开始检测。");
+    else if (hasPendingMeasurement) hint = QStringLiteral("上次结果尚未保存，请先在“测量结果”中重试保存。");
+    else hint = QStringLiteral("共 5 次，每次约 10 秒；完成一次后 1 秒自动开始下一次。");
+    if (lblStartHint) lblStartHint->setText(hint);
+    ui->btnStartMeasurement->setToolTip(ui->btnStartMeasurement->isEnabled() ? QString() : hint);
+
+    ui->btnMeasurementGuide->setEnabled(!navigationLocked);
+    ui->pushButton->setEnabled(connected && !navigationLocked);
+    ui->triggerButton->setEnabled(connected && !patientMeasureRunning && !nextRoundPending);
+    const QString deviceHint = connected ? QString() : QStringLiteral("请先连接设备");
+    ui->pushButton->setToolTip(connected ? QStringLiteral("单次读取四通道波形，不计入检测") : deviceHint);
+    ui->triggerButton->setToolTip(connected ? QStringLiteral("每 80 ms 连续采集，不计入检测") : deviceHint);
+
+    ui->btnReport->setEnabled(!navigationLocked && hasSavedResult);
+    if (navigationLocked) ui->btnReport->setToolTip(QStringLiteral("检测或采集进行中，暂不能打开报表"));
+    else if (!selected) ui->btnReport->setToolTip(QStringLiteral("请先选择被测者"));
+    else if (!hasSavedResult) ui->btnReport->setToolTip(QStringLiteral("当前被测者还没有已保存的检测结果"));
+    else ui->btnReport->setToolTip(QStringLiteral("打开最近一次检测的报表"));
+
     ui->pushButton_2->setEnabled(!patientMeasureRunning && !nextRoundPending);
-    if (gainSliderA) gainSliderA->setEnabled(!patientMeasureRunning && !nextRoundPending);
-    if (gainSliderB) gainSliderB->setEnabled(!patientMeasureRunning && !nextRoundPending);
-    if (gainSliderC) gainSliderC->setEnabled(!patientMeasureRunning && !nextRoundPending);
-    if (gainSliderD) gainSliderD->setEnabled(!patientMeasureRunning && !nextRoundPending);
-    // 正常完成时结果已自动保存；仅在自动保存失败时保留重试入口。
+    for (QSlider* slider : {gainSliderA, gainSliderB, gainSliderC, gainSliderD}) {
+        if (slider) slider->setEnabled(!patientMeasureRunning && !nextRoundPending);
+    }
+    // 正常完成时结果已自动保存；仅在自动保存失败时出现重试入口。
     ui->btnSaveResult->setVisible(hasPendingMeasurement);
     ui->btnSaveResult->setEnabled(patientDataWritable && !nextRoundPending);
-    ui->btnArchive->setEnabled(
-        !patientMeasureRunning && !debugAcquisitionRunning && !nextRoundPending);
+    ui->btnArchive->setEnabled(!navigationLocked);
+    ui->btnArchive->setToolTip(navigationLocked ? QStringLiteral("检测或采集进行中，暂不能打开档案") : QString());
     ui->btnAdd->setEnabled(patientDataWritable && !nextRoundPending);
-    ui->btnDeleteSelected->setEnabled(patientDataWritable && !nextRoundPending);
-    ui->btnFormSave->setEnabled(patientDataWritable && !nextRoundPending);
-    ui->btnDetailSave->setEnabled(patientDataWritable && !nextRoundPending);
-    ui->btnDetailDelete->setEnabled(patientDataWritable && !nextRoundPending);
-    ui->btnPatientNewSave->setEnabled(patientDataWritable && !nextRoundPending);
+    if (btnManageAccounts) btnManageAccounts->setEnabled(!navigationLocked);
     if (QAction* action = findChild<QAction*>(QStringLiteral("manageAccountsAction"))) {
-        action->setEnabled(
-            !patientMeasureRunning && !debugAcquisitionRunning && !nextRoundPending);
+        action->setEnabled(!navigationLocked);
     }
+
+    if (lblDeviceStatus) {
+        const bool silent = connected && deviceUnresponsive;
+        lblDeviceStatus->setText(!connected ? QStringLiteral("● 未连接")
+                                 : silent ? QStringLiteral("● 设备无响应")
+                                          : QStringLiteral("● 已连接"));
+        lblDeviceStatus->setProperty("state", !connected ? QStringLiteral("warn")
+                                              : silent ? QStringLiteral("bad") : QStringLiteral("ok"));
+        lblDeviceStatus->setToolTip(silent
+            ? QStringLiteral("已发送采集命令，但 %1 秒内没有收到完整波形。\n"
+                             "请确认选的是骨密度仪的端口、设备已通电、探头线已插好。")
+                  .arg(deviceResponseTimeoutMs / 1000.0, 0, 'f', 1)
+            : QString());
+    }
+    ui->connectButton->setProperty("variant", connected ? QString() : QStringLiteral("primary"));
+    for (QWidget* widget : {static_cast<QWidget*>(ui->btnStartMeasurement),
+                            static_cast<QWidget*>(ui->connectButton),
+                            static_cast<QWidget*>(lblDeviceStatus)}) {
+        if (!widget) continue;
+        widget->style()->unpolish(widget);
+        widget->style()->polish(widget);
+    }
+    updateArchiveSelectionBar();
 }
 
 void MainWindow::showPatientHistory(const QString& patientId)
 {
     QDialog dialog(this);
-    dialog.setWindowTitle("检测历史");
-    dialog.resize(860, 420);
-    QVBoxLayout* layout = new QVBoxLayout(&dialog);
-    QTableWidget* table = new QTableWidget(&dialog);
+    dialog.setObjectName(QStringLiteral("historyDialog"));
+    PatientInfo historyPatient;
+    for (const PatientInfo& patient : patientList) {
+        if (patient.id == patientId) historyPatient = patient;
+    }
+    const QString patientName = historyPatient.name;
+    dialog.setWindowTitle(QStringLiteral("检测历史 · %1").arg(patientName));
+    dialog.resize(900, 460);
+    auto* layout = new QVBoxLayout(&dialog);
+    layout->setContentsMargins(20, 18, 20, 18);
+    layout->setSpacing(12);
+    auto* title = new QLabel(dialog.windowTitle(), &dialog);
+    title->setProperty("role", QStringLiteral("dialogTitle"));
+    layout->addWidget(title);
+
+    auto* table = new QTableWidget(&dialog);
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    table->setSelectionMode(QAbstractItemView::SingleSelection);
+    table->verticalHeader()->hide();
+    table->setShowGrid(false);
     table->setColumnCount(6);
-    table->setHorizontalHeaderLabels({"检测时间", "SOS", "T 值", "Z 值", "诊断", "操作员"});
+    table->setHorizontalHeaderLabels({QStringLiteral("检测时间"), QStringLiteral("SOS (m/s)"),
+                                      QStringLiteral("T 值"), QStringLiteral("Z 值"),
+                                      QStringLiteral("骨强度"), QStringLiteral("操作账号")});
     QList<MeasurementRecord> records = measurementsForPatient(patientId);
     std::sort(records.begin(), records.end(), [](const MeasurementRecord& a, const MeasurementRecord& b) {
         return a.measuredAt > b.measuredAt;
     });
     table->setRowCount(records.size());
     for (int row = 0; row < records.size(); ++row) {
-        const MeasurementRecord& record = records[row];
-        QTableWidgetItem* timeItem = new QTableWidgetItem(record.measuredAt);
+        const MeasurementRecord record = withCurrentReference(records[row], historyPatient);
+        const QDateTime measuredAt = parsedMeasurementDateTime(record.measuredAt);
+        auto* timeItem = new QTableWidgetItem(measuredAt.isValid()
+            ? measuredAt.toString(QStringLiteral("yyyy-MM-dd HH:mm")) : record.measuredAt);
         timeItem->setData(Qt::UserRole, record.id);
         table->setItem(row, 0, timeItem);
         table->setItem(row, 1, new QTableWidgetItem(record.sos));
         table->setItem(row, 2, new QTableWidgetItem(record.tScore));
         table->setItem(row, 3, new QTableWidgetItem(record.zScore));
-        table->setItem(row, 4, new QTableWidgetItem(record.diagnosis));
+        table->setItem(row, 4, new QTableWidgetItem(record.boneStrength.isEmpty()
+                                                        ? record.diagnosis : record.boneStrength));
         table->setItem(row, 5, new QTableWidgetItem(record.operatorName));
     }
-    table->horizontalHeader()->setStretchLastSection(true);
-    layout->addWidget(table);
-    QHBoxLayout* buttons = new QHBoxLayout();
-    QPushButton* reportButton = new QPushButton("查看报表", &dialog);
-    QPushButton* deleteButton = new QPushButton("删除本条记录", &dialog);
+    table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    if (table->rowCount() > 0) table->selectRow(0);
+    layout->addWidget(table, 1);
+
+    auto* buttons = new QHBoxLayout();
+    auto* reportButton = new QPushButton(QStringLiteral("查看报表"), &dialog);
+    reportButton->setProperty("variant", QStringLiteral("primary"));
+    auto* deleteButton = new QPushButton(QStringLiteral("删除本条记录"), &dialog);
+    deleteButton->setProperty("variant", QStringLiteral("dangerOutline"));
     deleteButton->setEnabled(patientDataWritable);
-    QPushButton* closeButton = new QPushButton("关闭", &dialog);
+    auto* closeButton = new QPushButton(QStringLiteral("关闭"), &dialog);
     buttons->addWidget(reportButton);
     buttons->addWidget(deleteButton);
     buttons->addStretch();
     buttons->addWidget(closeButton);
     layout->addLayout(buttons);
     connect(closeButton, &QPushButton::clicked, &dialog, &QDialog::accept);
+
     auto openSelectedReport = [this, table, patientId, &dialog]() {
         const int row = table->currentRow();
         if (row < 0 || !table->item(row, 0)) {
@@ -5005,207 +4998,195 @@ void MainWindow::showPatientHistory(const QString& patientId)
         const PatientInfo patientCopy = *patient;
         const MeasurementRecord measurementCopy = *measurement;
         dialog.accept();
-        showReport(patientCopy, measurementCopy);
+        showReportFrom(ui->pageArchive, patientCopy, measurementCopy);
     };
     connect(reportButton, &QPushButton::clicked, &dialog, openSelectedReport);
     connect(table, &QTableWidget::cellDoubleClicked, &dialog,
             [openSelectedReport](int, int) { openSelectedReport(); });
-    connect(deleteButton, &QPushButton::clicked, &dialog, [this, table, patientId, &dialog]() {
+    connect(deleteButton, &QPushButton::clicked, &dialog, [this, table, &dialog]() {
         const int row = table->currentRow();
         if (row < 0 || !table->item(row, 0)) return;
         const QString recordId = table->item(row, 0)->data(Qt::UserRole).toString();
-        if (QMessageBox::question(&dialog, "确认删除", "确定删除这条检测记录？") != QMessageBox::Yes) return;
-        for (int i = 0; i < measurementList.size(); ++i) {
-            if (measurementList[i].id == recordId) {
-                QList<MeasurementRecord> candidate = measurementList;
-                candidate.removeAt(i);
-                if (!saveMeasurements(candidate)) return;
-                measurementList = candidate;
-                refreshTable(patientList);
-                dialog.accept();
-                return;
-            }
+        if (QMessageBox::question(&dialog, "确认删除", "确定删除这条检测记录？删除后无法恢复。")
+            != QMessageBox::Yes) {
+            return;
         }
+        if (deleteMeasurementRecord(recordId)) table->removeRow(row);
     });
     dialog.exec();
 }
 
+QString MainWindow::selectedArchivePatientId() const
+{
+    const int row = ui->table->currentRow();
+    if (row < 0 || !ui->table->item(row, ArchiveIdColumn)) return QString();
+    if (!ui->table->selectionModel() || !ui->table->selectionModel()->isRowSelected(row, QModelIndex()))
+        return QString();
+    return ui->table->item(row, ArchiveIdColumn)->text();
+}
+
 void MainWindow::on_btnSelectPatient_clicked()
 {
-    if (patientMeasureRunning || archiveMode != ImportMode) return;
-    int row = ui->table->currentRow();
-    if (row < 0 || !ui->table->item(row, 0)) {
-        QMessageBox::information(this, "提示", "请先选中一位患者，再点击“选择患者”。");
+    if (patientMeasureRunning) return;
+    const QString id = selectedArchivePatientId();
+    if (id.isEmpty()) {
+        QMessageBox::information(this, "提示", "请先在表格中选中一位被测者。");
         return;
     }
-    const QString id = ui->table->item(row, 0)->text();
     for (const PatientInfo& patient : patientList) {
         if (patient.id == id) {
             if (!selectCurrentPatient(patient)) return;
-            archiveMode = NormalMode;
-            ui->btnSelectPatient->setVisible(false);
-            ui->btnViewHistory->setVisible(false);
             ui->stackedWidget->setCurrentWidget(ui->pageMain);
             scheduleResponsiveLayout();
             return;
         }
     }
-
 }
 
 void MainWindow::on_btnViewHistory_clicked()
 {
     if (patientMeasureRunning) return;
-    int row = ui->table->currentRow();
-    if (row < 0 || !ui->table->item(row, 0)) {
-        QMessageBox::information(this, "提示", "请先选中一位患者，再点击“查看历史”。");
+    const QString id = selectedArchivePatientId();
+    if (id.isEmpty()) {
+        QMessageBox::information(this, "提示", "请先在表格中选中一位被测者。");
         return;
     }
-    showPatientHistory(ui->table->item(row, 0)->text());
+    showPatientHistory(id);
 }
 
 void MainWindow::refreshTable(const QList<PatientInfo> &list) {
+    const QString previouslySelected = ui->table->currentRow() >= 0 && ui->table->item(ui->table->currentRow(), ArchiveIdColumn)
+        ? ui->table->item(ui->table->currentRow(), ArchiveIdColumn)->text() : QString();
+    QSignalBlocker blocker(ui->table);
     ui->table->clear();
-
-    // ✅ 设置6列：ID, 姓名, 性别, 出生日期, 检查日期, 声速
-    // 注意：复选框将直接附加在第一列(ID列)上
-    ui->table->setColumnCount(6);
-    QStringList headers;
-    headers << "编号(ID)" << "姓名" << "性别" << "出生日期" << "检查日期" << "声速(m/s)";
-    ui->table->setHorizontalHeaderLabels(headers);
-
+    ui->table->setColumnCount(ArchiveColumnCount);
+    ui->table->setHorizontalHeaderLabels({QStringLiteral("编号"), QStringLiteral("姓名"),
+                                          QStringLiteral("性别"), QStringLiteral("出生日期（年龄）"),
+                                          QStringLiteral("最近检测"), QStringLiteral("最近 SOS"),
+                                          QStringLiteral("次数")});
     ui->table->setRowCount(list.size());
+    int rowToSelect = -1;
     for (int i = 0; i < list.size(); ++i) {
         const PatientInfo &p = list[i];
-
-        // --- 第一列：ID + 复选框 ---
-        QTableWidgetItem *itemID = new QTableWidgetItem(p.id);
-        // ⭐⭐⭐ 关键：设置 CheckState 为 Unchecked (未选中) ⭐⭐⭐
+        auto* itemID = new QTableWidgetItem(p.id);
         itemID->setCheckState(Qt::Unchecked);
-        // 设置为不可编辑，但可勾选，可选择
         itemID->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+        ui->table->setItem(i, ArchiveIdColumn, itemID);
 
-        ui->table->setItem(i, 0, itemID);
-        // -------------------------
-
-        ui->table->setItem(i, 1, new QTableWidgetItem(p.name));
-        ui->table->setItem(i, 2, new QTableWidgetItem(p.gender));
-        ui->table->setItem(i, 3, new QTableWidgetItem(p.birthDay));
+        const int age = ageOnDate(p.birthDay, QDate::currentDate());
+        const QString birth = p.birthDay.isEmpty() ? QStringLiteral("--")
+            : age >= 0 ? QStringLiteral("%1（%2）").arg(p.birthDay).arg(age) : p.birthDay;
         const MeasurementRecord* latest = latestMeasurementForPatient(p.id);
-        const QString date = latest ? latest->measuredAt.left(10) : "--";
-        const QString sosStr = latest ? latest->sos : "--";
-        ui->table->setItem(i, 4, new QTableWidgetItem(date));
-        ui->table->setItem(i, 5, new QTableWidgetItem(sosStr));
+        const QDateTime latestTime = latest ? parsedMeasurementDateTime(latest->measuredAt) : QDateTime();
+        const QString date = !latest ? QStringLiteral("--")
+            : latestTime.isValid() ? latestTime.date().toString(QStringLiteral("yyyy-MM-dd"))
+                                   : latest->measuredAt.left(10);
+        const QStringList values = {p.name, p.gender.isEmpty() ? QStringLiteral("--") : p.gender, birth, date,
+                                    latest ? latest->sos : QStringLiteral("--"),
+                                    QString::number(measurementsForPatient(p.id).size())};
+        for (int column = ArchiveNameColumn; column < ArchiveColumnCount; ++column) {
+            auto* item = new QTableWidgetItem(values.at(column - ArchiveNameColumn));
+            item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+            ui->table->setItem(i, column, item);
+        }
+        if (p.id == previouslySelected) rowToSelect = i;
     }
 
-    // 列宽设置
-    ui->table->setColumnWidth(0, 250);
-    ui->table->setColumnWidth(1, 250);
-    ui->table->setColumnWidth(2, 100);
-    ui->table->setColumnWidth(3, 300);
-    ui->table->setColumnWidth(4, 300);
-    ui->table->setColumnWidth(5, 200);
-
-    // ⭐⭐⭐ 关键：取消整行选中行为，否则点击复选框容易触发双击事件或选中干扰 ⭐⭐⭐
-    // 如果你希望能同时点选和勾选，可以保留 SelectRows，
-    // 但为了让勾选操作更明确，通常可以保留 SelectRows。
+    QHeaderView* header = ui->table->horizontalHeader();
+    header->setStretchLastSection(false);
+    header->setSectionResizeMode(QHeaderView::Stretch);
+    for (int column : {ArchiveIdColumn, ArchiveGenderColumn, ArchiveSosColumn, ArchiveCountColumn})
+        header->setSectionResizeMode(column, QHeaderView::ResizeToContents);
     ui->table->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->table->setSelectionMode(QAbstractItemView::SingleSelection);
-    ui->table->horizontalHeader()->setStretchLastSection(true);
+    ui->table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    if (rowToSelect >= 0) ui->table->selectRow(rowToSelect);
+    blocker.unblock();
+    updateArchiveSelectionBar();
     updateAgeSosReference();
 }
 
-
 void MainWindow::on_btnShowAll_clicked() {
+    ui->editSearchKeyword->clear();
+    if (chkDateFilter) chkDateFilter->setChecked(false);
     refreshTable(patientList);
 }
 
-// 姓名或编号搜索
+// 姓名/编号关键字，可选叠加检测日期
 void MainWindow::on_btnSearchName_clicked() {
-    QString key = ui->editSearchKeyword->text().trimmed(); // 从文本框获取
-    if (key.isEmpty()) {
-        QMessageBox::information(this, "提示", "请输入姓名或编号关键字");
-        return;
-    }
+    const QString key = ui->editSearchKeyword->text().trimmed();
+    const bool byDate = chkDateFilter && chkDateFilter->isChecked();
+    const QString date = byDate ? dateFilter->date().toString(QStringLiteral("yyyy-MM-dd")) : QString();
     QList<PatientInfo> result;
-    for (auto &p : patientList) {
-        if (p.name.contains(key, Qt::CaseInsensitive) ||
-            p.id.contains(key, Qt::CaseInsensitive)) {
-            result << p;
+    for (const PatientInfo& p : patientList) {
+        if (!key.isEmpty() && !p.name.contains(key, Qt::CaseInsensitive) &&
+            !p.id.contains(key, Qt::CaseInsensitive)) {
+            continue;
         }
-    }
-    refreshTable(result);
-    //QMessageBox::information(this, "搜索结果", QString("找到 %1 条记录").arg(result.size()));
-}
-
-// 2. ID 搜索
-void MainWindow::on_btnSearchID_clicked() {
-    on_btnSearchName_clicked();
-}
-
-// 3. 日期搜索 (组合年月日)
-void MainWindow::on_btnSearchDate_clicked() {
-    // 组装日期字符串，格式必须与 XML 里存的格式一致 (yyyy-MM-dd)
-    int year = ui->comboYear->currentData().toInt();
-    int month = ui->comboMonth->currentData().toInt();
-    int day = ui->comboDay->currentData().toInt();
-
-    // 格式化为 "2026-01-05" 这种标准格式
-    // %1: 年份
-    // %2: 月份 (填充0到2位)
-    // %3: 日期 (填充0到2位)
-    QString searchDate = QString("%1-%2-%3")
-                             .arg(year)
-                             .arg(month, 2, 10, QLatin1Char('0'))
-                             .arg(day, 2, 10, QLatin1Char('0'));
-
-    qDebug() << "Searching date:" << searchDate;
-
-    QList<PatientInfo> result;
-    for (const PatientInfo& patient : patientList) {
-        for (const MeasurementRecord& record : measurementsForPatient(patient.id)) {
-            if (record.measuredAt.left(10) == searchDate) {
-                result << patient;
-                break;
+        if (byDate) {
+            bool measuredThatDay = false;
+            for (const MeasurementRecord& record : measurementsForPatient(p.id)) {
+                const QDateTime time = parsedMeasurementDateTime(record.measuredAt);
+                const QString day = time.isValid() ? time.date().toString(QStringLiteral("yyyy-MM-dd"))
+                                                   : record.measuredAt.left(10);
+                if (day == date) {
+                    measuredThatDay = true;
+                    break;
+                }
             }
+            if (!measuredThatDay) continue;
         }
+        result << p;
     }
     refreshTable(result);
-
-    if (result.isEmpty()) {
-        QMessageBox::information(this, "搜索结果", "该日期没有检查记录");
+    if (result.isEmpty() && (!key.isEmpty() || byDate)) {
+        statusBar()->showMessage(QStringLiteral("没有找到符合条件的档案。"), 5000);
     }
 }
 
 void MainWindow::on_btnDeleteSelected_clicked()
 {
     if (patientMeasureRunning) {
-        QMessageBox::warning(this, "检测进行中", "检测进行中不能删除患者。");
+        QMessageBox::warning(this, "检测进行中", "检测进行中不能删除档案。");
         return;
     }
-    int rowCount = ui->table->rowCount();
+    QStringList orderedIds;
     QSet<QString> patientIds;
-    for (int i = 0; i < rowCount; ++i) {
-        QTableWidgetItem *item = ui->table->item(i, 0);
-        if (item && item->checkState() == Qt::Checked) {
+    for (int i = 0; i < ui->table->rowCount(); ++i) {
+        QTableWidgetItem *item = ui->table->item(i, ArchiveIdColumn);
+        if (item && item->checkState() == Qt::Checked && !patientIds.contains(item->text())) {
             patientIds.insert(item->text());
+            orderedIds << item->text();
         }
     }
 
     if (patientIds.isEmpty()) {
-        QMessageBox::information(this, "提示", "请先勾选需要删除的病人记录");
+        QMessageBox::information(this, "提示", "请先勾选需要删除的档案。");
         return;
     }
     if (hasPendingMeasurement && patientIds.contains(pendingMeasurement.patientId)) {
         QMessageBox::warning(this, "存在未保存结果",
-                             "当前患者还有未保存的检测结果，请先保存结果后再删除档案。");
+                             "当前被测者还有未保存的检测结果，请先重试保存后再删除档案。");
         return;
     }
 
-    QString msg = QString("确定要删除选中的 %1 条记录吗？\n此操作不可恢复！").arg(patientIds.size());
-    if (QMessageBox::question(this, "确认删除", msg) != QMessageBox::Yes) {
-        return;
+    QStringList summaries;
+    for (const QString& id : orderedIds) {
+        QString name = id;
+        for (const PatientInfo& patient : patientList) {
+            if (patient.id == id) name = patient.name;
+        }
+        summaries << QStringLiteral("%1（%2 条检测记录）").arg(name).arg(measurementsForPatient(id).size());
     }
+    QMessageBox box(QMessageBox::Warning, QStringLiteral("确认删除"),
+                    QStringLiteral("确定删除选中的 %1 份档案吗？").arg(orderedIds.size()),
+                    QMessageBox::Yes | QMessageBox::No, this);
+    box.setInformativeText(summaries.join(QStringLiteral("、")) +
+                           QStringLiteral("\n这些人的全部检测记录会一起删除，无法恢复。"));
+    box.setDefaultButton(QMessageBox::No);
+    box.button(QMessageBox::Yes)->setText(QStringLiteral("删除"));
+    box.button(QMessageBox::No)->setText(QStringLiteral("取消"));
+    if (box.exec() != QMessageBox::Yes) return;
 
     QList<PatientInfo> patientCandidate;
     for (const PatientInfo& patient : patientList) {
@@ -5221,329 +5202,828 @@ void MainWindow::on_btnDeleteSelected_clicked()
     patientList = patientCandidate;
     measurementList = measurementCandidate;
     if (removedCurrent) clearCurrentPatient();
-    refreshTable(patientList);
-    QMessageBox::information(this, "成功", QString("已成功删除 %1 条记录").arg(patientIds.size()));
+    refreshPatientDerivedViews();
+    statusBar()->showMessage(QStringLiteral("已删除 %1 份档案。").arg(patientIds.size()), 5000);
 }
 
 void MainWindow::on_btnAdd_clicked() {
     if (patientMeasureRunning) {
-        QMessageBox::warning(this, "检测进行中", "检测进行中不能编辑患者。");
+        QMessageBox::warning(this, "检测进行中", "检测进行中不能新建档案。");
         return;
     }
-    clearNewForm();
-    ui->stackedWidget->setCurrentWidget(ui->pagePatientForm);
+    openNewPatientDialog(false);
 }
 
 void MainWindow::on_table_cellDoubleClicked(int row, int)
 {
     if (patientMeasureRunning) {
-        QMessageBox::warning(this, "检测进行中", "检测进行中不能切换或编辑患者。");
+        QMessageBox::warning(this, "检测进行中", "检测进行中不能更换被测者。");
         return;
     }
     if (row < 0 || row >= ui->table->rowCount()) return;
-
-    QTableWidgetItem* idItem   = ui->table->item(row, 0);
+    QTableWidgetItem* idItem = ui->table->item(row, ArchiveIdColumn);
     if (!idItem) return;
+    for (const PatientInfo& patient : patientList) {
+        if (patient.id == idItem->text()) {
+            if (!selectCurrentPatient(patient)) return;
+            ui->stackedWidget->setCurrentWidget(ui->pageMain);
+            scheduleResponsiveLayout();
+            return;
+        }
+    }
+    QMessageBox::warning(this, "错误", "未找到该行对应的档案。");
+}
 
-    QString id = idItem->text();
-    int idx = -1;
-    for (int i = 0; i < patientList.size(); ++i) {
-        if (patientList[i].id == id) {
-            idx = i;
+// ==================== UI-REFRESH-001：主题与布局 ====================
+
+void MainWindow::applyTheme()
+{
+    QFile file(QStringLiteral(":/theme.qss"));
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        setStyleSheet(QString::fromUtf8(file.readAll()));
+    }
+}
+
+namespace {
+
+QLabel* captionLabel(const QString& text, QWidget* parent, const QString& role = QStringLiteral("caption"))
+{
+    auto* label = new QLabel(text, parent);
+    label->setProperty("role", role);
+    return label;
+}
+
+QFrame* separator(QWidget* parent)
+{
+    auto* line = new QFrame(parent);
+    line->setObjectName(QStringLiteral("toolbarSeparator"));
+    line->setFixedSize(1, 26);
+    return line;
+}
+
+} // namespace
+
+void MainWindow::setupToolbar()
+{
+    auto* toolbar = new QFrame(ui->pageMain);
+    toolbar->setObjectName(QStringLiteral("mainToolbar"));
+    auto* row = new QHBoxLayout(toolbar);
+    row->setContentsMargins(18, 10, 18, 10);
+    row->setSpacing(8);
+
+    auto* title = new QLabel(QStringLiteral("超声骨密度仪"), toolbar);
+    title->setObjectName(QStringLiteral("appTitle"));
+    row->addWidget(title);
+    row->addSpacing(16);
+
+    row->addWidget(captionLabel(QStringLiteral("设备"), toolbar));
+    ui->comboPort->setMinimumWidth(200);
+    row->addWidget(ui->comboPort);
+    row->addWidget(ui->connectButton);
+    lblDeviceStatus = new QLabel(toolbar);
+    lblDeviceStatus->setObjectName(QStringLiteral("deviceStatus"));
+    row->addWidget(lblDeviceStatus);
+    row->addSpacing(12);
+    row->addWidget(separator(toolbar));
+    row->addSpacing(12);
+
+    row->addWidget(captionLabel(QStringLiteral("调试"), toolbar));
+    ui->pushButton->setText(QStringLiteral("获取波形"));
+    ui->triggerButton->setText(QStringLiteral("自动采集"));
+    row->addWidget(ui->pushButton);
+    row->addWidget(ui->triggerButton);
+    row->addSpacing(12);
+    row->addWidget(separator(toolbar));
+    row->addSpacing(12);
+
+    ui->btnArchive->setText(QStringLiteral("档案"));
+    ui->btnReport->setText(QStringLiteral("报表"));
+    ui->pushButton_2->setText(QStringLiteral("校准"));
+    row->addWidget(ui->btnArchive);
+    row->addWidget(ui->btnReport);
+    row->addWidget(ui->pushButton_2);
+    row->addStretch(1);
+
+    btnManageAccounts = new QPushButton(QStringLiteral("账号管理"), toolbar);
+    btnManageAccounts->setObjectName(QStringLiteral("btnManageAccounts"));
+    btnManageAccounts->setProperty("variant", QStringLiteral("link"));
+    btnManageAccounts->setVisible(false);
+    connect(btnManageAccounts, &QPushButton::clicked, this, &MainWindow::manageAccounts);
+    row->addWidget(btnManageAccounts);
+    lblAccount = captionLabel(QString(), toolbar);
+    lblAccount->setObjectName(QStringLiteral("accountLabel"));
+    row->addWidget(lblAccount);
+
+    for (QPushButton* button : {ui->connectButton, ui->pushButton, ui->triggerButton,
+                                ui->btnArchive, ui->btnReport, ui->pushButton_2}) {
+        button->setMinimumHeight(36);
+        button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    }
+
+    // The legacy absolute-positioned container is now empty.
+    ui->layoutWidget_2->hide();
+    static_cast<QVBoxLayout*>(ui->pageMain->layout())->addWidget(toolbar);
+}
+
+void MainWindow::setupRightColumn()
+{
+    // ---- 被测者 ----
+    QGroupBox* patientCard = ui->grpPatientInfoRight;
+    patientCard->setTitle(QString());
+    patientCard->setProperty("card", true);
+    auto* patientLayout = new QVBoxLayout(patientCard);
+    patientLayout->setContentsMargins(16, 12, 16, 14);
+    patientLayout->setSpacing(8);
+    auto* header = new QHBoxLayout;
+    header->addWidget(captionLabel(QStringLiteral("被测者"), patientCard, QStringLiteral("cardTitle")));
+    header->addStretch();
+    ui->btnPatientInfo->setProperty("variant", QStringLiteral("link"));
+    btnNewPatient = new QPushButton(QStringLiteral("新建档案"), patientCard);
+    btnNewPatient->setObjectName(QStringLiteral("btnNewPatient"));
+    btnNewPatient->setProperty("variant", QStringLiteral("link"));
+    connect(btnNewPatient, &QPushButton::clicked, this, [this]() { openNewPatientDialog(true); });
+    header->addWidget(ui->btnPatientInfo);
+    header->addWidget(btnNewPatient);
+    patientLayout->addLayout(header);
+
+    auto* nameRow = new QHBoxLayout;
+    nameRow->setSpacing(10);
+    ui->labelName->setProperty("role", QStringLiteral("personName"));
+    lblPatientMeta = captionLabel(QString(), patientCard);
+    nameRow->addWidget(ui->labelName);
+    nameRow->addWidget(lblPatientMeta, 0, Qt::AlignBottom);
+    nameRow->addStretch();
+    patientLayout->addLayout(nameRow);
+
+    auto* details = new QGridLayout;
+    details->setHorizontalSpacing(16);
+    details->setVerticalSpacing(4);
+    details->addWidget(ui->labelID, 0, 0);
+    details->addWidget(ui->labelBirth, 0, 1);
+    details->addWidget(ui->labelHeight, 1, 0);
+    details->addWidget(ui->labelWeight, 1, 1);
+    for (QLabel* label : {ui->labelID, ui->labelBirth, ui->labelHeight, ui->labelWeight}) {
+        label->setProperty("role", QStringLiteral("detail"));
+        label->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+    }
+    patientLayout->addLayout(details);
+    ui->labelGender->hide();
+    ui->label_27->hide();
+    ui->label_28->hide();
+
+    ui->btnStartMeasurement->setMinimumHeight(46);
+    ui->btnStartMeasurement->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    patientLayout->addSpacing(4);
+    patientLayout->addWidget(ui->btnStartMeasurement);
+    lblStartHint = captionLabel(QString(), patientCard, QStringLiteral("hint"));
+    lblStartHint->setWordWrap(true);
+    patientLayout->addWidget(lblStartHint);
+
+    // ---- 测量结果 ----
+    QGroupBox* resultCard = ui->grpLatestResultRight;
+    resultCard->setTitle(QString());
+    resultCard->setProperty("card", true);
+    auto* resultLayout = new QVBoxLayout(resultCard);
+    resultLayout->setContentsMargins(16, 12, 16, 14);
+    resultLayout->setSpacing(8);
+    auto* resultHeader = new QHBoxLayout;
+    resultHeader->addWidget(captionLabel(QStringLiteral("测量结果"), resultCard, QStringLiteral("cardTitle")));
+    resultHeader->addStretch();
+    lblResultNote = captionLabel(QString(), resultCard);
+    lblResultNote->setObjectName(QStringLiteral("resultNote"));
+    resultHeader->addWidget(lblResultNote);
+    resultLayout->addLayout(resultHeader);
+
+    auto* sosRow = new QHBoxLayout;
+    sosRow->setSpacing(8);
+    ui->lblLatestSOS->setProperty("role", QStringLiteral("bigValue"));
+    ui->lblLatestPart->setProperty("role", QStringLiteral("caption"));
+    ui->lblLatestStrength->setProperty("role", QStringLiteral("chip"));
+    sosRow->addWidget(ui->lblLatestSOS, 0, Qt::AlignBottom);
+    sosRow->addWidget(ui->lblLatestPart, 0, Qt::AlignBottom);
+    sosRow->addStretch();
+    sosRow->addWidget(ui->lblLatestStrength, 0, Qt::AlignVCenter);
+    resultLayout->addLayout(sosRow);
+
+    auto* metrics = new QGridLayout;
+    metrics->setHorizontalSpacing(12);
+    metrics->setVerticalSpacing(2);
+    const QList<QPair<QLabel*, QLabel*>> metricPairs = {
+        {ui->label_35, ui->lblLatestT}, {ui->label_36, ui->lblLatestZ},
+        {ui->label_38, ui->lblLatestRisk}, {ui->label_39, ui->lblLatestBoneAge}};
+    const QStringList metricNames = {QStringLiteral("T 值"), QStringLiteral("Z 值"),
+                                     QStringLiteral("骨折风险"), QStringLiteral("相对骨龄")};
+    for (int i = 0; i < metricPairs.size(); ++i) {
+        metricPairs[i].first->setText(metricNames[i]);
+        metricPairs[i].first->setProperty("role", QStringLiteral("caption"));
+        metricPairs[i].second->setProperty("role", QStringLiteral("metric"));
+        metrics->addWidget(metricPairs[i].first, 0, i);
+        metrics->addWidget(metricPairs[i].second, 1, i);
+    }
+    for (QLabel* unused : {ui->label_33, ui->label_34, ui->label_37}) unused->hide();
+    auto* metricsFrame = new QFrame(resultCard);
+    metricsFrame->setObjectName(QStringLiteral("metricsFrame"));
+    metricsFrame->setLayout(metrics);
+    resultLayout->addWidget(metricsFrame);
+
+    ui->btnSaveResult->setText(QStringLiteral("重试保存"));
+    ui->btnSaveResult->setProperty("variant", QStringLiteral("primary"));
+    resultLayout->addWidget(ui->btnSaveResult);
+    lblRecentHistory = captionLabel(QString(), resultCard, QStringLiteral("history"));
+    lblRecentHistory->setObjectName(QStringLiteral("recentHistory"));
+    lblRecentHistory->setTextFormat(Qt::PlainText);
+    resultLayout->addWidget(lblRecentHistory);
+
+    // ---- 测量部位 ----
+    QGroupBox* partCard = ui->grpPartImageRight;
+    auto* partLayout = new QVBoxLayout(partCard);
+    partLayout->setContentsMargins(16, 40, 16, 14);
+    ui->label_32->setScaledContents(false);
+    ui->label_32->setAlignment(Qt::AlignCenter);
+    ui->label_32->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    ui->label_32->setMinimumHeight(90);
+    ui->label_32->setObjectName(QStringLiteral("label_32"));
+    partLayout->addWidget(ui->label_32, 1);
+    ui->label_32->installEventFilter(this);
+    updateCurrentPatientUI();
+}
+
+void MainWindow::setupArchivePage()
+{
+    QWidget* page = ui->pageArchive;
+    delete page->layout();
+    page->setFont(font());
+
+    auto* root = new QVBoxLayout(page);
+    root->setContentsMargins(0, 0, 0, 0);
+    root->setSpacing(0);
+
+    auto* toolbar = new QFrame(page);
+    toolbar->setObjectName(QStringLiteral("mainToolbar"));
+    auto* top = new QHBoxLayout(toolbar);
+    top->setContentsMargins(18, 10, 18, 10);
+    top->setSpacing(8);
+    ui->btnBackFromArchive->setText(QStringLiteral("‹ 主界面"));
+    top->addWidget(ui->btnBackFromArchive);
+    auto* title = new QLabel(QStringLiteral("档案"), toolbar);
+    title->setObjectName(QStringLiteral("appTitle"));
+    top->addWidget(title);
+    top->addSpacing(20);
+    ui->editSearchKeyword->setPlaceholderText(QStringLiteral("姓名或编号"));
+    ui->editSearchKeyword->setMinimumWidth(220);
+    ui->editSearchKeyword->setClearButtonEnabled(true);
+    connect(ui->editSearchKeyword, &QLineEdit::returnPressed, this, &MainWindow::on_btnSearchName_clicked);
+    top->addWidget(ui->editSearchKeyword);
+    chkDateFilter = new QCheckBox(QStringLiteral("检测日期"), toolbar);
+    chkDateFilter->setObjectName(QStringLiteral("chkDateFilter"));
+    dateFilter = new QDateEdit(QDate::currentDate(), toolbar);
+    dateFilter->setObjectName(QStringLiteral("dateFilter"));
+    dateFilter->setDisplayFormat(QStringLiteral("yyyy-MM-dd"));
+    dateFilter->setCalendarPopup(true);
+    dateFilter->setEnabled(false);
+    connect(chkDateFilter, &QCheckBox::toggled, dateFilter, &QWidget::setEnabled);
+    top->addSpacing(8);
+    top->addWidget(chkDateFilter);
+    top->addWidget(dateFilter);
+    ui->btnSearchName->setText(QStringLiteral("查找"));
+    ui->btnSearchName->setProperty("variant", QStringLiteral("dark"));
+    ui->btnShowAll->setText(QStringLiteral("清除"));
+    ui->btnShowAll->setProperty("variant", QStringLiteral("link"));
+    top->addWidget(ui->btnSearchName);
+    top->addWidget(ui->btnShowAll);
+    top->addStretch();
+    ui->btnAdd->setText(QStringLiteral("新建档案"));
+    ui->btnAdd->setProperty("variant", QStringLiteral("primary"));
+    top->addWidget(ui->btnAdd);
+    root->addWidget(toolbar);
+
+    auto* body = new QWidget(page);
+    body->setObjectName(QStringLiteral("archiveBody"));
+    auto* bodyLayout = new QVBoxLayout(body);
+    bodyLayout->setContentsMargins(18, 16, 18, 18);
+    bodyLayout->setSpacing(14);
+
+    auto* tableCard = new QFrame(body);
+    tableCard->setObjectName(QStringLiteral("tableCard"));
+    auto* tableLayout = new QVBoxLayout(tableCard);
+    tableLayout->setContentsMargins(0, 0, 0, 0);
+    tableLayout->setSpacing(0);
+    ui->table->verticalHeader()->hide();
+    ui->table->setShowGrid(false);
+    ui->table->setAlternatingRowColors(false);
+    ui->table->setFrameShape(QFrame::NoFrame);
+    tableLayout->addWidget(ui->table, 1);
+    auto* tableFooter = captionLabel(QStringLiteral("单击行选中，双击设为当前被测者；勾选框用于批量删除"),
+                                     tableCard);
+    tableFooter->setObjectName(QStringLiteral("tableFooter"));
+    tableLayout->addWidget(tableFooter);
+    bodyLayout->addWidget(tableCard, 1);
+
+    auto* actionBar = new QFrame(body);
+    actionBar->setObjectName(QStringLiteral("actionBar"));
+    auto* actions = new QHBoxLayout(actionBar);
+    actions->setContentsMargins(18, 12, 18, 12);
+    actions->setSpacing(10);
+    actions->addWidget(captionLabel(QStringLiteral("当前选中"), actionBar));
+    lblArchiveSelection = new QLabel(QStringLiteral("未选择"), actionBar);
+    lblArchiveSelection->setObjectName(QStringLiteral("archiveSelection"));
+    actions->addWidget(lblArchiveSelection);
+    actions->addSpacing(8);
+    ui->btnSelectPatient->setText(QStringLiteral("设为当前被测者"));
+    ui->btnSelectPatient->setProperty("variant", QStringLiteral("primary"));
+    ui->btnViewHistory->setText(QStringLiteral("检测历史 / 报表"));
+    btnEditPatient = new QPushButton(QStringLiteral("编辑资料"), actionBar);
+    btnEditPatient->setObjectName(QStringLiteral("btnEditPatient"));
+    connect(btnEditPatient, &QPushButton::clicked, this, [this]() {
+        const QString id = selectedArchivePatientId();
+        if (!id.isEmpty()) openEditPatientDialog(id);
+    });
+    actions->addWidget(ui->btnSelectPatient);
+    actions->addWidget(ui->btnViewHistory);
+    actions->addWidget(btnEditPatient);
+    actions->addStretch();
+    lblCheckedCount = captionLabel(QString(), actionBar);
+    lblCheckedCount->setObjectName(QStringLiteral("checkedCount"));
+    actions->addWidget(lblCheckedCount);
+    ui->btnDeleteSelected->setText(QStringLiteral("删除勾选项"));
+    ui->btnDeleteSelected->setProperty("variant", QStringLiteral("dangerOutline"));
+    actions->addWidget(ui->btnDeleteSelected);
+    bodyLayout->addWidget(actionBar);
+    root->addWidget(body, 1);
+
+    ui->btnSelectPatient->show();
+    ui->btnViewHistory->show();
+    connect(ui->table, &QTableWidget::itemChanged, this, [this](QTableWidgetItem* item) {
+        if (item && item->column() == ArchiveIdColumn) updateArchiveSelectionBar();
+    });
+    connect(ui->table, &QTableWidget::itemSelectionChanged, this, &MainWindow::updateArchiveSelectionBar);
+}
+
+void MainWindow::setupMainLayout()
+{
+    QWidget* page = ui->pageMain;
+    auto* pageLayout = new QVBoxLayout(page);
+    pageLayout->setContentsMargins(0, 0, 0, 0);
+    pageLayout->setSpacing(0);
+    setupToolbar();
+
+    auto* body = new QWidget(page);
+    body->setObjectName(QStringLiteral("mainBody"));
+    auto* bodyLayout = new QHBoxLayout(body);
+    bodyLayout->setContentsMargins(16, 14, 16, 16);
+    bodyLayout->setSpacing(14);
+
+    mainBlock = new QWidget(body);
+    mainBlock->setObjectName(QStringLiteral("mainBlock"));
+    auto* grid = new QGridLayout(mainBlock);
+    grid->setContentsMargins(0, 0, 0, 0);
+    grid->setSpacing(14);
+    grid->addWidget(ui->grpWaveArea, 0, 0);
+    grid->addWidget(ui->grpReferenceCurveArea, 0, 1);
+    grid->addWidget(ui->grpSpeedArea, 1, 0);
+    grid->addWidget(ui->grpProcessArea, 1, 1);
+    grid->setColumnStretch(0, 5);
+    grid->setColumnStretch(1, 4);
+    grid->setRowStretch(0, 0);
+    grid->setRowStretch(1, 1);
+
+    ui->grpReferenceCurveArea->setTitle(QStringLiteral("年龄 – SOS 参考"));
+    for (QGroupBox* group : {ui->grpWaveArea, ui->grpReferenceCurveArea, ui->grpSpeedArea,
+                             ui->grpProcessArea, ui->grpPatientInfoRight, ui->grpLatestResultRight,
+                             ui->grpPartImageRight}) {
+        group->setProperty("card", true);   // theme.qss: title inside the card
+        group->style()->unpolish(group);    // the theme is already applied; re-evaluate selectors
+        group->style()->polish(group);
+        group->setMinimumSize(0, 0);
+        group->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+        group->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    }
+
+    auto* waveLayout = new QVBoxLayout(ui->grpWaveArea);
+    waveLayout->setContentsMargins(12, 38, 12, 10);
+    ui->layoutWidget_3->setMinimumSize(0, 0);
+    waveLayout->addWidget(ui->layoutWidget_3, 1);
+
+    auto* speedLayout = new QVBoxLayout(ui->grpSpeedArea);
+    speedLayout->setContentsMargins(14, 38, 14, 12);
+    speedLayout->setSpacing(8);
+    ui->chartViewSpeed->setMinimumSize(0, 80);
+    speedLayout->addWidget(ui->chartViewSpeed, 1);
+
+    auto* referenceLayout = new QVBoxLayout(ui->grpReferenceCurveArea);
+    referenceLayout->setContentsMargins(14, 38, 14, 12);
+    ui->chartViewReference->setMinimumSize(0, 0);
+    referenceLayout->addWidget(ui->chartViewReference, 1);
+    ui->grpReferenceCurveArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+    auto* rightColumn = new QWidget(body);
+    rightColumn->setObjectName(QStringLiteral("rightColumn"));
+    auto* rightLayout = new QVBoxLayout(rightColumn);
+    rightLayout->setContentsMargins(0, 0, 0, 0);
+    rightLayout->setSpacing(14);
+    setupRightColumn();
+    ui->grpPatientInfoRight->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
+    ui->grpLatestResultRight->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
+    rightLayout->addWidget(ui->grpPatientInfoRight);
+    rightLayout->addWidget(ui->grpLatestResultRight);
+    rightLayout->addWidget(ui->grpPartImageRight, 1);
+    rightColumn->setMinimumWidth(320);
+
+    bodyLayout->addWidget(mainBlock, 25);
+    bodyLayout->addWidget(rightColumn, 9);
+    pageLayout->addWidget(body, 1);
+    ui->mainBodyWidget->hide();
+
+    mainBlock->installEventFilter(this);
+    ui->grpReferenceCurveArea->installEventFilter(this);
+    setupArchivePage();
+    if (ui->menubar) ui->menubar->hide();
+}
+
+void MainWindow::fitReferenceChartHeight()
+{
+    if (!mainBlock || !ui->grpReferenceCurveArea || !ui->grpReferenceCurveArea->layout()) return;
+    QWidget* group = ui->grpReferenceCurveArea;
+    const QMargins margins = group->layout()->contentsMargins();
+    const int chartWidth = group->width() - margins.left() - margins.right();
+    if (chartWidth <= 0) return;
+    const int imageMargin = 2 * AgeSosChartWidget::imageMargin;
+    int desired = qRound((chartWidth - imageMargin) * ui->chartViewReference->imageAspectRatio())
+                  + imageMargin + margins.top() + margins.bottom();
+    const int processMinimum = 250;
+    if (mainBlock->height() > 0) {
+        desired = qMin(desired, mainBlock->height() - processMinimum - 14);
+    }
+    desired = qMax(desired, 200);
+    // The waveform card shares this row, so both use the same height and the
+    // row boundary stays aligned across the first two columns.
+    for (QWidget* rowWidget : {group, static_cast<QWidget*>(ui->grpWaveArea)}) {
+        if (rowWidget->minimumHeight() != desired || rowWidget->maximumHeight() != desired) {
+            rowWidget->setFixedHeight(desired);
+        }
+    }
+}
+
+void MainWindow::updatePartImage()
+{
+    if (!ui->label_32) return;
+    static const QPixmap source(QStringLiteral(":/images/Radius.bmp"));
+    const QSize area = ui->label_32->size();
+    if (source.isNull() || area.width() <= 4 || area.height() <= 4) return;
+    ui->label_32->setPixmap(source.scaled(area, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+}
+
+void MainWindow::updateResultPanel()
+{
+    if (!lblResultNote) return;
+    const MeasurementRecord* shown = nullptr;
+    bool unsaved = false;
+    if (hasPendingMeasurement && hasCurrentPatient() && pendingMeasurement.patientId == currentPatient.id) {
+        shown = &pendingMeasurement;
+        unsaved = true;
+    } else if (hasCurrentPatient()) {
+        shown = latestMeasurementForPatient(currentPatient.id);
+    }
+    MeasurementRecord shownRecord;
+    if (shown) {
+        shownRecord = withCurrentReference(*shown, currentPatient);
+        shown = &shownRecord;
+    }
+
+    const auto text = [](const QString& value) {
+        return value.trimmed().isEmpty() ? QStringLiteral("--") : value.trimmed();
+    };
+    QString strength;
+    if (!shown) {
+        for (QLabel* label : {ui->lblLatestSOS, ui->lblLatestT, ui->lblLatestZ,
+                              ui->lblLatestRisk, ui->lblLatestBoneAge}) {
+            label->setText(QStringLiteral("--"));
+        }
+        strength = QStringLiteral("--");
+        lblResultNote->setText(hasCurrentPatient() ? QStringLiteral("暂无结果") : QStringLiteral("未选择被测者"));
+        lblResultNote->setProperty("state", QString());
+    } else {
+        ui->lblLatestSOS->setText(text(shown->sos));
+        ui->lblLatestT->setText(text(shown->tScore));
+        ui->lblLatestZ->setText(text(shown->zScore));
+        ui->lblLatestRisk->setText(text(shown->fractureRisk));
+        ui->lblLatestBoneAge->setText(shown->boneAge.trimmed().isEmpty()
+                                          ? QStringLiteral("--")
+                                          : QStringLiteral("%1 岁").arg(shown->boneAge.trimmed()));
+        strength = text(shown->boneStrength.isEmpty() ? shown->diagnosis : shown->boneStrength);
+        const QDateTime time = parsedMeasurementDateTime(shown->measuredAt);
+        const QString when = time.isValid() ? time.toString(QStringLiteral("yyyy-MM-dd HH:mm"))
+                                            : shown->measuredAt;
+        if (unsaved) {
+            lblResultNote->setText(QStringLiteral("本次 · %1 · 未保存").arg(when));
+            lblResultNote->setProperty("state", QStringLiteral("bad"));
+        } else {
+            const bool today = time.isValid() && time.date() == QDate::currentDate();
+            lblResultNote->setText(QStringLiteral("%1 · %2 · 已保存")
+                                       .arg(today ? QStringLiteral("本次") : QStringLiteral("最近一次"), when));
+            lblResultNote->setProperty("state", today ? QStringLiteral("ok") : QString());
+        }
+    }
+    ui->lblLatestPart->setText(QStringLiteral("m/s · 桡骨"));
+    ui->lblLatestStrength->setText(strength == QStringLiteral("--")
+                                       ? QStringLiteral("骨强度 --")
+                                       : QStringLiteral("骨强度 %1").arg(strength));
+    ui->lblLatestStrength->setProperty("state",
+        strength == QStringLiteral("正常") ? QStringLiteral("ok")
+        : strength == QStringLiteral("不足") ? QStringLiteral("warn")
+        : strength == QStringLiteral("严重不足") ? QStringLiteral("bad") : QString());
+
+    QStringList lines;
+    if (hasCurrentPatient()) {
+        QList<MeasurementRecord> records = measurementsForPatient(currentPatient.id);
+        std::sort(records.begin(), records.end(), [](const MeasurementRecord& a, const MeasurementRecord& b) {
+            return a.measuredAt > b.measuredAt;
+        });
+        for (const MeasurementRecord& record : records) {
+            if (shown && !unsaved && sameMeasurement(record, *shown)) continue;
+            const QDateTime time = parsedMeasurementDateTime(record.measuredAt);
+            const QString day = time.isValid() ? time.date().toString(QStringLiteral("yyyy-MM-dd"))
+                                               : record.measuredAt.left(10);
+            const MeasurementRecord current = withCurrentReference(record, currentPatient);
+            const QString recordStrength = current.boneStrength.isEmpty() ? current.diagnosis : current.boneStrength;
+            lines << QStringLiteral("%1　%2 m/s　%3").arg(day, text(record.sos), text(recordStrength));
+            if (lines.size() >= 3) break;
+        }
+    }
+    lblRecentHistory->setText(lines.isEmpty() ? QStringLiteral("以往记录：暂无")
+                                              : QStringLiteral("以往记录\n") + lines.join(QLatin1Char('\n')));
+    ui->btnSaveResult->setVisible(hasPendingMeasurement);
+    for (QWidget* widget : {static_cast<QWidget*>(lblResultNote), static_cast<QWidget*>(ui->lblLatestStrength)}) {
+        widget->style()->unpolish(widget);
+        widget->style()->polish(widget);
+    }
+    // The patient's sex/age profile selects a reference bitmap with its own aspect ratio.
+    fitReferenceChartHeight();
+}
+
+void MainWindow::refreshPatientDerivedViews()
+{
+    refreshTable(patientList);
+    updateCurrentPatientUI();
+    updateAgeSosReference();
+    updateResultPanel();
+    updatePatientSelectionUi();
+}
+
+void MainWindow::updateArchiveSelectionBar()
+{
+    if (!lblArchiveSelection || !lblCheckedCount) return;
+    const QString id = selectedArchivePatientId();
+    QString name;
+    for (const PatientInfo& patient : patientList) {
+        if (patient.id == id) name = patient.name;
+    }
+    lblArchiveSelection->setText(id.isEmpty() ? QStringLiteral("未选择")
+                                              : QStringLiteral("%1（%2）").arg(name, id));
+    int checked = 0;
+    for (int row = 0; row < ui->table->rowCount(); ++row) {
+        if (ui->table->item(row, ArchiveIdColumn) &&
+            ui->table->item(row, ArchiveIdColumn)->checkState() == Qt::Checked) {
+            ++checked;
+        }
+    }
+    lblCheckedCount->setText(QStringLiteral("已勾选 %1 人").arg(checked));
+    const bool nextRoundPending = nextRoundTimer.isActive();
+    const bool rowActionsAllowed = !id.isEmpty() && !patientMeasureRunning;
+    ui->btnSelectPatient->setEnabled(rowActionsAllowed && !nextRoundPending);
+    ui->btnViewHistory->setEnabled(rowActionsAllowed);
+    if (btnEditPatient) btnEditPatient->setEnabled(rowActionsAllowed && patientDataWritable && !nextRoundPending);
+    ui->btnDeleteSelected->setEnabled(checked > 0 && patientDataWritable && !nextRoundPending &&
+                                      !patientMeasureRunning);
+}
+
+void MainWindow::openNewPatientDialog(bool makeCurrent)
+{
+    if (patientMeasureRunning) return;
+    if (!ensurePatientDataWritable()) return;
+    PatientFormDialog dialog(PatientFormDialog::Mode::Create, this);
+    dialog.setSuggestedId(PatientFormDialog::suggestId(patientList, QDate::currentDate()));
+    QSet<QString> ids;
+    for (const PatientInfo& patient : patientList) ids.insert(patient.id);
+    dialog.setExistingIds(ids);
+    if (makeCurrent) dialog.setSaveButtonText(QStringLiteral("保存并设为当前被测者"));
+    if (dialog.exec() != QDialog::Accepted) return;
+    const PatientInfo patient = dialog.patient();
+    if (!createPatient(patient, makeCurrent)) return;
+    if (makeCurrent) {
+        ui->stackedWidget->setCurrentWidget(ui->pageMain);
+        scheduleResponsiveLayout();
+        return;
+    }
+    for (int row = 0; row < ui->table->rowCount(); ++row) {
+        if (ui->table->item(row, ArchiveIdColumn) &&
+            ui->table->item(row, ArchiveIdColumn)->text() == patient.id) {
+            ui->table->selectRow(row);
             break;
         }
     }
+}
 
-    if (idx == -1) {
-        QMessageBox::warning(this, "错误", "未找到该行对应的内部数据");
+void MainWindow::openEditPatientDialog(const QString& patientId)
+{
+    if (patientMeasureRunning) return;
+    for (const PatientInfo& existing : patientList) {
+        if (existing.id != patientId) continue;
+        PatientFormDialog dialog(PatientFormDialog::Mode::Edit, this);
+        dialog.setPatient(existing);
+        QSet<QString> ids;
+        for (const PatientInfo& patient : patientList) ids.insert(patient.id);
+        dialog.setExistingIds(ids);
+        if (dialog.exec() == QDialog::Accepted) updatePatient(dialog.patient());
         return;
     }
-
-    switch (archiveMode) {
-    case ImportMode:
-        if (!selectCurrentPatient(patientList[idx])) return;
-
-        ui->stackedWidget->setCurrentWidget(ui->pageMain);
-        archiveMode = NormalMode;
-        ui->btnSelectPatient->setVisible(false);
-        ui->btnViewHistory->setVisible(false);
-
-        // 注意：这里不再自动 startPatientMeasurement()
-        // 等你回到主界面后，再手动点击"开始检测"
-        break;
-
-    case PrintMode:
-        currentPatient = patientList[idx];
-        QMessageBox::information(this, "打印", "选择了病人：" + currentPatient.name);
-        ui->stackedWidget->setCurrentWidget(ui->pageMain);
-        archiveMode = NormalMode;
-        break;
-
-    case NormalMode:
-    default:
-        fillDetailPage(patientList[idx], idx);
-        ui->stackedWidget->setCurrentWidget(ui->pagePatientDetail);
-        break;
-    }
 }
 
-
-
-
-void MainWindow::clearNewForm() {
-    ui->editName->clear();
-    ui->editID->clear();
-    ui->comboGender->setCurrentIndex(0);
-    ui->dateBirth->setDate(QDate::currentDate());
-    //ui->comboPart->setCurrentIndex(-1);
-    ui->editHeight->clear();
-    ui->editWeight->clear();
-
-}
-
-bool MainWindow::validatePatientFields(const QDate& birthDate,
-                                       const QString& height,
-                                       const QString& weight)
+bool MainWindow::createPatient(const PatientInfo& patient, bool makeCurrent)
 {
-    if (!birthDate.isValid() || birthDate > QDate::currentDate()) {
-        QMessageBox::warning(this, "出生日期无效", "出生日期不能晚于今天。");
+    if (patientMeasureRunning) return false;
+    if (patient.name.trimmed().isEmpty() || patient.id.trimmed().isEmpty()) {
+        QMessageBox::warning(this, "缺少信息", "姓名和编号不能为空。");
         return false;
     }
+    for (const PatientInfo& existing : patientList) {
+        if (existing.id == patient.id) {
+            QMessageBox::warning(this, "重复编号", "该编号已存在，请从档案中选择被测者。");
+            return false;
+        }
+    }
+    if (makeCurrent && !confirmPatientChange(patient.id)) return false;
 
-    const auto validOptionalNumber = [](const QString& text) {
-        if (text.trimmed().isEmpty()) return true;
-        bool ok = false;
-        const double value = text.toDouble(&ok);
-        return ok && std::isfinite(value) && value > 0.0 && value <= 999.9;
-    };
-    if (!validOptionalNumber(height)) {
-        QMessageBox::warning(this, "身高无效",
-                             "身高请填写大于 0 且不超过 999.9 的数字，单位为 cm；也可以留空。");
-        return false;
-    }
-    if (!validOptionalNumber(weight)) {
-        QMessageBox::warning(this, "体重无效",
-                             "体重请填写大于 0 且不超过 999.9 的数字，单位为 kg；也可以留空。");
-        return false;
-    }
+    QList<PatientInfo> candidate = patientList;
+    candidate.append(patient);
+    if (!savePatients(candidate)) return false;
+    patientList = candidate;
+    if (makeCurrent) applyCurrentPatient(patient);
+    refreshPatientDerivedViews();
     return true;
 }
 
-void MainWindow::on_btnFormBack_clicked() {
-    editingIndex = -1; // 返回时也重置状态
-    ui->stackedWidget->setCurrentWidget(ui->pageArchive);
-}
-
-void MainWindow::on_btnFormSave_clicked() {
+bool MainWindow::updatePatient(const PatientInfo& patient)
+{
     if (patientMeasureRunning) {
-        QMessageBox::warning(this, "检测进行中", "检测进行中不能编辑患者。");
-        return;
+        QMessageBox::warning(this, "检测进行中", "检测进行中不能编辑档案。");
+        return false;
     }
-    // 1) 从新增表单页面采集数据（注意这些控件名都是 pagePatientForm 上的）
-    PatientInfo p;
-    p.name      = ui->editName->text().trimmed();
-    p.id        = ui->editID->text().trimmed();
-    p.gender    = ui->comboGender->currentText();
-    p.birthDay  = ui->dateBirth->date().toString("yyyy-MM-dd");
-    p.height    = ui->editHeight->text().trimmed();
-    p.weight    = ui->editWeight->text().trimmed();
-
-
-    // 2) 基本校验
-    if (p.name.isEmpty() || p.id.isEmpty()) {
-        QMessageBox::warning(this, "缺少信息", "姓名和编号(ID)不能为空");
-        return;
-    }
-    if (!validatePatientFields(ui->dateBirth->date(), p.height, p.weight)) return;
-
-    // 3) 新增 / 编辑 分支
-    QList<PatientInfo> candidate = patientList;
-    if (editingIndex == -1) {
-        // 新增：校验 ID 唯一
-        for (const auto &it : patientList) {
-            if (it.id == p.id) {
-                QMessageBox::warning(this, "重复ID", "该编号(ID)已存在，请更换。");
-                return;
-            }
-        }
-        candidate.push_back(p);
-    } else {
-        candidate[editingIndex] = p;
-    }
-
-    if (!savePatients(candidate)) return;
-    patientList = candidate;
-    refreshTable(patientList);
-
-    // 5) 复位状态并返回档案页
-    editingIndex = -1;
-    ui->stackedWidget->setCurrentWidget(ui->pageArchive);
-}
-
-
-
-void MainWindow::fillDetailPage(const PatientInfo& p, int index) {
-    editingIndex = index;
-
-    ui->dName->setText(p.name);
-    ui->dID->setText(p.id);
-    ui->dGender->setCurrentText(p.gender);
-    ui->dBirth->setDate(QDate::fromString(p.birthDay, "yyyy-MM-dd"));
-    ui->dHeight->setText(p.height);
-    ui->dWeight->setText(p.weight);
-}
-
-void MainWindow::on_btnDetailBack_clicked() {
-    editingIndex = -1;
-    ui->stackedWidget->setCurrentWidget(ui->pageArchive);
-}
-
-void MainWindow::on_btnDetailSave_clicked() {
-    if (patientMeasureRunning) {
-        QMessageBox::warning(this, "检测进行中", "检测进行中不能编辑患者。");
-        return;
-    }
-    if (editingIndex < 0 || editingIndex >= patientList.size()) {
-        QMessageBox::warning(this, "错误", "没有选中的病人记录");
-        return;
-    }
-
-    // 读回编辑后的内容
-    const PatientInfo& p = patientList[editingIndex];
-    QString newId = ui->dID->text().trimmed();
-    if (newId != p.id) {
-        QMessageBox::warning(this, "不允许修改", "为保持检测历史关联，本版本不允许修改患者 ID。");
-        return;
-    }
-    if (ui->dName->text().trimmed().isEmpty() || newId.isEmpty()) {
-        QMessageBox::warning(this, "缺少信息", "姓名和编号(ID)不能为空");
-        return;
-    }
-    if (!validatePatientFields(ui->dBirth->date(),
-                               ui->dHeight->text().trimmed(),
-                               ui->dWeight->text().trimmed())) return;
-    // 如果 ID 改了，检查是否与其他记录冲突
-    if (newId != p.id) {
-        for (int i=0; i<patientList.size(); ++i) {
-            if (i != editingIndex && patientList[i].id == newId) {
-                QMessageBox::warning(this, "重复ID", "该编号(ID)已存在，请更换");
-                return;
-            }
+    int index = -1;
+    for (int i = 0; i < patientList.size(); ++i) {
+        if (patientList[i].id == patient.id) {
+            index = i;
+            break;
         }
     }
-
+    if (index < 0) {
+        QMessageBox::warning(this, "错误", "没有找到这份档案。");
+        return false;
+    }
+    if (patient.name.trimmed().isEmpty()) {
+        QMessageBox::warning(this, "缺少信息", "姓名不能为空。");
+        return false;
+    }
     QList<PatientInfo> candidate = patientList;
-    PatientInfo& updated = candidate[editingIndex];
-    updated.name      = ui->dName->text().trimmed();
-    updated.id        = newId;
-    updated.gender    = ui->dGender->currentText();
-    updated.birthDay  = ui->dBirth->date().toString("yyyy-MM-dd");
-    updated.height    = ui->dHeight->text().trimmed();
-    updated.weight    = ui->dWeight->text().trimmed();
-
-    if (!savePatients(candidate)) return;
+    candidate[index] = patient;
+    if (!savePatients(candidate)) return false;
     patientList = candidate;
-    if (currentPatient.id == updated.id) {
-        currentPatient = updated;
-        updateCurrentPatientUI();
+    if (currentPatient.id == patient.id) {
+        // Only the editable archive fields; session-only fields stay untouched.
+        currentPatient.name = patient.name;
+        currentPatient.gender = patient.gender;
+        currentPatient.birthDay = patient.birthDay;
+        currentPatient.height = patient.height;
+        currentPatient.weight = patient.weight;
     }
-    refreshTable(patientList);
-    QMessageBox::information(this, "成功", "已保存修改");
+    refreshPatientDerivedViews();
+    statusBar()->showMessage(QStringLiteral("档案已保存。"), 4000);
+    return true;
 }
 
-void MainWindow::on_btnDetailDelete_clicked() {
-    if (patientMeasureRunning) {
-        QMessageBox::warning(this, "检测进行中", "检测进行中不能删除患者。");
-        return;
-    }
-    if (editingIndex < 0 || editingIndex >= patientList.size()) return;
-
-    if (hasPendingMeasurement &&
-        pendingMeasurement.patientId == patientList[editingIndex].id) {
-        QMessageBox::warning(this, "存在未保存结果",
-                             "当前患者还有未保存的检测结果，请先保存结果后再删除档案。");
-        return;
-    }
-
-    if (QMessageBox::question(this, "确认删除", "确定删除该病人信息？此操作不可恢复") != QMessageBox::Yes)
-        return;
-
-    const QString deletedPatientId = patientList[editingIndex].id;
-    QList<PatientInfo> patientCandidate = patientList;
-    patientCandidate.removeAt(editingIndex);
-    QList<MeasurementRecord> measurementCandidate;
-    for (const MeasurementRecord& record : measurementList) {
-        if (record.patientId != deletedPatientId) measurementCandidate.append(record);
-    }
-    if (!savePatientData(patientCandidate, measurementCandidate)) return;
-
-    const bool removedCurrent = currentPatient.id == deletedPatientId;
-    patientList = patientCandidate;
-    measurementList = measurementCandidate;
-    if (removedCurrent) clearCurrentPatient();
-    refreshTable(patientList);
-
-    editingIndex = -1;
-    ui->stackedWidget->setCurrentWidget(ui->pageArchive);
-}
-
-void MainWindow::initSearchControls()
+bool MainWindow::deleteMeasurementRecord(const QString& recordId)
 {
-    // 1. 初始化年份 (从今年往前推到1900年)
-    int currentYear = QDate::currentDate().year();
-    ui->comboYear->clear();
-    // 添加一个 "不限" 选项，方便用户只搜月份（可选）
-    // ui->comboYear->addItem("不限", 0);
-
-    for (int y = currentYear; y >= 1900; --y) {
-        ui->comboYear->addItem(QString::number(y), y);
+    for (int i = 0; i < measurementList.size(); ++i) {
+        if (measurementList[i].id != recordId) continue;
+        QList<MeasurementRecord> candidate = measurementList;
+        candidate.removeAt(i);
+        if (!saveMeasurements(candidate)) return false;
+        measurementList = candidate;
+        refreshPatientDerivedViews();
+        return true;
     }
-
-    // 2. 初始化月份 (1-12)
-    ui->comboMonth->clear();
-    for (int m = 1; m <= 12; ++m) {
-        ui->comboMonth->addItem(QString::number(m), m);
-    }
-    // 设置默认为当前月份
-    ui->comboMonth->setCurrentIndex(QDate::currentDate().month() - 1);
-
-    // 3. 初始化日 (联动)
-    // 连接信号：当年份或月份改变时，重新计算天数
-    connect(ui->comboYear, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            this, &MainWindow::updateDayCombo);
-    connect(ui->comboMonth, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            this, &MainWindow::updateDayCombo);
-
-    // 先手动触发一次以填充天数
-    updateDayCombo();
-
-    // 默认选中当天
-    int currentDay = QDate::currentDate().day();
-    int idx = ui->comboDay->findText(QString::number(currentDay));
-    if (idx != -1) ui->comboDay->setCurrentIndex(idx);
+    return false;
 }
 
-void MainWindow::updateDayCombo()
+void MainWindow::showReportFrom(QWidget* returnPage, const PatientInfo& patient,
+                                const MeasurementRecord& measurement)
 {
-    // 获取当前选中的年月
-    int year = ui->comboYear->currentData().toInt();
-    int month = ui->comboMonth->currentData().toInt();
+    reportReturnPage = returnPage;
+    showReport(patient, measurement);
+}
 
-    // 记录之前选中的天数，防止刷新后跳变
-    QString currentDayText = ui->comboDay->currentText();
+// ==================== 设备响应提示（只影响显示，不改变命令时序）====================
 
-    ui->comboDay->clear();
+void MainWindow::noteCommandSent()
+{
+    // Measure from the first unanswered command; continuous 80 ms commands
+    // must not keep restarting the clock.
+    if (awaitingDeviceFrame) return;
+    awaitingDeviceFrame = true;
+    awaitingFrameSince.start();
+}
 
-    // 计算该月有多少天
-    int daysInMonth = QDate(year, month, 1).daysInMonth();
+void MainWindow::noteDeviceFrameReceived()
+{
+    awaitingDeviceFrame = false;
+    if (!deviceUnresponsive) return;
+    deviceUnresponsive = false;
+    statusBar()->showMessage(QStringLiteral("设备已恢复响应。"), 4000);
+    updatePatientSelectionUi();
+}
 
-    for (int d = 1; d <= daysInMonth; ++d) {
-        ui->comboDay->addItem(QString::number(d), d);
+void MainWindow::checkDeviceResponse()
+{
+    if (!serial || !serial->isOpen()) {
+        awaitingDeviceFrame = false;
+        deviceUnresponsive = false;
+        return;
     }
+    if (deviceUnresponsive || !awaitingDeviceFrame) return;
+    if (awaitingFrameSince.elapsed() < deviceResponseTimeoutMs) return;
+    deviceUnresponsive = true;
+    statusBar()->showMessage(
+        QStringLiteral("设备无响应：请确认选的是骨密度仪的端口、设备已通电、探头线已插好。"), 10000);
+    updatePatientSelectionUi();
+}
 
-    // 尝试恢复之前选中的天数（如果新月份也有这一天）
-    int idx = ui->comboDay->findText(currentDayText);
-    if (idx != -1) {
-        ui->comboDay->setCurrentIndex(idx);
+// ==================== 登录页 ====================
+
+void MainWindow::setupLoginPage()
+{
+    QWidget* page = ui->pageLogin;
+    delete page->layout();
+
+    auto* root = new QVBoxLayout(page);
+    root->setContentsMargins(24, 24, 24, 18);
+    root->addStretch(3);
+
+    auto* card = new QFrame(page);
+    card->setObjectName(QStringLiteral("loginCard"));
+    card->setFixedWidth(400);
+    auto* form = new QVBoxLayout(card);
+    form->setContentsMargins(36, 32, 36, 30);
+    form->setSpacing(8);
+
+    auto* title = new QLabel(QStringLiteral("超声骨密度仪"), card);
+    title->setObjectName(QStringLiteral("loginTitle"));
+    auto* subtitle = new QLabel(QStringLiteral("请登录后使用"), card);
+    subtitle->setProperty("role", QStringLiteral("caption"));
+    form->addWidget(title);
+    form->addWidget(subtitle);
+    form->addSpacing(18);
+
+    ui->label_19->setText(QStringLiteral("账号"));
+    ui->label_20->setText(QStringLiteral("密码"));
+    for (QLabel* label : {ui->label_19, ui->label_20}) label->setProperty("role", QStringLiteral("fieldLabel"));
+    ui->editUsername->setPlaceholderText(QStringLiteral("请输入账号"));
+    ui->editPassword->setPlaceholderText(QStringLiteral("请输入密码"));
+    ui->editPassword->setEchoMode(QLineEdit::Password);
+    for (QLineEdit* edit : {ui->editUsername, ui->editPassword}) {
+        edit->setMinimumHeight(40);
+        edit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    }
+    form->addWidget(ui->label_19);
+    form->addWidget(ui->editUsername);
+    form->addSpacing(6);
+    form->addWidget(ui->label_20);
+    form->addWidget(ui->editPassword);
+
+    ui->lblLoginMsg->setStyleSheet(QString());
+    ui->lblLoginMsg->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    ui->lblLoginMsg->setProperty("role", QStringLiteral("error"));
+    ui->lblLoginMsg->setWordWrap(true);
+    ui->lblLoginMsg->setMinimumHeight(20);
+    form->addWidget(ui->lblLoginMsg);
+
+    ui->btnLogin->setText(QStringLiteral("登 录"));
+    ui->btnLogin->setMinimumHeight(44);
+    ui->btnLogin->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    ui->btnLogin->setProperty("variant", QStringLiteral("primary"));
+    form->addWidget(ui->btnLogin);
+
+    root->addWidget(card, 0, Qt::AlignHCenter);
+    root->addStretch(4);
+
+    auto* version = new QLabel(QStringLiteral("版本 %1 · 数据保存在本机 · 结果仅供参考").arg(QStringLiteral(APP_VERSION)),
+                               page);
+    version->setObjectName(QStringLiteral("loginVersion"));
+    version->setProperty("role", QStringLiteral("caption"));
+    root->addWidget(version, 0, Qt::AlignHCenter);
+
+    for (QWidget* w : {static_cast<QWidget*>(ui->lblLoginMsg), static_cast<QWidget*>(ui->btnLogin),
+                       static_cast<QWidget*>(ui->label_19), static_cast<QWidget*>(ui->label_20)}) {
+        w->style()->unpolish(w);
+        w->style()->polish(w);
     }
 }

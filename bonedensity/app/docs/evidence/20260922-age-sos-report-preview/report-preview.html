@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>年龄-SOS历史图报表样稿</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #e8edf3;
+      color: #303133;
+      font-family: "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+    }
+    .workspace {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 24px;
+      padding: 24px;
+    }
+    .sheet {
+      position: relative;
+      width: 720px;
+      min-height: 1018px;
+      padding: 0 28px 24px;
+      overflow: hidden;
+      background: white;
+      border: 9px solid #1296e8;
+      border-radius: 5px;
+      box-shadow: 0 12px 35px rgba(37, 67, 99, .17);
+    }
+    .brandbar {
+      height: 42px;
+      margin: 0 -28px 16px;
+      padding: 6px 20px;
+      color: white;
+      background: #1296e8;
+      font-size: 23px;
+      font-weight: 700;
+    }
+    .title {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      margin: 4px 0 14px;
+      font-size: 27px;
+      font-weight: 700;
+      color: #1f2329;
+    }
+    .cross {
+      position: relative;
+      width: 50px;
+      height: 50px;
+      border-radius: 14px;
+      background: #ef1f2f;
+      transform: rotate(45deg);
+    }
+    .cross::before, .cross::after {
+      content: "";
+      position: absolute;
+      left: 50%; top: 50%;
+      background: white;
+      transform: translate(-50%, -50%);
+    }
+    .cross::before { width: 31px; height: 12px; }
+    .cross::after { width: 12px; height: 31px; }
+    .section-title {
+      margin: 8px 0 7px;
+      color: #606266;
+      font-size: 17px;
+      font-weight: 700;
+    }
+    .info-grid, .result-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 34px;
+      padding: 10px 12px;
+      border: 1px solid #d9dee5;
+      border-radius: 7px;
+      background: #fbfcfe;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 78px 1fr;
+      min-height: 26px;
+      align-items: center;
+      font-size: 14px;
+    }
+    .row span:first-child { color: #909399; }
+    .row strong { font-weight: 500; color: #303133; }
+    .result-grid { grid-template-columns: repeat(4, 1fr); column-gap: 12px; }
+    .metric { border-right: 1px solid #e4e7ed; padding: 0 10px; }
+    .metric:last-child { border-right: none; }
+    .metric small { display: block; color: #909399; font-size: 12px; }
+    .metric strong { display: block; margin-top: 3px; font-size: 17px; color: #303133; }
+    .metric.primary strong { color: #0b86d4; font-size: 20px; }
+    .chart-heading {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin: 10px 0 6px;
+    }
+    .chart-heading .section-title { margin: 0; }
+    .chart-heading .caption { color: #909399; font-size: 12px; }
+    .chart-row {
+      display: flex;
+      align-items: stretch;
+      gap: 12px;
+      padding: 9px;
+      border: 1px solid #d9dee5;
+      border-radius: 7px;
+      background: #fff;
+    }
+    .chart {
+      position: relative;
+      width: 470px;
+      height: 346px;
+      flex: none;
+      overflow: hidden;
+      background: white;
+    }
+    .chart img { width: 100%; height: 100%; display: block; }
+    .dot {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: #7f8c98;
+      border: 2px solid white;
+      box-shadow: 0 0 0 1px rgba(55, 65, 75, .35);
+    }
+    .dot.current {
+      width: 15px;
+      height: 15px;
+      background: #f56c6c;
+      box-shadow: 0 0 0 2px rgba(245, 108, 108, .22);
+    }
+    .point-label {
+      position: absolute;
+      left: 38%; top: 41%;
+      padding: 4px 7px;
+      color: #d94e4e;
+      background: rgba(255,255,255,.94);
+      border: 1px solid #f3a4a4;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .history {
+      flex: 1;
+      min-width: 150px;
+      padding: 7px 5px 4px;
+    }
+    .history h4 { margin: 0 0 8px; font-size: 14px; color: #606266; }
+    .history-item {
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 6px;
+      padding: 8px 0;
+      border-bottom: 1px solid #ebeef5;
+      font-size: 12px;
+    }
+    .history-item:last-child { border-bottom: none; }
+    .history-item .age { color: #909399; }
+    .history-item b { display: block; font-size: 13px; }
+    .history-item em { display: block; margin-top: 2px; color: #909399; font-style: normal; font-size: 10px; }
+    .history-item.current b { color: #e95d5d; }
+    .diagnosis {
+      min-height: 70px;
+      padding: 10px 12px;
+      border: 1px solid #d9dee5;
+      border-radius: 7px;
+      color: #606266;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+    .sign {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin: 12px 0 8px;
+      color: #606266;
+      font-size: 14px;
+    }
+    .sign .line { width: 180px; border-bottom: 1px solid #606266; }
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 9px;
+      border-top: 1px solid #606266;
+      font-size: 11px;
+      color: #606266;
+    }
+    .notes {
+      width: 320px;
+      padding: 18px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(37, 67, 99, .12);
+    }
+    .notes h2 { margin: 0 0 7px; color: #20252b; font-size: 20px; }
+    .notes .lead { margin: 0 0 14px; color: #76818c; font-size: 13px; line-height: 1.6; }
+    .rule {
+      margin-top: 10px;
+      padding: 11px 12px;
+      background: #f5f8fb;
+      border-left: 3px solid #1296e8;
+      border-radius: 4px;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+    .rule b { color: #0b86d4; }
+    .legend-sample { display: flex; gap: 14px; margin-top: 14px; font-size: 12px; color: #606266; }
+    .legend-sample span::before {
+      content: "";
+      display: inline-block;
+      width: 9px; height: 9px;
+      margin-right: 5px;
+      border-radius: 50%;
+      vertical-align: -1px;
+      background: #7f8c98;
+    }
+    .legend-sample .red::before { background: #f56c6c; }
+    @media (max-width: 1100px) {
+      .workspace { flex-direction: column; align-items: center; }
+      .notes { width: 720px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="workspace">
+    <section class="sheet" aria-label="超声骨密度检测报表样稿">
+      <div class="brandbar">医疗参考</div>
+      <div class="title"><div class="cross"></div><span>超声骨密度检测报告</span></div>
+
+      <div class="section-title">受检者信息</div>
+      <div class="info-grid">
+        <div>
+          <div class="row"><span>姓名：</span><strong>王某</strong></div>
+          <div class="row"><span>年龄：</span><strong>47 岁</strong></div>
+          <div class="row"><span>出生年月：</span><strong>1979-04-18</strong></div>
+          <div class="row"><span>身高：</span><strong>164 cm</strong></div>
+        </div>
+        <div>
+          <div class="row"><span>ID：</span><strong>P-2026-023</strong></div>
+          <div class="row"><span>性别：</span><strong>女</strong></div>
+          <div class="row"><span>检测时间：</span><strong>2026-09-22 10:26</strong></div>
+          <div class="row"><span>体重：</span><strong>56 kg</strong></div>
+        </div>
+      </div>
+
+      <div class="section-title">测量结果</div>
+      <div class="result-grid">
+        <div class="metric primary"><small>桡骨 SOS</small><strong>4090.0</strong><small>m/s</small></div>
+        <div class="metric"><small>骨强度</small><strong>正常</strong></div>
+        <div class="metric"><small>T 值</small><strong>-0.8</strong></div>
+        <div class="metric"><small>Z 值</small><strong>-0.3</strong></div>
+      </div>
+
+      <div class="chart-heading">
+        <div class="section-title">年龄-SOS参考与历史测量</div>
+        <div class="caption">横坐标为每次检测当时年龄</div>
+      </div>
+      <div class="chart-row">
+        <div class="chart">
+          <img src="../../../resources/images/age_sos_woman.bmp" alt="成年女性年龄-SOS参考图">
+          <span class="dot" style="left:29.5%;top:57.1%" title="41岁 3980 m/s"></span>
+          <span class="dot" style="left:32.6%;top:52.6%" title="44岁 4035 m/s"></span>
+          <span class="dot current" style="left:35.7%;top:48.1%" title="47岁 4090 m/s"></span>
+          <span class="point-label">本次：47岁　4090 m/s</span>
+        </div>
+        <aside class="history">
+          <h4>历史记录</h4>
+          <div class="history-item">
+            <span class="age">41岁</span><span><b>3980 m/s</b><em>2020-08-16</em></span>
+          </div>
+          <div class="history-item">
+            <span class="age">44岁</span><span><b>4035 m/s</b><em>2023-07-09</em></span>
+          </div>
+          <div class="history-item current">
+            <span class="age">47岁</span><span><b>4090 m/s</b><em>2026-09-22　本次</em></span>
+          </div>
+        </aside>
+      </div>
+
+      <div class="section-title">诊断提示</div>
+      <div class="diagnosis">骨强度评估：正常；相对骨折风险：低；相对骨龄：45 岁。图中灰色点为该患者既往检测，红色点为本报表对应的检测结果。</div>
+      <div class="sign"><span>检查医师：</span><span class="line"></span></div>
+      <div class="footer"><span>只做临床参考，不作证明材料</span><span>联系电话：________________</span></div>
+    </section>
+
+    <aside class="notes">
+      <h2>本次样稿的显示规则</h2>
+      <p class="lead">先确认结构和信息表达。正式实现会继续使用项目现有年龄-SOS参考底图。</p>
+      <div class="rule"><b>报表红点</b><br>始终表示当前打开的这份报表对应的那次测量，而不是患者最新一次测量。</div>
+      <div class="rule"><b>历史灰点</b><br>同一患者以前的有效测量按各自“测量日期对应年龄”落点。不同年份会自然出现在不同年龄位置。</div>
+      <div class="rule"><b>上位机主页</b><br>选择患者后显示其全部有效历史点；最新一次为红色，其余为灰色。没有历史记录时仍显示原来的“暂无检测结果”。</div>
+      <div class="rule"><b>旧数据兼容</b><br>优先使用记录中保存的测量时年龄；旧记录没有年龄时，用当时保存的出生日期和测量日期计算，不修改原 XML。</div>
+      <div class="legend-sample"><span class="red">本次／最新</span><span>历史测量</span></div>
+    </aside>
+  </main>
+</body>
+</html>

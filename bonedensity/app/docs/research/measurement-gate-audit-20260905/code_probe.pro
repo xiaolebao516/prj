@@ -8,7 +8,7 @@ SOURCES += $$PWD/code_probe.cpp
 SOURCES += $$ROOT/src/mainwindow.cpp $$ROOT/src/accountstore.cpp \
     $$ROOT/src/calibration.cpp $$ROOT/src/calibrationdialog.cpp \
     $$ROOT/src/measurementguidedialog.cpp $$ROOT/src/calibrationstore.cpp \
-    $$ROOT/src/patientstore.cpp $$ROOT/src/agesoschartwidget.cpp \
+    $$ROOT/src/patientstore.cpp $$ROOT/src/agesoschartwidget.cpp $$ROOT/src/sosreference.cpp \
     $$ROOT/src/reportwidget.cpp $$ROOT/src/signalprocessor.cpp \
     $$ROOT/src/bonehealth.cpp $$ROOT/src/utils.cpp
 HEADERS += $$ROOT/include/mainwindow.h $$ROOT/include/calibrationdialog.h \

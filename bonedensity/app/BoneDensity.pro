@@ -4,6 +4,7 @@ QT += xml
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+include(version.pri)
 CONFIG += c++17
 
 TARGET = BoneDensity
@@ -48,7 +49,9 @@ SOURCES += \
     src/reportwidget.cpp \
     src/signalprocessor.cpp \
     src/bonehealth.cpp \
-    src/utils.cpp
+    src/sosreference.cpp \
+    src/utils.cpp \
+    src/patientformdialog.cpp
 
 HEADERS += \
     include/measurementexperimentlog.h \
@@ -64,7 +67,9 @@ HEADERS += \
     include/types.h \
     include/signalprocessor.h \
     include/bonehealth.h \
-    include/utils.h
+    include/sosreference.h \
+    include/utils.h \
+    include/patientformdialog.h
 
 FORMS += \
     ui/mainwindow.ui

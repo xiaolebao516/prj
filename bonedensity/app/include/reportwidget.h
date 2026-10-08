@@ -4,6 +4,8 @@
 #include <QString>
 #include <QWidget>
 
+#include "agesoschartwidget.h"
+
 class QPainter;
 
 struct ReportData {
@@ -22,6 +24,7 @@ struct ReportData {
     QString boneStrength;
     QString diagnosis;
     QString operatorName;
+    AgeSosChartData ageSosChart;
 };
 
 class ReportWidget : public QWidget {
@@ -41,5 +44,4 @@ private:
     void drawLogicalPage(QPainter* painter) const;
 
     ReportData data_;
-    QPixmap template_;
 };

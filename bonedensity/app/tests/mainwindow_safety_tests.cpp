@@ -5,6 +5,10 @@
 #include "calibrationdialog.h"
 #include "measurementguidedialog.h"
 #include "reportwidget.h"
+#include "patientformdialog.h"
+#include "sosreference.h"
+#include "bonehealth.h"
+#include "agesoschartwidget.h"
 #include "ui_mainwindow.h"
 
 #include <QAbstractButton>
@@ -21,6 +25,8 @@
 #include <QTemporaryDir>
 #include <QTimer>
 #include <QStackedWidget>
+#include <QGroupBox>
+#include <QStyleOption>
 #include <cmath>
 #include <limits>
 
@@ -117,6 +123,8 @@ private slots:
     void parserResynchronizesAfterNoiseAndBadTail();
     void interleavedAndWrappedFrameIndexesStayIndependent();
     void speedSeriesKeepsOnlyRecentPoints();
+    void liveChartRenderingRejectsUnsafeInputs();
+    void liveChartPaintStress();
     void disconnectedControlsAndPlaceholdersAreSafe();
     void positionGuideTracksExistingBarsWithoutChangingThem();
     void corrAFeedbackBindingAndResponsiveLayout();
@@ -142,9 +150,35 @@ private slots:
     void serialIoErrorsResetAcquisition_data();
     void serialIoErrorsResetAcquisition();
     void reportRenderingIsReadableAndArtifactFree();
+    void ageSosHistoryUsesStoredAgeProfileAndReportCutoff();
+    void mainAgeSosChartHighlightsLatestValidMeasurement();
     void invalidMeasurementDateDoesNotInventAge();
     void completedReportUsesProvidedMeasurement();
     void reportPdfCanBeCommitted();
+    void patientDialogStartsWithoutDefaults();
+    void patientDialogEditKeepsIdReadOnly();
+    void suggestedPatientIdIsUnique();
+    void selectingPatientShowsLatestSavedResult();
+    void retrySaveRefreshesResultArchiveAndChart();
+    void deletingRecordRefreshesViews();
+    void editingCurrentPatientRefreshesViews();
+    void enterSubmitsLogin();
+    void closeCancelKeepsPendingNextRound();
+    void batchDeleteConfirmationListsNamesAndCounts();
+    void archiveDoubleClickSetsCurrentPatient();
+    void toolbarAndResultCardStructure();
+    void accountDialogFillsWidthAndStaysOpen();
+    void themedDialogGroupTitlesStayClearOfContent();
+    void loginPageIsUsableAndShowsVersion();
+    void portListRefreshKeepsSelectionWithoutRebuilding();
+    void deviceWatchdogReportsMissingFrames();
+    void sosReferenceMatchesPublishedTable();
+    void patientResultUsesReferenceAndSkipsChildren();
+    void adultAgeSosChartIsDrawnFromReference();
+    void adultChartPointsMatchComputedScores();
+    void savedRecordsAreShownWithCurrentReference();
+    void boneAgeAndChildChartStayConsistent();
+    void mainLayoutFitsCommonWindowSizes();
     void capturePagesWhenRequested();
 };
 
@@ -490,7 +524,7 @@ void MainWindowSafetyTests::experimentBuildIdentity()
     QCOMPARE(window.mCfg.anglePairMidGapMin,-12.0);
     QCOMPARE(window.mCfg.anglePairMidGapMax,0.0);
     QVERIFY(window.observeStabilityBeforeG);
-    QCOMPARE(window.windowTitle(),QStringLiteral("骨密度仪APP · 首波一致性试测"));
+    QCOMPARE(window.windowTitle(),QStringLiteral("超声骨密度仪"));
 #endif
 #ifndef QT_NO_DEBUG
     window.startExperimentLog();
@@ -1314,6 +1348,77 @@ void MainWindowSafetyTests::speedSeriesKeepsOnlyRecentPoints()
     QCOMPARE(window.seriesSpeed->at(49).x(), 999.0);
 }
 
+void MainWindowSafetyTests::liveChartRenderingRejectsUnsafeInputs()
+{
+    MainWindow window;
+    window.hide();
+
+    QVERIFY(!(window.viewA->renderHints() & QPainter::Antialiasing));
+    QVERIFY(!(window.viewB->renderHints() & QPainter::Antialiasing));
+    QVERIFY(!(window.viewC->renderHints() & QPainter::Antialiasing));
+    QVERIFY(!(window.viewD->renderHints() & QPainter::Antialiasing));
+    QVERIFY(!(window.ui->chartViewSpeed->renderHints() & QPainter::Antialiasing));
+
+    window.liveWaveformRenderTimer.invalidate();
+    QVERIFY(window.shouldRefreshLiveWaveforms());
+    QVERIFY(!window.shouldRefreshLiveWaveforms());
+    QTest::qWait(MainWindow::liveWaveformRefreshIntervalMs + 10);
+    QVERIFY(window.shouldRefreshLiveWaveforms());
+
+    const int initialCount = window.seriesSpeed->count();
+    const int initialIndex = window.speedPointIndex;
+    window.appendSpeedPoint(std::numeric_limits<double>::quiet_NaN());
+    window.appendSpeedPoint(std::numeric_limits<double>::infinity());
+    QCOMPARE(window.seriesSpeed->count(), initialCount);
+    QCOMPARE(window.speedPointIndex, initialIndex);
+}
+
+void MainWindowSafetyTests::liveChartPaintStress()
+{
+    MainWindow window;
+    window.hide();
+
+    const QVector<QLineSeries*> series = {
+        window.seriesA, window.seriesB, window.seriesC, window.seriesD
+    };
+    const QVector<QChartView*> views = {
+        window.viewA, window.viewB, window.viewC, window.viewD
+    };
+    for (QChartView* view : views) {
+        view->resize(640, 125);
+    }
+
+    QVector<QPointF> points;
+    points.reserve(2000);
+    for (int sample = 0; sample < 2000; ++sample) {
+        points.append(QPointF(sample, 2048.0));
+    }
+
+    QImage target(640, 125, QImage::Format_ARGB32_Premultiplied);
+    target.fill(Qt::black);
+    constexpr int tenMinuteEquivalentUpdates = 2400;
+    for (int update = 0; update < tenMinuteEquivalentUpdates; ++update) {
+        const double phase = update * 0.03;
+        for (int sample = 0; sample < points.size(); ++sample) {
+            points[sample].setY(2048.0 + 900.0 * std::sin(sample * 0.025 + phase));
+        }
+        for (QLineSeries* line : series) {
+            line->replace(points);
+        }
+        if ((update % 4) == 0) {
+            QPainter painter(&target);
+            views[(update / 4) % views.size()]->render(&painter);
+        }
+        if ((update % 60) == 0) {
+            QCoreApplication::processEvents();
+        }
+    }
+
+    for (QLineSeries* line : series) {
+        QCOMPARE(line->count(), 2000);
+    }
+}
+
 void MainWindowSafetyTests::disconnectedControlsAndPlaceholdersAreSafe()
 {
     MainWindow window;
@@ -1322,14 +1427,11 @@ void MainWindowSafetyTests::disconnectedControlsAndPlaceholdersAreSafe()
     QVERIFY(!window.ui->pushButton->isEnabled());
     QVERIFY(!window.ui->triggerButton->isEnabled());
     QVERIFY(!window.ui->btnStartMeasurement->isEnabled());
-    QVERIFY(!window.ui->wifi_button->isEnabled());
+    QVERIFY(!window.findChild<QPushButton*>(QStringLiteral("wifi_button")));
     QCOMPARE(window.ui->grpWaveArea->title(), QStringLiteral("四通道波形"));
     QCOMPARE(window.ui->grpSpeedArea->title(), QStringLiteral("声速趋势"));
     QCOMPARE(window.ui->grpProcessArea->title(), QStringLiteral("检测过程"));
     QCOMPARE(window.ui->grpPartImageRight->title(), QStringLiteral("测量部位"));
-    QCOMPARE(window.ui->dateBirth->maximumDate(), QDate::currentDate());
-    QCOMPARE(window.ui->dBirth->maximumDate(), QDate::currentDate());
-    QCOMPARE(window.ui->eBirth->maximumDate(), QDate::currentDate());
 }
 
 void MainWindowSafetyTests::patientMeasurementDisablesConflictingControls()
@@ -1390,56 +1492,26 @@ void MainWindowSafetyTests::patientFormsStayInsideAndCenteredAtSmallWindow()
     window.resize(1200, 760);
     QTest::qWait(50);
 
-    const auto verifyPage = [&window](QWidget* page, const QList<QWidget*>& controls) {
-        window.ui->stackedWidget->setCurrentWidget(page);
+    for (const auto mode : {PatientFormDialog::Mode::Create, PatientFormDialog::Mode::Edit}) {
+        PatientFormDialog dialog(mode, &window);
+        dialog.setAttribute(Qt::WA_DontShowOnScreen, true);
+        if (mode == PatientFormDialog::Mode::Edit) dialog.setPatient(samplePatient());
+        dialog.show();
         QApplication::processEvents();
-        if (page->layout()) page->layout()->activate();
-        QApplication::processEvents();
-
-        int left = page->width();
-        int right = 0;
-        for (QWidget* control : controls) {
+        dialog.layout()->activate();
+        QVERIFY(dialog.width() <= window.width());
+        QVERIFY(dialog.height() <= window.height());
+        for (QWidget* control : QList<QWidget*>{dialog.nameEdit, dialog.idEdit, dialog.maleButton,
+                                                dialog.femaleButton, dialog.yearEdit, dialog.monthEdit,
+                                                dialog.dayEdit, dialog.heightEdit, dialog.weightEdit,
+                                                dialog.saveButton, dialog.cancelButton}) {
             QVERIFY(control);
             QVERIFY(!control->isHidden());
-            const QRect bounds(control->mapTo(page, QPoint(0, 0)), control->size());
-            QVERIFY2(page->rect().contains(bounds),
-                     qPrintable(QStringLiteral("%1 [%2,%3 %4x%5] escaped %6 [%7,%8 %9x%10]")
-                                    .arg(control->objectName())
-                                    .arg(bounds.x())
-                                    .arg(bounds.y())
-                                    .arg(bounds.width())
-                                    .arg(bounds.height())
-                                    .arg(page->objectName())
-                                    .arg(page->rect().x())
-                                    .arg(page->rect().y())
-                                    .arg(page->rect().width())
-                                    .arg(page->rect().height())));
-            left = qMin(left, bounds.left());
-            right = qMax(right, bounds.right());
+            const QRect bounds(control->mapTo(&dialog, QPoint(0, 0)), control->size());
+            QVERIFY2(dialog.rect().contains(bounds), qPrintable(control->objectName()));
         }
-        const int contentCenter = (left + right) / 2;
-        QVERIFY2(qAbs(contentCenter - page->rect().center().x()) <= 80,
-                 qPrintable(QStringLiteral("%1 content is visibly off-center")
-                                .arg(page->objectName())));
-    };
-
-    verifyPage(window.ui->pagePatientForm,
-               {window.ui->label, window.ui->editName,
-                window.ui->label_18, window.ui->editID,
-                window.ui->label_2, window.ui->comboGender,
-                window.ui->label_3, window.ui->dateBirth,
-                window.ui->label_5, window.ui->editHeight,
-                window.ui->label_6, window.ui->editWeight,
-                window.ui->btnFormSave, window.ui->btnFormBack});
-    verifyPage(window.ui->pagePatientDetail,
-               {window.ui->label_16, window.ui->dName,
-                window.ui->label_13, window.ui->dID,
-                window.ui->label_14, window.ui->dGender,
-                window.ui->label_17, window.ui->dBirth,
-                window.ui->label_12, window.ui->dHeight,
-                window.ui->label_10, window.ui->dWeight,
-                window.ui->btnDetailSave, window.ui->btnDetailDelete,
-                window.ui->btnDetailBack});
+        dialog.close();
+    }
 }
 
 void MainWindowSafetyTests::pendingResultBlocksAnotherMeasurement()
@@ -1544,12 +1616,13 @@ void MainWindowSafetyTests::cancelledQuickPatientCreationDoesNotWritePatient()
     window.measurementsFilePath = directory.filePath(QStringLiteral("measurements.xml"));
     window.hasPendingMeasurement = true;
     window.pendingMeasurement = sampleMeasurement();
-    window.ui->eName->setText(QStringLiteral("新患者"));
-    window.ui->eID->setText(QStringLiteral("patient-new"));
-    window.ui->eGender->setCurrentText(QStringLiteral("男"));
-    window.ui->eBirth->setDate(QDate(2000, 1, 1));
-    window.ui->eHeight->setText(QStringLiteral("170"));
-    window.ui->eWeight->setText(QStringLiteral("60"));
+    PatientInfo newPatient;
+    newPatient.name = QStringLiteral("新患者");
+    newPatient.id = QStringLiteral("patient-new");
+    newPatient.gender = QStringLiteral("男");
+    newPatient.birthDay = QStringLiteral("2000-01-01");
+    newPatient.height = QStringLiteral("170");
+    newPatient.weight = QStringLiteral("60");
 
     QTimer closer;
     closer.setSingleShot(true);
@@ -1559,7 +1632,7 @@ void MainWindowSafetyTests::cancelledQuickPatientCreationDoesNotWritePatient()
         }
     });
     closer.start(0);
-    window.on_btnPatientNewSave_clicked();
+    QVERIFY(!window.createPatient(newPatient, true));
     closer.stop();
 
     QCOMPARE(window.patientList.size(), 1);
@@ -1858,6 +1931,24 @@ void MainWindowSafetyTests::reportRenderingIsReadableAndArtifactFree()
     data.boneStrength = QStringLiteral("测试数据");
     data.diagnosis = QStringLiteral("仅用于年龄-SOS参考图演示，不提供诊断结论");
     data.operatorName = QStringLiteral("测试");
+    data.ageSosChart.hasPatient = true;
+    data.ageSosChart.hasMeasurementRecords = true;
+    data.ageSosChart.gender = QStringLiteral("女");
+    data.ageSosChart.focalAge = 47;
+    AgeSosMeasurementPoint historyPoint;
+    historyPoint.age = 41;
+    historyPoint.sos = 3980.0;
+    historyPoint.measuredAt = QStringLiteral("2020-08-16T09:00:00");
+    data.ageSosChart.points.append(historyPoint);
+    historyPoint.age = 44;
+    historyPoint.sos = 4035.0;
+    historyPoint.measuredAt = QStringLiteral("2023-07-09T09:00:00");
+    data.ageSosChart.points.append(historyPoint);
+    historyPoint.age = 47;
+    historyPoint.sos = 4090.0;
+    historyPoint.measuredAt = QStringLiteral("2026-09-22T10:26:00");
+    historyPoint.highlighted = true;
+    data.ageSosChart.points.append(historyPoint);
 
     ReportWidget report;
     report.setReportData(data);
@@ -1867,8 +1958,19 @@ void MainWindowSafetyTests::reportRenderingIsReadableAndArtifactFree()
     report.renderReport(&painter, QRectF(QPointF(0, 0), image.size()));
     painter.end();
 
-    QCOMPARE(image.pixelColor(173, 825), QColor(Qt::white));
-    QVERIFY(image.pixelColor(794, 500).red() > 200);
+    int redPixels = 0;
+    int grayPixels = 0;
+    for (int y = 410; y < 850; ++y) {
+        for (int x = 40; x < 755; ++x) {
+            const QColor color = image.pixelColor(x, y);
+            if (color.red() > 210 && color.green() < 150 && color.blue() < 150) ++redPixels;
+            if (qAbs(color.red() - color.green()) < 8 &&
+                qAbs(color.green() - color.blue()) < 8 &&
+                color.red() >= 90 && color.red() <= 180) ++grayPixels;
+        }
+    }
+    QVERIFY(redPixels > 20);
+    QVERIFY(grayPixels > 20);
     QCOMPARE(report.reportData().tScore, QString());
     QCOMPARE(report.reportData().zScore, QString());
 
@@ -1877,6 +1979,85 @@ void MainWindowSafetyTests::reportRenderingIsReadableAndArtifactFree()
         QVERIFY(QDir().mkpath(captureDir));
         QVERIFY(image.save(QDir(captureDir).filePath(QStringLiteral("report.png"))));
     }
+}
+
+void MainWindowSafetyTests::ageSosHistoryUsesStoredAgeProfileAndReportCutoff()
+{
+    MainWindow window;
+    window.hide();
+    PatientInfo patient = samplePatient();
+
+    auto record = [&patient](const QString& id, const QString& measuredAt,
+                             int age, double sos) {
+        MeasurementRecord value;
+        value.id = id;
+        value.patientId = patient.id;
+        value.patientName = patient.name;
+        value.patientGender = patient.gender;
+        value.patientBirthDay = patient.birthDay;
+        value.patientAge = QString::number(age);
+        value.measuredAt = measuredAt;
+        value.sos = QString::number(sos, 'f', 1);
+        return value;
+    };
+
+    const MeasurementRecord child = record(QStringLiteral("child"),
+                                            QStringLiteral("2008-05-01T09:00:00"),
+                                            18, 3900.0);
+    const MeasurementRecord adultPast = record(QStringLiteral("adult-past"),
+                                                QStringLiteral("2011-05-01T09:00:00"),
+                                                21, 4000.0);
+    const MeasurementRecord focal = record(QStringLiteral("adult-focal"),
+                                            QStringLiteral("2014-05-01T09:00:00"),
+                                            24, 4050.0);
+    const MeasurementRecord future = record(QStringLiteral("adult-future"),
+                                             QStringLiteral("2017-05-01T09:00:00"),
+                                             27, 4100.0);
+    const MeasurementRecord invalid = record(QStringLiteral("invalid"),
+                                              QStringLiteral("2013-05-01T09:00:00"),
+                                              23, 9999.0);
+    window.measurementList = {child, adultPast, focal, future, invalid};
+
+    const ReportData data = window.buildReportData(patient, focal);
+    QCOMPARE(data.ageSosChart.focalAge, 24);
+    QCOMPARE(data.ageSosChart.omittedOtherProfileCount, 1);
+    QCOMPARE(data.ageSosChart.points.size(), 2);
+    QCOMPARE(data.ageSosChart.points.at(0).age, 21);
+    QVERIFY(!data.ageSosChart.points.at(0).highlighted);
+    QCOMPARE(data.ageSosChart.points.at(1).age, 24);
+    QVERIFY(data.ageSosChart.points.at(1).highlighted);
+}
+
+void MainWindowSafetyTests::mainAgeSosChartHighlightsLatestValidMeasurement()
+{
+    MainWindow window;
+    window.hide();
+    const PatientInfo patient = samplePatient();
+    window.currentPatient = patient;
+
+    MeasurementRecord first = sampleMeasurement();
+    first.id = QStringLiteral("first");
+    first.patientAge = QStringLiteral("35");
+    first.patientGender = QStringLiteral("女");
+    first.measuredAt = QStringLiteral("2025-01-01T10:00:00");
+    first.sos = QStringLiteral("3980");
+    MeasurementRecord latest = first;
+    latest.id = QStringLiteral("latest");
+    latest.patientAge = QStringLiteral("36");
+    latest.measuredAt = QStringLiteral("2026-01-01T10:00:00");
+    latest.sos = QStringLiteral("4020");
+    MeasurementRecord invalidLatest = latest;
+    invalidLatest.id = QStringLiteral("invalid-latest");
+    invalidLatest.measuredAt = QStringLiteral("2027-01-01T10:00:00");
+    invalidLatest.sos = QStringLiteral("9000");
+    window.measurementList = {first, latest, invalidLatest};
+
+    window.updateAgeSosReference();
+    const AgeSosChartData& chart = window.ui->chartViewReference->chartData();
+    QCOMPARE(chart.points.size(), 2);
+    QVERIFY(!chart.points.at(0).highlighted);
+    QVERIFY(chart.points.at(1).highlighted);
+    QCOMPARE(chart.points.at(1).age, 36);
 }
 
 void MainWindowSafetyTests::invalidMeasurementDateDoesNotInventAge()
@@ -1923,10 +2104,41 @@ void MainWindowSafetyTests::reportPdfCanBeCommitted()
 {
     QTemporaryDir directory;
     QVERIFY(directory.isValid());
-    const QString pdfPath = directory.filePath(QStringLiteral("report.pdf"));
+    const QString captureDir = qEnvironmentVariable("BONE_UI_CAPTURE_DIR");
+    if (!captureDir.isEmpty()) QVERIFY(QDir().mkpath(captureDir));
+    const QString pdfPath = captureDir.isEmpty()
+        ? directory.filePath(QStringLiteral("report.pdf"))
+        : QDir(captureDir).filePath(QStringLiteral("report.pdf"));
 
     MainWindow window;
     window.hide();
+    ReportData data;
+    data.patientName = QStringLiteral("【测试】二十岁女性");
+    data.patientId = QStringLiteral("W20");
+    data.age = QStringLiteral("47");
+    data.gender = QStringLiteral("女");
+    data.birthDay = QStringLiteral("1979-04-18");
+    data.measuredAt = QStringLiteral("2026-09-22 10:26");
+    data.height = QStringLiteral("164 cm");
+    data.weight = QStringLiteral("56 kg");
+    data.part = QStringLiteral("桡骨");
+    data.sos = QStringLiteral("4090.0 m/s");
+    data.boneStrength = QStringLiteral("正常");
+    data.tScore = QStringLiteral("-0.8");
+    data.zScore = QStringLiteral("-0.3");
+    data.diagnosis = QStringLiteral("匿名测试数据，仅用于报表渲染验证");
+    data.operatorName = QStringLiteral("测试");
+    data.ageSosChart.hasPatient = true;
+    data.ageSosChart.hasMeasurementRecords = true;
+    data.ageSosChart.gender = QStringLiteral("女");
+    data.ageSosChart.focalAge = 47;
+    data.ageSosChart.points.append(
+        {41, 3980.0, QStringLiteral("2020-08-16T09:00:00"), false});
+    data.ageSosChart.points.append(
+        {44, 4035.0, QStringLiteral("2023-07-09T09:00:00"), false});
+    data.ageSosChart.points.append(
+        {47, 4090.0, QStringLiteral("2026-09-22T10:26:00"), true});
+    window.reportWidget->setReportData(data);
     QPrinter printer(QPrinter::HighResolution);
     printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setOutputFileName(pdfPath);
@@ -1959,14 +2171,51 @@ void MainWindowSafetyTests::capturePagesWhenRequested()
         QVERIFY2(window.grab().save(QDir(captureDir).filePath(name)), qPrintable(name));
     };
 
+    capture(window.ui->pageLogin, QStringLiteral("login.png"));
     capture(window.ui->pageMain, QStringLiteral("main.png"));
+
+    // In-memory anonymous sample data only; nothing is written to disk.
+    PatientInfo patient = samplePatient();
+    PatientInfo other = samplePatient();
+    other.id = QStringLiteral("patient-002");
+    other.name = QStringLiteral("示例被测者");
+    other.gender = QStringLiteral("男");
+    other.birthDay = QStringLiteral("1958-04-12");
+    MeasurementRecord older = sampleMeasurement();
+    older.id = QStringLiteral("measurement-older");
+    older.measuredAt = QStringLiteral("2025-03-12T14:05:00");
+    older.sos = QStringLiteral("4031.5");
+    older.boneStrength = QStringLiteral("正常");
+    MeasurementRecord latest = sampleMeasurement();
+    latest.tScore = QStringLiteral("-0.85");
+    latest.zScore = QStringLiteral("-0.40");
+    latest.boneStrength = QStringLiteral("正常");
+    latest.fractureRisk = QStringLiteral("1.4");
+    latest.boneAge = QStringLiteral("38");
+    window.patientList = {patient, other};
+    window.measurementList = {older, latest};
+    QVERIFY(window.selectCurrentPatient(patient));
+    window.refreshTable(window.patientList);
+    window.ui->table->selectRow(0);
+    window.ui->table->item(1, MainWindow::ArchiveIdColumn)->setCheckState(Qt::Checked);
+
     capture(window.ui->pageArchive, QStringLiteral("archive.png"));
-    capture(window.ui->pagePatientForm, QStringLiteral("patient-form.png"));
-    capture(window.ui->pagePatientDetail, QStringLiteral("patient-detail.png"));
+    for (const QSize& size : {QSize(1366, 768), QSize(1600, 900), QSize(1920, 1080)}) {
+        window.resize(size);
+        QTest::qWait(100);
+        capture(window.ui->pageMain, QStringLiteral("main-%1.png").arg(size.width()));
+    }
+    PatientFormDialog dialog(PatientFormDialog::Mode::Create, &window);
+    dialog.setAttribute(Qt::WA_DontShowOnScreen, true);
+    dialog.show();
+    QTest::qWait(50);
+    QVERIFY(dialog.grab().save(QDir(captureDir).filePath(QStringLiteral("patient-form.png"))));
 }
 
 #include "onset_guard_cases.inc"
 #include "subject_recording_cases.inc"
+#include "ui_refresh_cases.inc"
+#include "sos_reference_cases.inc"
 
 QTEST_MAIN(MainWindowSafetyTests)
 #include "mainwindow_safety_tests.moc"
