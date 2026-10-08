@@ -9,6 +9,12 @@ INCLUDEPATH += ../include
 SOURCES += \
     mainwindow_safety_tests.cpp \
     ../src/mainwindow.cpp \
+    ../src/mainwindow_device.cpp \
+    ../src/mainwindow_measurement.cpp \
+    ../src/mainwindow_display.cpp \
+    ../src/mainwindow_patients.cpp \
+    ../src/mainwindow_report.cpp \
+    ../src/mainwindow_layout.cpp \
     ../src/accountstore.cpp \
     ../src/calibration.cpp \
     ../src/calibrationdialog.cpp \
@@ -27,6 +33,7 @@ SOURCES += \
 HEADERS += \
     ../include/measurementexperimentlog.h \
     ../include/mainwindow.h \
+    ../include/mainwindow_internal.h \
     ../include/accountstore.h \
     ../include/calibration.h \
     ../include/calibrationdialog.h \
