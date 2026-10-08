@@ -86,7 +86,9 @@ function Get-Packages([string]$Target) {
 function Invoke-CmdCancel([string]$Source) {
     $startInfo = [System.Diagnostics.ProcessStartInfo]::new()
     $startInfo.FileName = $env:ComSpec
-    $startInfo.Arguments = '/d /c call "一键换机备份.cmd"'
+    # Absolute path, as Explorer passes it on double-click; a bare name relies on
+    # cmd resolving the working directory, which not every host provides.
+    $startInfo.Arguments = '/d /c call "' + (Join-Path $Source '一键换机备份.cmd') + '"'
     $startInfo.WorkingDirectory = $Source
     $startInfo.UseShellExecute = $false
     $startInfo.CreateNoWindow = $true
@@ -244,37 +246,37 @@ try {
     Assert-True (@(Get-Packages $directoryLockedTarget).Count -eq 0) `
         'second handoff should not create a final package'
 
+    # A running handoff holds BoneDensity.instance.lock (a directory created
+    # atomically). A second handoff must refuse to start, leave no package and
+    # not remove a lock it does not own; once released, a handoff succeeds.
+    # (Racing two real processes was timing-dependent: on a fast disk the first
+    # could finish before the second even started.)
     $concurrentSource = New-Fixture 'concurrent-handoff' -IncludeOptionalData
-    $largeRuntime = [System.IO.File]::OpenWrite(
-        (Join-Path $concurrentSource 'opengl32sw.dll')
-    )
-    try {
-        $largeRuntime.SetLength(32MB)
-    } finally {
-        $largeRuntime.Dispose()
-    }
+    $concurrentLock = Join-Path $concurrentSource 'BoneDensity.instance.lock'
     $concurrentTargetA = Join-Path $testRoot 'concurrent-target-a'
     $concurrentTargetB = Join-Path $testRoot 'concurrent-target-b'
     New-Item -ItemType Directory -Path $concurrentTargetA | Out-Null
     New-Item -ItemType Directory -Path $concurrentTargetB | Out-Null
-    $concurrentA = Start-HandoffProcess $concurrentSource $concurrentTargetA
-    $concurrentB = Start-HandoffProcess $concurrentSource $concurrentTargetB
-    Assert-True ($concurrentA.WaitForExit(30000)) 'first concurrent handoff should finish'
-    Assert-True ($concurrentB.WaitForExit(30000)) 'second concurrent handoff should finish'
-    $concurrentOutputA = $concurrentA.StandardOutput.ReadToEnd() +
-        $concurrentA.StandardError.ReadToEnd()
-    $concurrentOutputB = $concurrentB.StandardOutput.ReadToEnd() +
-        $concurrentB.StandardError.ReadToEnd()
-    $concurrentExitCodes = @($concurrentA.ExitCode, $concurrentB.ExitCode) | Sort-Object
-    Assert-True ($concurrentExitCodes[0] -eq 0 -and $concurrentExitCodes[1] -ne 0) `
-        "exactly one concurrent handoff should succeed; A=$($concurrentA.ExitCode) $concurrentOutputA; B=$($concurrentB.ExitCode) $concurrentOutputB"
-    $concurrentPackageCountA = @(Get-Packages $concurrentTargetA).Count
-    $concurrentPackageCountB = @(Get-Packages $concurrentTargetB).Count
-    Assert-True (($concurrentPackageCountA + $concurrentPackageCountB) -eq 1) `
-        "concurrent handoffs should create exactly one final package; countA=$concurrentPackageCountA, countB=$concurrentPackageCountB; A=$concurrentOutputA; B=$concurrentOutputB"
-    Assert-True (-not (Test-Path -LiteralPath (
-            Join-Path $concurrentSource 'BoneDensity.instance.lock'
-        ))) 'concurrent handoff owner should release its lock'
+    New-Item -ItemType Directory -Path $concurrentLock | Out-Null
+    $blocked = Start-HandoffProcess $concurrentSource $concurrentTargetB
+    Assert-True ($blocked.WaitForExit(30000)) 'handoff during another handoff should finish'
+    $blockedOutput = $blocked.StandardOutput.ReadToEnd() + $blocked.StandardError.ReadToEnd()
+    Assert-True ($blocked.ExitCode -ne 0) `
+        "handoff while another one holds the lock should fail; output=$blockedOutput"
+    Assert-True (@(Get-Packages $concurrentTargetB).Count -eq 0) `
+        'blocked handoff should not create a final package'
+    Assert-True (Test-Path -LiteralPath $concurrentLock -PathType Container) `
+        'blocked handoff must not remove a lock it does not own'
+    Remove-Item -LiteralPath $concurrentLock -Force
+    $owner = Start-HandoffProcess $concurrentSource $concurrentTargetA
+    Assert-True ($owner.WaitForExit(30000)) 'handoff after the lock is released should finish'
+    $ownerOutput = $owner.StandardOutput.ReadToEnd() + $owner.StandardError.ReadToEnd()
+    Assert-True ($owner.ExitCode -eq 0) `
+        "handoff after the lock is released should succeed; output=$ownerOutput"
+    Assert-True (@(Get-Packages $concurrentTargetA).Count -eq 1) `
+        'released handoff should create exactly one final package'
+    Assert-True (-not (Test-Path -LiteralPath $concurrentLock)) `
+        'handoff owner should release its lock'
 
     $orphanMeasurementsSource = New-Fixture 'orphan-measurements'
     Set-Content -LiteralPath (Join-Path $orphanMeasurementsSource 'measurements.xml') `
