@@ -2040,7 +2040,7 @@ void MainWindow::parseIncomingData() {
         const unsigned char *p =
             reinterpret_cast<const unsigned char*>(rxBuffer.constData());
 
-        quint16 gain   = p[2] | (p[3] << 8);
+        // p[2..3] carries the frame's gain; it is not used on this side.
         quint16 idx    = p[4] | (p[5] << 8);
         quint8  ch     = p[6];
         quint16 length = p[7] | (p[8] << 8);
@@ -2235,7 +2235,7 @@ void MainWindow::plotSamples()
     seriesD->replace(ptsD);
 
     auto updateAxisX = [&](QChart *chart, int count) {
-        auto *axisX = qobject_cast<QValueAxis*>(chart->axisX());
+        auto *axisX = qobject_cast<QValueAxis*>(chart->axes(Qt::Horizontal).value(0));
         const qreal maximum = count - 1;
         if (axisX && (axisX->min() != 0.0 || axisX->max() != maximum)) {
             axisX->setRange(0, maximum);
@@ -2720,7 +2720,7 @@ void MainWindow::appendSpeedPoint(double speedAvg)
     if (excessPoints > 0) seriesSpeed->removePoints(0, excessPoints);
     speedPointIndex++;
 
-    auto *axisX = qobject_cast<QValueAxis*>(chartSpeed->axisX());
+    auto *axisX = qobject_cast<QValueAxis*>(chartSpeed->axes(Qt::Horizontal).value(0));
     if (axisX) {
         qreal minimum = 0.0;
         qreal maximum = 50.0;
@@ -3832,7 +3832,8 @@ void MainWindow::setupChart()
         axisX->setGridLineVisible(true);
         axisX->setGridLineColor(gridColor);
         axisX->setLinePenColor(axisColor);
-        (*chartPtr)->setAxisX(axisX, *seriesPtr);
+        (*chartPtr)->addAxis(axisX, Qt::AlignBottom);
+        (*seriesPtr)->attachAxis(axisX);
 
         // 4. Y 轴：只保留 0 / 中间 / 4095
         QValueAxis *axisY = new QValueAxis();
@@ -3846,7 +3847,8 @@ void MainWindow::setupChart()
         axisY->setLabelsFont(axisFont);
         axisY->setGridLineColor(gridColor);
         axisY->setLinePenColor(axisColor);
-        (*chartPtr)->setAxisY(axisY, *seriesPtr);
+        (*chartPtr)->addAxis(axisY, Qt::AlignLeft);
+        (*seriesPtr)->attachAxis(axisY);
 
         // 5. 图表视图
         *viewPtr = new QChartView(*chartPtr);
@@ -5758,7 +5760,7 @@ void MainWindow::fitReferenceChartHeight()
 void MainWindow::updatePartImage()
 {
     if (!ui->label_32) return;
-    static const QPixmap source(QStringLiteral(":/images/Radius.bmp"));
+    static const QPixmap source(QStringLiteral(":/images/Radius.png"));
     const QSize area = ui->label_32->size();
     if (source.isNull() || area.width() <= 4 || area.height() <= 4) return;
     ui->label_32->setPixmap(source.scaled(area, Qt::KeepAspectRatio, Qt::SmoothTransformation));

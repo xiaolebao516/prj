@@ -73,7 +73,7 @@ void MainWindowSafetyTests::onsetGuardMatchesRecordedBatch() {
     const QString expectedRoot=qEnvironmentVariable("BONE_ONSET_REPLAY_EXPECTED");
     if(source.isEmpty() || expectedRoot.isEmpty())QSKIP("Set onset replay input/expected paths for 75-log acceptance");
     int files=0,frames=0;QJsonArray evidence;
-    for(const QString date:{QString("20260914"),QString("20260915")}) {
+    for(const QString& date:{QString("20260914"),QString("20260915")}) {
         QFile expectedFile(QDir(expectedRoot).filePath("wave-audit-"+date+"/state-replay.json"));
         QVERIFY(expectedFile.open(QIODevice::ReadOnly));
         auto expected=QJsonDocument::fromJson(expectedFile.readAll()).object();
@@ -111,13 +111,13 @@ void MainWindowSafetyTests::onsetGuardMatchesRecordedBatch() {
                     if(r["event"]=="frame") {
                         QVERIFY(i<originals.size());const auto original=originals[i++];
                         if(!guard) {
-                            for(const QString key:{QString("decision"),QString("B"),QString("A"),QString("D"),QString("G"),QString("gates"),QString("locked"),QString("locked_lag"),QString("partial_values_before_accept"),QString("sos_patient")})
+                            for(const QString& key:{QString("decision"),QString("B"),QString("A"),QString("D"),QString("G"),QString("gates"),QString("locked"),QString("locked_lag"),QString("partial_values_before_accept"),QString("sos_patient")})
                                 QVERIFY2(onsetJsonEqual(r[key],original[key]),qPrintable(name+" seq "+QString::number(original["sequence"].toInt())+" "+key));
                         }
                         if(r["decision"]=="accepted") accepted.append(QJsonObject{{"sequence",original["sequence"]},{"sos",r["sos_patient"]}});
                         completed=original["elapsed_ms"].toInteger();
                     } else if(r["event"]=="round_summary") {
-                        for(const QString k:{QString("sos"),QString("corr_A"),QString("corr_B"),QString("D"),QString("G"),QString("quality_pass")}) summary[k]=r[k];
+                        for(const QString& k:{QString("sos"),QString("corr_A"),QString("corr_B"),QString("D"),QString("G"),QString("quality_pass")}) summary[k]=r[k];
                     }
                 }
                 QCOMPARE(i,originals.size());

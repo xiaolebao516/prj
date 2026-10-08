@@ -1144,7 +1144,7 @@
                <string/>
               </property>
               <property name="pixmap">
-               <pixmap resource="resources.qrc">:/images/Radius.bmp</pixmap>
+               <pixmap resource="resources.qrc">:/images/Radius.png</pixmap>
               </property>
               <property name="scaledContents">
                <bool>true</bool>
