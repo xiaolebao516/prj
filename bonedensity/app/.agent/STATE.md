@@ -10,17 +10,64 @@
 
 ## Status
 
-`2026-09-19 subject-linked recording software verified and built: SC37/38/39 software pass; full58/0/1 including75-log Qt replay. Current algorithm/parameters and110 original runtime/data files preserved. Ready for supervised multi-person acquisition.`
+`2026-10-09 UI-REFRESH-001 implemented in managed worktree C:/Users/Administrator/.codex/worktrees/ui-refresh; review P0 follow-up added (login page, port list, device-response watchdog, version 2.0.0). User approved a Chinese-population SOS reference: T/Z now come from SosReference (中国公共卫生 2015 表1; T vs female 45~ / male 40~ peak group), adult age-SOS chart drawn from the same table, under-20 records SOS only. Saved records are shown re-derived with the current reference (stored XML unchanged; user approved). Bone age keeps the original nearest-mean rule but reads the chart's own curve; children's chart redrawn without verdict bands. Software verification passed (86/0/1 with captures incl. pixel check that chart points match computed T/Z, Debug build, diff check); evidence docs/evidence/20261009-sos-reference/. Deferred by user: fracture risk source, pediatric Z reference. Committed with user approval on codex/ui-refresh (214c96c removes tracked build3/build4; f0ab457 feature work; 22dc9c2 script defaults to D:/QT6.5.3) and fast-forwarded codex/feature-complete to it; not pushed. 2026-10-09 cleanup at user request: the rejected G-hysteresis trial code (never committed) was discarded, codex/trial-g-hysteresis-v1 deleted, trial build script/guide removed; its build folder keeps only the 2026-09-21 self-test XML and 16 experiment logs. Removed stale build/age-sos-* preview, mirror and capture folders. Kept: build/debug and build/Desktop_Qt_* (real data), build/tests, wave-audit and study logs, bone-density-v2-mvp (offline research MVP, user to decide). Awaiting user on-screen and real-device acceptance.`
 
 ## Active Milestone
 
-`MEASUREMENT-FEEDBACK-001 - Complete operator-facing measurement feedback`
+`UI-REFRESH-001 - Tidy and restyle the existing single-window UI and fix interaction bugs without changing measurement, acquisition, persistence, or report behavior`
 
 ## Current Task
 
-`Review wyl subject-linked fixed-pose follow-up; distinguish final-output repeatability from per-round variation and historical-reference accuracy.`
+`User acceptance of the isolated executable (layout on the real monitor, archive/patient flows, five-round device flow); no commit/push authorized.`
+
+## Plan Status
+
+`approved`
+
+## UI-REFRESH-001 Approval Evidence
+
+- Visual design: user approved mockup canvas https://claude.ai/artifact/PZz6WGb22Kc2giBDw8TAnd (page "整理版（保持原布局）") with "可以了，写吧" on 2026-10-08.
+- Plan decisions: user replied "1.最新版本吧 2.我记得我最新的版本报表历史这个规则已经定了而且已经做好了 3.同意 4.行". Recorded meaning: base on the latest source including the software-verified uncommitted report-history and crash-render-fix increments; keep the approved age-SOS history point semantics (red latest, gray same-profile history); add `PatientFormDialog` and `resources/theme.qss`; no commit/push.
+- Earlier design constraints: no role split; simple local login unchanged; report format (as implemented in report-history increment) unchanged; original three-column single window; first two columns aligned, right column content-sized; checkbox batch delete retained; charts reuse existing QChart code.
+
+## Approved Plan and Steps
+
+1. Create managed worktree `ui-refresh` at `8e27c64`; apply the `age-sos-report-preview` and `crash-render-fix` diffs, resolve overlaps in `mainwindow.*` and tests, run the full main-window suite, calibration suite and Debug build as the integrated baseline. `completed` (both diffs applied cleanly; baseline 61/0/2)
+2. Add failing focused tests: form defaults/validation, result refresh after retry-save and record deletion, Enter-to-login, batch-delete confirmation content, unified archive selection, three-size layout geometry. `completed`
+3. Add `resources/theme.qss` and load it once; remove scattered colour `setStyleSheet` calls that it replaces. `completed`
+4. Restructure `pageMain` in `mainwindow.ui` with layouts (toolbar groups; aligned two-row block for waveform/age-SOS/trend/process; content-sized right column); delete manual geometry in `resizeEvent`. `completed`
+5. Restyle existing waveform and SOS-trend charts and the SOS debug panel in place; keep refresh throttling. `completed`
+6. Rebuild right column: patient card, result card with inline save-retry and previous-records list, part image scaled with aspect ratio. `completed`
+7. Implement `PatientFormDialog`, replace `pagePatientSelect`/`pagePatientForm`/`pagePatientDetail`; rework archive page and modes. `completed`
+8. Fix SC-55 defects. `completed`
+9. Run suites, offscreen captures at three sizes, canonical-toolchain Debug build, `git diff --check`, data-hash check; deliver worktree and executable; no commit/push. `completed`
+
+## Model Recommendation (UI-REFRESH-001)
+
+- Model Capability: `BALANCED`
+- Reasoning Effort: `high`
+- Switch Benefit: `unknown`
+- Reason: broad but well-specified UI refactor in a high-coupling file; protected logic must remain untouched.
+
+## Superseded Milestone Note
+
+`REPORT-HISTORY-001` material below is historical: it was implemented and software-verified in `age-sos-report-preview` (its own STATE, 2026-09-23) and is now integrated by UI-REFRESH-001. Its physical-print and user visual acceptance remain external.
 
 ## Current Judgment
+
+2026-09-22 age20 boundary research: the user approved the report layout and adjacent history list. Repository code uses separate Girl/Boy `<20` and Woman/Man `>=20` bitmaps with different axes/reference curves. ISCD pediatric/adult positions and FDA bone-sonometer reference-database guidance support keeping pediatric and adult reference contexts separate; they do not prescribe this application's UI. Recommended rule: choose the focal measurement's profile, plot only same-sex/same-child-or-adult-profile records, exclude future records from an older report, and show an omitted-childhood-count note on adult charts while preserving every record in archive history. Do not force child/adult points onto one coordinate system or add a second chart to the one-page report. Evidence: `docs/research/age-sos-history-boundary-20260922.md` in the isolated preview worktree. Exact rule awaits user confirmation before PERSIST/implementation.
+
+2026-09-22 report/history alignment: current `AgeSosChartWidget` renders the correct sex/age reference bitmap but only one latest point, even though the embedded legend already distinguishes recent and historical values. `MeasurementRecord` already stores `patientAge`, `measuredAt`, `patientBirthDay`, `patientGender`, and `sos`; legacy records can derive measurement-time age from the saved birth date and measurement date, so no XML schema migration is currently justified. A review-only mockup in managed worktree `age-sos-report-preview` proposes: report-selected measurement red, prior records gray, a compact dated history list, and main-page latest red/all other valid history gray. It uses measurement-time age, not today's age. Formal code, PDF, persistence, and main UI remain unchanged pending user confirmation. Material review points are whether report history should include only records up to the selected report, whether to retain the side list, and how to handle one patient crossing the separate child/adult reference profiles at age20.
+
+2026-09-22 implementation result: the isolated worktree now processes/logs every frame before a 250 ms waveform-display throttle, disables antialiasing on all five live line charts, avoids unchanged-axis updates, and rejects non-finite display points. Baseline focused testing failed on enabled antialiasing; repaired focused tests passed including 2,400 four-channel updates and 600 forced raster paints. Full MainWindow regression is59 passed/0 failed/2 optional skips; clean Debug build/deployment passed. Only `include/mainwindow.h`, `src/mainwindow.cpp`, `tests/mainwindow_safety_tests.cpp`, and focused evidence changed in the worktree. Original clinical XML hashes/timestamps remain unchanged. The intermittent native Windows paint crash still requires supervised device endurance before hardware acceptance.
+
+2026-09-22 approval evidence: after receiving the exact UI-only plan and its external device-endurance limitation, the user replied “如果你对修复效果非常有把握我可以批准”. The agent stated high confidence for the two confirmed Qt Charts raster-paint crash paths and treated that reply as approval. This authorizes SC43-45 implementation and isolated build/test only; it does not authorize algorithm, acquisition, schema, clinical-data, or Git state changes.
+
+2026-09-22 crash diagnosis: Windows Application Error/WER records two `0xc0000005` crashes at Qt6Gui offsets0x237773 and0x237a06, from both canonical runtime directories. The retained 2026-09-21 minidump shows the GUI thread failing in `Qt6Charts::LineChartItem -> QPaintEngineEx::drawLines -> QRasterPaintEngine::stroke`; serial/worker threads were waiting normally. The active JSONL ends abruptly at frame754/61.642s with no stop/close event; the 2026-09-20 crash similarly ends at frame12/1.080s after about11 minutes of process uptime. Live acquisition currently replaces four 2000-point antialiased series about every80ms and repeats fixed-axis invalidation; the speed series is already capped at50, so unbounded point growth is excluded. Proposed repair affects rendering only: 250ms waveform refresh cap after every frame is still fully processed/logged, no live-chart antialiasing, fixed-axis updates only when changed, finite point guard, and a bounded Qt paint stress test. Implementation will use the managed worktree `crash-render-fix` at clean `codex/feature-complete` HEAD so existing dirty trial/user files remain untouched. Dump: `C:/Users/Administrator/AppData/Local/CrashDumps/BoneDensity.exe.28416.dmp`.
+
+2026-09-21 supervised follow-up: user reports the G-hysteresis build is unsatisfactory. Three completed self sessions ended at3757.22/3723.71/3745.89; a later124.8s attempt produced zero accepted frames. Same-endpoint replay shows the trial completed15/15 rounds versus6/15 under old raw-G gating and accepted86 frames whose raw G was outside[-12,0]. It enabled low B-lag129–134 clusters to finish but did not help the no-lock attempt, so it is rejected for promotion. New old-version labeled data include lzz/lhy/yrc/xsb and a correction: the latest old-version `wyl` session `3dd6934a...` is actually xj. User-supplied historical prototype references are lzz3800/yrc3900/xsb3900/xj3800/lhy3850, with prior wyl3850. Errors identify three gross-high modes: lzz+420.73, yrc+245.56, xsb+409.66; xsb's normal session is -21.32. A same-endpoint B lag>=120 diagnostic rejects those gross-high sessions and preserves this batch plus27 earlier completed rounds, but it is merely an SOS hard upper bound near4083, not a multi-mode discriminator. Raw B cross-check finds xsb high/normal separation in channel peak-delay mismatch (median18 vs1) and late-channel SNR (19.60 vs61.89), but per-round peak-delay medians overlap/reverse (xsb high first rounds3/4; normal first round26.5), so that gate is invalid. A coherent-low-SNR rule (`corrB>=.90`, BC SNR<30 rejected) removes all5 xsb-high rounds and preserves the current labeled sessions, but reduces prior75-log completion from27 to14; at corrB>=.85 xj also loses a round. Global highest correlation peaks select periodic late packets in normal lhy/wyl. No reference-independent common discriminator is proven; keep these features diagnostic-only and do not implement lag120 or SNR as an algorithm improvement. Evidence: `docs/research/subject-trial-followup-20260921.md`.
+
+2026-09-21 approval: the user explicitly requested that the reviewed ChatGPT proposal be implemented as a temporary source test version while retaining the current version as the best baseline. Exact approved behavior: pre-lock raw G `[-12,0]`; post-lock median of latest three eligible G values with upper bound `+2`; clear G history on B stability reset; synchronize the experimental round upper bound; retain raw G and add gate diagnostics; distinct trial title/profile/source branch. Preserve B estimator, corrA/D/SOS, stability settings, timing, schemas, and baseline branch. Remote and local `codex/feature-complete` both resolve to `8e27c64`; worktree was clean before branching.
 
 2026-09-20 wyl trial:25 subject-linked files, one archive,5 sessions (4 completed,1 incomplete fifth round). User confirms basically no probe replacement between full measurements. Complete SOS3845.5408/3867.8368/3840.8519/3840.3046; mean3848.6335, range27.5322, sampleSD13.0161. Actual gain1024 across all25 files, not1241; A0.78/G[-12,0]/onset40 unchanged.768 accepted samples3769–4016,11 onset rejects;15 samples>3950 were subsequently discarded, none in720 final-round samples. Last session round range98.87, so final stability partly reflects aggregation. Historical3850 is not contemporaneous truth. No replacement/cross-person claim or immediate repeat-measurement request. Evidence: docs/research/wyl-fixed-pose-20260920.md. Preserve this1024 baseline for comparable follow-up; no source changes.
 
@@ -49,7 +96,45 @@ Operating context: logs are beside the Qt Creator runtime under `build/Desktop_Q
 
 ## Plan Status
 
-`approved`
+`draft; preview only, implementation not yet approved`
+
+## Proposed Report-History Contract Draft
+
+- Goal: add the age-SOS reference chart to the screen/PDF/printed report and make the main-page chart show a selected patient's longitudinal measurement points at their measurement-time ages.
+- Scope: `AgeSosChartWidget`, `ReportData`/`ReportWidget`, report-data assembly in `MainWindow`, anonymous fixtures/tests, and visual/PDF verification. Preserve measurement calculations, XML schema, stored records, serial/acquisition behavior, and report medical wording unless separately approved.
+- Proposed report behavior: the report's own measurement is red; earlier valid records for the same patient are gray; future records are excluded when viewing an older report; an adjacent compact list shows age, SOS and date.
+- Proposed main-page behavior: latest valid measurement is red and all other valid historical measurements for the selected patient are gray, with every X coordinate calculated from that record's stored/fallback measurement-time age.
+- Approved decisions: use the reviewed visual layout and retain the adjacent history list.
+- Pending decision: confirm the recommended child/adult age20 boundary rule documented above; report history cutoff remains earlier same-profile records only unless the user revises it.
+
+## Approved Crash Contract
+
+- Goal: prevent the confirmed Qt Charts raster-paint access violation during prolonged live acquisition.
+- Scope: live waveform/speed-chart rendering and focused stress verification only. Preserve every signal-processing value, SOS/gate/stability rule, 80ms acquisition command, serial framing, experiment log, persistence schema, report and stored result.
+- `SC-43`: Preserve the two WER signatures, minidump stack and abrupt-log correlation as reproducible diagnosis evidence.
+- `SC-44`: Every acquisition frame remains processed and recorded; waveform display refresh is bounded to at most once per250ms, live line charts render without antialiasing, repeated fixed-axis invalidation is removed, and non-finite display values never enter a series.
+- `SC-45`: Focused chart tests and a long paint/update stress test pass, the full main-window suite passes, the canonical Debug build succeeds with the approved local Qt6.5.3/MinGW11.2 paths, and existing runtime XML/data remain untouched. Device endurance remains supervised external acceptance.
+
+## Approved Crash Plan
+
+1. Add focused failing assertions for live-chart render hints, finite speed points and refresh throttling; add a bounded offscreen chart paint/update stress case. `completed`
+2. Implement the localized rendering guard in `include/mainwindow.h` and `src/mainwindow.cpp` only. `completed`
+3. Run focused stress/test, full main-window regressions, `git diff --check`, and the canonical Debug build in the clean managed worktree. `completed`
+4. Deliver the source worktree and isolated executable for supervised long-run use; do not commit, push, merge, change the current best branch, or copy clinical XML. `ready; supervised run pending`
+
+## Approval Context
+
+- Required decision: satisfied for SC43-45 and the four-step crash-render plan above.
+- Reason: `.agent/STATE_MACHINE.md` requires implementation approval matching the actual Standard plan, and the crash task adds new success criteria to the active Loop.
+- Approval evidence: user conditionally approved when the agent had high confidence; the agent explicitly confirmed high confidence for the two diagnosed crash paths before proceeding.
+
+## Approved Trial Plan
+
+1. Create `codex/trial-g-hysteresis-v1` from `8e27c64` and persist the approved SC40-42 contract.
+2. Add focused failing tests for pre-lock strictness, median spike filtering, sustained movement rejection, reset clearing, trial identity, and log diagnostics.
+3. Implement the localized trial macro/configuration, three-value G gate buffer, round upper bound, diagnostics, and isolated build entry point.
+4. Run focused and full main-window regression tests, build the trial with the approved local Qt 6.5.3/MinGW 11.2 paths, verify source/data preservation and final diff.
+5. Deliver source branch, executable location, and a short supervised self-test method; do not merge, commit, or push without separate Git authorization.
 
 User approved the concrete onset-consistency proposal with “那先试试1” and separately permitted the installed same-version toolchain paths. Plan: focused failing tests and75-log C++ replay; expose firstHit without changing arrival calculation; reject abnormal patient B onset before stability with explicit logging; verify regression/calibration/build and preserve existing runtime/data. Gain/other parameter tuning remains out of scope.
 
@@ -166,6 +251,10 @@ D. Run focused regressions, canonical build and scope review, then hand off self
 9. Run existing regressions, the canonical Debug build, screenshot inspection, and real-device usability acceptance. `software verification completed; user visual and real-device acceptance pending`
 
 ## Progress
+
+2026-09-22 crash-render repair: clean managed worktree `crash-render-fix` retains best baseline `8e27c64` and changes only live-chart rendering plus focused tests/evidence. Baseline focused test failed on enabled waveform antialiasing. GREEN focused tests passed4/0, including a ten-minute-equivalent 4 Hz stress of four 2,000-point series with600 forced offscreen paints. Full MainWindow suite passed59/0/2; `git diff --check` and clean fixed-toolchain Debug build/deployment passed. Isolated executable SHA-256 is `D2F134BD983C87E3FC802325E0C1315BA64BD1EAB2C67B9BBB0632B975613C10`. Original four clinical XML hashes/timestamps are unchanged. No commit/push/merge.
+
+2026-09-21 G-hysteresis trial: created `codex/trial-g-hysteresis-v1` from clean, synchronized `8e27c64`. Added pre-lock raw G, post-lock median3/upper+2, reset clearing, round upper+2, explicit raw/gated diagnostics, distinct title/profile, tests, isolated build script and operating guide. Focused RED failed on missing trial members; GREEN/full main-window suite passed58/0/2. MinGW11.2 intermittently crashed internally while compiling unrelated Qt headers; single-thread incremental continuation completed both tests and isolated executable. Trial executable deployed with no XML files. No commit/push.
 
 2026-09-19 subject linkage delivered: approved ID/name snapshots and per-measurement UUID added to Debug configs, same-session rename protection and automatic next-round grouping verified. Full58/0/1; canonical build SHA2564cb4316b0af7ee98c9eff662b096933425483bfd775293e3dcd2660c319058e8.110 pre-existing runtime/data files unchanged. No numerical algorithm/parameter change, clinical schema change, commit or push. SC37–39 evidence and collection guide delivered.
 
@@ -303,6 +392,25 @@ Evidence and concrete next-change recommendations: `docs/research/measurement-ga
 
 ## Verification Status
 
+- `SC-46`, `SC-47`: passed (software) in `age-sos-report-preview`; re-check after integration pending.
+- `SC-48`: software/render/build passed in `age-sos-report-preview`; physical printing and user visual acceptance external; re-check after integration pending.
+- `SC-49`: passed (software). Layout-built main window; `mainLayoutFitsCommonWindowSizes` verifies 1366x768/1600x900/1920x1080 visibility, no overlap, shared row boundary and native-aspect age-SOS chart; `resizeEvent` geometry removed. On-monitor acceptance external.
+- `SC-50`: passed (software). `resources/theme.qss`; existing QChart/QLineSeries code restyled only; antialiasing off and 250 ms throttle unchanged (liveChart tests pass).
+- `SC-51`: passed (software). Grouped toolbar, WIFI and standalone Save removed, inline retry, disabled-reason hints/tooltips (`toolbarAndResultCardStructure`).
+- `SC-52`: passed (software). Latest saved result, refresh after save/retry/delete/edit, previous-records list (`selectingPatientShowsLatestSavedResult`, `retrySave…`, `deletingRecord…`, `editingCurrentPatient…`).
+- `SC-53`: passed (software). `PatientFormDialog` without defaults, live age, under-20 warning, read-only ID on edit, duplicate/validation rules.
+- `SC-54`: passed (software). Keyword + optional date filter, auto-fit columns, row actions, checkbox batch delete listing names and record counts, unified modes, double-click selects.
+- `SC-55`: passed (software). Enter-to-login, close-cancel restores pending next round, formal title, dead code removed.
+- `SC-56`: software passed: suite 75/0/1, calibration suite passed, Debug build passed (exe SHA-256 22014b6f…7c51), diff check clean, protected sources unchanged, no runtime XML touched. Evidence: worktree `docs/evidence/20261008-ui-refresh/verification.md`. Real-device and on-monitor acceptance external.
+
+- `SC-43`: passed. Two WER signatures, retained dump stack, abrupt-log correlation, scope, and exact verification are preserved in `docs/evidence/20260922-crash-render-fix/verification.md` in the isolated source worktree.
+- `SC-44`: passed by source review and focused tests. Signal processing/logging precede the display throttle; waveform rendering is capped at250ms, all five live charts have antialiasing disabled, fixed axes are not reset per frame, and non-finite speed/waveform display input is rejected.
+- `SC-45`: software passed; supervised Windows/device endurance pending. Baseline RED, focused4/0, full59/0/2, diff check and clean Debug build/deploy pass. Original clinical XML hashes and timestamps are unchanged.
+
+- `SC-40`: passed (software). Focused test covers pre-lock raw gate, locked one-frame suppression, sustained movement rejection and reset clearing.
+- `SC-41`: passed (software). Full suite verifies distinct title/profile/config and per-frame raw/gated/max/median diagnostics while preserving original `G` as raw. Best baseline branch still points to `8e27c64`.
+- `SC-42`: software passed; supervised hardware outcome rejected. Main-window58/0/2 and isolated build remain valid evidence, but user trial shows unacceptable low-cluster completion and one124.8s zero-progress attempt. Do not promote.
+
 - `SC-37`: passed focused test. Debug start records only approved ID/name snapshot, Unicode escaping and profile; no name in filename.
 - `SC-38`: passed focused test. Retry/real auto-next timer retain session/snapshot; completed restart/reset/same-name other archive create new ID; first log unchanged after rename.
 - `SC-39`: passed software; supervised acquisition pending. RED missing-profile failure, GREEN3/0/0, full58/0/1 including actual75-log replay, canonical build and110 preserved hashes. Evidence: docs/evidence/20260919-subject-recording/verification.md; guide: docs/guides/subject-linked-measurements.md.
@@ -365,7 +473,7 @@ Earlier rows below are historical; SC8/SC14 still require actual-user/device evi
 
 ## Next Actions
 
-`Keep the observed gain1024/A0.78/G[-12,0]/onset40 as the comparable baseline; no immediate repeat acquisition requested. User may later provide separate-person/reference or explicitly marked replacement data. Do not infer replacement from these logs: user confirmed basically fixed pose. Preserve incomplete session and discarded high-frame evidence. No commit/push requested.`
+`Obtain confirmation of the recommended age20 rule. Then persist numbered success criteria and the implementation/verification plan before changing formal source.`
 
 ## Iteration Control
 

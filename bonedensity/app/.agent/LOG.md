@@ -21,6 +21,19 @@ Do not store complete terminal output, long reasoning traces, every minor action
 - **Learnings:** `[DURABLE_LEARNINGS_OR_NONE]`
 - **Follow-up:** `[FOLLOW_UP_OR_NONE]`
 
+### 2026-09-22 — RUNTIME-STABILITY-001 — Live-chart crash stabilization
+
+- **Milestone:** `RUNTIME-STABILITY-001 - Prevent confirmed Qt Charts live-render access violations`
+- **Workflow:** `standard`
+- **Task objective:** Repair the two confirmed prolonged-run Qt Charts raster-paint crashes without changing measurement behavior or clinical data.
+- **Key decisions:** Keep every 80 ms frame fully processed and recorded; cap only four waveform displays at 250 ms, disable live-chart antialiasing, avoid unchanged-axis invalidation, and reject non-finite display points.
+- **Actual changes:** Localized source/tests/evidence in managed worktree `crash-render-fix`; isolated Debug executable produced; current best branch and dirty G trial preserved.
+- **Verification and result:** Baseline focused RED; repaired focused4/0 including ten-minute-equivalent paint stress; full MainWindow59/0/2; diff check and clean Qt6.5.3/MinGW11.2 build passed; original XML hashes/timestamps unchanged.
+- **Final status:** `software delivered; supervised device endurance remains external; uncommitted and unpushed`
+- **Problems encountered:** Exact internal Qt source statement remains unavailable because deployed Qt symbols are stripped; dump conclusively identifies the live Qt Charts raster stroke path.
+- **Learnings:** High-rate antialiased replacement of four 2,000-point line series was unnecessary rendering load; acquisition/analysis can remain at80 ms while display refresh is safely decoupled.
+- **Follow-up:** `Run the isolated build during a normal long device session and preserve any new dump/log if it exits.`
+
 ### 2026-07-18 — DOC-001 — Documentation authority consolidation
 
 - **Milestone:** `DOC-001 — Project documentation authority and reference consolidation`
