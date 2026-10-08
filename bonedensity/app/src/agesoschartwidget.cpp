@@ -470,7 +470,7 @@ void AgeSosChartWidget::renderChart(QPainter* painter,
 
     const Profile profile = profileFor(data.gender, data.focalAge);
     if (profile == Profile::None) {
-        drawCentered(QStringLiteral("患者性别或年龄信息不完整"));
+        drawCentered(QStringLiteral("被测者性别或出生日期不完整"));
         painter->restore();
         return;
     }

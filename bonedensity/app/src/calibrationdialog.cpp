@@ -310,7 +310,7 @@ void CalibrationDialog::activateCandidate()
     if (QMessageBox::question(
             this,
             QStringLiteral("确认激活候选D"),
-            QStringLiteral("激活后，患者测量将使用候选D %1。\n是否确认激活？")
+            QStringLiteral("激活后，正式检测将使用候选D %1。\n是否确认激活？")
                 .arg(dText(session_.candidateD()))) != QMessageBox::Yes) {
         return;
     }
@@ -539,7 +539,7 @@ QWidget* CalibrationDialog::createCollectionPage(CalibrationPhase phase)
     layout->addWidget(wrappedLabel(
         calibration
             ? QStringLiteral("每次测量固定探头并累计30个有效帧。每次完成后取下探头，下一次重新清洁、涂胶和定位。")
-            : QStringLiteral("候选D只在本验证页面的临时处理器中使用。患者测量仍保持原D，直到工程验证通过并确认激活。")));
+            : QStringLiteral("候选D只在本验证页面的临时处理器中使用。正式检测仍使用原D，直到工程验证通过并确认激活。")));
 
     QLabel* operationGuide = wrappedLabel(
         QStringLiteral("操作要求：使用同一种耦合剂，薄而均匀地覆盖接触面，排除气泡；保持探头方向、位置和压力一致。"
@@ -727,7 +727,7 @@ void CalibrationDialog::finishAcquisitionUi(CalibrationPhase phase)
     refreshMeasurementTables();
 
     if (phase == CalibrationPhase::Calibration && session_.calibrationComplete()) {
-        candidateLabel_->setText(QStringLiteral("候选D：%1；验证前患者参数仍为 %2")
+        candidateLabel_->setText(QStringLiteral("候选D：%1；验证前正式检测仍使用 %2")
                                      .arg(dText(session_.candidateD()),
                                           dText(store_->parameters().activeD)));
     }
@@ -814,7 +814,7 @@ void CalibrationDialog::refreshResult()
     } else if (activated_) {
         details += QStringLiteral("<br><br>候选D已经激活并保存。");
     } else {
-        details += QStringLiteral("<br><br>候选D尚未激活，患者测量仍使用原D。");
+        details += QStringLiteral("<br><br>候选D尚未激活，正式检测仍使用原D。");
     }
     resultLabel_->setText(details);
     resultLabel_->setStyleSheet(evaluation.passed

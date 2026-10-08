@@ -654,15 +654,15 @@ void MainWindow::openCalibrationDialog()
     if (patientMeasureRunning) {
         QMessageBox::information(this,
                                  QStringLiteral("正在检测"),
-                                 QStringLiteral("请先停止当前患者检测，再进入探头校准。"));
+                                 QStringLiteral("请先停止当前检测，再进入探头校准。"));
         return;
     }
 
     if (hasIncompletePatientRounds()) {
         QMessageBox::information(
             this,
-            QStringLiteral("患者检测尚未完成"),
-            QStringLiteral("当前患者已完成 %1/%2 次测量。请先完成本组检测，"
+            QStringLiteral("检测尚未完成"),
+            QStringLiteral("当前被测者已完成 %1/%2 次测量。请先完成本组检测，"
                            "避免同一组测量混用不同的校准参数。")
                 .arg(roundSosList.size())
                 .arg(normalMeasureRounds));
@@ -1007,8 +1007,8 @@ void MainWindow::startPatientMeasurement(int targetRounds, bool offerFirstUseGui
         QMessageBox::warning(
             this,
             QStringLiteral("日期异常"),
-            QStringLiteral("患者出生日期无效，或当前 Windows 系统日期早于患者出生日期。"
-                           "请先核对患者档案和电脑日期，再开始检测。"));
+            QStringLiteral("被测者出生日期无效，或当前 Windows 系统日期早于出生日期。"
+                           "请先核对档案和电脑日期，再开始检测。"));
         return;
     }
 
@@ -4075,7 +4075,7 @@ bool MainWindow::trySavePendingMeasurement()
         }
     }
     if (!patientExists) {
-        QMessageBox::warning(this, "错误", "检测结果对应的患者档案已不存在，不能保存。");
+        QMessageBox::warning(this, "错误", "检测结果对应的档案已不存在，不能保存。");
         return false;
     }
     QList<MeasurementRecord> candidate = measurementList;
@@ -4800,7 +4800,7 @@ bool MainWindow::confirmPatientChange(const QString& targetPatientId)
         return QMessageBox::question(
                    this,
                    QStringLiteral("放弃未保存结果"),
-                   QStringLiteral("当前结果尚未保存，是否放弃并更换患者？"))
+                   QStringLiteral("当前结果尚未保存，是否放弃并更换被测者？"))
             == QMessageBox::Yes;
     }
 
@@ -4808,7 +4808,7 @@ bool MainWindow::confirmPatientChange(const QString& targetPatientId)
         return QMessageBox::question(
                    this,
                    QStringLiteral("放弃未完成检测"),
-                   QStringLiteral("当前患者已完成 %1/%2 次测量。更换患者会清空本组进度，"
+                   QStringLiteral("当前被测者已完成 %1/%2 次测量。更换被测者会清空本组进度，"
                                   "是否仍要更换？")
                        .arg(roundSosList.size())
                        .arg(normalMeasureRounds))
