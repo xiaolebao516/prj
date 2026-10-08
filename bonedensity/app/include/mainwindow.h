@@ -110,6 +110,14 @@ private:
     QVector<quint16> samplesC;
     QVector<quint16> samplesD;
 
+    // ---- CSV export of measurement records (archive page) ----
+    QPushButton* btnExport = nullptr;
+    QStringList checkedArchivePatientIds() const;
+    void exportMeasurements();
+    // Rows as shown on screen (current reference), sorted by patient and time.
+    static QString measurementsCsv(const QList<PatientInfo>& patients,
+                                   const QList<MeasurementRecord>& measurements);
+
     // ---- account menu ----
     void updateAccountUi();
     void openDataFolder();

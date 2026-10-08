@@ -50,6 +50,7 @@ static constexpr bool kDebugPerFrame = false;
 #include <QPushButton>
 #include <QToolButton>
 #include <QSettings>
+#include <QSaveFile>
 #include <QMenu>
 #include <QDesktopServices>
 #include <QUrl>
@@ -69,6 +70,44 @@ static constexpr bool kDebugPerFrame = false;
 #endif
 
 namespace {
+
+// A label that gives up its width first: the text is shortened with "…" and
+// the full text stays in the tooltip, so neighbouring buttons keep their labels.
+class ElidingLabel : public QLabel
+{
+public:
+    using QLabel::QLabel;
+    void setFullText(const QString& text)
+    {
+        fullText_ = text;
+        setToolTip(text);
+        updateGeometry();
+        refresh();
+    }
+    const QString& fullText() const { return fullText_; }
+    QSize minimumSizeHint() const override
+    {
+        return {fontMetrics().horizontalAdvance(QStringLiteral("测试…")), QLabel::minimumSizeHint().height()};
+    }
+    QSize sizeHint() const override
+    {
+        return {fontMetrics().horizontalAdvance(fullText_) + 4, QLabel::sizeHint().height()};
+    }
+
+protected:
+    void resizeEvent(QResizeEvent* event) override
+    {
+        QLabel::resizeEvent(event);
+        refresh();
+    }
+
+private:
+    void refresh()
+    {
+        QLabel::setText(fontMetrics().elidedText(fullText_, Qt::ElideRight, qMax(0, width())));
+    }
+    QString fullText_;
+};
 
 int ageOnDate(const QString& birthDay, const QDate& date)
 {
@@ -5569,7 +5608,9 @@ void MainWindow::setupArchivePage()
     actions->setContentsMargins(18, 12, 18, 12);
     actions->setSpacing(10);
     actions->addWidget(captionLabel(QStringLiteral("当前选中"), actionBar));
-    lblArchiveSelection = new QLabel(QStringLiteral("未选择"), actionBar);
+    auto* selectionLabel = new ElidingLabel(actionBar);
+    selectionLabel->setFullText(QStringLiteral("未选择"));
+    lblArchiveSelection = selectionLabel;
     lblArchiveSelection->setObjectName(QStringLiteral("archiveSelection"));
     actions->addWidget(lblArchiveSelection);
     actions->addSpacing(8);
@@ -5589,6 +5630,12 @@ void MainWindow::setupArchivePage()
     lblCheckedCount = captionLabel(QString(), actionBar);
     lblCheckedCount->setObjectName(QStringLiteral("checkedCount"));
     actions->addWidget(lblCheckedCount);
+    btnExport = new QPushButton(QStringLiteral("导出全部"), actionBar);
+    btnExport->setObjectName(QStringLiteral("btnExport"));
+    btnExport->setToolTip(QStringLiteral("把检测记录导出为 CSV 表格（可用 Excel 打开）。"
+                                         "勾选了档案时只导出勾选的人。"));
+    connect(btnExport, &QPushButton::clicked, this, &MainWindow::exportMeasurements);
+    actions->addWidget(btnExport);
     ui->btnDeleteSelected->setText(QStringLiteral("删除勾选项"));
     ui->btnDeleteSelected->setProperty("variant", QStringLiteral("dangerOutline"));
     actions->addWidget(ui->btnDeleteSelected);
@@ -5822,7 +5869,7 @@ void MainWindow::updateArchiveSelectionBar()
     for (const PatientInfo& patient : patientList) {
         if (patient.id == id) name = patient.name;
     }
-    lblArchiveSelection->setText(id.isEmpty() ? QStringLiteral("未选择")
+    static_cast<ElidingLabel*>(lblArchiveSelection)->setFullText(id.isEmpty() ? QStringLiteral("未选择")
                                               : QStringLiteral("%1（%2）").arg(name, id));
     int checked = 0;
     for (int row = 0; row < ui->table->rowCount(); ++row) {
@@ -5832,6 +5879,7 @@ void MainWindow::updateArchiveSelectionBar()
         }
     }
     lblCheckedCount->setText(QStringLiteral("已勾选 %1 人").arg(checked));
+    if (btnExport) btnExport->setText(checked > 0 ? QStringLiteral("导出勾选") : QStringLiteral("导出全部"));
     const bool nextRoundPending = nextRoundTimer.isActive();
     const bool rowActionsAllowed = !id.isEmpty() && !patientMeasureRunning;
     ui->btnSelectPatient->setEnabled(rowActionsAllowed && !nextRoundPending);
@@ -5965,6 +6013,137 @@ void MainWindow::showReportFrom(QWidget* returnPage, const PatientInfo& patient,
 {
     reportReturnPage = returnPage;
     showReport(patient, measurement);
+}
+
+// ==================== 导出检测记录 ====================
+
+namespace {
+
+QString csvField(const QString& value)
+{
+    if (!value.contains(QLatin1Char(',')) && !value.contains(QLatin1Char('"')) &&
+        !value.contains(QLatin1Char('\n')) && !value.contains(QLatin1Char('\r'))) {
+        return value;
+    }
+    QString quoted = value;
+    quoted.replace(QLatin1Char('"'), QStringLiteral("\"\""));
+    return QLatin1Char('"') + quoted + QLatin1Char('"');
+}
+
+} // namespace
+
+QString MainWindow::measurementsCsv(const QList<PatientInfo>& patients,
+                                    const QList<MeasurementRecord>& measurements)
+{
+    const QStringList header = {
+        QStringLiteral("档案编号"), QStringLiteral("姓名"), QStringLiteral("性别"),
+        QStringLiteral("出生日期"), QStringLiteral("检测时间"), QStringLiteral("检测时年龄"),
+        QStringLiteral("部位"), QStringLiteral("SOS(m/s)"), QStringLiteral("T值"),
+        QStringLiteral("Z值"), QStringLiteral("骨强度"), QStringLiteral("相对骨折风险"),
+        QStringLiteral("相对骨龄"), QStringLiteral("诊断提示"), QStringLiteral("操作账号"),
+        QStringLiteral("身高(cm)"), QStringLiteral("体重(kg)")};
+    const QString lineEnd = QStringLiteral("\r\n");
+    QString csv = header.join(QLatin1Char(',')) + lineEnd;
+
+    QList<MeasurementRecord> rows;
+    for (const MeasurementRecord& record : measurements) {
+        for (const PatientInfo& patient : patients) {
+            if (patient.id == record.patientId) {
+                rows.append(record);
+                break;
+            }
+        }
+    }
+    std::stable_sort(rows.begin(), rows.end(), [](const MeasurementRecord& a, const MeasurementRecord& b) {
+        return a.patientId != b.patientId ? a.patientId < b.patientId : a.measuredAt < b.measuredAt;
+    });
+
+    const auto snapshotOr = [](const QString& snapshot, const QString& current) {
+        return snapshot.trimmed().isEmpty() ? current : snapshot;
+    };
+    for (const MeasurementRecord& saved : rows) {
+        PatientInfo patient;
+        for (const PatientInfo& candidate : patients) {
+            if (candidate.id == saved.patientId) patient = candidate;
+        }
+        const MeasurementRecord record = withCurrentReference(saved, patient);
+        const QDateTime time = parsedMeasurementDateTime(record.measuredAt);
+        const int age = measurementAge(record, patient);
+        const QStringList fields = {
+            record.patientId,
+            snapshotOr(record.patientName, patient.name),
+            measurementGender(record, patient),
+            snapshotOr(record.patientBirthDay, patient.birthDay),
+            time.isValid() ? time.toString(QStringLiteral("yyyy-MM-dd HH:mm")) : record.measuredAt,
+            age >= 0 ? QString::number(age) : QString(),
+            record.part,
+            record.sos,
+            record.tScore,
+            record.zScore,
+            record.boneStrength,
+            record.fractureRisk,
+            record.boneAge,
+            record.diagnosis == record.boneStrength ? QString() : record.diagnosis,
+            record.operatorName,
+            snapshotOr(record.patientHeight, patient.height),
+            snapshotOr(record.patientWeight, patient.weight)};
+        QStringList escaped;
+        for (const QString& field : fields) escaped << csvField(field.trimmed());
+        csv += escaped.join(QLatin1Char(',')) + lineEnd;
+    }
+    return csv;
+}
+
+QStringList MainWindow::checkedArchivePatientIds() const
+{
+    QStringList ids;
+    for (int row = 0; row < ui->table->rowCount(); ++row) {
+        const QTableWidgetItem* item = ui->table->item(row, ArchiveIdColumn);
+        if (item && item->checkState() == Qt::Checked && !ids.contains(item->text())) ids << item->text();
+    }
+    return ids;
+}
+
+void MainWindow::exportMeasurements()
+{
+    const QStringList checkedIds = checkedArchivePatientIds();
+    QList<PatientInfo> patients;
+    for (const PatientInfo& patient : patientList) {
+        if (checkedIds.isEmpty() || checkedIds.contains(patient.id)) patients.append(patient);
+    }
+    int recordCount = 0;
+    for (const MeasurementRecord& record : measurementList) {
+        for (const PatientInfo& patient : patients) {
+            if (patient.id == record.patientId) {
+                ++recordCount;
+                break;
+            }
+        }
+    }
+    if (recordCount == 0) {
+        QMessageBox::information(this, QStringLiteral("导出数据"),
+                                 checkedIds.isEmpty() ? QStringLiteral("还没有任何检测记录。")
+                                                      : QStringLiteral("勾选的档案还没有检测记录。"));
+        return;
+    }
+
+    const QString documents = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    const QString defaultPath = QDir(documents).filePath(
+        QStringLiteral("骨密度检测记录_%1.csv").arg(QDate::currentDate().toString(QStringLiteral("yyyyMMdd"))));
+    const QString path = QFileDialog::getSaveFileName(
+        this, checkedIds.isEmpty() ? QStringLiteral("导出全部检测记录") : QStringLiteral("导出勾选档案的检测记录"),
+        defaultPath, QStringLiteral("CSV 表格 (*.csv)"));
+    if (path.isEmpty()) return;
+
+    QSaveFile file(path);
+    QByteArray bytes("\xEF\xBB\xBF");   // UTF-8 BOM so Excel shows Chinese correctly
+    bytes += measurementsCsv(patients, measurementList).toUtf8();
+    if (!file.open(QIODevice::WriteOnly) || file.write(bytes) != bytes.size() || !file.commit()) {
+        QMessageBox::warning(this, QStringLiteral("导出失败"),
+                             QStringLiteral("无法写入文件，请换一个保存位置后重试。"));
+        return;
+    }
+    statusBar()->showMessage(QStringLiteral("已导出 %1 人、%2 条检测记录。").arg(patients.size()).arg(recordCount), 6000);
 }
 
 // ==================== 账号菜单 ====================

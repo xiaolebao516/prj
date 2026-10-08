@@ -186,6 +186,8 @@ private slots:
     void deletionsAreBackedUpFirst();
     void accountMenuSwitchesOperatorSafely();
     void serialPortSelectionIsRemembered();
+    void measurementCsvMatchesScreenValues();
+    void archiveActionBarKeepsButtonLabels();
     void capturePagesWhenRequested();
 };
 
