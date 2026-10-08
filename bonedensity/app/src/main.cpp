@@ -42,6 +42,8 @@ int main(int argc, char *argv[])
         return 2;
     }
     MainWindow w;
-    w.show();
+    // The designed size is 1920x1080; maximizing fits it to whatever screen
+    // the station has instead of opening partly off-screen on a 1366x768 one.
+    w.showMaximized();
     return a.exec();
 }
