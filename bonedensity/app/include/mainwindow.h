@@ -122,7 +122,13 @@ private:
     bool backupBeforeDelete();
 
     // ---- device link feedback (display only; command timing is unchanged) ----
-    void applyPortList(const QList<QPair<QString, QString>>& ports);
+    // ports: (name, description). preferred is selected when the previous
+    // selection is gone (e.g. at start-up); otherwise the selection is kept.
+    void applyPortList(const QList<QPair<QString, QString>>& ports,
+                       const QString& preferred = QString());
+    QString rememberedPort() const;
+    void rememberPort(const QString& portName);
+    QString deviceSettingsPath;
     void noteCommandSent();
     void noteDeviceFrameReceived();
     void checkDeviceResponse();

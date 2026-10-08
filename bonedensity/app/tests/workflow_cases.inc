@@ -82,3 +82,32 @@ void MainWindowSafetyTests::accountMenuSwitchesOperatorSafely()
     QCOMPARE(window.btnAccount->text(), QStringLiteral("未登录"));
     QCOMPARE(window.patientList.size(), 1);   // data is untouched
 }
+
+void MainWindowSafetyTests::serialPortSelectionIsRemembered()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    MainWindow window;
+    window.hide();
+    window.deviceSettingsPath = directory.filePath(QStringLiteral("device.ini"));
+    QVERIFY(window.rememberedPort().isEmpty());
+    window.rememberPort(QStringLiteral("COM7"));
+    QCOMPARE(window.rememberedPort(), QStringLiteral("COM7"));
+
+    // At start-up nothing is selected yet, so the remembered port wins even
+    // when it is not first in the list.
+    window.ui->comboPort->clear();
+    const QList<QPair<QString, QString>> ports = {
+        {QStringLiteral("COM1"), QStringLiteral("通信端口")},
+        {QStringLiteral("COM7"), QStringLiteral("USB 串行设备")}};
+    window.applyPortList(ports, window.rememberedPort());
+    QCOMPARE(window.ui->comboPort->currentData().toString(), QStringLiteral("COM7"));
+
+    // A port the user picked is kept when another device is plugged in.
+    window.ui->comboPort->setCurrentIndex(window.ui->comboPort->findData(QStringLiteral("COM1")));
+    window.applyPortList({ports.at(0), ports.at(1),
+                          {QStringLiteral("COM9"), QStringLiteral("USB 串行设备")}},
+                         QStringLiteral("COM7"));
+    QCOMPARE(window.ui->comboPort->count(), 3);
+    QCOMPARE(window.ui->comboPort->currentData().toString(), QStringLiteral("COM1"));
+}

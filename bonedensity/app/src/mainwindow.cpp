@@ -49,6 +49,7 @@ static constexpr bool kDebugPerFrame = false;
 #include <QTableWidget>
 #include <QPushButton>
 #include <QToolButton>
+#include <QSettings>
 #include <QMenu>
 #include <QDesktopServices>
 #include <QUrl>
@@ -159,6 +160,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     accountsFilePath = QCoreApplication::applicationDirPath() + "/accounts.xml";
+    deviceSettingsPath = QCoreApplication::applicationDirPath() + "/device.ini";
     measurementGuideSettingsPath =
         QCoreApplication::applicationDirPath() + "/measurement-guide.ini";
     QString accountError;
@@ -701,12 +703,41 @@ void MainWindow::scanPorts() {
     QList<QPair<QString, QString>> ports;
     const auto infos = QSerialPortInfo::availablePorts();
     for (const QSerialPortInfo &info : infos) ports.append({info.portName(), info.description()});
-    applyPortList(ports);
+
+    // Pre-select the port that worked last time; otherwise the Raspberry Pi
+    // Pico (VID 0x2E8A) the device is built on, then any USB serial port.
+    QString preferred;
+    const QString remembered = rememberedPort();
+    for (const QSerialPortInfo &info : infos) {
+        if (info.portName() == remembered) preferred = remembered;
+    }
+    for (const QSerialPortInfo &info : infos) {
+        if (preferred.isEmpty() && info.hasVendorIdentifier() && info.vendorIdentifier() == 0x2E8A)
+            preferred = info.portName();
+    }
+    for (const QSerialPortInfo &info : infos) {
+        if (preferred.isEmpty() && info.description().contains(QStringLiteral("USB"), Qt::CaseInsensitive))
+            preferred = info.portName();
+    }
+    applyPortList(ports, preferred);
+}
+
+QString MainWindow::rememberedPort() const
+{
+    return QSettings(deviceSettingsPath, QSettings::IniFormat)
+        .value(QStringLiteral("serial/lastPort")).toString();
+}
+
+void MainWindow::rememberPort(const QString& portName)
+{
+    QSettings settings(deviceSettingsPath, QSettings::IniFormat);
+    settings.setValue(QStringLiteral("serial/lastPort"), portName);
 }
 
 // Rebuild the port list only when it actually changed and the user is not
 // looking at the open drop-down, so the selection never flickers away.
-void MainWindow::applyPortList(const QList<QPair<QString, QString>>& ports)
+void MainWindow::applyPortList(const QList<QPair<QString, QString>>& ports,
+                               const QString& preferred)
 {
     QComboBox* combo = ui->comboPort;
     bool unchanged = combo->count() == ports.size();
@@ -724,7 +755,8 @@ void MainWindow::applyPortList(const QList<QPair<QString, QString>>& ports)
         // 文本：COM11 - USB Serial Device；data 只存端口名
         combo->addItem(port.first + " - " + port.second, port.first);
     }
-    const int idx = combo->findData(current);
+    int idx = combo->findData(current);
+    if (idx < 0 && !preferred.isEmpty()) idx = combo->findData(preferred);
     if (idx >= 0) combo->setCurrentIndex(idx);
 }
 
@@ -751,6 +783,7 @@ void MainWindow::on_connectButton_clicked() {
         serial->setTextModeEnabled(false);   // ⭐⭐ 最关键！！！
 
         if (serial->open(QIODevice::ReadWrite)) {
+            rememberPort(portName);
             serial->setDataTerminalReady(true); // 拉高 DTR，告诉 Pico "我准备好了"
             serial->setRequestToSend(false);     // 拉高 RTS (部分固件也需要这个)
 

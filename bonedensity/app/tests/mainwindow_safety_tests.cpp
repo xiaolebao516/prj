@@ -185,6 +185,7 @@ private slots:
     void dataBackupSnapshotsOnceAndPrunes();
     void deletionsAreBackedUpFirst();
     void accountMenuSwitchesOperatorSafely();
+    void serialPortSelectionIsRemembered();
     void capturePagesWhenRequested();
 };
 
