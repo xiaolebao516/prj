@@ -20,6 +20,7 @@ SOURCES += \
     ../src/signalprocessor.cpp \
     ../src/bonehealth.cpp \
     ../src/sosreference.cpp \
+    ../src/databackup.cpp \
     ../src/utils.cpp \
     ../src/patientformdialog.cpp
 
@@ -38,6 +39,7 @@ HEADERS += \
     ../include/signalprocessor.h \
     ../include/bonehealth.h \
     ../include/sosreference.h \
+    ../include/databackup.h \
     ../include/utils.h \
     ../include/patientformdialog.h
 

@@ -6,6 +6,7 @@
 #include "measurementguidedialog.h"
 #include "reportwidget.h"
 #include "patientformdialog.h"
+#include "databackup.h"
 #include "sosreference.h"
 #include "bonehealth.h"
 #include "agesoschartwidget.h"
@@ -179,6 +180,8 @@ private slots:
     void savedRecordsAreShownWithCurrentReference();
     void boneAgeAndChildChartStayConsistent();
     void mainLayoutFitsCommonWindowSizes();
+    void dataBackupSnapshotsOnceAndPrunes();
+    void deletionsAreBackedUpFirst();
     void capturePagesWhenRequested();
 };
 
@@ -2216,6 +2219,7 @@ void MainWindowSafetyTests::capturePagesWhenRequested()
 #include "subject_recording_cases.inc"
 #include "ui_refresh_cases.inc"
 #include "sos_reference_cases.inc"
+#include "data_backup_cases.inc"
 
 QTEST_MAIN(MainWindowSafetyTests)
 #include "mainwindow_safety_tests.moc"

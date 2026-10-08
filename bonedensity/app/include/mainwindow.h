@@ -108,6 +108,12 @@ private:
     QVector<quint16> samplesC;
     QVector<quint16> samplesD;
 
+    // ---- data backups (DataBackup): daily at first login, and before deletions ----
+    QString backupRoot() const;
+    QStringList dataFilePaths() const;
+    void backupDataDaily();
+    bool backupBeforeDelete();
+
     // ---- device link feedback (display only; command timing is unchanged) ----
     void applyPortList(const QList<QPair<QString, QString>>& ports);
     void noteCommandSent();

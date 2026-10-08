@@ -15,6 +15,7 @@ static constexpr bool kDebugPerFrame = false;
 #include "measurementguidedialog.h"
 #include "utils.h"
 #include "patientformdialog.h"
+#include "databackup.h"
 
 #include <QtSerialPort/QSerialPortInfo>
 #include <QMessageBox>
@@ -316,6 +317,7 @@ void MainWindow::on_btnLogin_clicked() {
         if (lblAccount) lblAccount->setText(QStringLiteral("账号 %1").arg(currentAccount.username));
         ui->stackedWidget->setCurrentWidget(ui->pageMain);
         scheduleResponsiveLayout();
+        backupDataDaily();
         return;
     }
     ui->lblLoginMsg->setText("账号或密码错误，请重试");
@@ -5182,7 +5184,8 @@ void MainWindow::on_btnDeleteSelected_clicked()
                     QStringLiteral("确定删除选中的 %1 份档案吗？").arg(orderedIds.size()),
                     QMessageBox::Yes | QMessageBox::No, this);
     box.setInformativeText(summaries.join(QStringLiteral("、")) +
-                           QStringLiteral("\n这些人的全部检测记录会一起删除，无法恢复。"));
+                           QStringLiteral("\n这些人的全部检测记录会一起删除。"
+                                          "删除前会自动在软件文件夹的 backups 里留一份备份。"));
     box.setDefaultButton(QMessageBox::No);
     box.button(QMessageBox::Yes)->setText(QStringLiteral("删除"));
     box.button(QMessageBox::No)->setText(QStringLiteral("取消"));
@@ -5196,6 +5199,7 @@ void MainWindow::on_btnDeleteSelected_clicked()
     for (const MeasurementRecord& record : measurementList) {
         if (!patientIds.contains(record.patientId)) measurementCandidate.append(record);
     }
+    if (!backupBeforeDelete()) return;
     if (!savePatientData(patientCandidate, measurementCandidate)) return;
 
     const bool removedCurrent = patientIds.contains(currentPatient.id);
@@ -5907,6 +5911,7 @@ bool MainWindow::deleteMeasurementRecord(const QString& recordId)
         if (measurementList[i].id != recordId) continue;
         QList<MeasurementRecord> candidate = measurementList;
         candidate.removeAt(i);
+        if (!backupBeforeDelete()) return false;
         if (!saveMeasurements(candidate)) return false;
         measurementList = candidate;
         refreshPatientDerivedViews();
@@ -5920,6 +5925,45 @@ void MainWindow::showReportFrom(QWidget* returnPage, const PatientInfo& patient,
 {
     reportReturnPage = returnPage;
     showReport(patient, measurement);
+}
+
+// ==================== 数据备份 ====================
+
+QString MainWindow::backupRoot() const
+{
+    return QFileInfo(xmlFilePath).absoluteDir().filePath(QStringLiteral("backups"));
+}
+
+QStringList MainWindow::dataFilePaths() const
+{
+    return {xmlFilePath, measurementsFilePath, accountsFilePath, calibrationFilePath};
+}
+
+void MainWindow::backupDataDaily()
+{
+    const DataBackup::Result result = DataBackup::snapshot(
+        backupRoot(), dataFilePaths(), DataBackup::dailyLabel(QDate::currentDate()));
+    if (!result.ok) {
+        statusBar()->showMessage(
+            QStringLiteral("今日自动备份失败：%1。数据仍可正常使用。").arg(result.error), 10000);
+        return;
+    }
+    if (result.created) DataBackup::prune(backupRoot());
+}
+
+bool MainWindow::backupBeforeDelete()
+{
+    const DataBackup::Result result = DataBackup::snapshot(
+        backupRoot(), dataFilePaths(), DataBackup::beforeDeleteLabel(QDateTime::currentDateTime()));
+    if (result.ok) {
+        DataBackup::prune(backupRoot());
+        return true;
+    }
+    return QMessageBox::warning(
+               this, QStringLiteral("删除前备份失败"),
+               QStringLiteral("%1。\n\n仍要删除吗？删除后将无法从备份恢复。").arg(result.error),
+               QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+        == QMessageBox::Yes;
 }
 
 // ==================== 设备响应提示（只影响显示，不改变命令时序）====================
