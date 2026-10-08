@@ -18,7 +18,7 @@
 
 ## 主要源码位置
 
-- 轮次、有效值、稳定簇、自动续测和界面状态：`src/mainwindow.cpp`、`include/mainwindow.h`
+- 轮次、有效值、稳定簇、自动续测：`src/mainwindow_measurement.cpp`、`include/mainwindow.h`；界面状态：`src/mainwindow_layout.cpp`
 - 波形特征与延迟计算：`src/signalprocessor.cpp`、`include/signalprocessor.h`
 - 各试测程序的编译开关和 EXE 名称：`BoneDensity.pro`
 - 自动化验证：`tests/mainwindow_safety_tests.cpp`

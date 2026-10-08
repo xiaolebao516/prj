@@ -1,6 +1,6 @@
 param(
-    [string]$qtRoot = "D:\Qt\6.5.3\mingw_64",
-    [string]$mingwRoot = "D:\Qt\Tools\mingw1120_64"
+    [string]$qtRoot = "D:\QT6.5.3\6.5.3\mingw_64",
+    [string]$mingwRoot = "D:\QT6.5.3\Tools\mingw1120_64"
 )
 $ErrorActionPreference = "Stop"
 

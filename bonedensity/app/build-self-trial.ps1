@@ -1,10 +1,12 @@
-param([ValidateSet('ObserveG','DualWindow')][string]$Profile = 'ObserveG')
+param(
+    [ValidateSet('ObserveG','DualWindow')][string]$Profile = 'ObserveG',
+    [string]$qtRoot = 'D:\QT6.5.3\6.5.3\mingw_64',
+    [string]$mingwRoot = 'D:\QT6.5.3\Tools\mingw1120_64'
+)
 $ErrorActionPreference = 'Stop'
 
 # Independent Debug experiment. Never builds over the original application.
 $projectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$qtRoot = 'D:\Qt\6.5.3\mingw_64'
-$mingwRoot = 'D:\Qt\Tools\mingw1120_64'
 $dual = $Profile -eq 'DualWindow'
 $buildName = if ($dual) { 'self-trial-dual-window' } else { 'self-trial-observe-g' }
 $targetName = if ($dual) { 'BoneDensity_DualWindowTrial.exe' } else { 'BoneDensity_SelfTrial.exe' }

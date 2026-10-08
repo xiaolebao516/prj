@@ -11,9 +11,11 @@
 
 ## Components
 
-- `src/mainwindow.cpp`: login, UI, serial acquisition, patient measurement, archive/chart/report orchestration; high-coupling and changed locally only.
+- `src/mainwindow*.cpp` (one `MainWindow` class split by area since 2026-10-09: `mainwindow.cpp` construction/login/close guard/account menu, `mainwindow_device.cpp` serial and frame parsing, `mainwindow_measurement.cpp` measurement flow, gates, rounds and results, `mainwindow_display.cpp` live charts and process panel, `mainwindow_patients.cpp` archive, history, export and backups, `mainwindow_report.cpp` report, `mainwindow_layout.cpp` theme and page layouts; shared helpers in `include/mainwindow_internal.h`): login, UI, serial acquisition, patient measurement, archive/chart/report orchestration; high-coupling and changed locally only.
 - `src/signalprocessor.cpp`: filtering, arrival time, refined correlation peaks, and SOS calculation.
-- `src/bonehealth.cpp`: age/reference mean, bone-strength, fracture-risk, and bone-age calculations.
+- `src/sosreference.cpp`: adult radius SOS reference table (中国公共卫生 2015), T/Z; the single source for scores and the adult age-SOS chart.
+- `src/bonehealth.cpp`: patient age, bone-strength, fracture-risk and bone-age calculations, and `deriveResult` used for new and saved records.
+- `src/databackup.cpp`: rolling copies of the data XML files under `backups/`.
 - `src/utils.cpp`: final-round clustering and trimmed means.
 - `src/accountstore.cpp`: local accounts, authentication, atomic save, and damaged-admin recovery.
 - `src/patientstore.cpp`: patients, measurement history, legacy migration, and backups.

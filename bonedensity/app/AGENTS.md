@@ -23,7 +23,7 @@
 | --- | --- |
 | Build | `powershell -ExecutionPolicy Bypass -File ./build-debug.ps1` |
 | Run | No unattended run command; after Build, manually launch `build/debug/debug/BoneDensity.exe` |
-| Test | `powershell -ExecutionPolicy Bypass -File ./test-calibration.ps1` (calibration scope only) |
+| Test | `powershell -ExecutionPolicy Bypass -File ./test-mainwindow-safety.ps1` (main-window regression suite); also `./test-calibration.ps1`, `./test-patientstore.ps1`, `./test-accountstore.ps1`, `./tests/portable_handoff_tests.ps1` |
 | Verify | No single command; use task-specific tests plus required human or laboratory acceptance |
 
 ## Golden Rules
@@ -122,7 +122,7 @@ For durable research: define the decision question, prefer primary/official sour
 
 ## Fixed Toolchain and Commands
 
-- Use only Qt 6.5.3 at `D:\\Qt\\6.5.3\\mingw_64` with MinGW 11.2 at `D:\\Qt\\Tools\\mingw1120_64` for command-line builds.
+- Use only Qt 6.5.3 at `D:\QT6.5.3\6.5.3\mingw_64` with MinGW 11.2 at `D:\QT6.5.3\Tools\mingw1120_64` for command-line builds. Every build/test script takes `-qtRoot` and `-mingwRoot` and defaults to these paths.
 - Do not invoke an unqualified system `qmake`, `mingw32-make`, or `g++`. Mixing the system MSYS2 toolchain with the Qt runtime can produce incompatible binaries.
 - `build-debug.ps1` is the canonical clean Debug build and deployment entry point.
 - `test-calibration.ps1` is a focused calibration suite, not a whole-project test or final acceptance command.
@@ -137,7 +137,7 @@ Obtain explicit user approval before changing any of the following:
 - serial framing, 115200-baud configuration, acquisition commands, or the 80 ms acquisition timing;
 - persistent data schemas, migration semantics, authentication behavior, architecture, public interfaces, or dependencies.
 
-Treat `src/mainwindow.cpp` as a high-coupling orchestration hotspot. Make localized changes and do not refactor it merely for tidiness.
+Treat the `MainWindow` sources (`src/mainwindow*.cpp`, split by area on 2026-10-09 with the user's explicit approval; see `.agent/reference/project-map.md`) as a high-coupling orchestration hotspot. Make localized changes and do not refactor them merely for tidiness.
 
 ## Data and Safety Rules
 

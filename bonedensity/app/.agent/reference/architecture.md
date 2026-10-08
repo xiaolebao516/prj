@@ -6,7 +6,7 @@ Read this file only for architecture, measurement-pipeline, persistence, calibra
 
 ## Component Ownership
 
-- `src/mainwindow.cpp`: serial intake, patient workflow, gate coordination, aggregation, persistence handoff, and UI/report transitions.
+- `src/mainwindow*.cpp` (one `MainWindow` class split by area since 2026-10-09: `mainwindow.cpp` construction/login/close guard/account menu, `mainwindow_device.cpp` serial and frame parsing, `mainwindow_measurement.cpp` measurement flow, gates, rounds and results, `mainwindow_display.cpp` live charts and process panel, `mainwindow_patients.cpp` archive, history, export and backups, `mainwindow_report.cpp` report, `mainwindow_layout.cpp` theme and page layouts; shared helpers in `include/mainwindow_internal.h`): serial intake, patient workflow, gate coordination, aggregation, persistence handoff, and UI/report transitions.
 - `src/signalprocessor.cpp`: filtering, arrival detection, correlation-lag refinement, and per-channel SOS.
 - `src/utils.cpp`: trimmed aggregation and candidate-round clustering.
 - `src/bonehealth.cpp`: T/Z and derived bone-health results.
@@ -27,7 +27,7 @@ Serial waveform → signal processing → frame acceptance → lag-B stability l
 ## Configuration and Change Impact
 
 - Correlation, posture, and stability thresholds are centralized in `MeasureConfig` in `include/types.h`.
-- Other acquisition cardinality and clustering controls are in `include/mainwindow.h` and `src/mainwindow.cpp`.
+- Other acquisition cardinality and clustering controls are in `include/mainwindow.h` and `src/mainwindow_measurement.cpp`.
 - Do not copy mutable numeric values into architecture decisions. Read current values from code.
 - SOS, thresholds, stability, clustering, channel selection, acquisition timing, and probe-baseline changes cross the protected boundary in `AGENTS.md` and require explicit approval.
 

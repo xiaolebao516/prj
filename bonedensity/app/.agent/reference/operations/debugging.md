@@ -12,7 +12,7 @@ A patient frame passes pre-checks, correlation/posture gates, then lag-B stabili
 
 - `include/types.h`: `MeasureConfig` correlation, posture, and stability settings.
 - `include/mainwindow.h`: acquisition cardinality and clustering declarations.
-- `src/mainwindow.cpp`: gate evaluation, counter recording, diagnostic output, operator cues, round handling, and serial timing.
+- `src/mainwindow_measurement.cpp`: gate evaluation, counter recording, diagnostic output, operator cues and round handling; `src/mainwindow_device.cpp`: serial timing and frame parsing.
 - `src/signalprocessor.cpp`: arrival and refined correlation-lag calculations.
 
 Numeric values in code are executable authority. This reference intentionally does not duplicate them.
