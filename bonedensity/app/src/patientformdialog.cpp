@@ -17,9 +17,9 @@ namespace {
 
 QLabel* fieldLabel(const QString& text, bool required, QWidget* parent)
 {
-    auto* label = new QLabel(required ? text + QStringLiteral(" <span style='color:#B3261E'>*</span>") : text,
+    auto* label = new QLabel(required ? text + QStringLiteral(" <span style='color:#C4321F'>*</span>") : text,
                              parent);
-    label->setProperty("role", QStringLiteral("fieldLabel"));
+    label->setProperty("role", QStringLiteral("formLabel"));
     return label;
 }
 

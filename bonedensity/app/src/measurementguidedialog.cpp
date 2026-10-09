@@ -1,5 +1,7 @@
 #include "measurementguidedialog.h"
 
+#include "theme.h"
+
 #include <QFile>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -9,6 +11,7 @@
 #include <QPushButton>
 #include <QSaveFile>
 #include <QStackedWidget>
+#include <QStyle>
 #include <QTextStream>
 #include <QVBoxLayout>
 #include <QStringList>
@@ -32,12 +35,14 @@ protected:
     {
         QPainter p(this);
         p.setRenderHint(QPainter::Antialiasing);
-        p.fillRect(rect(), QColor("#f2f5f8"));
+        const Theme::Tokens& t = Theme::tokens();
+        p.fillRect(rect(), t.sunken);
         // Same shapes and view directions as the approved preview; keep aspect ratio.
         const qreal scale = qMin(width() / 410.0, height() / 238.0);
         p.translate((width() - 410 * scale) / 2, (height() - 238 * scale) / 2);
         p.scale(scale, scale);
-        const QColor blue("#147bbf");
+        const QColor blue = t.accent;
+        const auto tint = [&blue](int alpha) { QColor c = blue; c.setAlpha(alpha); return c; };
         QPainterPath arm;
         if (pageIndex_ < 2) {
             arm.moveTo(35,116); arm.quadTo(25,134,36,163);
@@ -51,22 +56,22 @@ protected:
         arm.closeSubpath();
         p.setPen(QPen(QColor("#c59d7b"), 1.5));
         p.setBrush(QColor("#efd0b7")); p.drawPath(arm);
-        auto probe = [&p]() {
+        auto probe = [&p, &blue]() {
             p.setPen(QPen(QColor("#879bad"), 2)); p.setBrush(QColor("#f8fafc"));
             p.drawRoundedRect(QRectF(-77,-25,154,50),18,18);
             p.setPen(Qt::NoPen); p.setBrush(QColor("#879bad"));
             p.drawRoundedRect(QRectF(-52,-16,13,32),5,5);
             p.drawRoundedRect(QRectF(39,-16,13,32),5,5);
-            p.setPen(QPen(QColor("#147bbf"),3)); p.drawLine(-26,0,26,0);
+            p.setPen(QPen(blue,3)); p.drawLine(-26,0,26,0);
         };
         if (pageIndex_ == 0) {
-            p.setPen(Qt::NoPen); p.setBrush(QColor(20,123,191,56));
+            p.setPen(Qt::NoPen); p.setBrush(tint(56));
             p.drawEllipse(QRectF(132,105,150,34));
             p.save(); p.translate(207,91); probe(); p.restore();
             QPainterPath drop;
             drop.moveTo(106,39); drop.cubicTo(99,53,94,57,94,64);
             drop.cubicTo(94,80,118,80,118,64); drop.cubicTo(118,57,112,49,106,39);
-            p.setPen(Qt::NoPen); p.setBrush(QColor(20,123,191,150)); p.drawPath(drop);
+            p.setPen(Qt::NoPen); p.setBrush(tint(150)); p.drawPath(drop);
             p.setPen(QPen(blue,3)); p.drawLine(147,205,267,205);
             p.drawLine(147,205,157,199); p.drawLine(147,205,157,211);
             p.drawLine(267,205,257,199); p.drawLine(267,205,257,211);
@@ -79,7 +84,7 @@ protected:
             p.drawPath(rotation); p.drawLine(278,75,263,73); p.drawLine(278,75,275,60);
             p.setPen(QPen(QColor("#879bad"),2,Qt::DashLine)); p.drawLine(101,207,312,207);
         } else {
-            p.setPen(QPen(QColor(20,123,191,76),9)); p.setBrush(Qt::NoBrush);
+            p.setPen(QPen(tint(76),9)); p.setBrush(Qt::NoBrush);
             QPainterPath gel; gel.moveTo(166,141); gel.quadTo(205,132,244,141); p.drawPath(gel);
             p.setPen(QPen(QColor("#879bad"),2)); p.setBrush(QColor("#f8fafc"));
             p.save(); p.translate(205,142); p.rotate(-14); p.setOpacity(.3);
@@ -120,18 +125,7 @@ MeasurementGuideDialog::MeasurementGuideDialog(Mode mode, QWidget* parent, doubl
     setModal(true);
     resize(900, 620);
     setMinimumSize(760, 560);
-    setStyleSheet(QStringLiteral(
-        "QDialog#measurementGuideDialog { background: #FFFFFF; }"
-        "QLabel#guideTitle { font-size: 22px; font-weight: bold; color: #303133; }"
-        "QLabel#guideSubtitle { color: #606266; }"
-        "QLabel#guideHeading { font-size: 18px; font-weight: bold; color: #303133; }"
-        "QLabel#guideBody { font-size: 14px; color: #303133; line-height: 1.6; }"
-        "QLabel#guideEmphasis { background: #ECF5FF; border-left: 4px solid #147bbf;"
-        " padding: 10px; color: #303133; }"
-        "QPushButton#guideNextButton { background: #147bbf; color: white;"
-        " border: none; border-radius: 5px; padding: 8px 18px; }"
-        "QPushButton#guideSkipButton { background: transparent; color: #909399;"
-        " border: 1px solid #DCDFE6; border-radius: 5px; padding: 8px 16px; }"));
+    // Colours and type come from the application theme (theme.qss).
 
     QVBoxLayout* root = new QVBoxLayout(this);
     root->setContentsMargins(26, 20, 26, 20);
@@ -153,6 +147,7 @@ MeasurementGuideDialog::MeasurementGuideDialog(Mode mode, QWidget* parent, doubl
     for (int index = 0; index < names.size(); ++index) {
         stepButtons_[index] = new QPushButton(names[index]);
         stepButtons_[index]->setObjectName(QStringLiteral("guideStep%1").arg(index + 1));
+        stepButtons_[index]->setProperty("guideStep", true);
         steps->addWidget(stepButtons_[index], 1);
         connect(stepButtons_[index], &QPushButton::clicked, this, [this, index]() {
             pages_->setCurrentIndex(index);
@@ -187,10 +182,12 @@ MeasurementGuideDialog::MeasurementGuideDialog(Mode mode, QWidget* parent, doubl
     pageIndicator_->setObjectName(QStringLiteral("guidePageIndicator"));
     skipButton_ = new QPushButton;
     skipButton_->setObjectName(QStringLiteral("guideSkipButton"));
+    skipButton_->setProperty("variant", QStringLiteral("ghost"));
     backButton_ = new QPushButton(QStringLiteral("上一步"));
     backButton_->setObjectName(QStringLiteral("guideBackButton"));
     nextButton_ = new QPushButton;
     nextButton_->setObjectName(QStringLiteral("guideNextButton"));
+    nextButton_->setProperty("variant", QStringLiteral("primary"));
     footer->addWidget(backButton_);
     footer->addWidget(pageIndicator_);
     footer->addStretch();
@@ -275,9 +272,11 @@ QWidget* MeasurementGuideDialog::createPage(int pageIndex,
         example->setRange(0, 1000);
         example->setValue(846);
         example->setFormat(QStringLiteral("示意 corrA 0.846"));
+        example->setMinimumHeight(24);
         example->setStyleSheet(QStringLiteral(
-            "QProgressBar {border:1px solid #dbe4ed; border-radius:5px; background:#e8edf3;"
-            " text-align:center; min-height:24px;} QProgressBar::chunk {background:#a8d9cc;}"));
+            "QProgressBar { border-radius: 12px; background: %1; } "
+            "QProgressBar::chunk { background: %2; border-radius: 12px; }")
+            .arg(Theme::tokens().fill.name(), Theme::tokens().okSoft.darker(112).name()));
         copyLayout->addWidget(example);
     }
     copyLayout->addStretch();
@@ -315,12 +314,15 @@ void MeasurementGuideDialog::refreshNavigation()
     const int page = pages_->currentIndex();
     const int count = pages_->count();
     for (int index = 0; index < count; ++index) {
-        stepButtons_[index]->setStyleSheet(index == page
-            ? QStringLiteral("background:#e9f4fc; color:#147bbf; border:1px solid #147bbf; border-radius:6px; padding:9px;")
-            : QStringLiteral("background:#f2f5f8; color:#5e7083; border:1px solid transparent; border-radius:6px; padding:9px;"));
+        QPushButton* step = stepButtons_[index];
+        if (step->property("current").toBool() != (index == page)) {
+            step->setProperty("current", index == page);
+            step->style()->unpolish(step);
+            step->style()->polish(step);
+        }
     }
-    const QString active = QStringLiteral("<font color='#147bbf'>●</font>");
-    const QString inactive = QStringLiteral("<font color='#C0C4CC'>○</font>");
+    const QString active = QStringLiteral("<font color='%1'>●</font>").arg(Theme::tokens().accent.name());
+    const QString inactive = QStringLiteral("<font color='%1'>○</font>").arg(Theme::tokens().ink300.name());
     QString dots;
     for (int index = 0; index < count; ++index) {
         if (!dots.isEmpty()) dots += QStringLiteral("　");

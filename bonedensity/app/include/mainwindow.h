@@ -42,6 +42,9 @@ class QPrinter;
 class CalibrationDialog;
 class MeasurementGuideDialog;
 class MainWindowSafetyTests;
+class AvatarBadge;
+class TScoreGauge;
+class RoundProgress;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -243,6 +246,11 @@ private:
     QDateEdit* dateFilter = nullptr;
     QList<QLabel*> gainValueLabels;
     QWidget* reportReturnPage = nullptr;
+    QLabel* lblRunState = nullptr;          // toolbar pill: 正在检测 · 第 n / 5 轮
+    AvatarBadge* patientAvatar = nullptr;
+    TScoreGauge* tScoreGauge = nullptr;
+    RoundProgress* roundProgress = nullptr;
+    void updateRunStateUi();
 
     void setupChart();
     void plotSamples();

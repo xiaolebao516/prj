@@ -60,6 +60,8 @@
 #include <QtPrintSupport/QPrintDialog>
 #include <QtPrintSupport/QPrinter>
 #include "mainwindow_internal.h"
+#include "theme.h"
+#include "uikit.h"
 
 using namespace mainwindow_detail;
 
@@ -223,69 +225,54 @@ void MainWindow::appendSpeedPoint(double speedAvg)
 
 void MainWindow::setupChart()
 {
-    // Same four QChart/QLineSeries channels as before; only the light theme,
-    // channel labels and gain read-outs are new. Antialiasing stays off (SC-44).
+    // Same four QChart/QLineSeries channels as before; only the theme, the
+    // channel chips and the single shared gain control are new. Antialiasing
+    // stays off (SC-44).
+    const Theme::Tokens& tokens = Theme::tokens();
+    QWidget *container = new QWidget();
     QVBoxLayout *vbox = new QVBoxLayout();
-    vbox->setSpacing(6);
+    vbox->setSpacing(8);
     vbox->setContentsMargins(0, 0, 0, 0);
 
-    struct ChannelStyle { QString name; QColor color; };
-    const ChannelStyle styles[4] = {
-        {QStringLiteral("A"), QColor(0x1D, 0x5F, 0xA8)},
-        {QStringLiteral("B"), QColor(0x1B, 0x7A, 0x4B)},
-        {QStringLiteral("C"), QColor(0x9A, 0x5B, 0x00)},
-        {QStringLiteral("D"), QColor(0x6B, 0x3F, 0xA0)}};
-    const QColor gridColor(0xEE, 0xF1, 0xF5);
-    const QColor axisColor(0xD5, 0xDB, 0xE3);
-    const QColor labelColor(0x5B, 0x65, 0x73);
+    const QString names[4] = {QStringLiteral("A"), QStringLiteral("B"), QStringLiteral("C"), QStringLiteral("D")};
     int channelIndex = 0;
 
     auto createChannel = [&](QLineSeries **seriesPtr,
                              QChart **chartPtr,
                              QChartView **viewPtr,
                              QSlider **sliderPtr) {
-        const ChannelStyle& style = styles[channelIndex++];
+        const int index = channelIndex++;
+        const QString& name = names[index];
 
         // 1. 曲线
         *seriesPtr = new QLineSeries();
-        QPen pen(style.color);
+        QPen pen(tokens.channel[index]);
         pen.setWidth(2);
         (*seriesPtr)->setPen(pen);
 
         // 2. 图表
         *chartPtr = new QChart();
         (*chartPtr)->addSeries(*seriesPtr);
-        (*chartPtr)->legend()->hide();
         (*chartPtr)->setMargins(QMargins(0, 0, 0, 0));
         (*chartPtr)->layout()->setContentsMargins(0, 0, 0, 0);
-        (*chartPtr)->setBackgroundRoundness(0);
-        (*chartPtr)->setBackgroundBrush(QBrush(Qt::white));
-        (*chartPtr)->setPlotAreaBackgroundBrush(QBrush(QColor(0xF7, 0xF9, 0xFB)));
-        (*chartPtr)->setPlotAreaBackgroundVisible(true);
+        Theme::styleChart(*chartPtr);
 
         // 3. X 轴：不显示横坐标数字，节省高度
         QValueAxis *axisX = new QValueAxis();
-        axisX->setTitleText("");
         axisX->setLabelFormat("%d");
-        axisX->setLabelsVisible(false);
-        axisX->setGridLineVisible(true);
-        axisX->setGridLineColor(gridColor);
-        axisX->setLinePenColor(axisColor);
+        Theme::styleValueAxis(axisX, false);
         (*chartPtr)->addAxis(axisX, Qt::AlignBottom);
         (*seriesPtr)->attachAxis(axisX);
 
         // 4. Y 轴：只保留 0 / 中间 / 4095
         QValueAxis *axisY = new QValueAxis();
-        axisY->setTitleText("");
         axisY->setRange(0, 4095);
         axisY->setTickCount(3);
         axisY->setLabelFormat("%.0f");
-        axisY->setLabelsColor(labelColor);
-        QFont axisFont = axisY->labelsFont();
-        axisFont.setPointSize(7);
-        axisY->setLabelsFont(axisFont);
-        axisY->setGridLineColor(gridColor);
-        axisY->setLinePenColor(axisColor);
+        Theme::styleValueAxis(axisY, true);
+        // Slightly smaller than other charts so all three ticks still fit when
+        // a channel is only ~50 px tall (1366 x 768).
+        axisY->setLabelsFont(Theme::numberFont(9, QFont::Normal));
         (*chartPtr)->addAxis(axisY, Qt::AlignLeft);
         (*seriesPtr)->attachAxis(axisY);
 
@@ -293,45 +280,33 @@ void MainWindow::setupChart()
         *viewPtr = new QChartView(*chartPtr);
         (*viewPtr)->setRenderHint(QPainter::Antialiasing, false);
         (*viewPtr)->setStyleSheet("background: transparent;");
+        (*viewPtr)->setFrameShape(QFrame::NoFrame);
         (*viewPtr)->setMinimumHeight(44);
         (*viewPtr)->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-        // 6. 增益滑条（四条联动，共用一个增益）
-        *sliderPtr = new QSlider(Qt::Vertical);
+        // 6. 增益滑条：四条仍然联动、共用一个增益，界面只在标题栏显示 A 一条
+        *sliderPtr = new QSlider(index == 0 ? Qt::Horizontal : Qt::Vertical, container);
         (*sliderPtr)->setRange(0, 1241);
         (*sliderPtr)->setValue(globalGain);
-        (*sliderPtr)->setInvertedAppearance(false);
         (*sliderPtr)->setTickPosition(QSlider::NoTicks);
-        (*sliderPtr)->setFixedWidth(24);
-        (*sliderPtr)->setMinimumHeight(24);
-        (*sliderPtr)->setCursor(Qt::PointingHandCursor);
-        (*sliderPtr)->setObjectName(QStringLiteral("gainSlider%1").arg(style.name));
-        (*sliderPtr)->setToolTip(QStringLiteral("增益（四个通道联动）"));
+        (*sliderPtr)->setObjectName(QStringLiteral("gainSlider%1").arg(name));
+        (*sliderPtr)->setToolTip(QStringLiteral("增益（四个通道共用）"));
         connect(*sliderPtr, &QSlider::valueChanged, this, &MainWindow::onGainSliderChanged);
+        if (index != 0) (*sliderPtr)->hide();
 
-        auto* channelLabel = new QLabel(style.name);
-        channelLabel->setObjectName(QStringLiteral("channelLabel%1").arg(style.name));
-        channelLabel->setFixedWidth(18);
+        auto* channelLabel = new QLabel(name);
+        channelLabel->setObjectName(QStringLiteral("channelLabel%1").arg(name));
+        channelLabel->setProperty("role", QStringLiteral("channelChip"));
+        channelLabel->setProperty("channel", name);
+        channelLabel->setFixedSize(26, 26);
         channelLabel->setAlignment(Qt::AlignCenter);
-        channelLabel->setStyleSheet(QStringLiteral("font-weight:bold; font-size:14px; color:%1;")
-                                        .arg(style.color.name()));
 
-        auto* gainValue = new QLabel(QString::number(globalGain));
-        gainValue->setProperty("role", QStringLiteral("tiny"));
-        gainValue->setAlignment(Qt::AlignCenter);
-        gainValueLabels.append(gainValue);
-        auto* gainColumn = new QVBoxLayout();
-        gainColumn->setSpacing(0);
-        gainColumn->addWidget(*sliderPtr, 1, Qt::AlignHCenter);
-        gainColumn->addWidget(gainValue);
-
-        // 7. 一行：通道名 + 图 + 增益
+        // 7. 一行：通道标签 + 图
         QHBoxLayout *hbox = new QHBoxLayout();
         hbox->setContentsMargins(0, 0, 0, 0);
-        hbox->setSpacing(6);
-        hbox->addWidget(channelLabel);
+        hbox->setSpacing(10);
+        hbox->addWidget(channelLabel, 0, Qt::AlignVCenter);
         hbox->addWidget(*viewPtr, 1);
-        hbox->addLayout(gainColumn);
         vbox->addLayout(hbox, 1);
     };
 
@@ -340,8 +315,27 @@ void MainWindow::setupChart()
     createChannel(&seriesC, &chartC, &viewC, &gainSliderC);
     createChannel(&seriesD, &chartD, &viewD, &gainSliderD);
 
-    QWidget *container = new QWidget();
     container->setLayout(vbox);
+
+    // The shared gain lives in the card header next to the title.
+    QHBoxLayout* header = ui->grpWaveArea->layout()
+        ? ui->grpWaveArea->layout()->findChild<QHBoxLayout*>(QStringLiteral("waveHeader")) : nullptr;
+    if (header) {
+        auto* gainCaption = new QLabel(QStringLiteral("增益"), ui->grpWaveArea);
+        gainCaption->setProperty("role", QStringLiteral("caption"));
+        header->addWidget(gainCaption);
+        gainSliderA->setParent(ui->grpWaveArea);
+        gainSliderA->setFixedWidth(150);
+        gainSliderA->show();
+        header->addWidget(gainSliderA);
+        auto* gainValue = new QLabel(QString::number(globalGain), ui->grpWaveArea);
+        gainValue->setObjectName(QStringLiteral("gainValue"));
+        gainValue->setAlignment(Qt::AlignCenter);
+        gainValue->setMinimumWidth(48);
+        gainValue->setToolTip(QStringLiteral("当前增益"));
+        gainValueLabels.append(gainValue);
+        header->addWidget(gainValue);
+    }
 
     // 不套 QScrollArea，避免出现滚动条
     ui->verticalLayoutChart->setContentsMargins(0, 0, 0, 0);
@@ -390,7 +384,7 @@ void MainWindow::setupSpeedChart()
     seriesSpeed = new QLineSeries();
     seriesSpeed->setName("声速趋势");
 
-    QPen pen(QColor(0x1D, 0x5F, 0xA8));
+    QPen pen(Theme::tokens().accent);
     pen.setWidth(2);
     seriesSpeed->setPen(pen);
 
@@ -402,33 +396,18 @@ void MainWindow::setupSpeedChart()
 
     // 节省空间：不显示标题、不显示图例
     chartSpeed->setTitle("");
-    chartSpeed->legend()->hide();
-
-    // 压缩边距
-    chartSpeed->setMargins(QMargins(2, 2, 2, 2));
-    chartSpeed->setBackgroundRoundness(0);
-
-    chartSpeed->setBackgroundBrush(QBrush(Qt::white));
-    chartSpeed->setPlotAreaBackgroundBrush(QBrush(QColor(0xF7, 0xF9, 0xFB)));
-    chartSpeed->setPlotAreaBackgroundVisible(true);
+    chartSpeed->setMargins(QMargins(0, 2, 2, 0));
+    chartSpeed->layout()->setContentsMargins(0, 0, 0, 0);
+    Theme::styleChart(chartSpeed);
 
     // ======================================================
     // 3. X轴：时间/次数
     // ======================================================
     QValueAxis *axisX = new QValueAxis();
-    axisX->setTitleText("");
     axisX->setRange(0, 50);
     axisX->setTickCount(6);          // 0,10,20,30,40,50
     axisX->setLabelFormat("%d");
-
-    axisX->setLabelsColor(QColor(0x5B, 0x65, 0x73));
-    axisX->setGridLineColor(QColor(0xEE, 0xF1, 0xF5));
-    axisX->setLinePenColor(QColor(0xD5, 0xDB, 0xE3));
-
-    QFont fontX = axisX->labelsFont();
-    fontX.setPointSize(8);
-    axisX->setLabelsFont(fontX);
-
+    Theme::styleValueAxis(axisX, true);
     chartSpeed->addAxis(axisX, Qt::AlignBottom);
     seriesSpeed->attachAxis(axisX);
 
@@ -436,19 +415,10 @@ void MainWindow::setupSpeedChart()
     // 4. Y轴：声速范围固定 2000~5000
     // ======================================================
     QValueAxis *axisY = new QValueAxis();
-    axisY->setTitleText("");
     axisY->setRange(2000, 5000);
     axisY->setTickCount(4);          // 2000,3000,4000,5000
     axisY->setLabelFormat("%.0f");
-
-    axisY->setLabelsColor(QColor(0x5B, 0x65, 0x73));
-    axisY->setGridLineColor(QColor(0xEE, 0xF1, 0xF5));
-    axisY->setLinePenColor(QColor(0xD5, 0xDB, 0xE3));
-
-    QFont fontY = axisY->labelsFont();
-    fontY.setPointSize(8);
-    axisY->setLabelsFont(fontY);
-
+    Theme::styleValueAxis(axisY, true);
     chartSpeed->addAxis(axisY, Qt::AlignLeft);
     seriesSpeed->attachAxis(axisY);
 
@@ -458,6 +428,7 @@ void MainWindow::setupSpeedChart()
     ui->chartViewSpeed->setChart(chartSpeed);
     ui->chartViewSpeed->setRenderHint(QPainter::Antialiasing, false);
     ui->chartViewSpeed->setStyleSheet("background: transparent;");
+    ui->chartViewSpeed->setFrameShape(QFrame::NoFrame);
 }
 
 void MainWindow::setupSpeedDebugPanel()
@@ -467,25 +438,43 @@ void MainWindow::setupSpeedDebugPanel()
 
     QFrame *panel = new QFrame(host);
     panel->setObjectName("speedDebugPanel");
-    auto *grid = new QGridLayout(panel);
-    grid->setContentsMargins(12, 6, 12, 6);
-    grid->setHorizontalSpacing(18);
-    grid->setVerticalSpacing(0);
+    auto *row = new QHBoxLayout(panel);
+    row->setContentsMargins(0, 0, 0, 0);
+    row->setSpacing(0);
 
     lblSosA = new QLabel("--");
     lblSosB = new QLabel("--");
     lblSosAvg = new QLabel("--");
     lblSosInfo = new QLabel("等待测量...");
     lblSosInfo->setObjectName("speedDebugInfo");
-    const QStringList captions = {QStringLiteral("通道 A"), QStringLiteral("通道 B（输出）"),
+    const QStringList captions = {QStringLiteral("通道 A"), QStringLiteral("通道 B"),
                                   QStringLiteral("平均 m/s")};
     const QList<QLabel*> values = {lblSosA, lblSosB, lblSosAvg};
     for (int i = 0; i < values.size(); ++i) {
-        auto *caption = new QLabel(captions[i]);
+        auto *cell = new QFrame(panel);
+        cell->setProperty("role", QStringLiteral("cell"));
+        cell->setProperty("divider", i > 0);
+        auto *cellLayout = new QVBoxLayout(cell);
+        cellLayout->setContentsMargins(16, 9, 16, 9);
+        cellLayout->setSpacing(1);
+        auto *captionRow = new QHBoxLayout;
+        captionRow->setSpacing(6);
+        auto *caption = new QLabel(captions[i], cell);
         caption->setProperty("role", QStringLiteral("caption"));
+        captionRow->addWidget(caption);
+        if (values[i] == lblSosB) {
+            // B is the channel the result is computed from.
+            auto *badge = new QLabel(QStringLiteral("输出"), cell);
+            badge->setProperty("role", QStringLiteral("badge"));
+            captionRow->addWidget(badge);
+            lblSosB->setProperty("accent", true);
+        }
+        captionRow->addStretch(1);
+        cellLayout->addLayout(captionRow);
+        values[i]->setParent(cell);
         values[i]->setProperty("role", QStringLiteral("statValue"));
-        grid->addWidget(caption, 0, i);
-        grid->addWidget(values[i], 1, i);
+        cellLayout->addWidget(values[i]);
+        row->addWidget(cell, 1);
     }
 
     if (QBoxLayout *box = qobject_cast<QBoxLayout*>(host->layout())) {
@@ -542,32 +531,47 @@ void MainWindow::setSpeedDebugInvalid(const QString& reason)
 
 void MainWindow::initProcessPanel()
 {
+    const Theme::Tokens& tokens = Theme::tokens();
     processValidCount = 0;
     // This layout replaces only the approved process area, not the reference chart.
     ui->lblProcessTitle->hide();
     ui->lblGateStats->hide();
     auto* outer = new QVBoxLayout(ui->grpProcessArea);
-    outer->setContentsMargins(14, 38, 14, 12);
-    outer->addWidget(ui->widgetBalanceArea);
+    outer->setContentsMargins(20, 16, 20, 16);
+    outer->setSpacing(10);
+    auto* cardHeader = new QHBoxLayout;
+    cardHeader->setSpacing(10);
+    auto* cardTitle = new QLabel(QStringLiteral("检测过程"), ui->grpProcessArea);
+    cardTitle->setProperty("role", QStringLiteral("cardTitle"));
+    cardHeader->addWidget(cardTitle);
+    cardHeader->addStretch(1);
+    ui->btnMeasurementGuide->setStyleSheet(QString());
+    ui->btnMeasurementGuide->setProperty("variant", QStringLiteral("soft"));
+    ui->btnMeasurementGuide->setProperty("btnSize", QStringLiteral("small"));
+    ui->btnMeasurementGuide->setIcon(Icons::icon(Icons::Glyph::Help, tokens.accentInk));
+    ui->btnMeasurementGuide->setIconSize(QSize(15, 15));
+    ui->btnMeasurementGuide->setMinimumSize(96, 30);
+    cardHeader->addWidget(ui->btnMeasurementGuide);
+    outer->addLayout(cardHeader);
+    outer->addWidget(ui->widgetBalanceArea, 1);
+
     auto* root = new QVBoxLayout(ui->widgetBalanceArea);
     root->setContentsMargins(0, 0, 0, 0);
-    root->setSpacing(7);
-    ui->widgetBalanceArea->setStyleSheet(QStringLiteral(
-        "QLabel { color:#1A2330; font-size:13px; background:transparent; }"
-        "QFrame#corrACard { background:white; border:1.5px solid #9CC3EE; border-radius:8px; }"
-        "QFrame#gCard { background:white; border:1px solid #E1E6EC; border-radius:8px; }"));
+    root->setSpacing(10);
+    ui->widgetBalanceArea->setStyleSheet(QString());
     auto* header = new QHBoxLayout;
+    header->setSpacing(10);
     ui->lblProcessStatus->setWordWrap(true);
+    ui->lblProcessStatus->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     ui->lblProcessStatus->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
     header->addWidget(ui->lblProcessStatus, 1);
-    ui->btnMeasurementGuide->setMinimumSize(82, 28);
-    ui->btnMeasurementGuide->setStyleSheet(QStringLiteral(
-        "QPushButton { color:#1D5FA8; background:#E7F0FA; border:none;"
-        " border-radius:8px; padding:4px 12px; font-size:13px; font-weight:bold; }"
-        "QPushButton:disabled { color:#A3ACB8; background:#F2F4F7; }"));
-    header->addWidget(ui->btnMeasurementGuide);
+    roundProgress = new RoundProgress(ui->widgetBalanceArea);
+    roundProgress->setObjectName(QStringLiteral("roundProgress"));
+    roundProgress->setToolTip(QStringLiteral("5 轮检测进度"));
+    roundProgress->hide();
+    header->addWidget(roundProgress, 0, Qt::AlignVCenter);
     root->addLayout(header);
-    ui->barMeasureProgress->setFixedHeight(20);
+    ui->barMeasureProgress->setFixedHeight(24);
     root->addWidget(ui->barMeasureProgress);
 
     auto label = [](const QString& text, const QString& name) {
@@ -577,48 +581,51 @@ void MainWindow::initProcessPanel()
         return value;
     };
     auto* cards = new QHBoxLayout;
-    cards->setSpacing(8);
+    cards->setSpacing(10);
     auto* aCard = new QFrame;
     aCard->setObjectName(QStringLiteral("corrACard"));
     auto* aLayout = new QVBoxLayout(aCard);
-    aLayout->setContentsMargins(10, 9, 10, 9);
-    aLayout->setSpacing(5);
+    aLayout->setContentsMargins(14, 12, 14, 12);
+    aLayout->setSpacing(6);
+    auto* aHeader = new QHBoxLayout;
+    aHeader->setSpacing(8);
     auto* aTitle = label(QStringLiteral("① 优先调整  corrA"), QStringLiteral("corrATitle"));
-    aTitle->setStyleSheet(QStringLiteral("color:#1D5FA8; font-size:14px; font-weight:bold;"));
-    aLayout->addWidget(aTitle);
+    aTitle->setWordWrap(false);
+    aHeader->addWidget(aTitle, 1);
+    lblCorrAStatus = label(QStringLiteral("等待信号"), QStringLiteral("lblCorrAStatus"));
+    lblCorrAStatus->setWordWrap(false);
+    aHeader->addWidget(lblCorrAStatus, 0, Qt::AlignVCenter);
+    aLayout->addLayout(aHeader);
     auto* aBody = new QHBoxLayout;
-    aBody->setSpacing(10);
+    aBody->setSpacing(14);
     auto* scale = new QVBoxLayout;
-    scale->setSpacing(2);
+    scale->setSpacing(3);
     scale->addWidget(label(QStringLiteral("1.00"), QStringLiteral("corrAScaleTop")), 0, Qt::AlignHCenter);
     barCorrA = new QProgressBar;
     barCorrA->setObjectName(QStringLiteral("barCorrA"));
     barCorrA->setOrientation(Qt::Vertical);
     barCorrA->setRange(0, 1000);
     barCorrA->setTextVisible(false);
-    barCorrA->setFixedWidth(40);
+    barCorrA->setFixedWidth(14);
     barCorrA->setMinimumHeight(82);
-    scale->addWidget(barCorrA, 1);
+    scale->addWidget(barCorrA, 1, Qt::AlignHCenter);
     scale->addWidget(label(QStringLiteral("0.00"), QStringLiteral("corrAScaleBottom")), 0, Qt::AlignHCenter);
     aBody->addLayout(scale);
     auto* aValues = new QVBoxLayout;
-    aValues->setSpacing(5);
+    aValues->setSpacing(4);
     aValues->addStretch();
     lblCorrAValue = label(QStringLiteral("—"), QStringLiteral("lblCorrAValue"));
-    lblCorrAValue->setStyleSheet(QStringLiteral("font-size:28px; font-weight:bold;"));
     lblCorrAValue->setWordWrap(false);
-    lblCorrAStatus = label(QStringLiteral("等待信号"), QStringLiteral("lblCorrAStatus"));
     lblCorrAThreshold = label(QString(), QStringLiteral("lblCorrAThreshold"));
     aValues->addWidget(lblCorrAValue);
-    aValues->addWidget(lblCorrAStatus);
     aValues->addWidget(lblCorrAThreshold);
-    aValues->addWidget(label(QStringLiteral("达到要求即可\n不必追求满格"), QStringLiteral("corrAHelp")));
+    aValues->addWidget(label(QStringLiteral("达到要求即可，不必追求满格"), QStringLiteral("corrAHelp")));
     aValues->addStretch();
     aBody->addLayout(aValues, 1);
     aLayout->addLayout(aBody, 1);
     ui->lblPositionGuide->setText(QStringLiteral("先调整探头长轴方向"));
     ui->lblPositionGuide->setWordWrap(true);
-    ui->lblPositionGuide->setStyleSheet(QStringLiteral("font-size:13px; font-weight:bold; color:#1D5FA8;"));
+    ui->lblPositionGuide->setStyleSheet(QStringLiteral("font-weight:bold;"));
     aLayout->addWidget(ui->lblPositionGuide);
     aLayout->addWidget(label(QStringLiteral("沿桡骨方向小幅旋转，观察 corrA。"), QStringLiteral("corrAAction")));
     cards->addWidget(aCard, 3);
@@ -626,21 +633,22 @@ void MainWindow::initProcessPanel()
     auto* gCard = new QFrame;
     gCard->setObjectName(QStringLiteral("gCard"));
     auto* gLayout = new QVBoxLayout(gCard);
-    gLayout->setContentsMargins(10, 9, 10, 9);
-    gLayout->setSpacing(5);
+    gLayout->setContentsMargins(14, 12, 14, 12);
+    gLayout->setSpacing(6);
     ui->lblBPairTitle->setText(QStringLiteral("② 辅助调整  G"));
     ui->lblBPairTitle->setWordWrap(true);
-    ui->lblBPairTitle->setStyleSheet(QStringLiteral("font-size:14px; font-weight:bold;"));
+    ui->lblBPairTitle->setStyleSheet(QString());
     gLayout->addWidget(ui->lblBPairTitle);
     auto* gBody = new QHBoxLayout;
-    gBody->setSpacing(8);
-    ui->barPairB->setFixedWidth(28);
+    gBody->setSpacing(14);
+    ui->barPairB->setFixedWidth(14);
     ui->barPairB->setMinimumHeight(100);
     ui->barPairB->setTextVisible(false);
-    gBody->addWidget(ui->barPairB);
+    gBody->addWidget(ui->barPairB, 0, Qt::AlignHCenter);
     auto* gValues = new QVBoxLayout;
+    gValues->setSpacing(4);
     gValues->addStretch();
-    ui->lblPairBValue->setStyleSheet(QStringLiteral("font-size:17px; font-weight:bold;"));
+    ui->lblPairBValue->setStyleSheet(QString());
     ui->lblPairBValue->setWordWrap(false);
     gValues->addWidget(ui->lblPairBValue);
     lblGStatus = label(QStringLiteral("等待信号"), QStringLiteral("lblGStatus"));
@@ -656,26 +664,36 @@ void MainWindow::initProcessPanel()
     root->addLayout(cards, 1);
 
     auto* auxiliary = new QHBoxLayout;
-    auxiliary->setSpacing(8);
+    auxiliary->setSpacing(10);
     ui->lblAPairTitle->setText(QStringLiteral("辅助 D"));
-    ui->lblAPairTitle->setStyleSheet(QStringLiteral("font-size:12px;"));
+    ui->lblAPairTitle->setStyleSheet(QString());
     ui->barPairA->setOrientation(Qt::Horizontal);
-    ui->barPairA->setFixedSize(64, 10);
+    ui->barPairA->setFixedSize(72, 6);
     ui->barPairA->setTextVisible(false);
-    ui->lblPairAValue->setStyleSheet(QStringLiteral("font-size:12px;"));
+    ui->lblPairAValue->setStyleSheet(QString());
     lblDStatus = label(QStringLiteral("等待信号"), QStringLiteral("lblDStatus"));
     auxiliary->addWidget(ui->lblAPairTitle);
-    auxiliary->addWidget(ui->barPairA);
+    auxiliary->addWidget(ui->barPairA, 0, Qt::AlignVCenter);
     auxiliary->addWidget(ui->lblPairAValue);
     auxiliary->addWidget(lblDStatus);
     auxiliary->addStretch();
     root->addLayout(auxiliary);
+
+    auto* note = new QFrame(ui->widgetBalanceArea);
+    note->setObjectName(QStringLiteral("guideNote"));
+    auto* noteLayout = new QHBoxLayout(note);
+    noteLayout->setContentsMargins(12, 9, 12, 9);
+    noteLayout->setSpacing(8);
+    auto* noteIcon = new QLabel(note);
+    noteIcon->setPixmap(Icons::icon(Icons::Glyph::Info, tokens.accentInk).pixmap(QSize(15, 15), 2.0));
+    noteIcon->setFixedSize(15, 15);
+    noteLayout->addWidget(noteIcon, 0, Qt::AlignTop);
     ui->lblPositionGuideNote->setText(QStringLiteral(
         "优先让 corrA 达到要求；连续计数后保持稳定。提示仅供参考，以有效值计数为准。"));
     ui->lblPositionGuideNote->setWordWrap(true);
-    ui->lblPositionGuideNote->setStyleSheet(QStringLiteral(
-        "color:#174D8A; background:#EEF4FB; border-radius:8px; padding:8px 12px; font-size:13px;"));
-    root->addWidget(ui->lblPositionGuideNote);
+    ui->lblPositionGuideNote->setStyleSheet(QString());
+    noteLayout->addWidget(ui->lblPositionGuideNote, 1);
+    root->addWidget(note);
 
     // ======================================================
     // 1. 两个竖向进度条
@@ -705,32 +723,19 @@ void MainWindow::initProcessPanel()
     ui->lblPairAValue->setText("D=--");
     ui->lblPairBValue->setText("G=--");
     ui->lblProcessStatus->setText("等待开始测量");
+    ui->lblProcessStatus->setStyleSheet(QString());
+    Theme::setTone(ui->lblProcessStatus, Theme::Tone::Muted);
     ui->lblProcessStatus->setWordWrap(true);
     ui->lblProcessStatus->setMinimumHeight(0);
     ui->lblGateStats->setText("");
     ui->lblGateStats->setWordWrap(true);
 
     // ======================================================
-    // 4. 进度条样式
+    // 4. 进度条样式：全部在 theme.qss（按 objectName 与 tone）
     // ======================================================
-    QString barStyle = R"(
-        QProgressBar {
-            border: none;
-            border-radius: 6px;
-            background-color: #EEF1F5;
-            color: #1A2330;
-            text-align: center;
-        }
-        QProgressBar::chunk {
-            background-color: #168368;
-            border-radius: 6px;
-        }
-    )";
-
-    ui->barPairA->setStyleSheet(QString(barStyle).replace("#168368", "#1D5FA8"));
-    ui->barPairB->setStyleSheet(QString(barStyle).replace("#168368", "#1D5FA8"));
-    ui->barMeasureProgress->setStyleSheet(barStyle);
-    barCorrA->setStyleSheet(barStyle);
+    for (auto* bar : {ui->barPairA, ui->barPairB, ui->barMeasureProgress}) {
+        bar->setStyleSheet(QString());
+    }
     for (auto* bar : {ui->barPairA, ui->barPairB, barCorrA}) {
         bar->installEventFilter(this);
     }
@@ -757,7 +762,7 @@ void MainWindow::addMiddleLineToProgressBar(QProgressBar *bar)
         line = new QFrame(bar);
         line->setObjectName("middleLine");
         line->setFrameShape(QFrame::NoFrame);
-        line->setStyleSheet("background-color: #63758a;");
+        line->setStyleSheet(QStringLiteral("background-color: %1;").arg(Theme::tokens().ink900.name()));
         line->setAttribute(Qt::WA_TransparentForMouseEvents);
     }
 
@@ -799,14 +804,9 @@ void MainWindow::updateCorrAFeedback(double corrA)
     const bool meets = available && corrA >= mCfg.frameCorrAMin;
     lblCorrAStatus->setText(!available ? QStringLiteral("等待信号")
                                      : meets ? QStringLiteral("已达标") : QStringLiteral("未达标"));
-    const QString statusStyle = QStringLiteral("color:%1; font-size:12px;")
-        .arg(!available ? "#738194" : meets ? "#168368" : "#a66b14");
-    if (lblCorrAStatus->styleSheet() != statusStyle) lblCorrAStatus->setStyleSheet(statusStyle);
-    const QString barStyle = QStringLiteral(
-        "QProgressBar {border:1px solid #cad4df; border-radius:4px; background:#e8edf3;}"
-        "QProgressBar::chunk {background:%1; border-radius:3px;}")
-        .arg(!available ? "#bdc7d2" : meets ? "#168368" : "#d4a34b");
-    if (barCorrA->styleSheet() != barStyle) barCorrA->setStyleSheet(barStyle);
+    const Theme::Tone tone = !available ? Theme::Tone::Muted : meets ? Theme::Tone::Ok : Theme::Tone::Warn;
+    Theme::setTone(lblCorrAStatus, tone);
+    Theme::setTone(barCorrA, tone);
 }
 
 void MainWindow::clearFeedbackReadings()

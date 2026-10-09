@@ -60,29 +60,58 @@
 #include <QtPrintSupport/QPrintDialog>
 #include <QtPrintSupport/QPrinter>
 #include "mainwindow_internal.h"
+#include "theme.h"
+#include "uikit.h"
 
 using namespace mainwindow_detail;
 
 
 void MainWindow::setupReportPage()
 {
+    const Theme::Tokens& tokens = Theme::tokens();
     QVBoxLayout* pageLayout = new QVBoxLayout(ui->pageReport);
-    pageLayout->setContentsMargins(16, 12, 16, 12);
-    pageLayout->setSpacing(10);
+    pageLayout->setContentsMargins(0, 0, 0, 0);
+    pageLayout->setSpacing(0);
 
-    QHBoxLayout* toolbar = new QHBoxLayout();
-    QPushButton* backButton = new QPushButton("返回", ui->pageReport);
+    auto* toolbarFrame = new QFrame(ui->pageReport);
+    toolbarFrame->setObjectName(QStringLiteral("mainToolbar"));
+    toolbarFrame->setFixedHeight(64);
+    QHBoxLayout* toolbar = new QHBoxLayout(toolbarFrame);
+    toolbar->setContentsMargins(20, 0, 24, 0);
+    toolbar->setSpacing(8);
+    QPushButton* backButton = new QPushButton("返回", toolbarFrame);
     backButton->setObjectName(QStringLiteral("reportBackButton"));
-    QPushButton* exportButton = new QPushButton("导出 PDF", ui->pageReport);
-    QPushButton* printButton = new QPushButton("打印", ui->pageReport);
+    backButton->setProperty("variant", QStringLiteral("ghost"));
+    backButton->setIcon(Icons::icon(Icons::Glyph::ChevronLeft, tokens.ink700));
+    auto* title = new QLabel(QStringLiteral("报表预览"), toolbarFrame);
+    title->setObjectName(QStringLiteral("appTitle"));
+    QPushButton* exportButton = new QPushButton("导出 PDF", toolbarFrame);
+    exportButton->setIcon(Icons::icon(Icons::Glyph::FileDown, tokens.ink700));
+    QPushButton* printButton = new QPushButton("打印", toolbarFrame);
+    printButton->setProperty("variant", QStringLiteral("primary"));
+    printButton->setIcon(Icons::icon(Icons::Glyph::Printer, Qt::white));
+    for (QPushButton* button : {backButton, exportButton, printButton}) {
+        button->setIconSize(QSize(16, 16));
+        button->setMinimumHeight(36);
+    }
+    auto* divider = new QFrame(toolbarFrame);
+    divider->setObjectName(QStringLiteral("toolbarSeparator"));
+    divider->setFixedSize(1, 24);
     toolbar->addWidget(backButton);
+    toolbar->addWidget(divider);
+    toolbar->addSpacing(4);
+    toolbar->addWidget(title);
     toolbar->addStretch();
     toolbar->addWidget(exportButton);
     toolbar->addWidget(printButton);
-    pageLayout->addLayout(toolbar);
+    pageLayout->addWidget(toolbarFrame);
 
     reportWidget = new ReportWidget(ui->pageReport);
-    pageLayout->addWidget(reportWidget, 1);
+    auto* reportArea = new QWidget(ui->pageReport);
+    auto* reportLayout = new QVBoxLayout(reportArea);
+    reportLayout->setContentsMargins(20, 16, 20, 16);
+    reportLayout->addWidget(reportWidget, 1);
+    pageLayout->addWidget(reportArea, 1);
 
     connect(backButton, &QPushButton::clicked, this, [this]() {
         ui->stackedWidget->setCurrentWidget(reportReturnPage ? reportReturnPage : ui->pageMain);

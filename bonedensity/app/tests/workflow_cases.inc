@@ -38,7 +38,7 @@ void MainWindowSafetyTests::accountMenuSwitchesOperatorSafely()
     window.currentAccount.username = QStringLiteral("admin");
     window.currentAccount.role = QStringLiteral("admin");
     window.updateAccountUi();
-    QCOMPARE(window.btnAccount->text(), QStringLiteral("账号 admin"));
+    QCOMPARE(window.btnAccount->text(), QStringLiteral("admin"));
     QVERIFY(window.actManageAccounts->isVisible());
     window.currentAccount.username = QStringLiteral("zhang");
     window.currentAccount.role = QStringLiteral("user");

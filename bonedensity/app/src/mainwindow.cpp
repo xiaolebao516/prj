@@ -60,6 +60,7 @@
 #include <QtPrintSupport/QPrintDialog>
 #include <QtPrintSupport/QPrinter>
 #include "mainwindow_internal.h"
+#include "uikit.h"
 
 using namespace mainwindow_detail;
 
@@ -495,8 +496,10 @@ void MainWindow::updateAccountUi()
 {
     if (!btnAccount) return;
     const bool loggedIn = !currentAccount.username.isEmpty();
-    btnAccount->setText(loggedIn ? QStringLiteral("账号 %1").arg(currentAccount.username)
-                                 : QStringLiteral("未登录"));
+    btnAccount->setText(loggedIn ? currentAccount.username : QStringLiteral("未登录"));
+    btnAccount->setIcon(QIcon(AvatarBadge::render(loggedIn ? currentAccount.username : QString(),
+                                                  28, 2.0, false)));
+    btnAccount->setToolTip(loggedIn ? QStringLiteral("当前账号：%1").arg(currentAccount.username) : QString());
     if (actManageAccounts) actManageAccounts->setVisible(currentAccount.role == QStringLiteral("admin"));
 }
 

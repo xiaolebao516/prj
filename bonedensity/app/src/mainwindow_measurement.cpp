@@ -60,6 +60,7 @@
 #include <QtPrintSupport/QPrintDialog>
 #include <QtPrintSupport/QPrinter>
 #include "mainwindow_internal.h"
+#include "theme.h"
 
 using namespace mainwindow_detail;
 
@@ -226,9 +227,7 @@ void MainWindow::startPatientMeasurement(int targetRounds, bool offerFirstUseGui
             .arg(nextRound)
             .arg(normalMeasureRounds));
 
-    ui->lblProcessStatus->setStyleSheet(
-        "font-size: 14px; color: #1D5FA8; font-weight: bold;"
-        );
+    Theme::setTone(ui->lblProcessStatus, Theme::Tone::Info);
 
     autoTimer->start(80);
     updatePatientSelectionUi();
@@ -460,9 +459,7 @@ void MainWindow::resetAllPatientMeasurementData()
 
     clearFeedbackReadings();
     ui->lblProcessStatus->setText("等待开始测量");
-    ui->lblProcessStatus->setStyleSheet(
-        "font-size: 12px; color: #606266;"
-        );
+    Theme::setTone(ui->lblProcessStatus, Theme::Tone::Muted);
 
     if (seriesSpeed) {
         seriesSpeed->clear();
@@ -719,9 +716,7 @@ void MainWindow::finishOnePatientRound()
             QString("第 %1/%2 轮未计入｜数据稳定性不足，请按界面提示调整后重新测量")
                 .arg(rejectedRound)
                 .arg(normalMeasureRounds));
-        ui->lblProcessStatus->setStyleSheet(
-            "font-size: 14px; color: #9A5B00; font-weight: bold;"
-            );
+        Theme::setTone(ui->lblProcessStatus, Theme::Tone::Warn);
 
         showRoundFinishedTip(roundSosList.size(), normalMeasureRounds, false);
         return;
@@ -796,9 +791,7 @@ void MainWindow::finishOnePatientRound()
             .arg(finished)
             .arg(normalMeasureRounds));
 
-    ui->lblProcessStatus->setStyleSheet(
-        "font-size: 14px; color: #1D5FA8; font-weight: bold;"
-        );
+    Theme::setTone(ui->lblProcessStatus, Theme::Tone::Info);
 
     showRoundFinishedTip(finished, normalMeasureRounds);
     scheduleNextPatientRound(finished);
@@ -858,8 +851,7 @@ void MainWindow::finishAllPatientRounds()
         stopPatientMeasurement();
         ui->lblProcessStatus->setText(
             QStringLiteral("上一次检测结果尚未保存，请先点击“保存结果”。"));
-        ui->lblProcessStatus->setStyleSheet(
-            "font-size: 14px; color: #9A5B00; font-weight: bold;");
+        Theme::setTone(ui->lblProcessStatus, Theme::Tone::Warn);
         updatePatientSelectionUi();
         return;
     }
@@ -870,9 +862,7 @@ void MainWindow::finishAllPatientRounds()
                 .arg(roundSosList.size())
                 .arg(normalMeasureRounds)
             );
-        ui->lblProcessStatus->setStyleSheet(
-            "font-size: 14px; color: #9A5B00; font-weight: bold;"
-            );
+        Theme::setTone(ui->lblProcessStatus, Theme::Tone::Warn);
         return;
     }
 
@@ -937,9 +927,7 @@ void MainWindow::finishAllPatientRounds()
         QString("5 次测量完成：最终 SOS=%1 m/s")
             .arg(finalSos, 0, 'f', 1)
         );
-    ui->lblProcessStatus->setStyleSheet(
-        "font-size: 14px; color: #1B7A4B; font-weight: bold;"
-        );
+    Theme::setTone(ui->lblProcessStatus, Theme::Tone::Ok);
 
     showPatientMeasureFinishedDialog(completedMeasurement);
 
@@ -2451,9 +2439,7 @@ void MainWindow::on_btnStartMeasurement_clicked()
         ui->barMeasureProgress->setFormat("有效值：%v / %m");
         clearFeedbackReadings();
         ui->lblProcessStatus->setText("检测已手动停止");
-        ui->lblProcessStatus->setStyleSheet(
-            "font-size: 14px; color: #9A5B00; font-weight: bold;"
-            );
+        Theme::setTone(ui->lblProcessStatus, Theme::Tone::Warn);
         return;
     }
 

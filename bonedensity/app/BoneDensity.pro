@@ -61,7 +61,9 @@ SOURCES += \
     src/parametergroup.cpp \
     src/datalocation.cpp \
     src/utils.cpp \
-    src/patientformdialog.cpp
+    src/patientformdialog.cpp \
+    src/theme.cpp \
+    src/uikit.cpp
 
 HEADERS += \
     include/measurementexperimentlog.h \
@@ -84,7 +86,9 @@ HEADERS += \
     include/parametergroup.h \
     include/datalocation.h \
     include/utils.h \
-    include/patientformdialog.h
+    include/patientformdialog.h \
+    include/theme.h \
+    include/uikit.h
 
 FORMS += \
     ui/mainwindow.ui

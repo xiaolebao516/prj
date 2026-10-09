@@ -60,6 +60,7 @@
 #include <QtPrintSupport/QPrintDialog>
 #include <QtPrintSupport/QPrinter>
 #include "mainwindow_internal.h"
+#include "theme.h"
 
 using namespace mainwindow_detail;
 
@@ -242,9 +243,7 @@ void MainWindow::on_triggerButton_clicked()
         ui->barMeasureProgress->setFormat("有效值：%v / %m");
         clearFeedbackReadings();
         ui->lblProcessStatus->setText("检测已手动停止");
-        ui->lblProcessStatus->setStyleSheet(
-            "font-size: 14px; color: #9A5B00; font-weight: bold;"
-            );
+        Theme::setTone(ui->lblProcessStatus, Theme::Tone::Warn);
         return;
     }
 
@@ -302,9 +301,7 @@ void MainWindow::on_btnAcquireWaveform_clicked()
         ui->barMeasureProgress->setFormat("有效值：%v / %m");
         clearFeedbackReadings();
         ui->lblProcessStatus->setText("检测已手动停止");
-        ui->lblProcessStatus->setStyleSheet(
-            "font-size: 14px; color: #9A5B00; font-weight: bold;"
-            );
+        Theme::setTone(ui->lblProcessStatus, Theme::Tone::Warn);
         return;
     }
 
