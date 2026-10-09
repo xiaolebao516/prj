@@ -15,7 +15,7 @@ A build proves compilation/deployment only. The calibration suite proves only it
 ## Reproduction Entry Points
 
 - `powershell -ExecutionPolicy Bypass -File ./build-debug.ps1`: canonical Qt 6.5.3 / MinGW 11.2 clean Debug build.
-- `powershell -ExecutionPolicy Bypass -File ./test-calibration.ps1`: calibration formula, boundary, candidate-isolation, permission, persistence, recovery, and UI checks.
+- `powershell -ExecutionPolicy Bypass -File ./test.ps1` runs every automated suite; `-Suite calibration`: calibration formula, boundary, candidate-isolation, permission, persistence, recovery, and UI checks.
 - `testdata/age-sos-reference/`: anonymous four-population, age-boundary, newest-record, legacy-record, empty, and out-of-range demonstrations.
 - [probe-calibration-research.md](../../docs/research/probe-calibration-research.md): formal-source and formula rationale for calibration evidence.
 - `docs/evidence/<date>-<feature>/`: only a minimal reproducible set of approved visual evidence when needed.

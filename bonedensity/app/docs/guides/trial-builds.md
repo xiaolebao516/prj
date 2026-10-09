@@ -1,6 +1,6 @@
 # 试测版本与源码说明
 
-`build/.../debug/` 是程序运行目录，只保存 EXE、Qt 运行库和运行数据，不保存一份重复的 C++ 源码。所有版本共同使用项目根目录下的 `src/`、`include/`、`ui/` 和 `resources/`。
+`build/.../debug/` 是程序运行目录，只保存 EXE、Qt 运行库和运行数据，不保存一份重复的 C++ 源码。所有版本共同使用项目根目录下的 `src/` 和 `resources/`。
 
 ## 当前版本区别
 
@@ -18,9 +18,11 @@
 
 ## 主要源码位置
 
-- 轮次、有效值、稳定簇、自动续测：`src/mainwindow_measurement.cpp`、`include/mainwindow.h`；界面状态：`src/mainwindow_layout.cpp`
-- 波形特征与延迟计算：`src/signalprocessor.cpp`、`include/signalprocessor.h`
-- 各试测程序的编译开关和 EXE 名称：`BoneDensity.pro`
-- 自动化验证：`tests/mainwindow_safety_tests.cpp`
+- 逐帧门控、D/G 与声速：`src/core/measurement/frameanalyzer.cpp`
+- 稳定簇、轮次、有效值、最终 5 轮选择：`src/core/measurement/measurementsession.cpp`；全部参数：`src/core/measurement/measurementtypes.h` 中的 `MeasureConfig`
+- 各试测版本的算法开关、窗口标题：`src/core/measurement/measurementprofile.cpp`；编译开关和 EXE 名称：`src/core/core.pri`
+- 自动续测与界面状态：`src/ui/mainwindow/mainwindow_measurement.cpp`、`src/ui/mainwindow/mainwindow_layout.cpp`
+- 波形特征与延迟计算：`src/core/measurement/signalprocessor.cpp`
+- 自动化验证：`test.ps1`（`tests/core_tests.cpp` 不需要界面即可测试测量核心；`tests/mainwindow_safety_tests.cpp` 测主窗口）
 
 如果要比较某个 EXE 与普通版，先看窗口标题和本文件中的程序名，不要只看它是否位于名为 `debug` 的文件夹。

@@ -10,10 +10,10 @@ Load only for patient-measurement gate diagnostics, accepted-frame failures, sta
 
 A patient frame passes pre-checks, correlation/posture gates, then lag-B stability before entering accepted-frame accumulation. Inspect current behavior at:
 
-- `include/types.h`: `MeasureConfig` correlation, posture, and stability settings.
-- `include/mainwindow.h`: acquisition cardinality and clustering declarations.
-- `src/mainwindow_measurement.cpp`: gate evaluation, counter recording, diagnostic output, operator cues and round handling; `src/mainwindow_device.cpp`: serial timing and frame parsing.
-- `src/signalprocessor.cpp`: arrival and refined correlation-lag calculations.
+- `src/core/measurement/measurementtypes.h`: `MeasureConfig`, all measurement parameters.
+- `src/core/measurement/frameanalyzer.cpp` (per-frame gates) and `measurementsession.cpp` (stability, rounds, gate statistics).
+- `src/ui/mainwindow/mainwindow_measurement.cpp`: operator cues and round flow; `src/core/device/deviceprotocol.cpp`: frame parsing; `mainwindow_device.cpp`: serial timing.
+- `src/core/measurement/signalprocessor.cpp`: arrival and refined correlation-lag calculations.
 
 Numeric values in code are executable authority. This reference intentionally does not duplicate them.
 

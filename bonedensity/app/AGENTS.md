@@ -3,7 +3,7 @@
 ## Project Map
 
 - Project root: `D:/Repository/prj/bonedensity/app`
-- Key implementation directories: `src/`, `include/`, `ui/`, `resources/`, `tests/`, and `testdata/`
+- Key implementation directories: `src/core/` (device protocol, measurement, calibration, storage, health; Qt Core/Xml only), `src/ui/` (main window, widgets, dialogs), `src/app/`, `resources/`, `tests/`, and `testdata/`; sources are listed once in `src/core/core.pri` and `src/ui/ui.pri`
 - Product specification: `.agent/reference/product-spec.md`
 - Code/data map: `.agent/reference/project-map.md`
 - Architecture reference: `.agent/reference/architecture.md`
@@ -23,7 +23,7 @@
 | --- | --- |
 | Build | `powershell -ExecutionPolicy Bypass -File ./build-debug.ps1` |
 | Run | No unattended run command; after Build, manually launch `build/debug/debug/BoneDensity.exe` |
-| Test | `powershell -ExecutionPolicy Bypass -File ./test-mainwindow-safety.ps1` (main-window regression suite); also `./test-calibration.ps1`, `./test-patientstore.ps1`, `./test-accountstore.ps1`, `./tests/portable_handoff_tests.ps1` |
+| Test | `powershell -ExecutionPolicy Bypass -File ./test.ps1` (all suites: core, accountstore, patientstore, calibration, mainwindow, handoff); select with `-Suite core,mainwindow`, reuse builds with `-Incremental` |
 | Verify | No single command; use task-specific tests plus required human or laboratory acceptance |
 
 ## Golden Rules
@@ -125,19 +125,19 @@ For durable research: define the decision question, prefer primary/official sour
 - Use only Qt 6.5.3 at `D:\QT6.5.3\6.5.3\mingw_64` with MinGW 11.2 at `D:\QT6.5.3\Tools\mingw1120_64` for command-line builds. Every build/test script takes `-qtRoot` and `-mingwRoot` and defaults to these paths.
 - Do not invoke an unqualified system `qmake`, `mingw32-make`, or `g++`. Mixing the system MSYS2 toolchain with the Qt runtime can produce incompatible binaries.
 - `build-debug.ps1` is the canonical clean Debug build and deployment entry point.
-- `test-calibration.ps1` is a focused calibration suite, not a whole-project test or final acceptance command.
+- `test.ps1 -Suite calibration` is a focused calibration suite, not a whole-project test or final acceptance command.
 - Qt Creator may open `BoneDensity.pro` for interactive runs. Hardware acquisition, physical printing, and qualified-phantom calibration require supervised real-operation checks.
 
 ## Protected Engineering Boundaries
 
 Obtain explicit user approval before changing any of the following:
 
-- measurement algorithms or constants in `src/signalprocessor.cpp`, `src/bonehealth.cpp`, or `src/utils.cpp`;
+- measurement algorithms or constants in `src/core/measurement/` (`signalprocessor`, `frameanalyzer`, `measurementsession`, `utils`, `MeasureConfig` in `measurementtypes.h`, `measurementprofile`) or `src/core/health/bonehealth.cpp`;
 - SOS calculation, gating thresholds, empirical parameters, correlation or stability rules, the active probe baseline D, or channel-selection policy;
-- serial framing, 115200-baud configuration, acquisition commands, or the 80 ms acquisition timing;
+- serial framing (`src/core/device/deviceprotocol.cpp`), 115200-baud configuration, acquisition commands, or the 80 ms acquisition timing;
 - persistent data schemas, migration semantics, authentication behavior, architecture, public interfaces, or dependencies.
 
-Treat the `MainWindow` sources (`src/mainwindow*.cpp`, split by area on 2026-10-09 with the user's explicit approval; see `.agent/reference/project-map.md`) as a high-coupling orchestration hotspot. Make localized changes and do not refactor them merely for tidiness.
+Treat the `MainWindow` sources (`src/ui/mainwindow/mainwindow*.cpp`; see `.agent/reference/project-map.md`) as the orchestration layer: they connect the UI, the device link, the stores and the measurement core. Keep measurement logic in `src/core/measurement` (testable without a window, see `tests/core_tests.cpp`), not in `MainWindow`. Make localized changes and do not refactor them merely for tidiness.
 
 ## Data and Safety Rules
 
@@ -149,7 +149,7 @@ Treat the `MainWindow` sources (`src/mainwindow*.cpp`, split by area on 2026-10-
 ## Verification Expectations
 
 - Map verification to the applicable `REQ-*` or Loop `SC-*`; a successful build proves only compilation and deployment.
-- Run `test-calibration.ps1` for calibration changes, plus the canonical Debug build when the application is affected.
+- Run `test.ps1 -Suite calibration` for calibration changes and `test.ps1 -Suite core,mainwindow` for measurement or device changes, plus the canonical Debug build when the application is affected.
 - Use anonymous fixtures for age-SOS and persistence demonstrations. Keep visual evidence minimal and reproducible.
 - Store reusable boundary fixtures under `testdata/<feature>/`; keep only a few decisive visual artifacts under `docs/evidence/<date>-<feature>/`. Record case-to-operation mappings in the active verification plan or delivery evidence, not in parallel progress files.
 - Mark device acquisition, five-round hardware flow, USB hot-unplug/reconnection, physical print output, coupling repeatability, temperature truth, and qualified-phantom accuracy as external acceptance unless they were actually exercised.
