@@ -610,7 +610,16 @@ void MainWindow::fitReferenceChartHeight()
     const int imageMargin = 2 * AgeSosChartWidget::imageMargin;
     int desired = qRound((chartWidth - imageMargin) * ui->chartViewReference->imageAspectRatio())
                   + imageMargin + margins.top() + margins.bottom();
-    const int processMinimum = 250;
+    // The bottom row must keep the height it needs at its current width (the
+    // process card has word-wrapped text, so that is more than its minimum
+    // size hint); otherwise this fixed-height row overflows into it.
+    int processMinimum = 250;
+    for (QWidget* bottom : {static_cast<QWidget*>(ui->grpProcessArea), static_cast<QWidget*>(ui->grpSpeedArea)}) {
+        int need = bottom->minimumSizeHint().height();
+        if (bottom->hasHeightForWidth() && bottom->width() > 0)
+            need = qMax(need, bottom->heightForWidth(bottom->width()));
+        processMinimum = qMax(processMinimum, need);
+    }
     if (mainBlock->height() > 0) {
         desired = qMin(desired, mainBlock->height() - processMinimum - 14);
     }

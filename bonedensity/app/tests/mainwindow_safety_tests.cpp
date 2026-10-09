@@ -2209,10 +2209,10 @@ void MainWindowSafetyTests::capturePagesWhenRequested()
     window.ui->table->item(1, MainWindow::ArchiveIdColumn)->setCheckState(Qt::Checked);
 
     capture(window.ui->pageArchive, QStringLiteral("archive.png"));
-    for (const QSize& size : {QSize(1366, 768), QSize(1600, 900), QSize(1920, 1080)}) {
+    for (const QSize& size : {QSize(1366, 768), QSize(1600, 900), QSize(1920, 1080), QSize(1920, 1013)}) {
         window.resize(size);
         QTest::qWait(100);
-        capture(window.ui->pageMain, QStringLiteral("main-%1.png").arg(size.width()));
+        capture(window.ui->pageMain, QStringLiteral("main-%1x%2.png").arg(size.width()).arg(size.height()));
     }
     PatientFormDialog dialog(PatientFormDialog::Mode::Create, &window);
     dialog.setAttribute(Qt::WA_DontShowOnScreen, true);

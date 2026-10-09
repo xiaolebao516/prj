@@ -490,7 +490,7 @@ void MainWindowSafetyTests::mainLayoutFitsCommonWindowSizes()
     window.currentPatient = samplePatient();
     window.updateAgeSosReference();
 
-    for (const QSize& size : {QSize(1366, 768), QSize(1600, 900), QSize(1920, 1080)}) {
+    for (const QSize& size : {QSize(1366, 768), QSize(1366, 705), QSize(1600, 900), QSize(1920, 1080), QSize(1920, 1013), QSize(1920, 960)}) {
         window.resize(size);
         QTest::qWait(80);
         QApplication::processEvents();
@@ -518,7 +518,17 @@ void MainWindowSafetyTests::mainLayoutFitsCommonWindowSizes()
             for (int j = i + 1; j < regions.size(); ++j) {
                 QVERIFY2(!boundsIn(regions[i], page).intersects(boundsIn(regions[j], page)),
                          qPrintable(regions[i]->objectName() + QStringLiteral(" overlaps ")
-                                    + regions[j]->objectName()));
+                                    + regions[j]->objectName()
+                                    + QStringLiteral(" at %1x%2 (block %3, wave %4, process min %5)")
+                                          .arg(size.width()).arg(size.height())
+                                          .arg(window.mainBlock->height())
+                                          .arg(window.ui->grpWaveArea->height())
+                                          .arg(window.ui->grpProcessArea->minimumSizeHint().height())
+                                    + QStringLiteral(" wave y %1-%2 speed y %3 speed min %4 ref h %5")
+                                          .arg(window.ui->grpWaveArea->y()).arg(window.ui->grpWaveArea->geometry().bottom())
+                                          .arg(window.ui->grpSpeedArea->y())
+                                          .arg(window.ui->grpSpeedArea->minimumSizeHint().height())
+                                          .arg(window.ui->grpReferenceCurveArea->height())));
             }
         }
 
