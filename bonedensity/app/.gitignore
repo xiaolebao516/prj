@@ -6,3 +6,4 @@
 # Generated build artifacts
 /build/
 /build*/
+.claude/settings.local.json
