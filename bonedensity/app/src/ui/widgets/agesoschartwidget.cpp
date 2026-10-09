@@ -33,7 +33,7 @@ const QColor kSdLine(104, 196, 240);
 const QColor kSdFill(64, 170, 230, 60);
 const QColor kAxisText(104, 110, 120);
 const QColor kLatestPoint(245, 108, 108);
-const QColor kHistoryPoint(126, 143, 160);
+const QColor kHistoryPoint(140, 140, 140);   // neutral gray: earlier results
 
 // Children's curves digitised from the research group's existing pediatric
 // charts (formerly age_sos_girl.bmp / age_sos_boy.bmp; source not recorded):

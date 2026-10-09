@@ -220,7 +220,7 @@ QImage renderAdultChartWithPoint(const QString& gender, int age, double sos)
 void MainWindowSafetyTests::adultChartPointsMatchComputedScores()
 {
     using SosReference::Sex;
-    const QColor historyPoint(126, 143, 160);
+    const QColor historyPoint(140, 140, 140);
     const QColor thresholdLine(76, 222, 110);
     const QColor meanLine(40, 150, 220);
     const QRect belowLegend(0, 70, 607, 403);
