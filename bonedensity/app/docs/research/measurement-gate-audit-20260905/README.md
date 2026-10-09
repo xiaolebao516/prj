@@ -2,6 +2,8 @@
 
 日期：2026-09-05。代码基线：`315c5f4b69981cdb78bd923e08df4d10c59bc548`，叠加当前未提交的教程修改。本文是研究与修改建议，不是新参数的生效依据。
 
+> 2026-10-09 补记：本目录的 C++ 回放与诊断程序（`*.cpp`、`*.pro`）链接的是旧的主窗口源码，代码分层后已无法编译，已删除；需要查看时从提交 `6f73d92` 取回（`git show 6f73d92:bonedensity/app/docs/research/measurement-gate-audit-20260905/<文件名>`）。文中的代码位置都指旧源码。现在的逐帧实测回放见 `tests/onset_guard_cases.inc` 的 `onsetGuardMatchesRecordedBatch`；新的离线研究程序可直接引入 `src/core/core.pri`，调用 `FrameAnalyzer` 和 `MeasurementSession`，不需要界面。
+
 ## 结论
 
 当前问题不能概括为“所有条件太严格”。代码存在可重复证明的稳定状态和数据混合问题，D/G 的特征定义也与说明书不完全一致。直接加宽姿态范围会增加记录的通过量，但会同时增加同一受试者偏离说明书参考区间的记录通过量。应先修正状态与记录能力，再检验特征和阈值的跨人适用性。
