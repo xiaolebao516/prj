@@ -53,8 +53,15 @@ $requiredPluginFiles = @(
     'tls\qopensslbackend.dll',
     'tls\qschannelbackend.dll'
 )
-$requiredDataFiles = @('accounts.xml', 'calibration.xml')
-$optionalDataFiles = @('patients.xml', 'measurements.xml', 'angle_features.csv')
+# New versions keep every data file in BoneDensityData next to BoneDensity.exe;
+# packages from older versions keep them directly beside the program.
+$dataPrefix = ''
+if (Test-Path -LiteralPath (Join-Path $runtimeRoot 'BoneDensityData') -PathType Container) {
+    $dataPrefix = 'BoneDensityData\'
+}
+$requiredDataFiles = @('accounts.xml', 'calibration.xml') | ForEach-Object { $dataPrefix + $_ }
+$optionalDataFiles = @('patients.xml', 'measurements.xml', 'angle_features.csv',
+    'settings\device.ini', 'settings\measurement-guide.ini') | ForEach-Object { $dataPrefix + $_ }
 $handoffFiles = @('一键换机备份.cmd', '换机说明.txt', '使用说明.txt')
 
 function Test-YesNo([string]$Prompt) {
@@ -101,14 +108,14 @@ function Assert-SourcePayload {
     if (-not (Test-Path -LiteralPath $handoffScriptPath -PathType Leaf)) {
         throw '找不到一键换机备份的内部脚本。'
     }
-    if (Test-Path -LiteralPath (Join-Path $runtimeRoot 'BoneDensity.instance.lock')) {
-        throw '检测到骨密度程序仍在运行或上次未正常退出。请先关闭程序。若确认任务管理器中没有 BoneDensity.exe 仍出现此提示，可删除软件目录中的 BoneDensity.instance.lock 后重试。'
+    if (Test-Path -LiteralPath (Join-Path $runtimeRoot ($dataPrefix + 'BoneDensity.instance.lock'))) {
+        throw '检测到骨密度程序仍在运行或上次未正常退出。请先关闭程序。若确认任务管理器中没有 BoneDensity.exe 仍出现此提示，可删除 BoneDensityData 文件夹（旧版本为软件目录）中的 BoneDensity.instance.lock 后重试。'
     }
-    if (Test-Path -LiteralPath (Join-Path $runtimeRoot 'patients.xml.txn') -PathType Leaf) {
+    if (Test-Path -LiteralPath (Join-Path $runtimeRoot ($dataPrefix + 'patients.xml.txn')) -PathType Leaf) {
         throw '检测到未完成的档案保存。请先启动骨密度软件完成自动恢复，正常退出后再重试换机。'
     }
-    if ((Test-Path -LiteralPath (Join-Path $runtimeRoot 'measurements.xml') -PathType Leaf) -and
-        -not (Test-Path -LiteralPath (Join-Path $runtimeRoot 'patients.xml') -PathType Leaf)) {
+    if ((Test-Path -LiteralPath (Join-Path $runtimeRoot ($dataPrefix + 'measurements.xml')) -PathType Leaf) -and
+        -not (Test-Path -LiteralPath (Join-Path $runtimeRoot ($dataPrefix + 'patients.xml')) -PathType Leaf)) {
         throw '检测记录存在，但患者档案缺失。为避免带走不完整数据，换机已中止。'
     }
 }
@@ -215,7 +222,7 @@ function Start-PortableHandoff {
         throw "目标目录不可用：$TargetRoot"
     }
 
-    $handoffLockPath = Join-Path $runtimeRoot 'BoneDensity.instance.lock'
+    $handoffLockPath = Join-Path $runtimeRoot ($dataPrefix + 'BoneDensity.instance.lock')
     $handoffLockAcquired = $false
     try {
         try {

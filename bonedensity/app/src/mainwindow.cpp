@@ -70,15 +70,14 @@ MainWindow::MainWindow(QWidget *parent)
     serial(new QSerialPort(this))
 {
     ui->setupUi(this);
-    accountsFilePath = QCoreApplication::applicationDirPath() + "/accounts.xml";
-    deviceSettingsPath = QCoreApplication::applicationDirPath() + "/device.ini";
-    measurementGuideSettingsPath =
-        QCoreApplication::applicationDirPath() + "/measurement-guide.ini";
+    accountsFilePath = DataLocation::filePath("accounts.xml");
+    deviceSettingsPath = DataLocation::settingsFile("device.ini");
+    measurementGuideSettingsPath = DataLocation::settingsFile("measurement-guide.ini");
     QString accountError;
     if (!accountStore.loadOrInitialize(accountsFilePath, &accountError)) {
         QMessageBox::warning(this, "账号初始化失败", accountError);
     }
-    calibrationFilePath = QCoreApplication::applicationDirPath() + "/calibration.xml";
+    calibrationFilePath = DataLocation::filePath("calibration.xml");
     QString calibrationError;
     if (!calibrationStore.loadOrInitialize(calibrationFilePath, &calibrationError)) {
         QMessageBox::warning(this, QStringLiteral("校准参数加载失败"), calibrationError);
@@ -158,8 +157,8 @@ MainWindow::MainWindow(QWidget *parent)
     signalProcessor.designFIR(1250000.0, 600000.0, 62500000.0);
 
     // ✅ 加载患者数据库
-    xmlFilePath = QCoreApplication::applicationDirPath() + "/patients.xml";
-    measurementsFilePath = QCoreApplication::applicationDirPath() + "/measurements.xml";
+    xmlFilePath = DataLocation::filePath("patients.xml");
+    measurementsFilePath = DataLocation::filePath("measurements.xml");
     loadPatients();
     //ui->comboPart->setCurrentIndex(-1);
     //ui->dPartCombo->setCurrentIndex(-1);

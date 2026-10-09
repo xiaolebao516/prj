@@ -57,6 +57,9 @@ SOURCES += \
     src/bonehealth.cpp \
     src/sosreference.cpp \
     src/databackup.cpp \
+    src/legacyimport.cpp \
+    src/parametergroup.cpp \
+    src/datalocation.cpp \
     src/utils.cpp \
     src/patientformdialog.cpp
 
@@ -77,6 +80,9 @@ HEADERS += \
     include/bonehealth.h \
     include/sosreference.h \
     include/databackup.h \
+    include/legacyimport.h \
+    include/parametergroup.h \
+    include/datalocation.h \
     include/utils.h \
     include/patientformdialog.h
 

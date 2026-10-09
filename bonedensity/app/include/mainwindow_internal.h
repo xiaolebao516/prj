@@ -4,6 +4,8 @@
 
 #include "agesoschartwidget.h"
 #include "bonehealth.h"
+#include "datalocation.h"
+#include "parametergroup.h"
 #include "types.h"
 
 #include <QDate>

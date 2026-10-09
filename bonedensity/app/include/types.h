@@ -34,6 +34,8 @@ struct MeasurementRecord {
     QString boneStrength;
     QString fractureRisk;
     QString boneAge;
+    // ParameterGroup id the result was measured with; empty for older records.
+    QString parameterGroup;
 };
 
 // ==================== Serial / Waveform ====================

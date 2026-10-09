@@ -275,6 +275,35 @@ void MainWindow::startExperimentLog()
     }
     QJsonArray previousRounds;
     for (double sos : roundSosList) previousRounds.append(sos);
+    QJsonObject config = measurementParameters();
+    config.insert("recording_profile", "subject-linked-20260918-v1");
+    config.insert("measurement_session_id", experimentSessionId);
+    config.insert("subject", experimentSubjectSnapshot);
+    config.insert("previous_accepted_rounds", previousRounds);
+    config.insert("build", __DATE__ " " __TIME__);
+    config.insert("round", roundSosList.size() + 1);
+    config.insert("gain_BC", gainSliderA->value());
+    config.insert("gain_BD", gainSliderB->value());
+    config.insert("gain_AC", gainSliderC->value());
+    config.insert("gain_AD", gainSliderD->value());
+    config.insert("parameter_group", ParameterGroup::id(config));
+    // Logs measured with the same parameters share one folder that also
+    // describes those parameters (see ParameterGroup).
+    QString folderError;
+    const QString folder = ParameterGroup::prepareFolder(
+        DataLocation::experimentsRoot(), config, QDateTime::currentDateTime(),
+        true, &folderError);
+    if (folder.isEmpty()) {
+        statusBar()->showMessage(QStringLiteral("实验记录未开启：%1").arg(folderError), 8000);
+        return;
+    }
+    experimentLog.start(folder, config);
+    checkExperimentLogError();
+#endif
+}
+
+QJsonObject MainWindow::measurementParameters() const
+{
 #ifdef BONE_COMPLETE_B_PEAK_EXPERIMENT
     const char* implementation="b-peak-completion-20260908-v1";
 #elif defined(BONE_RELOCK_PRESERVATION_EXPERIMENT)
@@ -286,18 +315,13 @@ void MainWindow::startExperimentLog()
 #else
     const char* implementation="onset-consistency-20260915-v1";
 #endif
-    const QJsonObject config{
-        {"recording_profile", "subject-linked-20260918-v1"},
-        {"measurement_session_id", experimentSessionId},
-        {"subject", experimentSubjectSnapshot},
-        {"previous_accepted_rounds", previousRounds},
+    return QJsonObject{
         {"implementation", implementation},
         {"B_onset_forward_limit", enforceBOnsetConsistency ? bOnsetForwardLimit : 0},
         {"B_clipped_peak_extension", completeTruncatedBPeak ? 15 : 0},
         {"partial_relock_retention_lag", deferPartialDiscardUntilRelock
             ? partialRelockRetentionTolerance : 0},
-        {"build", __DATE__ " " __TIME__},
-        {"round", roundSosList.size() + 1}, {"round_target", normalMeasureRounds},
+        {"round_target", normalMeasureRounds},
         {"frame_target", processValidTarget}, {"round_cluster_tolerance", roundClusterTolerance},
         {"probe_distance_m", signalProcessor.probeDistanceCD},
         {"sample_period_s", signalProcessor.samplePeriod},
@@ -309,12 +333,7 @@ void MainWindow::startExperimentLog()
         {"G_min", mCfg.anglePairMidGapMin}, {"G_max", mCfg.anglePairMidGapMax},
         {"warmup", mCfg.stableLagWarmupCount}, {"lock_need", mCfg.stableLagLockNeedCount},
         {"lag_tolerance", mCfg.stableLagTolerance}, {"unlock_count", mCfg.boneLagUnlockCount},
-        {"window_size", stableLagWindowSize},
-        {"gain_BC", gainSliderA->value()}, {"gain_BD", gainSliderB->value()},
-        {"gain_AC", gainSliderC->value()}, {"gain_AD", gainSliderD->value()}};
-    experimentLog.start(QCoreApplication::applicationDirPath() + "/measurement-experiments", config);
-    checkExperimentLogError();
-#endif
+        {"window_size", stableLagWindowSize}};
 }
 
 void MainWindow::checkExperimentLogError()
@@ -895,6 +914,14 @@ void MainWindow::finishAllPatientRounds()
     pendingMeasurement.boneStrength = derived.strength;
     pendingMeasurement.fractureRisk = derived.fractureRisk;
     pendingMeasurement.boneAge = derived.boneAge;
+    {
+        // Record which parameter group produced this result and keep that
+        // group's description in the data folder, also in builds without logs.
+        const QJsonObject parameters = measurementParameters();
+        pendingMeasurement.parameterGroup = ParameterGroup::id(parameters);
+        ParameterGroup::prepareFolder(DataLocation::experimentsRoot(), parameters,
+                                      QDateTime::currentDateTime(), false);
+    }
     hasPendingMeasurement = true;
     const MeasurementRecord completedMeasurement = pendingMeasurement;
     QList<MeasurementRecord> savedMeasurements = measurementList;
@@ -1022,7 +1049,7 @@ void MainWindow::appendAngleFeatureCsv(const QString& mode,
                                        double expectedOffset,
                                        double offsetResidual) const
 {
-    QString path = QCoreApplication::applicationDirPath() + "/angle_features.csv";
+    QString path = DataLocation::filePath("angle_features.csv");
 
     QFile file(path);
 

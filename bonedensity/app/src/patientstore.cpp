@@ -375,6 +375,7 @@ MeasurementRecord recordFromElement(const QDomElement& element)
     record.boneStrength = element.attribute("boneStrength");
     record.fractureRisk = element.attribute("fractureRisk");
     record.boneAge = element.attribute("boneAge");
+    record.parameterGroup = element.attribute("parameterGroup");
     return record;
 }
 
@@ -592,6 +593,8 @@ bool PatientStore::saveMeasurements(const QString& measurementsPath,
         element.setAttribute("boneStrength", record.boneStrength);
         element.setAttribute("fractureRisk", record.fractureRisk);
         element.setAttribute("boneAge", record.boneAge);
+        if (!record.parameterGroup.isEmpty())
+            element.setAttribute("parameterGroup", record.parameterGroup);
         root.appendChild(element);
     }
     return writeDocument(measurementsPath, document, errorMessage);

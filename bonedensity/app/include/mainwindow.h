@@ -123,6 +123,10 @@ private:
     void openDataFolder();
     void switchAccount();
 
+    // Group-defining measurement parameters (see ParameterGroup); experiment
+    // logs add session fields such as gains to this.
+    QJsonObject measurementParameters() const;
+
     // ---- data backups (DataBackup): daily at first login, and before deletions ----
     QString backupRoot() const;
     QStringList dataFilePaths() const;

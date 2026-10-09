@@ -339,10 +339,11 @@ void MainWindow::showPatientHistory(const QString& patientId)
     table->setSelectionMode(QAbstractItemView::SingleSelection);
     table->verticalHeader()->hide();
     table->setShowGrid(false);
-    table->setColumnCount(6);
+    table->setColumnCount(7);
     table->setHorizontalHeaderLabels({QStringLiteral("检测时间"), QStringLiteral("SOS (m/s)"),
                                       QStringLiteral("T 值"), QStringLiteral("Z 值"),
-                                      QStringLiteral("骨强度"), QStringLiteral("操作账号")});
+                                      QStringLiteral("骨强度"), QStringLiteral("操作账号"),
+                                      QStringLiteral("参数组")});
     QList<MeasurementRecord> records = measurementsForPatient(patientId);
     std::sort(records.begin(), records.end(), [](const MeasurementRecord& a, const MeasurementRecord& b) {
         return a.measuredAt > b.measuredAt;
@@ -361,6 +362,8 @@ void MainWindow::showPatientHistory(const QString& patientId)
         table->setItem(row, 4, new QTableWidgetItem(record.boneStrength.isEmpty()
                                                         ? record.diagnosis : record.boneStrength));
         table->setItem(row, 5, new QTableWidgetItem(record.operatorName));
+        table->setItem(row, 6, new QTableWidgetItem(record.parameterGroup.isEmpty()
+                                                        ? QStringLiteral("未记录") : record.parameterGroup));
     }
     table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     if (table->rowCount() > 0) table->selectRow(0);
@@ -819,7 +822,7 @@ QString MainWindow::measurementsCsv(const QList<PatientInfo>& patients,
         QStringLiteral("部位"), QStringLiteral("SOS(m/s)"), QStringLiteral("T值"),
         QStringLiteral("Z值"), QStringLiteral("骨强度"), QStringLiteral("相对骨折风险"),
         QStringLiteral("相对骨龄"), QStringLiteral("诊断提示"), QStringLiteral("操作账号"),
-        QStringLiteral("身高(cm)"), QStringLiteral("体重(kg)")};
+        QStringLiteral("身高(cm)"), QStringLiteral("体重(kg)"), QStringLiteral("参数组")};
     const QString lineEnd = QStringLiteral("\r\n");
     QString csv = header.join(QLatin1Char(',')) + lineEnd;
 
@@ -864,7 +867,8 @@ QString MainWindow::measurementsCsv(const QList<PatientInfo>& patients,
             record.diagnosis == record.boneStrength ? QString() : record.diagnosis,
             record.operatorName,
             snapshotOr(record.patientHeight, patient.height),
-            snapshotOr(record.patientWeight, patient.weight)};
+            snapshotOr(record.patientWeight, patient.weight),
+            record.parameterGroup.isEmpty() ? QStringLiteral("未记录") : record.parameterGroup};
         QStringList escaped;
         for (const QString& field : fields) escaped << csvField(field.trimmed());
         csv += escaped.join(QLatin1Char(',')) + lineEnd;

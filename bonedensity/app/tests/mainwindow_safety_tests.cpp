@@ -6,6 +6,10 @@
 #include "measurementguidedialog.h"
 #include "reportwidget.h"
 #include "patientformdialog.h"
+#include "patientstore.h"
+#include "legacyimport.h"
+#include "parametergroup.h"
+#include "datalocation.h"
 #include "databackup.h"
 #include "sosreference.h"
 #include "bonehealth.h"
@@ -98,7 +102,11 @@ class MainWindowSafetyTests : public QObject
 {
     Q_OBJECT
 
+    QTemporaryDir dataRoot;
+
 private slots:
+    // Every test runs against a throw-away data folder, never app/BoneDensityData.
+    void initTestCase() { QVERIFY(dataRoot.isValid()); qputenv("BONE_DATA_DIR", dataRoot.path().toUtf8()); }
     void experimentSubjectSnapshotAndSessions();
     void onsetConsistencyBoundaries();
     void onsetGuardRejectsRecordedLowFrame();
@@ -188,6 +196,10 @@ private slots:
     void serialPortSelectionIsRemembered();
     void measurementCsvMatchesScreenValues();
     void archiveActionBarKeepsButtonLabels();
+    void dataFolderIsSharedByEveryBuild();
+    void parameterGroupsDescribeTheirData();
+    void resultsRecordTheirParameterGroup();
+    void legacyDataIsMergedWithoutMixingPeople();
     void capturePagesWhenRequested();
 };
 
@@ -1857,7 +1869,7 @@ void MainWindowSafetyTests::patientMeasurementStartClearsSerialAssembly()
 #ifndef QT_NO_DEBUG
     QVERIFY2(window.experimentLog.active(), qPrintable(window.experimentLog.error()));
     const QString logPath = window.experimentLog.path();
-    QVERIFY(logPath.startsWith(QCoreApplication::applicationDirPath()));
+    QVERIFY(logPath.startsWith(DataLocation::experimentsRoot()));
 #else
     QVERIFY(!window.experimentLog.active());
 #endif
@@ -2227,6 +2239,7 @@ void MainWindowSafetyTests::capturePagesWhenRequested()
 #include "sos_reference_cases.inc"
 #include "data_backup_cases.inc"
 #include "workflow_cases.inc"
+#include "data_location_cases.inc"
 
 QTEST_MAIN(MainWindowSafetyTests)
 #include "mainwindow_safety_tests.moc"

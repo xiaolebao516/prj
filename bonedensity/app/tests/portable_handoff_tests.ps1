@@ -278,6 +278,29 @@ try {
     Assert-True (-not (Test-Path -LiteralPath $concurrentLock)) `
         'handoff owner should release its lock'
 
+    # Current layout: data in BoneDensityData beside the program. The package
+    # carries that folder; stale copies left beside the program are ignored.
+    $dataFolderSource = New-Fixture 'data-folder-layout' -IncludeOptionalData
+    $dataFolder = Join-Path $dataFolderSource 'BoneDensityData'
+    New-Item -ItemType Directory -Path (Join-Path $dataFolder 'settings') -Force | Out-Null
+    foreach ($dataFile in @('accounts.xml', 'calibration.xml', 'patients.xml', 'measurements.xml')) {
+        Set-Content -LiteralPath (Join-Path $dataFolder $dataFile) -Value "current:$dataFile" -Encoding utf8
+    }
+    Set-Content -LiteralPath (Join-Path $dataFolder 'settings\device.ini') -Value '[serial]' -Encoding utf8
+    $dataFolderTarget = Join-Path $testRoot 'data-folder-target'
+    New-Item -ItemType Directory -Path $dataFolderTarget | Out-Null
+    Invoke-Handoff $dataFolderSource $dataFolderTarget
+    $dataFolderPackage = @(Get-Packages $dataFolderTarget)
+    Assert-True ($dataFolderPackage.Count -eq 1) 'data-folder layout should create one package'
+    foreach ($dataFile in @('accounts.xml', 'calibration.xml', 'patients.xml', 'measurements.xml', 'settings\device.ini')) {
+        $packaged = Join-Path $dataFolderPackage[0].FullName ('BoneDensityData\' + $dataFile)
+        Assert-True (Test-Path -LiteralPath $packaged -PathType Leaf) "package should contain BoneDensityData\$dataFile"
+    }
+    Assert-True ((Get-Content -LiteralPath (Join-Path $dataFolderPackage[0].FullName 'BoneDensityData\patients.xml') -Raw) -match 'current:') `
+        'package should take the data folder, not the old files beside the program'
+    Assert-True (-not (Test-Path -LiteralPath (Join-Path $dataFolderPackage[0].FullName 'patients.xml'))) `
+        'old data beside the program should not be packaged in the data-folder layout'
+
     $orphanMeasurementsSource = New-Fixture 'orphan-measurements'
     Set-Content -LiteralPath (Join-Path $orphanMeasurementsSource 'measurements.xml') `
         -Value '<measurements version="1" />' -Encoding utf8
