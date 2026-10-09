@@ -1,4 +1,5 @@
 #include "widgets/reportwidget.h"
+#include "theme/theme.h"
 
 #include <QPainter>
 #include <QPaintEvent>
@@ -43,7 +44,8 @@ void ReportWidget::paintEvent(QPaintEvent* event)
 {
     Q_UNUSED(event)
     QPainter painter(this);
-    painter.fillRect(rect(), QColor(235, 238, 242));
+    // On-screen backdrop only; renderReport() draws the page exactly as printed.
+    painter.fillRect(rect(), Theme::tokens().canvas);
     renderReport(&painter, rect());
 }
 

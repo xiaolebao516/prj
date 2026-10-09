@@ -20,6 +20,8 @@ $projectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 . (Join-Path $projectRoot "scripts\toolchain.ps1")
 $tools = Initialize-QtToolchain -QtRoot $qtRoot -MingwRoot $mingwRoot
 $env:QT_QPA_PLATFORM = "offscreen"
+# The offscreen platform renders no text without a font directory.
+if (-not $env:QT_QPA_FONTDIR) { $env:QT_QPA_FONTDIR = Join-Path $env:WINDIR "Fonts" }
 
 $targets = @{
     core = 'core_tests'

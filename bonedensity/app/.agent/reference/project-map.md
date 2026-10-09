@@ -44,6 +44,7 @@ UI:
 - `src/ui/mainwindow/mainwindow*.cpp`: one `MainWindow` class split by area (`mainwindow.cpp` construction/login/close guard/account menu, `_device` serial link, `_measurement` patient measurement flow and calibration acquisition, `_display` live charts and process panel, `_patients` archive, history, export and backups, `_report` report, `_layout` theme and page layouts; shared helpers in `mainwindow_internal.h`; pages and controls in `mainwindow.ui`). It orchestrates; the measurement algorithm stays in the core.
 - `src/ui/widgets/`: `reportwidget.cpp` shared screen, PDF, and print rendering; `agesoschartwidget.cpp` age/sex reference chart and latest measurement point.
 - `src/ui/dialogs/`: calibration wizard, measurement guide, patient form.
+- `src/ui/theme/theme.cpp`: the "Quiet Instrument" token palette shared by `resources/theme.qss` (a template with `@tokens`) and C++ painting; `src/ui/widgets/uikit.cpp`: paint-only widgets (icons, avatars, T-score band, round progress). Design notes: `docs/design/2026-10-09-quiet-instrument-ui.md`.
 - `resources/`: theme, measurement, report, and age-SOS images.
 
 Tests and data:

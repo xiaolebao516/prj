@@ -38,6 +38,13 @@ public:
         Man
     };
 
+    // Report keeps the printed report's colours; Screen is the softer on-screen
+    // look (legend lives in the card header, verdict bands are labelled).
+    enum class RenderStyle {
+        Report,
+        Screen
+    };
+
     explicit AgeSosChartWidget(QWidget* parent = nullptr);
 
     void clearReferenceData();
@@ -58,7 +65,8 @@ public:
     static bool supportsPoint(const QString& gender, int age, double sos);
     static void renderChart(QPainter* painter,
                             const QRectF& targetRect,
-                            const AgeSosChartData& data);
+                            const AgeSosChartData& data,
+                            RenderStyle style = RenderStyle::Report);
 
 protected:
     void paintEvent(QPaintEvent* event) override;

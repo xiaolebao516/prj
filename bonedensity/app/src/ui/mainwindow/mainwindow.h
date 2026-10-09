@@ -43,6 +43,9 @@ class QSlider;
 class QToolButton;
 class CalibrationDialog;
 class MainWindowSafetyTests;
+class AvatarBadge;
+class TScoreGauge;
+class RoundProgress;
 
 enum AcquireMode {
     DebugAcquireMode,       // trigger / 获取波形：只调试，不走病人测量流程
@@ -372,4 +375,9 @@ private:
     QPushButton* btnEditPatient = nullptr;
     QCheckBox* chkDateFilter = nullptr;
     QDateEdit* dateFilter = nullptr;
+    QLabel* lblRunState = nullptr;          // toolbar pill: 正在检测 · 第 n / 5 轮
+    AvatarBadge* patientAvatar = nullptr;
+    TScoreGauge* tScoreGauge = nullptr;
+    RoundProgress* roundProgress = nullptr;
+    void updateRunStateUi();
 };

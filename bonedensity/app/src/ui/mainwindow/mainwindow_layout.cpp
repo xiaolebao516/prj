@@ -3,6 +3,8 @@
 #include "mainwindow/mainwindow.h"
 #include "ui_mainwindow.h"
 #include "mainwindow/mainwindow_internal.h"
+#include "theme/theme.h"
+#include "widgets/uikit.h"
 
 #include <QAction>
 #include <QCheckBox>
@@ -12,6 +14,8 @@
 #include <QFrame>
 #include <QGridLayout>
 #include <QGroupBox>
+#include <QPainter>
+#include <QPainterPath>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -27,6 +31,7 @@
 #include <algorithm>
 
 using namespace mainwindow_detail;
+using Icons::Glyph;
 
 // ================= 串口扫描等原有代码 =======================================================================================
 void MainWindow::scheduleResponsiveLayout()
@@ -61,6 +66,7 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
 
 void MainWindow::updatePatientSelectionUi()
 {
+    const Theme::Tokens& tokens = Theme::tokens();
     const bool selected = hasCurrentPatient();
     const bool connected = serial && serial->isOpen();
     const bool debugAcquisitionRunning = autoRunning && !patientMeasureRunning;
@@ -81,6 +87,9 @@ void MainWindow::updatePatientSelectionUi()
                            : QStringLiteral("开始检测"));
     ui->btnStartMeasurement->setProperty("variant", patientMeasureRunning
         ? QStringLiteral("danger") : QStringLiteral("primary"));
+    ui->btnStartMeasurement->setIcon(patientMeasureRunning
+        ? Icons::icon(Glyph::Stop, tokens.bad)
+        : Icons::icon(Glyph::Play, Qt::white, tokens.ink300));
 
     QString hint;
     if (patientMeasureRunning) hint = QStringLiteral("检测中不能更换被测者；5 次完成后自动保存。");
@@ -139,21 +148,46 @@ void MainWindow::updatePatientSelectionUi()
     for (QWidget* widget : {static_cast<QWidget*>(ui->btnStartMeasurement),
                             static_cast<QWidget*>(ui->connectButton),
                             static_cast<QWidget*>(lblDeviceStatus)}) {
-        if (!widget) continue;
-        widget->style()->unpolish(widget);
-        widget->style()->polish(widget);
+        Theme::repolish(widget);
     }
+    updateRunStateUi();
     updateArchiveSelectionBar();
 }
 
-// ==================== UI-REFRESH-001：主题与布局 ====================
+void MainWindow::updateRunStateUi()
+{
+    const bool nextRoundPending = nextRoundTimer.isActive();
+    const bool debugAcquisitionRunning = autoRunning && !patientMeasureRunning;
+    const int finished = int(session.roundSos.size());
+    const int current = qMin(finished + 1, mCfg.roundsPerMeasurement);
+    if (roundProgress) {
+        roundProgress->setProgress(finished, patientMeasureRunning, mCfg.roundsPerMeasurement);
+        roundProgress->setVisible(patientMeasureRunning || nextRoundPending || hasIncompletePatientRounds());
+    }
+    if (!lblRunState) return;
+    QString text;
+    Theme::Tone tone = Theme::Tone::Info;
+    if (patientMeasureRunning) {
+        text = QStringLiteral("正在检测 · 第 %1 / %2 轮").arg(current).arg(mCfg.roundsPerMeasurement);
+    } else if (nextRoundPending) {
+        text = QStringLiteral("即将开始第 %1 / %2 轮").arg(current).arg(mCfg.roundsPerMeasurement);
+    } else if (debugAcquisitionRunning) {
+        text = QStringLiteral("连续采集中 · 不计入检测");
+    } else if (hasPendingMeasurement) {
+        text = QStringLiteral("本次结果尚未保存");
+        tone = Theme::Tone::Warn;
+    }
+    lblRunState->setText(text);
+    lblRunState->setVisible(!text.isEmpty());
+    Theme::setTone(lblRunState, tone);
+}
+
+// ==================== 主题与布局（静谧仪器）====================
 
 void MainWindow::applyTheme()
 {
-    QFile file(QStringLiteral(":/theme.qss"));
-    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        setStyleSheet(QString::fromUtf8(file.readAll()));
-    }
+    Theme::installApplicationStyle();
+    setStyleSheet(Theme::styleSheet());
 }
 
 namespace {
@@ -169,63 +203,131 @@ QFrame* separator(QWidget* parent)
 {
     auto* line = new QFrame(parent);
     line->setObjectName(QStringLiteral("toolbarSeparator"));
-    line->setFixedSize(1, 26);
+    line->setFixedSize(1, 24);
     return line;
+}
+
+void decorate(QPushButton* button, Glyph glyph, const QString& variant, const QColor& iconColor)
+{
+    button->setProperty("variant", variant);
+    button->setIcon(Icons::icon(glyph, iconColor));
+    button->setIconSize(QSize(16, 16));
+}
+
+// Card header: title, optional muted subtitle, then the caller's trailing widgets.
+QHBoxLayout* addCardHeader(QBoxLayout* cardLayout, QWidget* card, const QString& title,
+                           const QString& subtitle = QString())
+{
+    auto* row = new QHBoxLayout;
+    row->setContentsMargins(0, 0, 0, 0);
+    row->setSpacing(10);
+    row->addWidget(captionLabel(title, card, QStringLiteral("cardTitle")));
+    if (!subtitle.isEmpty()) row->addWidget(captionLabel(subtitle, card, QStringLiteral("cardSubtitle")));
+    row->addStretch(1);
+    cardLayout->addLayout(row);
+    return row;
+}
+
+QFrame* metricCell(QWidget* parent, QLabel* caption, QLabel* value, bool divider)
+{
+    auto* frame = new QFrame(parent);
+    frame->setProperty("role", QStringLiteral("cell"));
+    frame->setProperty("divider", divider);
+    auto* layout = new QVBoxLayout(frame);
+    layout->setContentsMargins(divider ? 14 : 0, 10, 4, 10);
+    layout->setSpacing(2);
+    caption->setParent(frame);
+    value->setParent(frame);
+    layout->addWidget(caption);
+    layout->addWidget(value);
+    return frame;
+}
+
+QPixmap pixmapFor(const QIcon& icon, int size)
+{
+    return icon.pixmap(QSize(size, size), 2.0);
 }
 
 } // namespace
 
 void MainWindow::setupToolbar()
 {
+    const Theme::Tokens& tokens = Theme::tokens();
     auto* toolbar = new QFrame(ui->pageMain);
     toolbar->setObjectName(QStringLiteral("mainToolbar"));
+    toolbar->setFixedHeight(64);
     auto* row = new QHBoxLayout(toolbar);
-    row->setContentsMargins(18, 10, 18, 10);
+    row->setContentsMargins(24, 0, 20, 0);
     row->setSpacing(8);
 
+    row->addWidget(new BrandMark(28, toolbar));
+    row->addSpacing(2);
     auto* title = new QLabel(QStringLiteral("超声骨密度仪"), toolbar);
     title->setObjectName(QStringLiteral("appTitle"));
     row->addWidget(title);
-    row->addSpacing(16);
+    row->addSpacing(12);
+    row->addWidget(separator(toolbar));
+    row->addSpacing(12);
 
-    row->addWidget(captionLabel(QStringLiteral("设备"), toolbar));
-    ui->comboPort->setMinimumWidth(200);
+    ui->comboPort->setMinimumWidth(240);
+    ui->comboPort->setFixedHeight(36);
+    auto* portIcon = new QLabel(ui->comboPort);
+    portIcon->setObjectName(QStringLiteral("portIcon"));
+    portIcon->setPixmap(pixmapFor(Icons::icon(Glyph::Plug, tokens.ink500), 16));
+    portIcon->setFixedSize(16, 16);
+    portIcon->move(12, 10);
+    portIcon->setAttribute(Qt::WA_TransparentForMouseEvents);
     row->addWidget(ui->comboPort);
     row->addWidget(ui->connectButton);
     lblDeviceStatus = new QLabel(toolbar);
     lblDeviceStatus->setObjectName(QStringLiteral("deviceStatus"));
-    row->addWidget(lblDeviceStatus);
+    row->addWidget(lblDeviceStatus, 0, Qt::AlignVCenter);
     row->addSpacing(12);
     row->addWidget(separator(toolbar));
-    row->addSpacing(12);
+    row->addSpacing(8);
 
-    row->addWidget(captionLabel(QStringLiteral("调试"), toolbar));
+    row->addWidget(captionLabel(QStringLiteral("调试"), toolbar, QStringLiteral("toolbarCaption")));
     ui->pushButton->setText(QStringLiteral("获取波形"));
     ui->triggerButton->setText(QStringLiteral("自动采集"));
+    decorate(ui->pushButton, Glyph::Activity, QStringLiteral("ghost"), tokens.ink700);
+    decorate(ui->triggerButton, Glyph::Repeat, QStringLiteral("ghost"), tokens.ink700);
     row->addWidget(ui->pushButton);
     row->addWidget(ui->triggerButton);
-    row->addSpacing(12);
+    row->addSpacing(8);
     row->addWidget(separator(toolbar));
-    row->addSpacing(12);
+    row->addSpacing(8);
 
     ui->btnArchive->setText(QStringLiteral("档案"));
     ui->btnReport->setText(QStringLiteral("报表"));
     ui->pushButton_2->setText(QStringLiteral("校准"));
+    decorate(ui->btnArchive, Glyph::Folder, QStringLiteral("ghost"), tokens.ink700);
+    decorate(ui->btnReport, Glyph::FileText, QStringLiteral("ghost"), tokens.ink700);
+    decorate(ui->pushButton_2, Glyph::Target, QStringLiteral("ghost"), tokens.ink700);
     row->addWidget(ui->btnArchive);
     row->addWidget(ui->btnReport);
     row->addWidget(ui->pushButton_2);
     row->addStretch(1);
 
+    lblRunState = new QLabel(toolbar);
+    lblRunState->setObjectName(QStringLiteral("runState"));
+    lblRunState->hide();
+    row->addWidget(lblRunState, 0, Qt::AlignVCenter);
+    row->addSpacing(10);
+
     btnAccount = new QToolButton(toolbar);
     btnAccount->setObjectName(QStringLiteral("accountButton"));
     btnAccount->setPopupMode(QToolButton::InstantPopup);
-    btnAccount->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    btnAccount->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    btnAccount->setIconSize(QSize(28, 28));
     auto* accountMenu = new QMenu(btnAccount);
     accountMenu->setObjectName(QStringLiteral("accountMenu"));
-    actManageAccounts = accountMenu->addAction(QStringLiteral("账号管理…"), this, &MainWindow::manageAccounts);
-    accountMenu->addAction(QStringLiteral("打开数据文件夹"), this, &MainWindow::openDataFolder);
+    actManageAccounts = accountMenu->addAction(Icons::icon(Glyph::Users, tokens.ink700),
+                                               QStringLiteral("账号管理…"), this, &MainWindow::manageAccounts);
+    accountMenu->addAction(Icons::icon(Glyph::Folder, tokens.ink700),
+                           QStringLiteral("打开数据文件夹"), this, &MainWindow::openDataFolder);
     accountMenu->addSeparator();
-    accountMenu->addAction(QStringLiteral("切换账号"), this, &MainWindow::switchAccount);
+    accountMenu->addAction(Icons::icon(Glyph::LogOut, tokens.ink700),
+                           QStringLiteral("切换账号"), this, &MainWindow::switchAccount);
     btnAccount->setMenu(accountMenu);
     row->addWidget(btnAccount);
     updateAccountUi();
@@ -243,87 +345,118 @@ void MainWindow::setupToolbar()
 
 void MainWindow::setupRightColumn()
 {
+    const Theme::Tokens& tokens = Theme::tokens();
+
     // ---- 被测者 ----
     QGroupBox* patientCard = ui->grpPatientInfoRight;
-    patientCard->setTitle(QString());
+    patientCard->setTitle(QStringLiteral("被测者"));
     patientCard->setProperty("card", true);
     auto* patientLayout = new QVBoxLayout(patientCard);
-    patientLayout->setContentsMargins(16, 12, 16, 14);
-    patientLayout->setSpacing(8);
-    auto* header = new QHBoxLayout;
-    header->addWidget(captionLabel(QStringLiteral("被测者"), patientCard, QStringLiteral("cardTitle")));
-    header->addStretch();
-    ui->btnPatientInfo->setProperty("variant", QStringLiteral("link"));
+    patientLayout->setContentsMargins(20, 16, 20, 18);
+    patientLayout->setSpacing(14);
+    QHBoxLayout* header = addCardHeader(patientLayout, patientCard, QStringLiteral("被测者"));
+    header->setSpacing(4);
     btnNewPatient = new QPushButton(QStringLiteral("新建档案"), patientCard);
     btnNewPatient->setObjectName(QStringLiteral("btnNewPatient"));
-    btnNewPatient->setProperty("variant", QStringLiteral("link"));
     connect(btnNewPatient, &QPushButton::clicked, this, [this]() { openNewPatientDialog(true); });
-    header->addWidget(ui->btnPatientInfo);
-    header->addWidget(btnNewPatient);
-    patientLayout->addLayout(header);
-
-    auto* nameRow = new QHBoxLayout;
-    nameRow->setSpacing(10);
-    ui->labelName->setProperty("role", QStringLiteral("personName"));
-    lblPatientMeta = captionLabel(QString(), patientCard);
-    nameRow->addWidget(ui->labelName);
-    nameRow->addWidget(lblPatientMeta, 0, Qt::AlignBottom);
-    nameRow->addStretch();
-    patientLayout->addLayout(nameRow);
-
-    auto* details = new QGridLayout;
-    details->setHorizontalSpacing(16);
-    details->setVerticalSpacing(4);
-    details->addWidget(ui->labelID, 0, 0);
-    details->addWidget(ui->labelBirth, 0, 1);
-    details->addWidget(ui->labelHeight, 1, 0);
-    details->addWidget(ui->labelWeight, 1, 1);
-    for (QLabel* label : {ui->labelID, ui->labelBirth, ui->labelHeight, ui->labelWeight}) {
-        label->setProperty("role", QStringLiteral("detail"));
-        label->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+    for (const auto& [button, glyph] : {std::pair<QPushButton*, Glyph>{ui->btnPatientInfo, Glyph::Swap},
+                                        std::pair<QPushButton*, Glyph>{btnNewPatient, Glyph::Plus}}) {
+        decorate(button, glyph, QStringLiteral("ghost"), tokens.ink700);
+        button->setProperty("btnSize", QStringLiteral("small"));
+        button->setIconSize(QSize(14, 14));
+        header->addWidget(button);
     }
-    patientLayout->addLayout(details);
+
+    auto* identity = new QHBoxLayout;
+    identity->setSpacing(14);
+    patientAvatar = new AvatarBadge(52, patientCard);
+    identity->addWidget(patientAvatar, 0, Qt::AlignVCenter);
+    auto* nameColumn = new QVBoxLayout;
+    nameColumn->setSpacing(6);
+    ui->labelName->setProperty("role", QStringLiteral("personName"));
+    ui->labelName->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+    nameColumn->addWidget(ui->labelName);
+    lblPatientMeta = captionLabel(QString(), patientCard, QStringLiteral("tag"));
+    auto* metaRow = new QHBoxLayout;
+    metaRow->setContentsMargins(0, 0, 0, 0);
+    metaRow->addWidget(lblPatientMeta);
+    metaRow->addStretch(1);
+    nameColumn->addLayout(metaRow);
+    identity->addLayout(nameColumn, 1);
+    patientLayout->addLayout(identity);
+
+    auto* details = new QFrame(patientCard);
+    details->setObjectName(QStringLiteral("patientDetails"));
+    auto* detailGrid = new QGridLayout(details);
+    detailGrid->setContentsMargins(0, 12, 0, 12);
+    detailGrid->setHorizontalSpacing(16);
+    detailGrid->setVerticalSpacing(10);
+    const QList<QPair<QString, QLabel*>> detailCells = {
+        {QStringLiteral("编号"), ui->labelID}, {QStringLiteral("出生日期"), ui->labelBirth},
+        {QStringLiteral("身高"), ui->labelHeight}, {QStringLiteral("体重"), ui->labelWeight}};
+    for (int i = 0; i < detailCells.size(); ++i) {
+        auto* cellLayout = new QVBoxLayout;
+        cellLayout->setSpacing(2);
+        cellLayout->addWidget(captionLabel(detailCells[i].first, details, QStringLiteral("fieldLabel")));
+        QLabel* value = detailCells[i].second;
+        value->setParent(details);
+        value->setProperty("role", QStringLiteral("detail"));
+        value->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+        cellLayout->addWidget(value);
+        detailGrid->addLayout(cellLayout, i / 2, i % 2);
+    }
+    detailGrid->setColumnStretch(0, 1);
+    detailGrid->setColumnStretch(1, 1);
+    patientLayout->addWidget(details);
     ui->labelGender->hide();
     ui->label_27->hide();
     ui->label_28->hide();
 
-    ui->btnStartMeasurement->setMinimumHeight(46);
+    ui->btnStartMeasurement->setProperty("btnSize", QStringLiteral("large"));
+    ui->btnStartMeasurement->setIconSize(QSize(14, 14));
     ui->btnStartMeasurement->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    patientLayout->addSpacing(4);
-    patientLayout->addWidget(ui->btnStartMeasurement);
+    auto* startBlock = new QVBoxLayout;
+    startBlock->setSpacing(8);
+    startBlock->addWidget(ui->btnStartMeasurement);
     lblStartHint = captionLabel(QString(), patientCard, QStringLiteral("hint"));
     lblStartHint->setWordWrap(true);
-    patientLayout->addWidget(lblStartHint);
+    startBlock->addWidget(lblStartHint);
+    patientLayout->addLayout(startBlock);
 
     // ---- 测量结果 ----
     QGroupBox* resultCard = ui->grpLatestResultRight;
-    resultCard->setTitle(QString());
+    resultCard->setTitle(QStringLiteral("测量结果"));
     resultCard->setProperty("card", true);
     auto* resultLayout = new QVBoxLayout(resultCard);
-    resultLayout->setContentsMargins(16, 12, 16, 14);
-    resultLayout->setSpacing(8);
-    auto* resultHeader = new QHBoxLayout;
-    resultHeader->addWidget(captionLabel(QStringLiteral("测量结果"), resultCard, QStringLiteral("cardTitle")));
-    resultHeader->addStretch();
+    resultLayout->setContentsMargins(20, 16, 20, 16);
+    resultLayout->setSpacing(10);
+    QHBoxLayout* resultHeader = addCardHeader(resultLayout, resultCard, QStringLiteral("测量结果"));
     lblResultNote = captionLabel(QString(), resultCard);
     lblResultNote->setObjectName(QStringLiteral("resultNote"));
     resultHeader->addWidget(lblResultNote);
-    resultLayout->addLayout(resultHeader);
 
     auto* sosRow = new QHBoxLayout;
     sosRow->setSpacing(8);
-    ui->lblLatestSOS->setProperty("role", QStringLiteral("bigValue"));
+    ui->lblLatestSOS->setProperty("role", QStringLiteral("hero"));
     ui->lblLatestPart->setProperty("role", QStringLiteral("caption"));
     ui->lblLatestStrength->setProperty("role", QStringLiteral("chip"));
     sosRow->addWidget(ui->lblLatestSOS, 0, Qt::AlignBottom);
+    ui->lblLatestPart->setContentsMargins(0, 0, 0, 7);   // sit on the number's baseline
     sosRow->addWidget(ui->lblLatestPart, 0, Qt::AlignBottom);
     sosRow->addStretch();
     sosRow->addWidget(ui->lblLatestStrength, 0, Qt::AlignVCenter);
     resultLayout->addLayout(sosRow);
 
-    auto* metrics = new QGridLayout;
-    metrics->setHorizontalSpacing(12);
-    metrics->setVerticalSpacing(2);
+    tScoreGauge = new TScoreGauge(resultCard);
+    tScoreGauge->setObjectName(QStringLiteral("tScoreGauge"));
+    tScoreGauge->setToolTip(QStringLiteral("T 值位置：≥ −1 正常；−2.5 ~ −1 不足；≤ −2.5 严重不足"));
+    resultLayout->addWidget(tScoreGauge);
+
+    auto* metricsFrame = new QFrame(resultCard);
+    metricsFrame->setObjectName(QStringLiteral("metricsFrame"));
+    auto* metrics = new QHBoxLayout(metricsFrame);
+    metrics->setContentsMargins(0, 0, 0, 0);
+    metrics->setSpacing(0);
     const QList<QPair<QLabel*, QLabel*>> metricPairs = {
         {ui->label_35, ui->lblLatestT}, {ui->label_36, ui->lblLatestZ},
         {ui->label_38, ui->lblLatestRisk}, {ui->label_39, ui->lblLatestBoneAge}};
@@ -331,15 +464,11 @@ void MainWindow::setupRightColumn()
                                      QStringLiteral("骨折风险"), QStringLiteral("相对骨龄")};
     for (int i = 0; i < metricPairs.size(); ++i) {
         metricPairs[i].first->setText(metricNames[i]);
-        metricPairs[i].first->setProperty("role", QStringLiteral("caption"));
+        metricPairs[i].first->setProperty("role", QStringLiteral("fieldLabel"));
         metricPairs[i].second->setProperty("role", QStringLiteral("metric"));
-        metrics->addWidget(metricPairs[i].first, 0, i);
-        metrics->addWidget(metricPairs[i].second, 1, i);
+        metrics->addWidget(metricCell(metricsFrame, metricPairs[i].first, metricPairs[i].second, i > 0), 1);
     }
     for (QLabel* unused : {ui->label_33, ui->label_34, ui->label_37}) unused->hide();
-    auto* metricsFrame = new QFrame(resultCard);
-    metricsFrame->setObjectName(QStringLiteral("metricsFrame"));
-    metricsFrame->setLayout(metrics);
     resultLayout->addWidget(metricsFrame);
 
     ui->btnSaveResult->setText(QStringLiteral("重试保存"));
@@ -352,8 +481,11 @@ void MainWindow::setupRightColumn()
 
     // ---- 测量部位 ----
     QGroupBox* partCard = ui->grpPartImageRight;
+    partCard->setTitle(QStringLiteral("测量部位"));
     auto* partLayout = new QVBoxLayout(partCard);
-    partLayout->setContentsMargins(16, 40, 16, 14);
+    partLayout->setContentsMargins(20, 16, 20, 18);
+    partLayout->setSpacing(10);
+    addCardHeader(partLayout, partCard, QStringLiteral("测量部位"), QStringLiteral("桡骨远端"));
     ui->label_32->setScaledContents(false);
     ui->label_32->setAlignment(Qt::AlignCenter);
     ui->label_32->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
@@ -366,6 +498,7 @@ void MainWindow::setupRightColumn()
 
 void MainWindow::setupArchivePage()
 {
+    const Theme::Tokens& tokens = Theme::tokens();
     QWidget* page = ui->pageArchive;
     delete page->layout();
     page->setFont(font());
@@ -376,18 +509,23 @@ void MainWindow::setupArchivePage()
 
     auto* toolbar = new QFrame(page);
     toolbar->setObjectName(QStringLiteral("mainToolbar"));
+    toolbar->setFixedHeight(64);
     auto* top = new QHBoxLayout(toolbar);
-    top->setContentsMargins(18, 10, 18, 10);
+    top->setContentsMargins(20, 0, 24, 0);
     top->setSpacing(8);
-    ui->btnBackFromArchive->setText(QStringLiteral("‹ 主界面"));
+    ui->btnBackFromArchive->setText(QStringLiteral("主界面"));
+    decorate(ui->btnBackFromArchive, Glyph::ChevronLeft, QStringLiteral("ghost"), tokens.ink700);
     top->addWidget(ui->btnBackFromArchive);
+    top->addWidget(separator(toolbar));
+    top->addSpacing(4);
     auto* title = new QLabel(QStringLiteral("档案"), toolbar);
     title->setObjectName(QStringLiteral("appTitle"));
     top->addWidget(title);
-    top->addSpacing(20);
+    top->addSpacing(16);
     ui->editSearchKeyword->setPlaceholderText(QStringLiteral("姓名或编号"));
-    ui->editSearchKeyword->setMinimumWidth(220);
+    ui->editSearchKeyword->setMinimumWidth(280);
     ui->editSearchKeyword->setClearButtonEnabled(true);
+    ui->editSearchKeyword->addAction(Icons::icon(Glyph::Search, tokens.ink400), QLineEdit::LeadingPosition);
     connect(ui->editSearchKeyword, &QLineEdit::returnPressed, this, &MainWindow::on_btnSearchName_clicked);
     top->addWidget(ui->editSearchKeyword);
     chkDateFilter = new QCheckBox(QStringLiteral("检测日期"), toolbar);
@@ -409,27 +547,42 @@ void MainWindow::setupArchivePage()
     top->addWidget(ui->btnShowAll);
     top->addStretch();
     ui->btnAdd->setText(QStringLiteral("新建档案"));
-    ui->btnAdd->setProperty("variant", QStringLiteral("primary"));
+    decorate(ui->btnAdd, Glyph::Plus, QStringLiteral("primary"), Qt::white);
     top->addWidget(ui->btnAdd);
+    for (QWidget* control : {static_cast<QWidget*>(ui->btnBackFromArchive), static_cast<QWidget*>(ui->editSearchKeyword),
+                             static_cast<QWidget*>(dateFilter), static_cast<QWidget*>(ui->btnSearchName),
+                             static_cast<QWidget*>(ui->btnAdd)}) {
+        control->setFixedHeight(36);
+    }
     root->addWidget(toolbar);
 
-    auto* body = new QWidget(page);
+    auto* body = new CardCanvas(page);
     body->setObjectName(QStringLiteral("archiveBody"));
     auto* bodyLayout = new QVBoxLayout(body);
-    bodyLayout->setContentsMargins(18, 16, 18, 18);
-    bodyLayout->setSpacing(14);
+    bodyLayout->setContentsMargins(20, 20, 20, 20);
+    bodyLayout->setSpacing(16);
 
     auto* tableCard = new QFrame(body);
     tableCard->setObjectName(QStringLiteral("tableCard"));
     auto* tableLayout = new QVBoxLayout(tableCard);
-    tableLayout->setContentsMargins(0, 0, 0, 0);
+    tableLayout->setContentsMargins(1, 1, 1, 1);
     tableLayout->setSpacing(0);
     ui->table->verticalHeader()->hide();
+    ui->table->verticalHeader()->setDefaultSectionSize(48);
+    ui->table->horizontalHeader()->setMinimumHeight(44);
+    ui->table->horizontalHeader()->setHighlightSections(false);
+    ui->table->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     ui->table->setShowGrid(false);
     ui->table->setAlternatingRowColors(false);
     ui->table->setFrameShape(QFrame::NoFrame);
+    ui->table->setMouseTracking(true);
+    ui->table->setItemDelegateForColumn(ArchiveNameColumn, new NameAvatarDelegate(
+        [this](const QModelIndex& index) {
+            const QModelIndex idIndex = index.sibling(index.row(), ArchiveIdColumn);
+            return hasCurrentPatient() && idIndex.data().toString() == currentPatient.id;
+        }, ui->table));
     tableLayout->addWidget(ui->table, 1);
-    auto* tableFooter = captionLabel(QStringLiteral("单击行选中，双击设为当前被测者；勾选框用于批量删除"),
+    auto* tableFooter = captionLabel(QStringLiteral("单击行选中，双击设为当前被测者；勾选框用于批量删除和导出"),
                                      tableCard);
     tableFooter->setObjectName(QStringLiteral("tableFooter"));
     tableLayout->addWidget(tableFooter);
@@ -438,7 +591,7 @@ void MainWindow::setupArchivePage()
     auto* actionBar = new QFrame(body);
     actionBar->setObjectName(QStringLiteral("actionBar"));
     auto* actions = new QHBoxLayout(actionBar);
-    actions->setContentsMargins(18, 12, 18, 12);
+    actions->setContentsMargins(20, 12, 20, 12);
     actions->setSpacing(10);
     actions->addWidget(captionLabel(QStringLiteral("当前选中"), actionBar));
     auto* selectionLabel = new ElidingLabel(actionBar);
@@ -450,8 +603,10 @@ void MainWindow::setupArchivePage()
     ui->btnSelectPatient->setText(QStringLiteral("设为当前被测者"));
     ui->btnSelectPatient->setProperty("variant", QStringLiteral("primary"));
     ui->btnViewHistory->setText(QStringLiteral("检测历史 / 报表"));
+    decorate(ui->btnViewHistory, Glyph::Clock, QString(), tokens.ink700);
     btnEditPatient = new QPushButton(QStringLiteral("编辑资料"), actionBar);
     btnEditPatient->setObjectName(QStringLiteral("btnEditPatient"));
+    decorate(btnEditPatient, Glyph::Edit, QString(), tokens.ink700);
     connect(btnEditPatient, &QPushButton::clicked, this, [this]() {
         const QString id = selectedArchivePatientId();
         if (!id.isEmpty()) openEditPatientDialog(id);
@@ -465,14 +620,21 @@ void MainWindow::setupArchivePage()
     actions->addWidget(lblCheckedCount);
     btnExport = new QPushButton(QStringLiteral("导出全部"), actionBar);
     btnExport->setObjectName(QStringLiteral("btnExport"));
+    decorate(btnExport, Glyph::Download, QString(), tokens.ink700);
     btnExport->setToolTip(QStringLiteral("把检测记录导出为 CSV 表格（可用 Excel 打开）。"
                                          "勾选了档案时只导出勾选的人。"));
     connect(btnExport, &QPushButton::clicked, this, &MainWindow::exportMeasurements);
     actions->addWidget(btnExport);
     ui->btnDeleteSelected->setText(QStringLiteral("删除勾选项"));
-    ui->btnDeleteSelected->setProperty("variant", QStringLiteral("dangerOutline"));
+    decorate(ui->btnDeleteSelected, Glyph::Trash, QStringLiteral("dangerOutline"), tokens.bad);
     actions->addWidget(ui->btnDeleteSelected);
+    for (QPushButton* button : {ui->btnSelectPatient, ui->btnViewHistory, btnEditPatient, btnExport,
+                                ui->btnDeleteSelected}) {
+        button->setMinimumHeight(36);
+    }
     bodyLayout->addWidget(actionBar);
+    body->addCard(tableCard);
+    body->addCard(actionBar);
     root->addWidget(body, 1);
 
     ui->btnSelectPatient->show();
@@ -491,17 +653,17 @@ void MainWindow::setupMainLayout()
     pageLayout->setSpacing(0);
     setupToolbar();
 
-    auto* body = new QWidget(page);
+    auto* body = new CardCanvas(page);
     body->setObjectName(QStringLiteral("mainBody"));
     auto* bodyLayout = new QHBoxLayout(body);
-    bodyLayout->setContentsMargins(16, 14, 16, 16);
-    bodyLayout->setSpacing(14);
+    bodyLayout->setContentsMargins(20, 20, 20, 20);
+    bodyLayout->setSpacing(16);
 
     mainBlock = new QWidget(body);
     mainBlock->setObjectName(QStringLiteral("mainBlock"));
     auto* grid = new QGridLayout(mainBlock);
     grid->setContentsMargins(0, 0, 0, 0);
-    grid->setSpacing(14);
+    grid->setSpacing(16);
     grid->addWidget(ui->grpWaveArea, 0, 0);
     grid->addWidget(ui->grpReferenceCurveArea, 0, 1);
     grid->addWidget(ui->grpSpeedArea, 1, 0);
@@ -511,31 +673,57 @@ void MainWindow::setupMainLayout()
     grid->setRowStretch(0, 0);
     grid->setRowStretch(1, 1);
 
-    ui->grpReferenceCurveArea->setTitle(QStringLiteral("年龄 – SOS 参考"));
     for (QGroupBox* group : {ui->grpWaveArea, ui->grpReferenceCurveArea, ui->grpSpeedArea,
                              ui->grpProcessArea, ui->grpPatientInfoRight, ui->grpLatestResultRight,
                              ui->grpPartImageRight}) {
-        group->setProperty("card", true);   // theme.qss: title inside the card
-        group->style()->unpolish(group);    // the theme is already applied; re-evaluate selectors
-        group->style()->polish(group);
+        // The title stays as the card's accessible name; theme.qss does not
+        // paint it because each card draws a richer header row itself.
+        group->setProperty("card", true);
+        Theme::repolish(group);              // the theme is already applied; re-evaluate selectors
         group->setMinimumSize(0, 0);
         group->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
         group->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        body->addCard(group);
     }
 
+    ui->grpWaveArea->setTitle(QStringLiteral("四通道波形"));
+    ui->grpReferenceCurveArea->setTitle(QStringLiteral("年龄 – SOS 参考"));
+    ui->grpSpeedArea->setTitle(QStringLiteral("声速趋势"));
+    ui->grpProcessArea->setTitle(QStringLiteral("检测过程"));
     auto* waveLayout = new QVBoxLayout(ui->grpWaveArea);
-    waveLayout->setContentsMargins(12, 38, 12, 10);
+    waveLayout->setContentsMargins(20, 16, 20, 18);
+    waveLayout->setSpacing(12);
+    QHBoxLayout* waveHeader = addCardHeader(waveLayout, ui->grpWaveArea, QStringLiteral("四通道波形"),
+                                            QStringLiteral("原始回波 · 0 – 4095"));
+    waveHeader->setObjectName(QStringLiteral("waveHeader"));
     ui->layoutWidget_3->setMinimumSize(0, 0);
     waveLayout->addWidget(ui->layoutWidget_3, 1);
 
     auto* speedLayout = new QVBoxLayout(ui->grpSpeedArea);
-    speedLayout->setContentsMargins(14, 38, 14, 12);
-    speedLayout->setSpacing(8);
+    speedLayout->setContentsMargins(20, 16, 20, 16);
+    speedLayout->setSpacing(10);
+    addCardHeader(speedLayout, ui->grpSpeedArea, QStringLiteral("声速趋势"), QStringLiteral("最近 50 帧"));
     ui->chartViewSpeed->setMinimumSize(0, 80);
     speedLayout->addWidget(ui->chartViewSpeed, 1);
 
     auto* referenceLayout = new QVBoxLayout(ui->grpReferenceCurveArea);
-    referenceLayout->setContentsMargins(14, 38, 14, 12);
+    referenceLayout->setContentsMargins(16, 16, 16, 12);
+    referenceLayout->setSpacing(6);
+    QHBoxLayout* referenceHeader = addCardHeader(referenceLayout, ui->grpReferenceCurveArea,
+                                                 QStringLiteral("年龄 – SOS 参考"));
+    referenceHeader->setContentsMargins(4, 0, 4, 0);
+    const Theme::Tokens& tokens = Theme::tokens();
+    auto legend = [&](const QString& text, const QString& swatchCss) {
+        auto* item = new QLabel(QStringLiteral("<span style='%1'>%2</span>&nbsp;%3")
+                                    .arg(swatchCss, QStringLiteral("●"), text),
+                                ui->grpReferenceCurveArea);
+        item->setTextFormat(Qt::RichText);
+        item->setProperty("role", QStringLiteral("caption"));
+        referenceHeader->addWidget(item);
+    };
+    legend(QStringLiteral("本次"), QStringLiteral("color:%1;").arg(tokens.ink900.name()));
+    legend(QStringLiteral("历史"), QStringLiteral("color:%1;").arg(tokens.ink400.name()));
+    legend(QStringLiteral("同龄均值 ±1SD"), QStringLiteral("color:%1;").arg(tokens.accent.name()));
     ui->chartViewReference->setMinimumSize(0, 0);
     referenceLayout->addWidget(ui->chartViewReference, 1);
     ui->grpReferenceCurveArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -544,17 +732,17 @@ void MainWindow::setupMainLayout()
     rightColumn->setObjectName(QStringLiteral("rightColumn"));
     auto* rightLayout = new QVBoxLayout(rightColumn);
     rightLayout->setContentsMargins(0, 0, 0, 0);
-    rightLayout->setSpacing(14);
+    rightLayout->setSpacing(16);
     setupRightColumn();
     ui->grpPatientInfoRight->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
     ui->grpLatestResultRight->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
     rightLayout->addWidget(ui->grpPatientInfoRight);
     rightLayout->addWidget(ui->grpLatestResultRight);
     rightLayout->addWidget(ui->grpPartImageRight, 1);
-    rightColumn->setMinimumWidth(320);
+    rightColumn->setMinimumWidth(330);
 
     bodyLayout->addWidget(mainBlock, 25);
-    bodyLayout->addWidget(rightColumn, 9);
+    bodyLayout->addWidget(rightColumn, 8);
     pageLayout->addWidget(body, 1);
     ui->mainBodyWidget->hide();
 
@@ -568,12 +756,20 @@ void MainWindow::fitReferenceChartHeight()
 {
     if (!mainBlock || !ui->grpReferenceCurveArea || !ui->grpReferenceCurveArea->layout()) return;
     QWidget* group = ui->grpReferenceCurveArea;
-    const QMargins margins = group->layout()->contentsMargins();
+    auto* groupLayout = static_cast<QBoxLayout*>(group->layout());
+    const QMargins margins = groupLayout->contentsMargins();
     const int chartWidth = group->width() - margins.left() - margins.right();
     if (chartWidth <= 0) return;
+    // Everything above the chart (the header row) plus the layout spacing.
+    int headerHeight = 0;
+    for (int i = 0; i < groupLayout->count(); ++i) {
+        QLayoutItem* item = groupLayout->itemAt(i);
+        if (item->widget() == ui->chartViewReference) break;
+        headerHeight += item->sizeHint().height() + groupLayout->spacing();
+    }
     const int imageMargin = 2 * AgeSosChartWidget::imageMargin;
     int desired = qRound((chartWidth - imageMargin) * ui->chartViewReference->imageAspectRatio())
-                  + imageMargin + margins.top() + margins.bottom();
+                  + imageMargin + margins.top() + margins.bottom() + headerHeight;
     // The bottom row must keep the height it needs at its current width (the
     // process card has word-wrapped text, so that is more than its minimum
     // size hint); otherwise this fixed-height row overflows into it.
@@ -584,8 +780,9 @@ void MainWindow::fitReferenceChartHeight()
             need = qMax(need, bottom->heightForWidth(bottom->width()));
         processMinimum = qMax(processMinimum, need);
     }
+    const int rowGap = mainBlock->layout() ? static_cast<QGridLayout*>(mainBlock->layout())->verticalSpacing() : 16;
     if (mainBlock->height() > 0) {
-        desired = qMin(desired, mainBlock->height() - processMinimum - 14);
+        desired = qMin(desired, mainBlock->height() - processMinimum - rowGap);
     }
     desired = qMax(desired, 200);
     // The waveform card shares this row, so both use the same height and the
@@ -603,7 +800,27 @@ void MainWindow::updatePartImage()
     static const QPixmap source(QStringLiteral(":/images/Radius.png"));
     const QSize area = ui->label_32->size();
     if (source.isNull() || area.width() <= 4 || area.height() <= 4) return;
-    ui->label_32->setPixmap(source.scaled(area, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    // The illustration sits on its own dark backdrop; extend that backdrop to
+    // the whole frame and round the corners so it reads as one panel.
+    const qreal dpr = ui->label_32->devicePixelRatioF();
+    QPixmap framed(area * dpr);
+    framed.setDevicePixelRatio(dpr);
+    framed.fill(Qt::transparent);
+    const QColor backdrop = source.toImage().pixelColor(2, 2);
+    QPainter painter(&framed);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+    QPainterPath clip;
+    clip.addRoundedRect(QRectF(QPointF(0, 0), QSizeF(area)), 10, 10);
+    painter.fillPath(clip, backdrop);
+    painter.setClipPath(clip);
+    const QPixmap scaled = source.scaled(area * dpr, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    const QSizeF logical = QSizeF(scaled.size()) / dpr;
+    painter.drawPixmap(QRectF(QPointF((area.width() - logical.width()) / 2.0,
+                                      (area.height() - logical.height()) / 2.0), logical),
+                       scaled, QRectF(scaled.rect()));
+    painter.end();
+    ui->label_32->setPixmap(framed);
 }
 
 void MainWindow::updateResultPanel()
@@ -627,6 +844,7 @@ void MainWindow::updateResultPanel()
         return value.trimmed().isEmpty() ? QStringLiteral("--") : value.trimmed();
     };
     QString strength;
+    double tValue = std::numeric_limits<double>::quiet_NaN();
     if (!shown) {
         for (QLabel* label : {ui->lblLatestSOS, ui->lblLatestT, ui->lblLatestZ,
                               ui->lblLatestRisk, ui->lblLatestBoneAge}) {
@@ -643,6 +861,9 @@ void MainWindow::updateResultPanel()
         ui->lblLatestBoneAge->setText(shown->boneAge.trimmed().isEmpty()
                                           ? QStringLiteral("--")
                                           : QStringLiteral("%1 岁").arg(shown->boneAge.trimmed()));
+        bool tOk = false;
+        const double parsedT = shown->tScore.trimmed().toDouble(&tOk);
+        if (tOk && std::isfinite(parsedT)) tValue = parsedT;
         strength = text(shown->boneStrength.isEmpty() ? shown->diagnosis : shown->boneStrength);
         const QDateTime time = parsedMeasurementDateTime(shown->measuredAt);
         const QString when = time.isValid() ? time.toString(QStringLiteral("yyyy-MM-dd HH:mm"))
@@ -657,6 +878,7 @@ void MainWindow::updateResultPanel()
             lblResultNote->setProperty("state", today ? QStringLiteral("ok") : QString());
         }
     }
+    if (tScoreGauge) tScoreGauge->setTScore(tValue);
     ui->lblLatestPart->setText(QStringLiteral("m/s · 桡骨"));
     ui->lblLatestStrength->setText(strength == QStringLiteral("--")
                                        ? QStringLiteral("骨强度 --")
@@ -687,8 +909,7 @@ void MainWindow::updateResultPanel()
                                               : QStringLiteral("以往记录\n") + lines.join(QLatin1Char('\n')));
     ui->btnSaveResult->setVisible(hasPendingMeasurement);
     for (QWidget* widget : {static_cast<QWidget*>(lblResultNote), static_cast<QWidget*>(ui->lblLatestStrength)}) {
-        widget->style()->unpolish(widget);
-        widget->style()->polish(widget);
+        Theme::repolish(widget);
     }
     // The patient's sex/age profile selects a reference bitmap with its own aspect ratio.
     fitReferenceChartHeight();
@@ -710,38 +931,71 @@ void MainWindow::setupLoginPage()
     QWidget* page = ui->pageLogin;
     delete page->layout();
 
-    auto* root = new QVBoxLayout(page);
-    root->setContentsMargins(24, 24, 24, 18);
-    root->addStretch(3);
+    auto* root = new QHBoxLayout(page);
+    root->setContentsMargins(0, 0, 0, 0);
+    root->setSpacing(0);
 
-    auto* card = new QFrame(page);
+    // ---- brand panel ----
+    auto* brand = new BrandPanel(page);
+    brand->setObjectName(QStringLiteral("loginBrand"));
+    brand->setMinimumWidth(360);
+    brand->setMaximumWidth(760);
+    brand->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+    auto* brandLayout = new QVBoxLayout(brand);
+    brandLayout->setContentsMargins(56, 56, 40, 44);
+    brandLayout->setSpacing(14);
+    brandLayout->addWidget(new BrandMark(36, brand), 0, Qt::AlignLeft);
+    brandLayout->addStretch(3);
+    auto* productName = new QLabel(QStringLiteral("超声骨密度仪"), brand);
+    productName->setProperty("role", QStringLiteral("brandTitle"));
+    auto* tagline = new QLabel(QStringLiteral("定量超声 · 桡骨声速检测"), brand);
+    tagline->setProperty("role", QStringLiteral("brandTagline"));
+    brandLayout->addWidget(productName);
+    brandLayout->addWidget(tagline);
+    brandLayout->addStretch(5);
+    auto* version = new QLabel(QStringLiteral("数据保存在本机 · 结果仅供参考 · 版本 %1").arg(QStringLiteral(APP_VERSION)),
+                               brand);
+    version->setObjectName(QStringLiteral("loginVersion"));
+    version->setProperty("role", QStringLiteral("brandFoot"));
+    version->setWordWrap(true);
+    brandLayout->addWidget(version);
+    root->addWidget(brand, 2);
+
+    // ---- form ----
+    auto* formArea = new QWidget(page);
+    formArea->setObjectName(QStringLiteral("loginFormArea"));
+    auto* formColumn = new QVBoxLayout(formArea);
+    formColumn->setContentsMargins(32, 32, 32, 32);
+    formColumn->addStretch(1);
+    auto* card = new QWidget(formArea);
     card->setObjectName(QStringLiteral("loginCard"));
-    card->setFixedWidth(400);
+    card->setMinimumWidth(280);
+    card->setMaximumWidth(380);
+    card->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     auto* form = new QVBoxLayout(card);
-    form->setContentsMargins(36, 32, 36, 30);
+    form->setContentsMargins(0, 0, 0, 0);
     form->setSpacing(8);
 
-    auto* title = new QLabel(QStringLiteral("超声骨密度仪"), card);
+    auto* title = new QLabel(QStringLiteral("登录"), card);
     title->setObjectName(QStringLiteral("loginTitle"));
-    auto* subtitle = new QLabel(QStringLiteral("请登录后使用"), card);
-    subtitle->setProperty("role", QStringLiteral("caption"));
+    auto* subtitle = new QLabel(QStringLiteral("使用本机账号登录后开始工作"), card);
+    subtitle->setObjectName(QStringLiteral("loginSubtitle"));
     form->addWidget(title);
     form->addWidget(subtitle);
-    form->addSpacing(18);
+    form->addSpacing(28);
 
     ui->label_19->setText(QStringLiteral("账号"));
     ui->label_20->setText(QStringLiteral("密码"));
-    for (QLabel* label : {ui->label_19, ui->label_20}) label->setProperty("role", QStringLiteral("fieldLabel"));
+    for (QLabel* label : {ui->label_19, ui->label_20}) label->setProperty("role", QStringLiteral("formLabel"));
     ui->editUsername->setPlaceholderText(QStringLiteral("请输入账号"));
     ui->editPassword->setPlaceholderText(QStringLiteral("请输入密码"));
     ui->editPassword->setEchoMode(QLineEdit::Password);
     for (QLineEdit* edit : {ui->editUsername, ui->editPassword}) {
-        edit->setMinimumHeight(40);
         edit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     }
     form->addWidget(ui->label_19);
     form->addWidget(ui->editUsername);
-    form->addSpacing(6);
+    form->addSpacing(10);
     form->addWidget(ui->label_20);
     form->addWidget(ui->editPassword);
 
@@ -749,27 +1003,25 @@ void MainWindow::setupLoginPage()
     ui->lblLoginMsg->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     ui->lblLoginMsg->setProperty("role", QStringLiteral("error"));
     ui->lblLoginMsg->setWordWrap(true);
-    ui->lblLoginMsg->setMinimumHeight(20);
+    ui->lblLoginMsg->setMinimumHeight(24);
     form->addWidget(ui->lblLoginMsg);
 
     ui->btnLogin->setText(QStringLiteral("登 录"));
-    ui->btnLogin->setMinimumHeight(44);
     ui->btnLogin->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     ui->btnLogin->setProperty("variant", QStringLiteral("primary"));
+    ui->btnLogin->setProperty("btnSize", QStringLiteral("large"));
     form->addWidget(ui->btnLogin);
 
-    root->addWidget(card, 0, Qt::AlignHCenter);
-    root->addStretch(4);
-
-    auto* version = new QLabel(QStringLiteral("版本 %1 · 数据保存在本机 · 结果仅供参考").arg(QStringLiteral(APP_VERSION)),
-                               page);
-    version->setObjectName(QStringLiteral("loginVersion"));
-    version->setProperty("role", QStringLiteral("caption"));
-    root->addWidget(version, 0, Qt::AlignHCenter);
+    auto* centered = new QHBoxLayout;
+    centered->addStretch(1);
+    centered->addWidget(card, 4);
+    centered->addStretch(1);
+    formColumn->addLayout(centered);
+    formColumn->addStretch(1);
+    root->addWidget(formArea, 3);
 
     for (QWidget* w : {static_cast<QWidget*>(ui->lblLoginMsg), static_cast<QWidget*>(ui->btnLogin),
                        static_cast<QWidget*>(ui->label_19), static_cast<QWidget*>(ui->label_20)}) {
-        w->style()->unpolish(w);
-        w->style()->polish(w);
+        Theme::repolish(w);
     }
 }

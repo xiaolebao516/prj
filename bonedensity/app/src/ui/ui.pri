@@ -8,6 +8,8 @@ INCLUDEPATH += $$PWD
 HEADERS += \
     $$PWD/mainwindow/mainwindow.h \
     $$PWD/mainwindow/mainwindow_internal.h \
+    $$PWD/theme/theme.h \
+    $$PWD/widgets/uikit.h \
     $$PWD/widgets/agesoschartwidget.h \
     $$PWD/widgets/reportwidget.h \
     $$PWD/dialogs/calibrationdialog.h \
@@ -22,6 +24,8 @@ SOURCES += \
     $$PWD/mainwindow/mainwindow_patients.cpp \
     $$PWD/mainwindow/mainwindow_report.cpp \
     $$PWD/mainwindow/mainwindow_layout.cpp \
+    $$PWD/theme/theme.cpp \
+    $$PWD/widgets/uikit.cpp \
     $$PWD/widgets/agesoschartwidget.cpp \
     $$PWD/widgets/reportwidget.cpp \
     $$PWD/dialogs/calibrationdialog.cpp \

@@ -1,6 +1,7 @@
 #include "widgets/agesoschartwidget.h"
 
 #include "health/sosreference.h"
+#include "theme/theme.h"
 
 #include <QFontMetricsF>
 #include <QPaintEvent>
@@ -34,6 +35,73 @@ const QColor kSdFill(64, 170, 230, 60);
 const QColor kAxisText(104, 110, 120);
 const QColor kLatestPoint(245, 108, 108);
 const QColor kHistoryPoint(140, 140, 140);   // neutral gray: earlier results
+
+// Report colours are the constants above (the printed report never changes);
+// the screen palette is the softer "Quiet Instrument" look.
+struct ChartPalette {
+    bool screen = false;
+    QColor normalBand, lowBand, veryLowBand;
+    QColor normalLine, veryLowLine, bandGrid;
+    QColor neutralBackground, neutralGrid;
+    QColor meanLine, sdLine, sdFill;
+    QColor axisText, latestPoint, historyPoint, frame, emptyText, noteText;
+    qreal thresholdWidth = 2.5;
+};
+
+const ChartPalette& reportPalette()
+{
+    static const ChartPalette palette = [] {
+        ChartPalette p;
+        p.normalBand = kNormalBand;
+        p.lowBand = kLowBand;
+        p.veryLowBand = kVeryLowBand;
+        p.normalLine = kNormalLine;
+        p.veryLowLine = kVeryLowLine;
+        p.bandGrid = QColor(255, 255, 255, 190);
+        p.neutralBackground = kNeutralBackground;
+        p.neutralGrid = kNeutralGrid;
+        p.meanLine = kMeanLine;
+        p.sdLine = kSdLine;
+        p.sdFill = kSdFill;
+        p.axisText = kAxisText;
+        p.latestPoint = kLatestPoint;
+        p.historyPoint = kHistoryPoint;
+        p.frame = QColor(196, 202, 210);
+        p.emptyText = QColor(144, 147, 153);
+        p.noteText = QColor(96, 98, 102);
+        return p;
+    }();
+    return palette;
+}
+
+const ChartPalette& screenPalette()
+{
+    static const ChartPalette palette = [] {
+        const Theme::Tokens& t = Theme::tokens();
+        ChartPalette p;
+        p.screen = true;
+        p.normalBand = QColor(0xEE, 0xF8, 0xF2);
+        p.lowBand = QColor(0xFD, 0xF6, 0xE8);
+        p.veryLowBand = QColor(0xFC, 0xEF, 0xED);
+        p.normalLine = QColor(0x38, 0xA1, 0x70);
+        p.veryLowLine = QColor(0xDB, 0x5A, 0x48);
+        p.bandGrid = QColor(255, 255, 255, 230);
+        p.neutralBackground = t.sunken;
+        p.neutralGrid = t.line;
+        p.meanLine = t.accent;
+        p.sdLine = QColor(t.accent.red(), t.accent.green(), t.accent.blue(), 115);
+        p.sdFill = QColor(t.accent.red(), t.accent.green(), t.accent.blue(), 31);
+        p.axisText = t.ink400;
+        p.latestPoint = t.ink900;
+        p.historyPoint = QColor(0x9A, 0x9A, 0x9A);   // neutral gray, like the report
+        p.frame = QColor(0xE2, 0xE5, 0xEA);
+        p.emptyText = t.ink400;
+        p.noteText = t.ink500;
+        p.thresholdWidth = 1.5;
+        return p;
+    }();
+    return palette;
+}
 
 // Children's curves digitised from the research group's existing pediatric
 // charts (formerly age_sos_girl.bmp / age_sos_boy.bmp; source not recorded):
@@ -106,8 +174,9 @@ SosReference::Stat childAt(bool female, double age)
     return pick(kChildRows[kChildRowCount - 1]);
 }
 
-QFont chartFont(int pixelSize, bool bold = false)
+QFont chartFont(int pixelSize, bool bold = false, bool screen = false)
 {
+    if (screen) return Theme::numberFont(pixelSize, bold ? QFont::Bold : QFont::Normal);
     QFont font(QStringLiteral("Microsoft YaHei"));
     font.setPixelSize(pixelSize);
     font.setBold(bold);
@@ -176,9 +245,9 @@ void drawLegend(QPainter* painter, const QRectF& plot)
     text(band);
 }
 
-Frame drawReference(QPainter* painter, const QRectF& rect, const CurveChart& chart)
+Frame drawReference(QPainter* painter, const QRectF& rect, const CurveChart& chart, const ChartPalette& p)
 {
-    const QFont tickFont = chartFont(11);
+    const QFont tickFont = chartFont(11, false, p.screen);
     const QFontMetricsF fm(tickFont);
     const QString unit = QStringLiteral("岁");
     const qreal left = fm.horizontalAdvance(chart.tAxis ? QStringLiteral("-5") : QStringLiteral("4300")) + 14;
@@ -205,16 +274,16 @@ Frame drawReference(QPainter* painter, const QRectF& rect, const CurveChart& cha
     painter->setFont(tickFont);
     if (chart.tAxis) {
         // T >= -1 normal, -2.5 < T < -1 low, T <= -2.5 very low.
-        painter->fillRect(QRectF(plot.left(), plot.top(), plot.width(), yT(-1) - plot.top()), kNormalBand);
-        painter->fillRect(QRectF(plot.left(), yT(-1), plot.width(), yT(-2.5) - yT(-1)), kLowBand);
-        painter->fillRect(QRectF(plot.left(), yT(-2.5), plot.width(), plot.bottom() - yT(-2.5)), kVeryLowBand);
+        painter->fillRect(QRectF(plot.left(), plot.top(), plot.width(), yT(-1) - plot.top()), p.normalBand);
+        painter->fillRect(QRectF(plot.left(), yT(-1), plot.width(), yT(-2.5) - yT(-1)), p.lowBand);
+        painter->fillRect(QRectF(plot.left(), yT(-2.5), plot.width(), plot.bottom() - yT(-2.5)), p.veryLowBand);
         for (int t = int(AgeSosChartWidget::minT); t <= int(AgeSosChartWidget::maxT); ++t) {
             const qreal yy = yT(t);
             if (t > AgeSosChartWidget::minT && t < AgeSosChartWidget::maxT) {
-                painter->setPen(QPen(QColor(255, 255, 255, 190), 1));
+                painter->setPen(QPen(p.bandGrid, 1));
                 painter->drawLine(QPointF(plot.left(), yy), QPointF(plot.right(), yy));
             }
-            painter->setPen(kAxisText);
+            painter->setPen(p.axisText);
             painter->drawText(QRectF(rect.left(), yy - fm.height() / 2, left - 6, fm.height()),
                               Qt::AlignRight | Qt::AlignVCenter, QString::number(t));
             painter->drawText(QRectF(plot.right() + 6, yy - fm.height() / 2, right - 6, fm.height()),
@@ -222,18 +291,18 @@ Frame drawReference(QPainter* painter, const QRectF& rect, const CurveChart& cha
                               QString::number(qRound(young.mean + t * young.sd)));
         }
     } else {
-        painter->fillRect(plot, kNeutralBackground);
+        painter->fillRect(plot, p.neutralBackground);
         for (double sos = std::ceil(minSos / 200.0) * 200.0; sos <= maxSos; sos += 200.0) {
             const qreal yy = y(sos);
-            painter->setPen(QPen(kNeutralGrid, 1));
+            painter->setPen(QPen(p.neutralGrid, 1));
             painter->drawLine(QPointF(plot.left(), yy), QPointF(plot.right(), yy));
-            painter->setPen(kAxisText);
+            painter->setPen(p.axisText);
             painter->drawText(QRectF(rect.left(), yy - fm.height() / 2, left - 6, fm.height()),
                               Qt::AlignRight | Qt::AlignVCenter, QString::number(qRound(sos)));
         }
     }
 
-    painter->setPen(kAxisText);
+    painter->setPen(p.axisText);
     const int ageStep = maxAge - minAge > 40 ? 10 : 2;
     for (int age = int(minAge); age <= int(maxAge); age += ageStep) {
         painter->drawText(QRectF(x(age) - 20, plot.bottom() + ageRow, 40, fm.height()),
@@ -247,7 +316,7 @@ Frame drawReference(QPainter* painter, const QRectF& rect, const CurveChart& cha
     painter->drawText(titleRow, Qt::AlignLeft | Qt::AlignVCenter,
                       chart.tAxis ? QStringLiteral("T值") : sosTitle);
     if (chart.tAxis) painter->drawText(titleRow, Qt::AlignRight | Qt::AlignVCenter, sosTitle);
-    const QFont captionFont = chartFont(10);
+    const QFont captionFont = chartFont(10, false, p.screen);
     painter->setFont(captionFont);
     const QFontMetricsF captionMetrics(captionFont);
     const qreal captionWidth = titleRow.width() - 2 * fm.horizontalAdvance(sosTitle) - 16;
@@ -255,10 +324,26 @@ Frame drawReference(QPainter* painter, const QRectF& rect, const CurveChart& cha
                       captionMetrics.elidedText(chart.caption, Qt::ElideRight, captionWidth));
 
     if (chart.tAxis) {
-        painter->setPen(QPen(kNormalLine, 2.5));
+        const Qt::PenStyle thresholdStyle = p.screen ? Qt::DashLine : Qt::SolidLine;
+        painter->setPen(QPen(p.normalLine, p.thresholdWidth, thresholdStyle));
         painter->drawLine(QPointF(plot.left(), yT(-1)), QPointF(plot.right(), yT(-1)));
-        painter->setPen(QPen(kVeryLowLine, 2.5));
+        painter->setPen(QPen(p.veryLowLine, p.thresholdWidth, thresholdStyle));
         painter->drawLine(QPointF(plot.left(), yT(-2.5)), QPointF(plot.right(), yT(-2.5)));
+        if (p.screen) {
+            // Name each verdict band in its own corner, clear of the curves.
+            const QFont bandFont = Theme::uiFont(11, QFont::DemiBold);
+            painter->setFont(bandFont);
+            const QFontMetricsF bandMetrics(bandFont);
+            const qreal inset = 8;
+            const auto bandLabel = [&](const QString& text, const QColor& color, qreal baselineY) {
+                painter->setPen(color);
+                painter->drawText(QPointF(plot.left() + inset, baselineY), text);
+            };
+            bandLabel(QStringLiteral("正常"), QColor(0x2E, 0x82, 0x59), plot.top() + inset + bandMetrics.ascent());
+            bandLabel(QStringLiteral("不足"), QColor(0xA3, 0x60, 0x0C), yT(-2.5) - 6);
+            bandLabel(QStringLiteral("严重不足"), QColor(0xB4, 0x39, 0x2A), plot.bottom() - 7);
+            painter->setFont(tickFont);
+        }
     }
 
     // Reference mean ±1 SD; dashed where the data is held flat.
@@ -280,25 +365,25 @@ Frame drawReference(QPainter* painter, const QRectF& rect, const CurveChart& cha
         band.addPolygon(upper);
         for (int i = lower.size() - 1; i >= 0; --i) band.lineTo(lower.at(i));
         band.closeSubpath();
-        QColor fill = kSdFill;
+        QColor fill = p.sdFill;
         if (!measured) fill.setAlpha(fill.alpha() / 2);
         painter->fillPath(band, fill);
         const Qt::PenStyle style = measured ? Qt::SolidLine : Qt::DashLine;
         painter->setBrush(Qt::NoBrush);
-        painter->setPen(QPen(kSdLine, 1.3, style));
+        painter->setPen(QPen(p.sdLine, p.screen ? 1.0 : 1.3, style));
         painter->drawPolyline(upper);
         painter->drawPolyline(lower);
-        painter->setPen(QPen(kMeanLine, 2.0, style));
+        painter->setPen(QPen(p.meanLine, 2.0, style));
         painter->drawPolyline(mean);
     };
     drawSegment(minAge, solidUntil, true);
     drawSegment(solidUntil, maxAge, false);
     painter->restore();
 
-    painter->setPen(QPen(QColor(196, 202, 210), 1));
+    painter->setPen(QPen(p.frame, 1));
     painter->setBrush(Qt::NoBrush);
     painter->drawRect(plot);
-    drawLegend(painter, plot);
+    if (!p.screen) drawLegend(painter, plot);
 
     // Records carry whole years; Z compares them with the reference at age + 0.5
     // (SosReference::zScore), so the point is placed there too. A Z = 0 result then
@@ -444,21 +529,23 @@ void AgeSosChartWidget::paintEvent(QPaintEvent* event)
 {
     Q_UNUSED(event)
     QPainter painter(this);
-    renderChart(&painter, rect(), data_);
+    renderChart(&painter, rect(), data_, RenderStyle::Screen);
 }
 
 void AgeSosChartWidget::renderChart(QPainter* painter,
                                     const QRectF& targetRect,
-                                    const AgeSosChartData& data)
+                                    const AgeSosChartData& data,
+                                    RenderStyle style)
 {
     if (!painter || targetRect.isEmpty()) return;
+    const ChartPalette& p = style == RenderStyle::Screen ? screenPalette() : reportPalette();
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, true);
     painter->fillRect(targetRect, Qt::white);
 
-    const auto drawCentered = [painter, &targetRect](const QString& text) {
-        painter->setPen(QColor(144, 147, 153));
-        painter->setFont(chartFont(14));
+    const auto drawCentered = [painter, &targetRect, &p](const QString& text) {
+        painter->setPen(p.emptyText);
+        painter->setFont(p.screen ? Theme::uiFont(14) : chartFont(14));
         painter->drawText(targetRect, Qt::AlignCenter, text);
     };
 
@@ -480,7 +567,7 @@ void AgeSosChartWidget::renderChart(QPainter* painter,
         profile == Profile::Woman ? adultChart(SosReference::Sex::Female)
         : profile == Profile::Man ? adultChart(SosReference::Sex::Male)
                                   : childChart(profile == Profile::Girl);
-    const Frame frame = drawReference(painter, available, chart);
+    const Frame frame = drawReference(painter, available, chart, p);
 
     bool drewPoint = false;
     AgeSosMeasurementPoint highlighted;
@@ -496,7 +583,7 @@ void AgeSosChartWidget::renderChart(QPainter* painter,
             painter->setBrush(Qt::white);
             painter->drawEllipse(point, value.highlighted ? 8.5 : 7.0,
                                   value.highlighted ? 8.5 : 7.0);
-            painter->setBrush(value.highlighted ? kLatestPoint : kHistoryPoint);
+            painter->setBrush(value.highlighted ? p.latestPoint : p.historyPoint);
             painter->drawEllipse(point, value.highlighted ? 6.0 : 4.8,
                                   value.highlighted ? 6.0 : 4.8);
             if (value.highlighted) {
@@ -508,10 +595,10 @@ void AgeSosChartWidget::renderChart(QPainter* painter,
 
     if (hasHighlighted) {
         const QPointF point = frame.map(highlighted.age, highlighted.sos);
-        const QString label = QStringLiteral("本次：%1岁  %2 m/s")
-                                  .arg(highlighted.age)
-                                  .arg(highlighted.sos, 0, 'f', 1);
-        const QFont labelFont = chartFont(12);
+        const QString label = p.screen
+            ? QStringLiteral("本次 %1 岁 · %2 m/s").arg(highlighted.age).arg(highlighted.sos, 0, 'f', 1)
+            : QStringLiteral("本次：%1岁  %2 m/s").arg(highlighted.age).arg(highlighted.sos, 0, 'f', 1);
+        const QFont labelFont = p.screen ? Theme::uiFont(12) : chartFont(12);
         painter->setFont(labelFont);
         const QFontMetricsF metrics(labelFont);
         const QSizeF labelSize(metrics.horizontalAdvance(label) + 16, metrics.height() + 8);
@@ -522,29 +609,37 @@ void AgeSosChartWidget::renderChart(QPainter* painter,
         if (labelY < frame.area.top() + 4)
             labelY = point.y() + 10;
         const QRectF labelRect(QPointF(labelX, labelY), labelSize);
-        painter->setPen(kLatestPoint);
-        painter->setBrush(QColor(255, 255, 255, 235));
-        painter->drawRoundedRect(labelRect, 4, 4);
+        if (p.screen) {
+            painter->setPen(Qt::NoPen);
+            painter->setBrush(p.latestPoint);
+            painter->drawRoundedRect(labelRect, 7, 7);
+            painter->setPen(Qt::white);
+        } else {
+            painter->setPen(kLatestPoint);
+            painter->setBrush(QColor(255, 255, 255, 235));
+            painter->drawRoundedRect(labelRect, 4, 4);
+        }
         painter->drawText(labelRect, Qt::AlignCenter, label);
     }
 
     if (!drewPoint) {
-        painter->setFont(chartFont(12));
+        painter->setFont(p.screen ? Theme::uiFont(12) : chartFont(12));
         const QString text = data.hasMeasurementRecords
             ? QStringLiteral("当前年龄分组暂无有效结果")
             : QStringLiteral("暂无检测结果");
         const qreal width = qMin<qreal>(220, frame.area.width() - 16);
         const QRectF statusRect(frame.area.center().x() - width / 2, frame.area.bottom() - 40,
                                 width, 28);
-        painter->setPen(QColor(144, 147, 153));
+        painter->setPen(p.screen ? QPen(p.frame) : QPen(p.emptyText));
         painter->setBrush(QColor(255, 255, 255, 230));
-        painter->drawRoundedRect(statusRect, 4, 4);
+        painter->drawRoundedRect(statusRect, p.screen ? 8 : 4, p.screen ? 8 : 4);
+        painter->setPen(p.emptyText);
         painter->drawText(statusRect, Qt::AlignCenter, text);
     }
 
     if (data.omittedOtherProfileCount > 0) {
-        painter->setFont(chartFont(11));
-        painter->setPen(QColor(96, 98, 102));
+        painter->setFont(p.screen ? Theme::uiFont(11) : chartFont(11));
+        painter->setPen(p.noteText);
         painter->drawText(QRectF(frame.area.left() + 8, frame.area.bottom() - 24,
                                  frame.area.width() - 16, 20),
                           Qt::AlignLeft | Qt::AlignVCenter,

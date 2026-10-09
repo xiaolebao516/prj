@@ -13,6 +13,7 @@
 #include <QSettings>
 #include <QSignalBlocker>
 #include <QStatusBar>
+#include "theme/theme.h"
 
 void MainWindow::resetFrameAssembly()
 {

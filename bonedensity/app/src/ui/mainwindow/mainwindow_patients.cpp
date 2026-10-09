@@ -27,6 +27,8 @@
 #include <QVBoxLayout>
 #include <algorithm>
 
+#include "widgets/uikit.h"
+
 using namespace mainwindow_detail;
 
 void MainWindow::on_btnPatientInfo_clicked()
@@ -46,11 +48,14 @@ void MainWindow::updateCurrentPatientUI() {
     const int age = ageOnDate(currentPatient.birthDay, QDate::currentDate());
     if (age >= 0) meta << QStringLiteral("%1 岁").arg(age);
     if (lblPatientMeta) lblPatientMeta->setText(meta.join(QStringLiteral(" · ")));
-    ui->labelID->setText(QStringLiteral("编号　%1").arg(value(currentPatient.id)));
-    ui->labelGender->setText(QStringLiteral("性别　%1").arg(value(currentPatient.gender)));
-    ui->labelBirth->setText(QStringLiteral("出生　%1").arg(value(currentPatient.birthDay)));
-    ui->labelHeight->setText(QStringLiteral("身高　%1").arg(value(currentPatient.height, QStringLiteral(" cm"))));
-    ui->labelWeight->setText(QStringLiteral("体重　%1").arg(value(currentPatient.weight, QStringLiteral(" kg"))));
+    if (patientAvatar) patientAvatar->setName(currentPatient.name);
+    if (lblPatientMeta) lblPatientMeta->setVisible(!meta.isEmpty());
+    // Captions sit above these values in the patient card.
+    ui->labelID->setText(value(currentPatient.id));
+    ui->labelGender->setText(value(currentPatient.gender));
+    ui->labelBirth->setText(value(currentPatient.birthDay));
+    ui->labelHeight->setText(value(currentPatient.height, QStringLiteral(" cm")));
+    ui->labelWeight->setText(value(currentPatient.weight, QStringLiteral(" kg")));
 }
 
 // ==================== 档案管理 ===============================================================================================

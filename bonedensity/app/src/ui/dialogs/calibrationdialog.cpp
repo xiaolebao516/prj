@@ -18,16 +18,33 @@
 #include <QPushButton>
 #include <QScrollArea>
 #include <QStackedWidget>
+#include <QStyle>
 #include <QTableWidget>
 #include <QVBoxLayout>
 #include <cmath>
 
 namespace {
 
+// Colours come from the application theme (theme.qss): these helpers only
+// set the role / tone properties it styles.
+void setRole(QWidget* widget, const char* role)
+{
+    widget->setProperty("role", QString::fromLatin1(role));
+}
+
+void setTone(QWidget* widget, const char* tone)
+{
+    const QString value = QString::fromLatin1(tone);
+    if (widget->property("tone").toString() == value) return;
+    widget->setProperty("tone", value);
+    widget->style()->unpolish(widget);
+    widget->style()->polish(widget);
+}
+
 QLabel* pageTitle(const QString& text)
 {
     QLabel* label = new QLabel(text);
-    label->setStyleSheet(QStringLiteral("font-size: 18px; font-weight: bold; color: #303133;"));
+    setRole(label, "sectionTitle");
     return label;
 }
 
@@ -36,7 +53,7 @@ QLabel* wrappedLabel(const QString& text)
     QLabel* label = new QLabel(text);
     label->setWordWrap(true);
     label->setTextFormat(Qt::RichText);
-    label->setStyleSheet(QStringLiteral("line-height: 1.45; color: #606266;"));
+    setRole(label, "body");
     return label;
 }
 
@@ -98,7 +115,7 @@ CalibrationDialog::CalibrationDialog(CalibrationStore* store,
 
     stepLabel_ = new QLabel;
     stepLabel_->setObjectName(QStringLiteral("calibrationStepLabel"));
-    stepLabel_->setStyleSheet(QStringLiteral("color: #409EFF; font-weight: bold;"));
+    setRole(stepLabel_, "step");
     root->addWidget(stepLabel_);
 
     pages_ = new QStackedWidget;
@@ -118,6 +135,7 @@ CalibrationDialog::CalibrationDialog(CalibrationStore* store,
     backButton_->setObjectName(QStringLiteral("calibrationBackButton"));
     nextButton_->setObjectName(QStringLiteral("calibrationNextButton"));
     closeButton_->setObjectName(QStringLiteral("calibrationCloseButton"));
+    nextButton_->setProperty("variant", QStringLiteral("primary"));
     footer->addWidget(backButton_);
     footer->addStretch();
     footer->addWidget(nextButton_);
@@ -157,13 +175,13 @@ void CalibrationDialog::submitFrame(const CalibrationFrame& frame)
         status->setText(QStringLiteral("本帧未计入：%1；累计拒绝 %2 帧。")
                             .arg(reason)
                             .arg(session_.currentRejectedFrameCount()));
-        status->setStyleSheet(QStringLiteral("color: #E6A23C;"));
+        setTone(status, "warn");
         return;
     }
     if (result == CalibrationFrameResult::Accepted) {
         status->setText(QStringLiteral("正在采集第 %1/6 次独立测量。")
                             .arg(session_.completedMeasurementCount(phase) + 1));
-        status->setStyleSheet(QStringLiteral("color: #409EFF;"));
+        setTone(status, "info");
         return;
     }
 
@@ -181,7 +199,7 @@ void CalibrationDialog::notifyAcquisitionUnavailable(const QString& reason)
     operationCheckForPhase(phase)->setEnabled(true);
     temperatureForPhase(phase)->setEnabled(true);
     statusForPhase(phase)->setText(reason);
-    statusForPhase(phase)->setStyleSheet(QStringLiteral("color: #F56C6C;"));
+    setTone(statusForPhase(phase), "bad");
 }
 
 void CalibrationDialog::closeEvent(QCloseEvent* event)
@@ -514,7 +532,7 @@ QWidget* CalibrationDialog::createSetupPage()
     layout->addLayout(form);
 
     setupModeHint_ = wrappedLabel(QString());
-    setupModeHint_->setStyleSheet(QStringLiteral("color: #409EFF;"));
+    setTone(setupModeHint_, "info");
     layout->addWidget(setupModeHint_);
     certificateConfirmedCheck_ = new QCheckBox(
         QStringLiteral("我已核对试块与证书，并确认参考温度、SOS和单位录入正确"));
@@ -544,7 +562,7 @@ QWidget* CalibrationDialog::createCollectionPage(CalibrationPhase phase)
     QLabel* operationGuide = wrappedLabel(
         QStringLiteral("操作要求：使用同一种耦合剂，薄而均匀地覆盖接触面，排除气泡；保持探头方向、位置和压力一致。"
                        "请使用外部温度计测量试块本体温度，室温不能直接代替试块温度。"));
-    operationGuide->setStyleSheet(QStringLiteral("background: #F4F8FF; border: 1px solid #D9ECFF; padding: 10px;"));
+    setRole(operationGuide, "calloutInfo");
     layout->addWidget(operationGuide);
 
     QHBoxLayout* controls = new QHBoxLayout;
@@ -593,7 +611,8 @@ QWidget* CalibrationDialog::createCollectionPage(CalibrationPhase phase)
         calibrationStatus_ = status;
         calibrationStartButton_ = start;
         candidateLabel_ = new QLabel(QStringLiteral("候选D：完成6次后计算"));
-        candidateLabel_->setStyleSheet(QStringLiteral("font-weight: bold; color: #409EFF;"));
+        candidateLabel_->setStyleSheet(QStringLiteral("font-weight: 600;"));
+        setTone(candidateLabel_, "info");
         layout->addWidget(candidateLabel_);
         connect(start, &QPushButton::clicked,
                 this, &CalibrationDialog::startCalibrationMeasurement);
@@ -639,15 +658,17 @@ QWidget* CalibrationDialog::createResultPage()
     resultLabel_ = wrappedLabel(QStringLiteral("等待验证完成。"));
     resultLabel_->setObjectName(QStringLiteral("calibrationResultLabel"));
     resultLabel_->setStyleSheet(QStringLiteral("font-size: 15px;"));
+    setRole(resultLabel_, "");
     layout->addWidget(resultLabel_);
 
     QLabel* threshold = wrappedLabel(
         QStringLiteral("判定阈值：B通道平均SOS相对误差不超过 <b>±2%</b>，6次验证结果变异系数不超过 <b>1%</b>。"
                        "该阈值参考YY/T 0774-2019产品性能要求，用于本项目工程验证，不等同于计量校准结论。"));
-    threshold->setStyleSheet(QStringLiteral("background: #FFF8E8; border: 1px solid #F3D19E; padding: 10px;"));
+    setRole(threshold, "calloutWarn");
     layout->addWidget(threshold);
     activateButton_ = new QPushButton(QStringLiteral("确认激活候选D"));
     activateButton_->setObjectName(QStringLiteral("calibrationActivateButton"));
+    activateButton_->setProperty("variant", QStringLiteral("primary"));
     connect(activateButton_, &QPushButton::clicked,
             this, &CalibrationDialog::activateCandidate);
     layout->addWidget(activateButton_, 0, Qt::AlignLeft);
@@ -705,7 +726,7 @@ void CalibrationDialog::startMeasurement(CalibrationPhase phase)
     statusForPhase(phase)->setText(
         QStringLiteral("正在采集第 %1/6 次独立测量，请勿移动探头。")
             .arg(session_.completedMeasurementCount(phase) + 1));
-    statusForPhase(phase)->setStyleSheet(QStringLiteral("color: #409EFF;"));
+    setTone(statusForPhase(phase), "info");
     startButtonForPhase(phase)->setEnabled(false);
     operationCheckForPhase(phase)->setEnabled(false);
     temperatureForPhase(phase)->setEnabled(false);
@@ -723,7 +744,7 @@ void CalibrationDialog::finishAcquisitionUi(CalibrationPhase phase)
     statusForPhase(phase)->setText(
         QStringLiteral("第 %1/6 次独立测量完成。请取下探头，下一次重新清洁、涂胶和定位。")
             .arg(session_.completedMeasurementCount(phase)));
-    statusForPhase(phase)->setStyleSheet(QStringLiteral("color: #67C23A;"));
+    setTone(statusForPhase(phase), "ok");
     refreshMeasurementTables();
 
     if (phase == CalibrationPhase::Calibration && session_.calibrationComplete()) {
@@ -817,9 +838,7 @@ void CalibrationDialog::refreshResult()
         details += QStringLiteral("<br><br>候选D尚未激活，正式检测仍使用原D。");
     }
     resultLabel_->setText(details);
-    resultLabel_->setStyleSheet(evaluation.passed
-                                    ? QStringLiteral("font-size: 15px; color: #67C23A;")
-                                    : QStringLiteral("font-size: 15px; color: #F56C6C;"));
+    setTone(resultLabel_, evaluation.passed ? "ok" : "bad");
     activateButton_->setVisible(record.setup.mode == CalibrationMode::Formal);
     activateButton_->setEnabled(session_.canActivate() && !activated_);
 }
