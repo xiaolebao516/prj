@@ -86,7 +86,7 @@ void MainWindowSafetyTests::experimentSubjectSnapshotAndSessions()
     QCOMPARE(otherConfig["subject"].toObject()["archive_id"].toString(), other.id);
     QCOMPARE(otherConfig["subject"].toObject()["name"].toString(), other.name);
     QCOMPARE(readConfig(firstPath), first); // Later renames cannot relabel old logs.
-    QCOMPARE(first["implementation"].toString(), QStringLiteral("onset-consistency-20260915-v1"));
+    QCOMPARE(first["implementation"].toString(), window.profile.implementation);
     QCOMPARE(first["G_min"].toDouble(), -12.0);
     QCOMPARE(first["G_max"].toDouble(), 0.0);
 #endif

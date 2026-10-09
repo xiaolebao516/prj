@@ -42,6 +42,7 @@ void MainWindowSafetyTests::onsetGuardRejectsRecordedLowFrame() {
     const auto rows=onsetReadRows(QFINDTESTDATA("../testdata/onset-consistency/low-1984.jsonl"));
     const auto r=rows.last();QTemporaryDir dir;QVERIFY(dir.isValid());
     MainWindow w;w.patientMeasureRunning=true;w.acquireMode=PatientMeasureMode;
+    w.profile.enforceBOnsetConsistency=true; // the guard itself, also in trial builds that disable it
     QVERIFY(w.experimentLog.start(dir.path(),{}));const QString log=w.experimentLog.path();
     w.currentFrame.bc=onsetRaw(r,"raw_BC");w.currentFrame.bd=onsetRaw(r,"raw_BD");
     w.currentFrame.ac=onsetRaw(r,"raw_AC");w.currentFrame.ad=onsetRaw(r,"raw_AD");

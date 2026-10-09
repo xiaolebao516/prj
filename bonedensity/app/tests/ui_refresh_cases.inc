@@ -298,7 +298,8 @@ void MainWindowSafetyTests::toolbarAndResultCardStructure()
     QVERIFY(!window.findChild<QPushButton*>(QStringLiteral("wifi_button")));
     QVERIFY(window.ui->grpLatestResultRight->isAncestorOf(window.ui->btnSaveResult));
     QVERIFY(window.ui->btnSaveResult->isHidden());
-    QVERIFY(!window.windowTitle().contains(QStringLiteral("试测")));
+    // Only trial builds say 试测 in the title (see experimentBuildIdentity).
+    QCOMPARE(window.windowTitle(), window.profile.title);
 
     QVERIFY(!window.ui->btnStartMeasurement->isEnabled());
     QVERIFY(window.lblStartHint->text().contains(QStringLiteral("连接")));

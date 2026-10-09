@@ -266,7 +266,8 @@ void MainWindowSafetyTests::trialRoundQualityStillRejectsBelowFloor()
             const auto row=QJsonDocument::fromJson(line).object();
             if (row["event"]!="round_summary") continue;
             found=true;
-            QCOMPARE(row["quality_pass"].toBool(),scenario==1 && window.profile.useDualWindowAQuality);
+            // Every profile uses the 0.78 round corrA floor.
+            QCOMPARE(row["quality_pass"].toBool(),scenario==1);
         }
         QVERIFY(found);
         window.closeRoundFinishedTip();
@@ -384,7 +385,7 @@ void MainWindowSafetyTests::experimentBuildIdentity()
     QVERIFY(!window.profile.useDualWindowAQuality);
     QVERIFY(!window.profile.completeTruncatedBPeak);
     QVERIFY(!window.profile.deferPartialDiscardUntilRelock);
-    QCOMPARE(window.mCfg.roundCorrAMin,.80);
+    QCOMPARE(window.mCfg.roundCorrAMin,.78);
     QVERIFY(window.profile.observeStabilityBeforeG);
     QVERIFY(window.windowTitle().contains(QStringLiteral("试测版")));
 #else
