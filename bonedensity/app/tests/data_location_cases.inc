@@ -110,12 +110,12 @@ void MainWindowSafetyTests::resultsRecordTheirParameterGroup()
     window.currentPatient = samplePatient();
     window.patientList = {window.currentPatient};
     QVERIFY(window.savePatients(window.patientList));
-    window.roundSosList = {3910.0, 3956.9, 3946.3, 3951.6, 3983.7};
-    window.roundAList = {10, 20, 30, 40, 60};
-    window.roundBList = {100, 200, 300, 400, 600};
+    window.session.roundSos = {3910.0, 3956.9, 3946.3, 3951.6, 3983.7};
+    window.session.roundA = {10, 20, 30, 40, 60};
+    window.session.roundB = {100, 200, 300, 400, 600};
     window.finishAllPatientRounds();
     QCOMPARE(window.measurementList.size(), 1);
-    const QString group = ParameterGroup::id(window.measurementParameters());
+    const QString group = ParameterGroup::id(measurementParameters(window.mCfg, window.profile, window.signalProcessor));
     QCOMPARE(window.measurementList.first().parameterGroup, group);
     QVERIFY(QFileInfo::exists(QDir(DataLocation::experimentsRoot()).filePath(group + "/参数说明.txt")));
 

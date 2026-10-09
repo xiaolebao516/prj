@@ -19,7 +19,7 @@ void MainWindowSafetyTests::experimentSubjectSnapshotAndSessions()
         return QJsonDocument::fromJson(file.readLine()).object()["config"].toObject();
     };
 
-    window.startPatientMeasurement(5, false);
+    window.startPatientMeasurement(false);
     QVERIFY(window.experimentLog.active());
     const QString firstPath = window.experimentLog.path();
     window.stopPatientMeasurement();
@@ -35,7 +35,7 @@ void MainWindowSafetyTests::experimentSubjectSnapshotAndSessions()
 
     // Retry the interrupted first round: same session and frozen identity.
     window.currentPatient.name = QStringLiteral("试测甲已更名");
-    window.startPatientMeasurement(5, false);
+    window.startPatientMeasurement(false);
     const QString retryPath = window.experimentLog.path();
     window.stopPatientMeasurement();
     const auto retry = readConfig(retryPath);
@@ -44,7 +44,7 @@ void MainWindowSafetyTests::experimentSubjectSnapshotAndSessions()
     QVERIFY(retryPath != firstPath);
 
     // Exercise the real automatic next-round timer, without real serial hardware.
-    window.roundSosList = {3800.0};
+    window.session.roundSos = {3800.0};
     window.patientDataWritable = true;
     window.scheduleNextPatientRound(1);
     window.nextRoundTimer.setInterval(1);
@@ -57,8 +57,8 @@ void MainWindowSafetyTests::experimentSubjectSnapshotAndSessions()
     QCOMPARE(next["subject"].toObject(), subject);
 
     // A new measurement after five completed rounds gets a new snapshot/ID.
-    window.roundSosList = {3800,3800,3800,3800,3800};
-    window.startPatientMeasurement(5, false);
+    window.session.roundSos = {3800,3800,3800,3800,3800};
+    window.startPatientMeasurement(false);
     const QString completedPath = window.experimentLog.path();
     window.stopPatientMeasurement();
     const auto completed = readConfig(completedPath);
@@ -69,7 +69,7 @@ void MainWindowSafetyTests::experimentSubjectSnapshotAndSessions()
 
     // Explicit restart and switching to a different archive with the same name.
     window.resetAllPatientMeasurementData();
-    window.startPatientMeasurement(5, false);
+    window.startPatientMeasurement(false);
     const QString resetPath = window.experimentLog.path();
     window.stopPatientMeasurement();
     const QString resetSession = readConfig(resetPath)["measurement_session_id"].toString();
@@ -78,7 +78,7 @@ void MainWindowSafetyTests::experimentSubjectSnapshotAndSessions()
     PatientInfo other = window.currentPatient;
     other.id = QStringLiteral("patient-002");
     QVERIFY(window.selectCurrentPatient(other));
-    window.startPatientMeasurement(5, false);
+    window.startPatientMeasurement(false);
     const QString otherPath = window.experimentLog.path();
     window.stopPatientMeasurement();
     const auto otherConfig = readConfig(otherPath);

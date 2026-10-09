@@ -1,6 +1,6 @@
 #include <QtTest>
 
-#include "patientstore.h"
+#include "storage/patientstore.h"
 
 #include <QDomDocument>
 #include <QFile>

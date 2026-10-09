@@ -3,5 +3,6 @@ QT = core testlib
 include(tests.pri)
 include(../src/core/core.pri)
 
-TARGET = accountstore_tests
-SOURCES += accountstore_tests.cpp
+TARGET = core_tests
+HEADERS += testframes.h
+SOURCES += core_tests.cpp

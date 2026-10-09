@@ -1,8 +1,8 @@
 #include <QtTest>
 
-#include "calibration.h"
-#include "calibrationdialog.h"
-#include "calibrationstore.h"
+#include "calibration/calibration.h"
+#include "dialogs/calibrationdialog.h"
+#include "calibration/calibrationstore.h"
 
 #include <QAbstractButton>
 #include <QCheckBox>

@@ -1,98 +1,10 @@
-    QT       += core gui
-QT += core gui widgets serialport charts printsupport
-QT += xml
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-
+# BoneDensity desktop application (Qt 6.5.3 / MinGW 11.2, Windows).
+# Sources are listed once in src/core/core.pri and src/ui/ui.pri; the test
+# projects under tests/ include the same files.
 include(version.pri)
-CONFIG += c++17
+include(src/ui/ui.pri)
 
 TARGET = BoneDensity
+!isEmpty(BONE_TRIAL_TARGET): TARGET = $$BONE_TRIAL_TARGET
 
-# Explicit isolated research build; normal builds retain the original flow.
-contains(CONFIG, observe_before_g_trial) {
-    !CONFIG(debug, debug|release): error("The posture-flow trial must be a Debug build")
-    DEFINES += BONE_OBSERVE_BEFORE_G_EXPERIMENT
-    TARGET = BoneDensity_SelfTrial
-}
-contains(CONFIG, dual_window_a_trial) {
-    contains(CONFIG, observe_before_g_trial): error("Select only one trial profile")
-    !CONFIG(debug, debug|release): error("The dual-window trial must be a Debug build")
-    DEFINES += BONE_DUAL_WINDOW_A_EXPERIMENT
-    TARGET = BoneDensity_DualWindowTrial
-}
-contains(CONFIG, b_peak_completion_trial) {
-    contains(CONFIG, observe_before_g_trial)|contains(CONFIG, dual_window_a_trial)|contains(CONFIG, relock_preservation_trial): error("Select only one trial profile")
-    !CONFIG(debug, debug|release): error("The B peak-completion trial must be a Debug build")
-    DEFINES += BONE_COMPLETE_B_PEAK_EXPERIMENT
-    TARGET = BoneDensity_BPeakTrial
-}
-contains(CONFIG, relock_preservation_trial) {
-    contains(CONFIG, observe_before_g_trial)|contains(CONFIG, dual_window_a_trial)|contains(CONFIG, b_peak_completion_trial): error("Select only one trial profile")
-    !CONFIG(debug, debug|release): error("The relock-preservation trial must be a Debug build")
-    DEFINES += BONE_RELOCK_PRESERVATION_EXPERIMENT
-    TARGET = BoneDensity_RelockTrial
-}
-
-INCLUDEPATH += include
-
-SOURCES += \
-    src/main.cpp \
-    src/mainwindow.cpp \
-    src/mainwindow_device.cpp \
-    src/mainwindow_measurement.cpp \
-    src/mainwindow_display.cpp \
-    src/mainwindow_patients.cpp \
-    src/mainwindow_report.cpp \
-    src/mainwindow_layout.cpp \
-    src/accountstore.cpp \
-    src/calibration.cpp \
-    src/calibrationdialog.cpp \
-    src/measurementguidedialog.cpp \
-    src/calibrationstore.cpp \
-    src/patientstore.cpp \
-    src/agesoschartwidget.cpp \
-    src/reportwidget.cpp \
-    src/signalprocessor.cpp \
-    src/bonehealth.cpp \
-    src/sosreference.cpp \
-    src/databackup.cpp \
-    src/legacyimport.cpp \
-    src/parametergroup.cpp \
-    src/datalocation.cpp \
-    src/utils.cpp \
-    src/patientformdialog.cpp
-
-HEADERS += \
-    include/measurementexperimentlog.h \
-    include/mainwindow.h \
-    include/mainwindow_internal.h \
-    include/accountstore.h \
-    include/calibration.h \
-    include/calibrationdialog.h \
-    include/measurementguidedialog.h \
-    include/calibrationstore.h \
-    include/patientstore.h \
-    include/agesoschartwidget.h \
-    include/reportwidget.h \
-    include/types.h \
-    include/signalprocessor.h \
-    include/bonehealth.h \
-    include/sosreference.h \
-    include/databackup.h \
-    include/legacyimport.h \
-    include/parametergroup.h \
-    include/datalocation.h \
-    include/utils.h \
-    include/patientformdialog.h
-
-FORMS += \
-    ui/mainwindow.ui
-
-RESOURCES += \
-    resources/resources.qrc
-
-# Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
+SOURCES += src/app/main.cpp

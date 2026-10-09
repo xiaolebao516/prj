@@ -38,24 +38,15 @@ bool onsetJsonEqual(const QJsonValue& a,const QJsonValue& b) {
 }
 }
 
-void MainWindowSafetyTests::onsetConsistencyBoundaries() {
-    ArrivalResult a;a.valid=true;a.firstHit=100;a.onset=140;
-    QVERIFY(a.onsetConsistent(40));
-    a.onset=141;QVERIFY(!a.onsetConsistent(40));
-    a.onset=99;QVERIFY(a.onsetConsistent(40));
-    a.valid=false;QVERIFY(!a.onsetConsistent(40));
-    a.valid=true;a.firstHit=-1;QVERIFY(!a.onsetConsistent(40));
-}
-
 void MainWindowSafetyTests::onsetGuardRejectsRecordedLowFrame() {
     const auto rows=onsetReadRows(QFINDTESTDATA("../testdata/onset-consistency/low-1984.jsonl"));
     const auto r=rows.last();QTemporaryDir dir;QVERIFY(dir.isValid());
     MainWindow w;w.patientMeasureRunning=true;w.acquireMode=PatientMeasureMode;
     QVERIFY(w.experimentLog.start(dir.path(),{}));const QString log=w.experimentLog.path();
-    w.samplesA=onsetRaw(r,"raw_BC");w.samplesB=onsetRaw(r,"raw_BD");
-    w.samplesC=onsetRaw(r,"raw_AC");w.samplesD=onsetRaw(r,"raw_AD");
+    w.currentFrame.bc=onsetRaw(r,"raw_BC");w.currentFrame.bd=onsetRaw(r,"raw_BD");
+    w.currentFrame.ac=onsetRaw(r,"raw_AC");w.currentFrame.ad=onsetRaw(r,"raw_AD");
     for(int i=0;i<15;++i)w.plotSamples();
-    QCOMPARE(w.processValidCount,0);QVERIFY(w.currentRoundSosList.isEmpty());
+    QCOMPARE(w.session.validCount(),0);QVERIFY(w.session.currentRound.sos.isEmpty());
     w.stopPatientMeasurement();
     const auto actual=onsetReadRows(log);int frames=0;
     for(const auto& x:actual)if(x["event"]=="frame") {
@@ -85,7 +76,7 @@ void MainWindowSafetyTests::onsetGuardMatchesRecordedBatch() {
             const auto c=rows.first()["config"].toObject();
             for(bool guard:{false,true}) {
                 QTemporaryDir dir;QVERIFY(dir.isValid());MainWindow w;
-                w.enforceBOnsetConsistency=guard;
+                w.profile.enforceBOnsetConsistency=guard;
                 w.mCfg.frameCorrAMin=c["frame_corr_A"].toDouble();
                 w.mCfg.frameCorrBMin=c["frame_corr_B"].toDouble();
                 w.mCfg.roundCorrAMin=c["round_corr_A"].toDouble();
@@ -100,8 +91,8 @@ void MainWindowSafetyTests::onsetGuardMatchesRecordedBatch() {
                     if(r["event"]!="frame")continue;
                     QVERIFY2(w.patientMeasureRunning,qPrintable(name+" premature completion"));
                     originals.append(r);
-                    w.samplesA=onsetRaw(r,"raw_BC");w.samplesB=onsetRaw(r,"raw_BD");
-                    w.samplesC=onsetRaw(r,"raw_AC");w.samplesD=onsetRaw(r,"raw_AD");
+                    w.currentFrame.bc=onsetRaw(r,"raw_BC");w.currentFrame.bd=onsetRaw(r,"raw_BD");
+                    w.currentFrame.ac=onsetRaw(r,"raw_AC");w.currentFrame.ad=onsetRaw(r,"raw_AD");
                     w.plotSamples();
                 }
                 w.stopPatientMeasurement();w.closeRoundFinishedTip();

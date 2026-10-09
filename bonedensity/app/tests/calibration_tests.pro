@@ -1,17 +1,11 @@
-QT += core widgets testlib xml
-CONFIG += c++17 testcase console
-CONFIG -= app_bundle
+QT += testlib
+include(tests.pri)
+include(../src/core/core.pri)
+
+QT += widgets
+INCLUDEPATH += ../src/ui
+HEADERS += ../src/ui/dialogs/calibrationdialog.h
+SOURCES += ../src/ui/dialogs/calibrationdialog.cpp
 
 TARGET = calibration_tests
-INCLUDEPATH += ../include
-
-SOURCES += \
-    calibration_tests.cpp \
-    ../src/calibration.cpp \
-    ../src/calibrationdialog.cpp \
-    ../src/calibrationstore.cpp
-
-HEADERS += \
-    ../include/calibration.h \
-    ../include/calibrationdialog.h \
-    ../include/calibrationstore.h
+SOURCES += calibration_tests.cpp

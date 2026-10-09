@@ -1,6 +1,6 @@
 #include <QtTest>
 
-#include "accountstore.h"
+#include "storage/accountstore.h"
 
 #include <QDir>
 #include <QFile>

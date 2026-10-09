@@ -46,11 +46,11 @@ void MainWindowSafetyTests::patientResultUsesReferenceAndSkipsChildren()
         window.currentPatient = patient;
         window.patientList = {patient};
         window.measurementList.clear();
-        window.roundSosList = rounds;
-        window.roundAList = {10, 20, 30, 40, 5000, 60};
-        window.roundBList = {100, 200, 300, 400, 50000, 600};
+        window.session.roundSos = rounds;
+        window.session.roundA = {10, 20, 30, 40, 5000, 60};
+        window.session.roundB = {100, 200, 300, 400, 50000, 600};
         double a = 0, b = 0;
-        QVERIFY(window.computeFinalPatientRoundMeans(*finalSos, a, b));
+        QVERIFY(window.session.finalMeans(*finalSos, a, b));
         window.finishAllPatientRounds();
         QCOMPARE(window.measurementList.size(), 1);
     };

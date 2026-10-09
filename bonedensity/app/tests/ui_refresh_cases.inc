@@ -213,7 +213,7 @@ void MainWindowSafetyTests::closeCancelKeepsPendingNextRound()
     window.patientDataWritable = true;
     window.currentPatient = samplePatient();
     window.nextRoundDelayMs = 5000;
-    window.roundSosList = {3900.0};
+    window.session.roundSos = {3900.0};
     window.scheduleNextPatientRound(1);
     QVERIFY(window.nextRoundTimer.isActive());
 
