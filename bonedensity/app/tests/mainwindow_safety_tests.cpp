@@ -88,7 +88,13 @@ class MainWindowSafetyTests : public QObject
 
 private slots:
     // Every test runs against a throw-away data folder, never app/BoneDensityData.
-    void initTestCase() { QVERIFY(dataRoot.isValid()); qputenv("BONE_DATA_DIR", dataRoot.path().toUtf8()); }
+    // Auto-connect is off too, so a densitometer plugged into the test PC is never opened.
+    void initTestCase()
+    {
+        QVERIFY(dataRoot.isValid());
+        qputenv("BONE_DATA_DIR", dataRoot.path().toUtf8());
+        qputenv("BONE_NO_AUTO_CONNECT", "1");
+    }
     void experimentSubjectSnapshotAndSessions();
     void onsetGuardRejectsRecordedLowFrame();
     void onsetGuardMatchesRecordedBatch();
@@ -154,6 +160,8 @@ private slots:
     void themedDialogGroupTitlesStayClearOfContent();
     void loginPageIsUsableAndShowsVersion();
     void portListRefreshKeepsSelectionWithoutRebuilding();
+    void densitometerPortIsNamedAndPreferred();
+    void autoConnectOncePerPlugIn();
     void deviceWatchdogReportsMissingFrames();
     void sosReferenceMatchesPublishedTable();
     void patientResultUsesReferenceAndSkipsChildren();

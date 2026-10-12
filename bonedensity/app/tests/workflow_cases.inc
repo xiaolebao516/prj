@@ -97,7 +97,7 @@ void MainWindowSafetyTests::serialPortSelectionIsRemembered()
     // At start-up nothing is selected yet, so the remembered port wins even
     // when it is not first in the list.
     window.ui->comboPort->clear();
-    const QList<QPair<QString, QString>> ports = {
+    const QList<MainWindow::SerialPortChoice> ports = {
         {QStringLiteral("COM1"), QStringLiteral("通信端口")},
         {QStringLiteral("COM7"), QStringLiteral("USB 串行设备")}};
     window.applyPortList(ports, window.rememberedPort());

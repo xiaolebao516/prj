@@ -165,6 +165,10 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     scheduleResponsiveLayout();
+
+    // From the next port scan on; tests set BONE_NO_AUTO_CONNECT so they
+    // never open a real device.
+    autoConnectEnabled = qEnvironmentVariableIsEmpty("BONE_NO_AUTO_CONNECT");
 }
 
 //先登录===============================================================================

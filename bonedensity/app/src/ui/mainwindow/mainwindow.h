@@ -67,6 +67,13 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    // One entry of the port drop-down.
+    struct SerialPortChoice {
+        QString name;               // COM5
+        QString description;        // driver description, e.g. "USB 串行设备"
+        bool densitometer = false;  // the bone densitometer's lower unit
+    };
+
 private slots:
     void on_btnLogin_clicked();
     void manageAccounts();
@@ -123,13 +130,23 @@ private:
     void restartFrameStream();              // 同上，并丢弃串口里尚未读取的数据
     void resetDisconnectedAcquisitionState();
 
-    // ports: (name, description). preferred is selected when the previous
-    // selection is gone (e.g. at start-up); otherwise the selection is kept.
-    void applyPortList(const QList<QPair<QString, QString>>& ports,
+    // preferred is selected when the previous selection is gone (e.g. at
+    // start-up); otherwise the selection is kept.
+    void applyPortList(const QList<SerialPortChoice>& ports,
                        const QString& preferred = QString());
+    QString preferredPort(const QList<SerialPortChoice>& ports) const;
     QString rememberedPort() const;
     void rememberPort(const QString& portName);
     QString deviceSettingsPath;
+    bool openDevicePort(const QString& portName);
+
+    // Auto-connect when exactly one densitometer is plugged in and nothing is
+    // connected: a few tries per plug-in, none after a manual disconnect.
+    QString nextAutoConnectPort(const QList<SerialPortChoice>& ports);
+    void autoConnect(const QString& portName);
+    bool autoConnectEnabled = false;   // switched on once the window is built
+    QString autoConnectCandidate;
+    int autoConnectTriesLeft = 0;
 
     // Device link feedback (display only; command timing is unchanged).
     void noteCommandSent();

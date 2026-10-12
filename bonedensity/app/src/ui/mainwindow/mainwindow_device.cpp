@@ -5,6 +5,8 @@
 
 #include "dialogs/calibrationdialog.h"
 
+#include <algorithm>
+
 #include <QAbstractItemView>
 #include <QComboBox>
 #include <QDebug>
@@ -46,27 +48,94 @@ void MainWindow::resetDisconnectedAcquisitionState()
     updatePatientSelectionUi();
 }
 
-void MainWindow::scanPorts() {
-    QList<QPair<QString, QString>> ports;
-    const auto infos = QSerialPortInfo::availablePorts();
-    for (const QSerialPortInfo &info : infos) ports.append({info.portName(), info.description()});
+namespace {
 
-    // Pre-select the port that worked last time; otherwise the Raspberry Pi
-    // Pico (VID 0x2E8A) the device is built on, then any USB serial port.
-    QString preferred;
+// The lower unit is a Raspberry Pi Pico 2 running the Pico SDK USB serial
+// (firmware 骨密度仪/hhhh111): VID 0x2E8A, PID 0x0009. Windows names every such
+// port "USB 串行设备", so it is recognised by these IDs. The Raspberry Pi Debug
+// Probe (PID 0x000C) and other Raspberry Pi devices do not match.
+bool isDensitometerPort(const QSerialPortInfo& info)
+{
+    return info.hasVendorIdentifier() && info.vendorIdentifier() == 0x2E8A &&
+           info.hasProductIdentifier() && info.productIdentifier() == 0x0009;
+}
+
+QString portLabel(const MainWindow::SerialPortChoice& port)
+{
+    if (port.densitometer) return QStringLiteral("骨密度仪（%1）").arg(port.name);
+    if (port.description.isEmpty()) return port.name;
+    return port.name + QStringLiteral(" - ") + port.description;
+}
+
+} // namespace
+
+void MainWindow::scanPorts() {
+    QList<SerialPortChoice> ports;
+    const auto infos = QSerialPortInfo::availablePorts();
+    for (const QSerialPortInfo &info : infos)
+        ports.append({info.portName(), info.description(), isDensitometerPort(info)});
+    // The densitometer first, so it is the obvious choice in the drop-down.
+    std::stable_partition(ports.begin(), ports.end(),
+                          [](const SerialPortChoice& port) { return port.densitometer; });
+
+    applyPortList(ports, preferredPort(ports));
+    const QString target = nextAutoConnectPort(ports);
+    if (!target.isEmpty()) autoConnect(target);
+}
+
+// The densitometer (the one used last time if several are plugged in);
+// without one, the port that worked last time, then any USB serial port.
+QString MainWindow::preferredPort(const QList<SerialPortChoice>& ports) const
+{
     const QString remembered = rememberedPort();
-    for (const QSerialPortInfo &info : infos) {
-        if (info.portName() == remembered) preferred = remembered;
+    QString device;
+    for (const SerialPortChoice& port : ports) {
+        if (!port.densitometer) continue;
+        if (port.name == remembered) return remembered;
+        if (device.isEmpty()) device = port.name;
     }
-    for (const QSerialPortInfo &info : infos) {
-        if (preferred.isEmpty() && info.hasVendorIdentifier() && info.vendorIdentifier() == 0x2E8A)
-            preferred = info.portName();
+    if (!device.isEmpty()) return device;
+    for (const SerialPortChoice& port : ports) {
+        if (port.name == remembered) return remembered;
     }
-    for (const QSerialPortInfo &info : infos) {
-        if (preferred.isEmpty() && info.description().contains(QStringLiteral("USB"), Qt::CaseInsensitive))
-            preferred = info.portName();
+    for (const SerialPortChoice& port : ports) {
+        if (port.description.contains(QStringLiteral("USB"), Qt::CaseInsensitive)) return port.name;
     }
-    applyPortList(ports, preferred);
+    return QString();
+}
+
+QString MainWindow::nextAutoConnectPort(const QList<SerialPortChoice>& ports)
+{
+    QStringList devices;
+    for (const SerialPortChoice& port : ports) {
+        if (port.densitometer) devices.append(port.name);
+    }
+    // Two densitometers: the user has to choose.
+    if (devices.size() != 1) {
+        autoConnectCandidate.clear();
+        return QString();
+    }
+    if (devices.first() != autoConnectCandidate) {
+        // Newly plugged in. Windows may need a moment before the port opens.
+        autoConnectCandidate = devices.first();
+        autoConnectTriesLeft = 3;
+    }
+    if (!autoConnectEnabled || serial->isOpen() || autoConnectTriesLeft <= 0) return QString();
+    --autoConnectTriesLeft;
+    return autoConnectCandidate;
+}
+
+void MainWindow::autoConnect(const QString& portName)
+{
+    const int index = ui->comboPort->findData(portName);
+    if (index >= 0) ui->comboPort->setCurrentIndex(index);
+    if (openDevicePort(portName)) {
+        statusBar()->showMessage(QStringLiteral("已自动连接骨密度仪（%1）。").arg(portName), 5000);
+    } else if (autoConnectTriesLeft <= 0) {
+        statusBar()->showMessage(
+            QStringLiteral("骨密度仪（%1）自动连接失败，端口可能被其他程序占用。关闭该程序后点击“连接”。")
+                .arg(portName), 10000);
+    }
 }
 
 QString MainWindow::rememberedPort() const
@@ -83,14 +152,14 @@ void MainWindow::rememberPort(const QString& portName)
 
 // Rebuild the port list only when it actually changed and the user is not
 // looking at the open drop-down, so the selection never flickers away.
-void MainWindow::applyPortList(const QList<QPair<QString, QString>>& ports,
+void MainWindow::applyPortList(const QList<SerialPortChoice>& ports,
                                const QString& preferred)
 {
     QComboBox* combo = ui->comboPort;
     bool unchanged = combo->count() == ports.size();
     for (int i = 0; unchanged && i < ports.size(); ++i) {
-        unchanged = combo->itemData(i).toString() == ports[i].first &&
-                    combo->itemText(i) == ports[i].first + " - " + ports[i].second;
+        unchanged = combo->itemData(i).toString() == ports[i].name &&
+                    combo->itemText(i) == portLabel(ports[i]);
     }
     if (unchanged) return;
     if (combo->view() && combo->view()->isVisible()) return;
@@ -98,9 +167,10 @@ void MainWindow::applyPortList(const QList<QPair<QString, QString>>& ports,
     const QString current = combo->currentData().toString();
     QSignalBlocker blocker(combo);
     combo->clear();
-    for (const auto& port : ports) {
-        // 文本：COM11 - USB Serial Device；data 只存端口名
-        combo->addItem(port.first + " - " + port.second, port.first);
+    for (const SerialPortChoice& port : ports) {
+        // 文本：骨密度仪（COM11）或 COM3 - 蓝牙串口；data 只存端口名
+        combo->addItem(portLabel(port), port.name);
+        combo->setItemData(combo->count() - 1, port.description, Qt::ToolTipRole);
     }
     int idx = combo->findData(current);
     if (idx < 0 && !preferred.isEmpty()) idx = combo->findData(preferred);
@@ -113,53 +183,11 @@ void MainWindow::on_connectButton_clicked() {
 
         QString portName = ui->comboPort->currentData().toString();
         if (portName.isEmpty()) {
-            QMessageBox::warning(this, "无法连接设备", "请先选择设备端口，再点击“连接”。");
+            QMessageBox::warning(this, "无法连接设备", "请先选择骨密度仪端口，再点击“连接”。");
             return;
         }
 
-        serial->setPortName(portName);
-        serial->setBaudRate(QSerialPort::Baud115200);
-        serial->setDataBits(QSerialPort::Data8);
-        serial->setParity(QSerialPort::NoParity);
-        serial->setStopBits(QSerialPort::OneStop);
-        serial->setFlowControl(QSerialPort::NoFlowControl);
-
-        serial->setReadBufferSize(0);              // 可选
-
-        // ⭐⭐⭐ 关键一行：关闭文本模式的 LF ↔ CRLF 自动转换
-        serial->setTextModeEnabled(false);   // ⭐⭐ 最关键！！！
-
-        if (serial->open(QIODevice::ReadWrite)) {
-            rememberPort(portName);
-            serial->setDataTerminalReady(true); // 拉高 DTR，告诉 Pico "我准备好了"
-            serial->setRequestToSend(false);     // 拉高 RTS (部分固件也需要这个)
-
-
-
-
-            // ★★ 必须加的三行，解决 USB CDC 卡住的问题
-            serial->clear(QSerialPort::AllDirections);
-            serial->flush();
-            serial->readAll();
-            serial->waitForReadyRead(10);
-            serial->readAll();
-
-            resetFrameAssembly();
-            serialErrorHandled = false;
-
-            qDebug() << "Serial opened on" << portName;
-            qDebug() << "Serial actually opened:" << serial->isOpen();
-            qDebug() << "Error:" << serial->error();
-
-            ui->connectButton->setText("断开连接");
-
-            // 允许重复连接流程，但同一串口只保留一个 readyRead 连接。
-            connect(serial, &QSerialPort::readyRead,
-                    this, &MainWindow::handleSerialReadyRead,
-                    Qt::UniqueConnection);
-            updatePatientSelectionUi();
-
-        } else {
+        if (!openDevicePort(portName)) {
             QMessageBox::warning(this,
                                  "无法连接设备",
                                  "设备连接失败。\n请检查 USB 是否插好、设备是否被其他程序占用，然后重试。");
@@ -169,9 +197,55 @@ void MainWindow::on_connectButton_clicked() {
     } else {
         serial->close();
         serialErrorHandled = false;
+        autoConnectTriesLeft = 0;   // a manual disconnect stays disconnected
         ui->connectButton->setText("连接");
         resetDisconnectedAcquisitionState();
     }
+}
+
+bool MainWindow::openDevicePort(const QString& portName)
+{
+    serial->setPortName(portName);
+    serial->setBaudRate(QSerialPort::Baud115200);
+    serial->setDataBits(QSerialPort::Data8);
+    serial->setParity(QSerialPort::NoParity);
+    serial->setStopBits(QSerialPort::OneStop);
+    serial->setFlowControl(QSerialPort::NoFlowControl);
+
+    serial->setReadBufferSize(0);              // 可选
+
+    // ⭐⭐⭐ 关键一行：关闭文本模式的 LF ↔ CRLF 自动转换
+    serial->setTextModeEnabled(false);   // ⭐⭐ 最关键！！！
+
+    if (!serial->open(QIODevice::ReadWrite)) return false;
+
+    rememberPort(portName);
+    autoConnectTriesLeft = 0;
+    serial->setDataTerminalReady(true); // 拉高 DTR，告诉 Pico "我准备好了"
+    serial->setRequestToSend(false);     // 拉高 RTS (部分固件也需要这个)
+
+    // ★★ 必须加的三行，解决 USB CDC 卡住的问题
+    serial->clear(QSerialPort::AllDirections);
+    serial->flush();
+    serial->readAll();
+    serial->waitForReadyRead(10);
+    serial->readAll();
+
+    resetFrameAssembly();
+    serialErrorHandled = false;
+
+    qDebug() << "Serial opened on" << portName;
+    qDebug() << "Serial actually opened:" << serial->isOpen();
+    qDebug() << "Error:" << serial->error();
+
+    ui->connectButton->setText("断开连接");
+
+    // 允许重复连接流程，但同一串口只保留一个 readyRead 连接。
+    connect(serial, &QSerialPort::readyRead,
+            this, &MainWindow::handleSerialReadyRead,
+            Qt::UniqueConnection);
+    updatePatientSelectionUi();
+    return true;
 }
 
 
@@ -265,12 +339,12 @@ void MainWindow::handleSerialError(QSerialPort::SerialPortError error) {
     serial->close();
     ui->connectButton->setText("连接");
     resetDisconnectedAcquisitionState();
-    statusBar()->showMessage("设备通信已中断，请检查 USB 连接和设备电源。重新插入后点击“连接”。", 10000);
+    statusBar()->showMessage("设备通信已中断，请检查 USB 连接和设备电源。重新插入后会自动连接。", 10000);
 
     QMessageBox::warning(this,
                          "设备通信已中断",
                          "设备通信已中断，可能是 USB 被拔出、连接不稳定或读写失败。\n"
-                         "请检查 USB 线和设备电源，重新插入后点击“连接”。");
+                         "请检查 USB 线和设备电源。重新插入后会自动连接；若没有连上，请点击“连接”。");
 }
 
 // ==================== 设备响应提示（只影响显示，不改变命令时序）====================

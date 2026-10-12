@@ -431,7 +431,7 @@ void MainWindowSafetyTests::portListRefreshKeepsSelectionWithoutRebuilding()
 {
     MainWindow window;
     window.hide();
-    const QList<QPair<QString, QString>> ports = {
+    const QList<MainWindow::SerialPortChoice> ports = {
         {QStringLiteral("COM3"), QStringLiteral("蓝牙串口")},
         {QStringLiteral("COM5"), QStringLiteral("USB 串行设备")}};
     window.applyPortList(ports);
@@ -447,6 +447,69 @@ void MainWindowSafetyTests::portListRefreshKeepsSelectionWithoutRebuilding()
                           {QStringLiteral("COM7"), QStringLiteral("新设备")}});
     QCOMPARE(window.ui->comboPort->count(), 2);
     QCOMPARE(window.ui->comboPort->currentData().toString(), QStringLiteral("COM5"));
+}
+
+void MainWindowSafetyTests::densitometerPortIsNamedAndPreferred()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    MainWindow window;
+    window.hide();
+    window.deviceSettingsPath = directory.filePath(QStringLiteral("device.ini"));
+    window.rememberPort(QStringLiteral("COM3"));
+
+    const MainWindow::SerialPortChoice other{QStringLiteral("COM3"), QStringLiteral("蓝牙串口")};
+    const MainWindow::SerialPortChoice device{QStringLiteral("COM5"), QStringLiteral("USB 串行设备"), true};
+    window.ui->comboPort->clear();
+    window.applyPortList({device, other}, window.preferredPort({device, other}));
+    QCOMPARE(window.ui->comboPort->itemText(0), QStringLiteral("骨密度仪（COM5）"));
+    QCOMPARE(window.ui->comboPort->itemText(1), QStringLiteral("COM3 - 蓝牙串口"));
+    QCOMPARE(window.ui->comboPort->itemData(0, Qt::ToolTipRole).toString(), QStringLiteral("USB 串行设备"));
+    // The densitometer wins over a remembered port that is not one.
+    QCOMPARE(window.ui->comboPort->currentData().toString(), QStringLiteral("COM5"));
+
+    // With two densitometers the one used last time is preferred.
+    const MainWindow::SerialPortChoice second{QStringLiteral("COM8"), QStringLiteral("USB 串行设备"), true};
+    window.rememberPort(QStringLiteral("COM8"));
+    QCOMPARE(window.preferredPort({device, second, other}), QStringLiteral("COM8"));
+    // Without a densitometer the old order applies: remembered, then USB.
+    QCOMPARE(window.preferredPort({other, {QStringLiteral("COM8"), QStringLiteral("蓝牙串口")}}),
+             QStringLiteral("COM8"));
+    window.rememberPort(QStringLiteral("COM1"));
+    QCOMPARE(window.preferredPort({other, {QStringLiteral("COM9"), QStringLiteral("USB 串行设备")}}),
+             QStringLiteral("COM9"));
+}
+
+void MainWindowSafetyTests::autoConnectOncePerPlugIn()
+{
+    MainWindow window;
+    window.hide();
+    QVERIFY(!window.autoConnectEnabled);   // BONE_NO_AUTO_CONNECT in tests
+    QVERIFY(!window.serial->isOpen());
+    const MainWindow::SerialPortChoice other{QStringLiteral("COM3"), QStringLiteral("蓝牙串口")};
+    const MainWindow::SerialPortChoice device{QStringLiteral("COM5"), QStringLiteral("USB 串行设备"), true};
+    const MainWindow::SerialPortChoice second{QStringLiteral("COM8"), QStringLiteral("USB 串行设备"), true};
+    QVERIFY(window.nextAutoConnectPort({other, device}).isEmpty());
+
+    window.autoConnectEnabled = true;
+    window.autoConnectCandidate.clear();
+    // Plugged in: a few tries while Windows finishes the port, then it stops.
+    for (int i = 0; i < 3; ++i)
+        QCOMPARE(window.nextAutoConnectPort({other, device}), QStringLiteral("COM5"));
+    QVERIFY(window.nextAutoConnectPort({other, device}).isEmpty());
+
+    // Unplugged and plugged in again: tries again.
+    QVERIFY(window.nextAutoConnectPort({other}).isEmpty());
+    QCOMPARE(window.nextAutoConnectPort({device}), QStringLiteral("COM5"));
+
+    // A manual disconnect (tries spent) is not undone while the device stays.
+    window.autoConnectTriesLeft = 0;
+    QVERIFY(window.nextAutoConnectPort({device}).isEmpty());
+
+    // Two densitometers: never guess.
+    QVERIFY(window.nextAutoConnectPort({device, second}).isEmpty());
+    // One of them unplugged: the other one counts as newly plugged in.
+    QCOMPARE(window.nextAutoConnectPort({second, other}), QStringLiteral("COM8"));
 }
 
 void MainWindowSafetyTests::deviceWatchdogReportsMissingFrames()

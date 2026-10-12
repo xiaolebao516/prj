@@ -72,3 +72,16 @@ Do not store complete terminal output, long reasoning traces, every minor action
 - **Problems encountered:** Windows PowerShell 5.1 initially misread UTF-8 Chinese script text without a BOM; UTF-8 BOM markers and a path-independent launcher resolved it.
 - **Learnings:** A runtime whitelist plus Windows-native copy and a package manifest provides fast handoff while excluding Agent and development content; no new generic Skill or system rule is justified yet.
 - **Follow-up:** `none`
+
+### 2026-10-12 — DEVICE-PORT-NAME — Name the densitometer port and auto-connect
+
+- **Milestone:** `standalone (not part of UI-REFRESH-001)`
+- **Workflow:** `lite`
+- **Task objective:** `Show the lower unit as 骨密度仪（COMx） in the port list and auto-connect when that is unambiguous.`
+- **Key decisions:** `Identify the unit by USB VID 0x2E8A + PID 0x0009 (Pico 2, Pico SDK stdio_usb; read from 骨密度仪/hhhh111/build/hhhh.bin), not by the Windows description, which is "USB 串行设备" for every CDC port. Auto-connect only with exactly one such port and no open link; 3 tries per plug-in; none after a manual disconnect. Serial settings, framing and timing unchanged (open code moved into openDevicePort).`
+- **Actual changes:** `mainwindow_device.cpp/.h/.cpp (SerialPortChoice, preferredPort, nextAutoConnectPort, autoConnect, openDevicePort); tests set BONE_NO_AUTO_CONNECT; two new main-window cases; weekly report.`
+- **Verification and result:** `test.ps1 -Suite core,mainwindow: core 19, main window 87 passed / 2 skipped by design; Debug build without warnings; git diff --check clean.`
+- **Final status:** `completed; uncommitted; real-device naming, auto-connect and re-plug are external acceptance`
+- **Problems encountered:** `none`
+- **Learnings:** `Another Pico 2 running Pico SDK USB serial would also be named 骨密度仪; a unique USB product ID or serial-number match in the firmware would be needed for certainty.`
+- **Follow-up:** `Lab check with the real device.`
