@@ -542,6 +542,14 @@ void MainWindow::processFilteredFrame(const FilteredFrame& filtered)
 void MainWindow::processCalibrationFrame(const FilteredFrame& filtered)
 {
     if (filtered.length() <= 0) {
+        // Preserve failed frames too: they are often the best evidence of
+        // contact loss, decoder noise or an onset/peak selection failure.
+        if (specimenLog.active()) {
+            writeSpecimenFrame(QJsonObject{
+                {"accepted", false},
+                {"b_valid", false},
+                {"rejection_reason", "filtered input empty"}});
+        }
         setSpeedDebugInvalid("滤波数据为空");
         return;
     }

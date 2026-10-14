@@ -581,11 +581,19 @@ void MainWindowSafetyTests::specimenEvidenceRecordsIdentityAndRawFrames()
     QVERIFY(window.specimenLog.active());
     const QString calibrationPath = window.specimenLog.path();
     QVERIFY(calibrationPath != path);
+    window.acquireMode = CalibrationAcquireMode;
+    window.processCalibrationFrame({{}, {}, {}, {}});
     window.stopSpecimenRecording(QStringLiteral("calibration_measurement_stopped"));
     QFile calFile(calibrationPath);
     QVERIFY(calFile.open(QIODevice::ReadOnly));
     const QJsonObject calConfig = QJsonDocument::fromJson(
         calFile.readLine()).object().value("config").toObject();
+    const QJsonObject rejected = QJsonDocument::fromJson(calFile.readLine()).object();
+    QCOMPARE(rejected.value("event").toString(), QStringLiteral("frame"));
+    QVERIFY(!rejected.value("accepted").toBool());
+    QCOMPARE(rejected.value("rejection_reason").toString(), QStringLiteral("filtered input empty"));
+    QCOMPARE(rejected.value("raw_BC").toString(),
+             MeasurementExperimentLog::encodeRaw(window.currentFrame.bc));
     QCOMPARE(calConfig.value("specimen_model").toString(), QStringLiteral("KJMK-02"));
     QCOMPARE(calConfig.value("specimen_serial").toString(), QStringLiteral("M2607289"));
     QCOMPARE(calConfig.value("reference_SOS_m_s").toDouble(), 2702.0);
