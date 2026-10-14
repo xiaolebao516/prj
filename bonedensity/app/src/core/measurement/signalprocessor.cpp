@@ -2,6 +2,7 @@
 #include <cmath>
 #include <algorithm>
 #include <QDebug>
+#include <QPair>
 
 // 逐帧调试开关：改为 true 输出首波定位等逐帧细节（默认关闭）
 static constexpr bool kDebugPerFrame = false;
