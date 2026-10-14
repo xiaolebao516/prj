@@ -249,7 +249,7 @@ CalibrationFrame FrameAnalyzer::calibrationFrame(const SignalProcessor& candidat
     CalibrationFrame result;
     const PairResult b = candidate.estimatePairSpeed(
         frame.bd, frame.bc, pick.bd, pick.bc, kMinSos, kMaxSos,
-        QStringLiteral("Calibration B_pair / BD->BC"));
+        QStringLiteral("Calibration B_pair / BD->BC"), -1, -1, 0, true);
     if (bOut) *bOut = b;
     if (!b.valid) return result;
 
@@ -285,7 +285,7 @@ CalibrationFrame FrameAnalyzer::calibrationFrame(const SignalProcessor& candidat
 
     const PairResult audit = active.estimatePairSpeed(
         frame.bd, frame.bc, pick.bd, pick.bc, kMinSos, kMaxSos,
-        QStringLiteral("Calibration active-D peak audit"));
+        QStringLiteral("Calibration active-D peak audit"), -1, -1, 0, true);
     result.peakConsistent = audit.valid && std::abs(audit.refinedLag - b.refinedLag) <= 3;
     return result;
 }

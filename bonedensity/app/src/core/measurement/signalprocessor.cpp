@@ -391,7 +391,8 @@ int SignalProcessor::refineLagByPositiveCrossCorrelation(
     int prePts,
     int postPts,
     double* bestCorrOut,
-    int clippedPeakExtension)
+    int clippedPeakExtension,
+    bool robustLocalPeaks)
 {
     int n = qMin(early.size(), late.size());
 
@@ -496,6 +497,49 @@ int SignalProcessor::refineLagByPositiveCrossCorrelation(
 
         return num / std::sqrt(denX * denY);
     };
+
+    // Calibration-only opt-in. Complete the nearby physical candidate area
+    // before selecting a peak; a 1-sample rough lag shift must not clip a
+    // different high-correlation lobe and switch between wave cycles.
+    // Never use the phantom's target SOS to force a particular result.
+    if (robustLocalPeaks && roughOk) {
+        const int halfWidth = qBound(48, int(0.25 * std::abs(roughLag)), 55);
+        const int completedMin = qMax(lagMin, roughLag - halfWidth);
+        const int completedMax = qMin(lagMax, roughLag + halfWidth);
+        QVector<QPair<int, double>> scores;
+        int bestLag = roughLag;
+        double best = -1.0;
+        for (int lag = completedMin; lag <= completedMax; ++lag) {
+            const double corr = calcCorr(lag);
+            if (corr <= 0.0 || !std::isfinite(corr)) continue;
+            scores.append(qMakePair(lag, corr));
+            if (corr > best) { best = corr; bestLag = lag; }
+        }
+        if (best <= 0.0) {
+            if (bestCorrOut) *bestCorrOut = 0.0;
+            return roughLag;
+        }
+        const bool clipped = (bestLag == completedMin && completedMin > lagMin)
+            || (bestLag == completedMax && completedMax < lagMax);
+        double competing = -1.0;
+        // Exclude the crest of the selected lobe. A nearby point on the
+        // same broad peak is not evidence of a competing wave cycle.
+        for (const auto& score : scores) {
+            if (std::abs(score.first - bestLag) >= 18)
+                competing = qMax(competing, score.second);
+        }
+        // Conservative first-stage ambiguity guard, not a calibrated
+        // clinical threshold: two separated nearly-equal peaks mean no lag.
+        const bool ambiguous = competing > 0.0 && best - competing < 0.015;
+        if (clipped || ambiguous) {
+            qDebug() << "Calibration peak unresolved:" << roughLag
+                     << bestLag << best << competing << clipped;
+            if (bestCorrOut) *bestCorrOut = 0.0;
+            return roughLag;
+        }
+        if (bestCorrOut) *bestCorrOut = best;
+        return bestLag;
+    }
 
     // ======================================================
     // 第一遍：找最大正相关点 maxLag
@@ -723,7 +767,8 @@ PairResult SignalProcessor::estimatePairSpeed(
     const QString& pairName,
     int forcedLagMin,
     int forcedLagMax,
-    int clippedPeakExtension) const
+    int clippedPeakExtension,
+    bool robustLocalPeaks) const
 {
     PairResult res;
 
@@ -773,7 +818,8 @@ PairResult SignalProcessor::estimatePairSpeed(
         20,
         120,
         &bestCorr,
-        clippedPeakExtension
+        clippedPeakExtension,
+        robustLocalPeaks
         );
 
     int absLag = std::abs(refinedLag);

@@ -35,6 +35,7 @@ private slots:
     void frameGatesCombineLikeTheOriginalChecks();
     void onsetConsistencyBoundaries();
     void clippedBPeakSearchCanBeCompletedWithoutFullRangeScan();
+    void calibrationPeakSelectionIsCycleStable();
     void dualWindowQualityRequiresBothAtCommonLag();
     void partialRoundWaitsForRelockBeforeDiscarding();
     void finalRoundSelectionPreservesCompanionsAndBoundaries();
@@ -265,6 +266,42 @@ void CoreTests::clippedBPeakSearchCanBeCompletedWithoutFullRangeScan()
     QVERIFY(oldLag<=135);
     QCOMPARE(newLag,140);
     QVERIFY(newCorr>oldCorr);
+}
+
+void CoreTests::calibrationPeakSelectionIsCycleStable()
+{
+    QVector<double> early(700, 0.0), late(700, 0.0);
+    for (int i=260; i<=300; ++i) {
+        const double x=(i-280)/7.0;
+        const double v=std::exp(-0.5*x*x)*std::cos(0.55*(i-280));
+        early[i]=v;
+        late[i+102]=v*(1.0+0.12*std::sin(0.29*(i-280)));
+        late[i+173]=v;
+    }
+    double corr=0.0;
+    for (int rough : {136,137,138}) {
+        const int lag=SignalProcessor::refineLagByPositiveCrossCorrelation(
+            early, late, 280, rough, 92, 250, 20, 120, &corr, 0, true);
+        QCOMPARE(lag,173);
+        QVERIFY(corr>0.95);
+    }
+    // Do not commit either cycle if two separate packets are indistinguishable.
+    QVector<double> tiedLate(700, 0.0);
+    for (int i=260; i<=300; ++i) {
+        tiedLate[i+102]=early[i];
+        tiedLate[i+173]=early[i];
+    }
+    const int unresolved=SignalProcessor::refineLagByPositiveCrossCorrelation(
+        early,tiedLate,280,136,92,250,20,30,&corr,0,true);
+    QCOMPARE(unresolved,136);
+    QCOMPARE(corr,0.0);
+    // No hard-coded phantom lag: a fast single peak must remain valid.
+    QVector<double> fastLate(700, 0.0);
+    for (int i=260; i<=300; ++i) fastLate[i+105]=early[i];
+    const int fastLag=SignalProcessor::refineLagByPositiveCrossCorrelation(
+        early,fastLate,280,108,92,250,20,30,&corr,0,true);
+    QCOMPARE(fastLag,105);
+    QVERIFY(corr>0.95);
 }
 
 void CoreTests::dualWindowQualityRequiresBothAtCommonLag()
