@@ -196,6 +196,7 @@ void MainWindow::on_btnLogin_clicked() {
 //====================================================================================
 
 MainWindow::~MainWindow() {
+    stopSpecimenRecording(QStringLiteral("application_closed"));
     if (experimentLog.active()) {
         experimentLog.write({{"event", "application_closed"}});
         experimentLog.close();

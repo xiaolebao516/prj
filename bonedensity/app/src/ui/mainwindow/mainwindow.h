@@ -224,6 +224,17 @@ private:
     void startExperimentLog();
     void checkExperimentLogError();
 
+    // Independent, opt-in evidence. No patient information is written here.
+    bool specimenRecordingEnabled = false;
+    QString specimenName;
+    QPushButton* specimenRecordButton = nullptr;
+    MeasurementExperimentLog specimenLog;
+    bool specimenLogWarningShown = false;
+    void startSpecimenRecording(const QJsonObject& context);
+    void stopSpecimenRecording(const QString& reason);
+    void writeSpecimenFrame(QJsonObject evidence);
+    void checkSpecimenLogError();
+
     // ================== 探头校准 ==================
     CalibrationStore calibrationStore;
     CalibrationDialog* calibrationDialog = nullptr;

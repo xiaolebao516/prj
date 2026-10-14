@@ -13,12 +13,71 @@
 #include <QtCharts/QLineSeries>
 #include <QDate>
 #include <QDateTime>
+#include <QDir>
 #include <QDebug>
 #include <QJsonArray>
 #include <QMessageBox>
 #include <QProgressBar>
 #include <QStatusBar>
 #include <QUuid>
+
+void MainWindow::startSpecimenRecording(const QJsonObject& context)
+{
+    stopSpecimenRecording(QStringLiteral("restarted"));
+    specimenLogWarningShown = false;
+    QJsonObject config = context;
+    config.insert("recording_profile", "specimen-evidence-v1");
+    config.insert("sample_period_s", signalProcessor.samplePeriod);
+    config.insert("active_D_m", signalProcessor.probeDistanceCD);
+    config.insert("gain_BC", gainSliderA ? gainSliderA->value() : 0);
+    config.insert("gain_BD", gainSliderB ? gainSliderB->value() : 0);
+    config.insert("gain_AC", gainSliderC ? gainSliderC->value() : 0);
+    config.insert("gain_AD", gainSliderD ? gainSliderD->value() : 0);
+
+    // One common directory: the existing recorder enforces a 256 MiB file
+    // limit and a 2 GiB cumulative limit. Never overwrite or auto-delete.
+    const QString folder = QDir(DataLocation::experimentsRoot())
+        .filePath(QStringLiteral("specimens"));
+    if (!specimenLog.start(folder, config)) {
+        checkSpecimenLogError();
+        return;
+    }
+    statusBar()->showMessage(
+        QStringLiteral("实验波形记录已开启：%1").arg(specimenLog.path()), 6000);
+}
+
+void MainWindow::stopSpecimenRecording(const QString& reason)
+{
+    if (!specimenLog.active()) return;
+    specimenLog.write({{"event", "stop"}, {"reason", reason}});
+    specimenLog.close();
+    checkSpecimenLogError();
+}
+
+void MainWindow::checkSpecimenLogError()
+{
+    if (specimenLogWarningShown || specimenLog.error().isEmpty()) return;
+    specimenLogWarningShown = true;
+    statusBar()->showMessage(
+        QStringLiteral("试块原始数据未保存完整：%1（测量本身未受影响）")
+            .arg(specimenLog.error()), 15000);
+}
+
+void MainWindow::writeSpecimenFrame(QJsonObject evidence)
+{
+    if (!specimenLog.active()) return;
+    evidence.insert("event", "frame");
+    evidence.insert("utc", QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs));
+    evidence.insert("active_D_m", signalProcessor.probeDistanceCD);
+    evidence.insert("processing_D_m", acquireMode == CalibrationAcquireMode
+        ? calibrationSignalProcessor.probeDistanceCD : signalProcessor.probeDistanceCD);
+    evidence.insert("raw_BC", MeasurementExperimentLog::encodeRaw(currentFrame.bc));
+    evidence.insert("raw_BD", MeasurementExperimentLog::encodeRaw(currentFrame.bd));
+    evidence.insert("raw_AC", MeasurementExperimentLog::encodeRaw(currentFrame.ac));
+    evidence.insert("raw_AD", MeasurementExperimentLog::encodeRaw(currentFrame.ad));
+    specimenLog.write(evidence);
+    checkSpecimenLogError();
+}
 
 void MainWindow::openCalibrationDialog()
 {
@@ -44,6 +103,7 @@ void MainWindow::openCalibrationDialog()
         autoTimer->stop();
         autoRunning = false;
         ui->triggerButton->setText(QStringLiteral("自动采集"));
+        stopSpecimenRecording(QStringLiteral("switched_to_calibration"));
         updatePatientSelectionUi();
     }
 
@@ -75,6 +135,11 @@ void MainWindow::startCalibrationAcquisition(double processingD)
     restartFrameStream();
     calibrationSignalProcessor.probeDistanceCD = processingD;
     acquireMode = CalibrationAcquireMode;
+    if (calibrationDialog && calibrationDialog->rawEvidenceEnabled()) {
+        QJsonObject context = calibrationDialog->specimenEvidenceContext();
+        context.insert("processing_D_m", processingD);
+        startSpecimenRecording(context);
+    }
     autoTimer->start(80);
 }
 
@@ -84,6 +149,7 @@ void MainWindow::stopCalibrationAcquisition()
         autoTimer->stop();
     }
     if (acquireMode == CalibrationAcquireMode) acquireMode = DebugAcquireMode;
+    stopSpecimenRecording(QStringLiteral("calibration_measurement_stopped"));
     resetFrameAssembly();
     calibrationSignalProcessor.probeDistanceCD = calibrationStore.parameters().activeD;
 }
@@ -137,6 +203,7 @@ void MainWindow::startPatientMeasurement(bool offerFirstUseGuide)
         autoTimer->stop();
         autoRunning = false;
         ui->triggerButton->setText("自动采集");
+        stopSpecimenRecording(QStringLiteral("switched_to_patient"));
     }
 
     acquireMode = PatientMeasureMode;
@@ -395,6 +462,8 @@ void MainWindow::processFilteredFrame(const FilteredFrame& filtered)
     QElapsedTimer processingTimer;
     processingTimer.start();
     const FrameAnalysis frame = frameAnalyzer.analyze(filtered, patient);
+    if (!patient && specimenLog.active())
+        writeSpecimenFrame(frameEvidence(frame, mCfg, profile, nullptr));
 
     // Written after the stability update and before the value can complete
     // (and close) the round log.
@@ -484,6 +553,33 @@ void MainWindow::processCalibrationFrame(const FilteredFrame& filtered)
     const CalibrationFrame frame = FrameAnalyzer::calibrationFrame(
         calibrationSignalProcessor, signalProcessor, mCfg.frameCorrBMin,
         filtered, arrivals, &a, &b);
+    if (specimenLog.active()) {
+        const bool validation = calibrationDialog->specimenEvidenceContext()
+            .value("phase").toString() == QStringLiteral("validation");
+        const bool accepted = frame.bValid && !frame.boundaryPeak
+            && (!validation || frame.peakConsistent);
+        writeSpecimenFrame(QJsonObject{
+            {"accepted", accepted},
+            {"b_valid", frame.bValid},
+            {"a_valid", frame.aValid},
+            {"boundary_peak", frame.boundaryPeak},
+            {"peak_consistent", frame.peakConsistent},
+            {"sos_B_m_s", frame.sosB},
+            {"sos_A_m_s", frame.sosA},
+            {"corr_B", frame.corrB},
+            {"corr_A", frame.corrA},
+            {"lag_B", frame.lagB},
+            {"lag_A", frame.lagA},
+            {"rough_lag_B", b.roughLag},
+            {"refined_lag_B", b.refinedLag},
+            {"early_onset_BD", b.earlyOnset},
+            {"late_onset_BC", b.lateOnset},
+            {"rejection_reason", !frame.bValid ? QStringLiteral("B invalid/correlation/lag jump")
+                : frame.boundaryPeak ? QStringLiteral("boundary peak")
+                : validation && !frame.peakConsistent ? QStringLiteral("candidate/active peak mismatch")
+                : QString()}
+        });
+    }
     if (b.valid) {
         if (a.valid) {
             updateSpeedDebugPanel(a.sos, b.sos, b.sos, a.refinedLag, b.refinedLag,

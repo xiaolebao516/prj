@@ -107,6 +107,7 @@ private slots:
     void clusterLossDiscardsPartialRound();
     void transientRejectionPreservesProgressAndSteadySequence();
     void experimentRecordingIsBoundedAndUnique();
+    void specimenEvidenceRecordsIdentityAndRawFrames();
     void experimentRecordingIncludesEarlyFailuresAndRawInput();
     void precheckFailuresExpireStateThroughActualPipeline();
     void experimentRecordingCoversFeatureDecisions();
@@ -529,6 +530,65 @@ void MainWindowSafetyTests::experimentRecordingIsBoundedAndUnique()
     QVERIFY(!log.start(directory.path(), {}, 4096, original.size()));
     // A file where a directory is required simulates an unavailable destination.
     QVERIFY(!log.start(firstPath + "/child", {}));
+}
+
+void MainWindowSafetyTests::specimenEvidenceRecordsIdentityAndRawFrames()
+{
+    MainWindow window;
+    window.acquireMode = DebugAcquireMode;
+    window.currentFrame.bc = {0, 256, 65535};
+    window.currentFrame.bd = {2};
+    window.currentFrame.ac = {3};
+    window.currentFrame.ad = {4};
+    window.startSpecimenRecording({
+        {"capture_mode", "auto"},
+        {"specimen_name", QStringLiteral("铜块")},
+        {"specimen_kind", "research_specimen"}});
+    QVERIFY2(window.specimenLog.active(), qPrintable(window.specimenLog.error()));
+    const QString path = window.specimenLog.path();
+    QVERIFY(path.contains(QStringLiteral("specimens")));
+    window.processFilteredFrame({{}, {}, {}, {}});
+    window.stopSpecimenRecording(QStringLiteral("operator_stopped"));
+    QFile file(path);
+    QVERIFY(file.open(QIODevice::ReadOnly));
+    const auto lines = file.readAll().trimmed().split('\n');
+    QCOMPARE(lines.size(), 3); // start, rejected/raw frame, stop
+    const QJsonObject start = QJsonDocument::fromJson(lines[0]).object();
+    const QJsonObject config = start.value("config").toObject();
+    QCOMPARE(config.value("capture_mode").toString(), QStringLiteral("auto"));
+    QCOMPARE(config.value("specimen_name").toString(), QStringLiteral("铜块"));
+    QVERIFY(config.value("sample_period_s").toDouble() > 0);
+    const QJsonObject frame = QJsonDocument::fromJson(lines[1]).object();
+    QCOMPARE(frame.value("event").toString(), QStringLiteral("frame"));
+    QCOMPARE(frame.value("decision").toString(), QStringLiteral("empty_filtered_input"));
+    QCOMPARE(frame.value("raw_BC").toString(),
+             MeasurementExperimentLog::encodeRaw(window.currentFrame.bc));
+    QCOMPARE(frame.value("raw_BD").toString(),
+             MeasurementExperimentLog::encodeRaw(window.currentFrame.bd));
+    QCOMPARE(frame.value("raw_AC").toString(),
+             MeasurementExperimentLog::encodeRaw(window.currentFrame.ac));
+    QCOMPARE(frame.value("raw_AD").toString(),
+             MeasurementExperimentLog::encodeRaw(window.currentFrame.ad));
+    QCOMPARE(frame.value("active_D_m").toDouble(), 0.00784);
+    QCOMPARE(QJsonDocument::fromJson(lines[2]).object()
+        .value("reason").toString(), QStringLiteral("operator_stopped"));
+
+    window.startSpecimenRecording({{"capture_mode", "calibration"},
+        {"specimen_model", QStringLiteral("KJMK-02")},
+        {"specimen_serial", QStringLiteral("M2607289")},
+        {"temperature_C", 26.0}, {"reference_SOS_m_s", 2702.0},
+        {"phase", "validation"}, {"measurement_index", 1}});
+    QVERIFY(window.specimenLog.active());
+    const QString calibrationPath = window.specimenLog.path();
+    QVERIFY(calibrationPath != path);
+    window.stopSpecimenRecording(QStringLiteral("calibration_measurement_stopped"));
+    QFile calFile(calibrationPath);
+    QVERIFY(calFile.open(QIODevice::ReadOnly));
+    const QJsonObject calConfig = QJsonDocument::fromJson(
+        calFile.readLine()).object().value("config").toObject();
+    QCOMPARE(calConfig.value("specimen_model").toString(), QStringLiteral("KJMK-02"));
+    QCOMPARE(calConfig.value("specimen_serial").toString(), QStringLiteral("M2607289"));
+    QCOMPARE(calConfig.value("reference_SOS_m_s").toDouble(), 2702.0);
 }
 
 void MainWindowSafetyTests::experimentRecordingIncludesEarlyFailuresAndRawInput()

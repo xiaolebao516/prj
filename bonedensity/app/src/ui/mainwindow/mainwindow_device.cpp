@@ -38,6 +38,7 @@ void MainWindow::resetDisconnectedAcquisitionState()
         checkExperimentLogError();
     }
     if (autoTimer && autoTimer->isActive()) autoTimer->stop();
+    stopSpecimenRecording(QStringLiteral("disconnected"));
     autoRunning = false;
     patientMeasureRunning = false;
     acquireMode = DebugAcquireMode;
@@ -260,11 +261,18 @@ void MainWindow::on_triggerButton_clicked()
     acquireMode = DebugAcquireMode;
 
     if (!autoRunning) {
+        if (specimenRecordingEnabled) {
+            startSpecimenRecording(QJsonObject{
+                {"capture_mode", "auto"},
+                {"specimen_name", specimenName},
+                {"specimen_kind", "research_specimen"}});
+        }
         autoTimer->start(80);
         ui->triggerButton->setText("停止自动采集");
         autoRunning = true;
     } else {
         autoTimer->stop();
+        stopSpecimenRecording(QStringLiteral("operator_stopped"));
         ui->triggerButton->setText("自动采集");
         autoRunning = false;
     }

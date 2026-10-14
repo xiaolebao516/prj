@@ -14,6 +14,8 @@
 #include <QFrame>
 #include <QGridLayout>
 #include <QGroupBox>
+#include <QInputDialog>
+#include <QLineEdit>
 #include <QPainter>
 #include <QPainterPath>
 #include <QHBoxLayout>
@@ -106,6 +108,7 @@ void MainWindow::updatePatientSelectionUi()
     ui->btnMeasurementGuide->setEnabled(!navigationLocked);
     ui->pushButton->setEnabled(connected && !navigationLocked);
     ui->triggerButton->setEnabled(connected && !patientMeasureRunning && !nextRoundPending);
+    if (specimenRecordButton) specimenRecordButton->setEnabled(!navigationLocked);
     const QString deviceHint = connected ? QString() : QStringLiteral("请先连接设备");
     ui->pushButton->setToolTip(connected ? QStringLiteral("单次读取四通道波形，不计入检测") : deviceHint);
     ui->triggerButton->setToolTip(connected ? QStringLiteral("每 80 ms 连续采集，不计入检测") : deviceHint);
@@ -293,6 +296,37 @@ void MainWindow::setupToolbar()
     decorate(ui->triggerButton, Glyph::Repeat, QStringLiteral("ghost"), tokens.ink700);
     row->addWidget(ui->pushButton);
     row->addWidget(ui->triggerButton);
+    specimenRecordButton = new QPushButton(QStringLiteral("记录：关闭"), toolbar);
+    specimenRecordButton->setObjectName(QStringLiteral("specimenRecordButton"));
+    specimenRecordButton->setMinimumHeight(36);
+    specimenRecordButton->setToolTip(QStringLiteral("为自动采集选择试块并保存原始波形；校准记录单独设置。"));
+    row->addWidget(specimenRecordButton);
+    connect(specimenRecordButton, &QPushButton::clicked, this, [this]() {
+        const QStringList choices = {QStringLiteral("关闭"), QStringLiteral("铜块"),
+                                     QStringLiteral("塑料试块"),
+                                     QStringLiteral("科进校准模块 KJMK-02 / M2607289"),
+                                     QStringLiteral("自定义…")};
+        bool ok = false;
+        const QString choice = QInputDialog::getItem(
+            this, QStringLiteral("实验数据记录"), QStringLiteral("选择自动采集的试块："),
+            choices, 0, false, &ok);
+        if (!ok) return;
+        QString name = choice;
+        if (choice == QStringLiteral("自定义…")) {
+            name = QInputDialog::getText(this, QStringLiteral("自定义试块"),
+                QStringLiteral("试块名称或编号："), QLineEdit::Normal, specimenName, &ok).trimmed();
+            if (!ok || name.isEmpty()) return;
+        }
+        specimenRecordingEnabled = choice != QStringLiteral("关闭");
+        specimenName = specimenRecordingEnabled ? name : QString();
+        const QString brief = choice == QStringLiteral("科进校准模块 KJMK-02 / M2607289")
+            ? QStringLiteral("KJMK-02") : name.left(10);
+        specimenRecordButton->setText(specimenRecordingEnabled
+            ? QStringLiteral("记录：%1").arg(brief) : QStringLiteral("记录：关闭"));
+        specimenRecordButton->setToolTip(specimenRecordingEnabled
+            ? QStringLiteral("自动采集时保存 %1 的波形；点击可更换试块或关闭记录。").arg(name)
+            : QStringLiteral("选择试块后，自动采集将保存四通道原始数据。"));
+    });
     row->addSpacing(8);
     row->addWidget(separator(toolbar));
     row->addSpacing(8);

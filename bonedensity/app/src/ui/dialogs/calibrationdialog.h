@@ -4,6 +4,7 @@
 #include "calibration/calibrationstore.h"
 
 #include <QDialog>
+#include <QJsonObject>
 
 class QCheckBox;
 class QComboBox;
@@ -27,6 +28,8 @@ public:
 
     void submitFrame(const CalibrationFrame& frame);
     void notifyAcquisitionUnavailable(const QString& reason);
+    bool rawEvidenceEnabled() const;
+    QJsonObject specimenEvidenceContext() const;
 
 signals:
     void acquisitionStartRequested(double processingD);
@@ -98,6 +101,7 @@ private:
     QDoubleSpinBox* referenceSosSpin_ = nullptr;
     QCheckBox* certificateConfirmedCheck_ = nullptr;
     QCheckBox* responsibilityCheck_ = nullptr;
+    QCheckBox* rawEvidenceCheck_ = nullptr;
     QLabel* setupModeHint_ = nullptr;
 
     QDoubleSpinBox* calibrationTemperatureSpin_ = nullptr;

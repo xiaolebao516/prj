@@ -159,6 +159,31 @@ CalibrationDialog::CalibrationDialog(CalibrationStore* store,
     refreshNavigation();
 }
 
+bool CalibrationDialog::rawEvidenceEnabled() const
+{
+    return rawEvidenceCheck_ && rawEvidenceCheck_->isChecked();
+}
+
+QJsonObject CalibrationDialog::specimenEvidenceContext() const
+{
+    const CalibrationRecord& record = session_.record();
+    const CalibrationPhase phase = session_.currentPhase();
+    return QJsonObject{
+        {"capture_mode", "calibration"},
+        {"specimen_kind", "calibration_module"},
+        {"specimen_name", (record.setup.phantomModel + QStringLiteral(" ") + record.setup.phantomSerial).trimmed()},
+        {"specimen_model", record.setup.phantomModel},
+        {"specimen_serial", record.setup.phantomSerial},
+        {"probe_id", record.setup.probeId},
+        {"calibration_session_id", record.id},
+        {"phase", calibrationPhaseToString(phase)},
+        {"measurement_index", session_.completedMeasurementCount(phase) + 1},
+        {"temperature_C", temperatureForPhase(phase)->value()},
+        {"reference_temperature_C", record.setup.referenceTemperature},
+        {"reference_SOS_m_s", record.setup.referenceSos}
+    };
+}
+
 void CalibrationDialog::submitFrame(const CalibrationFrame& frame)
 {
     if (!session_.isCollecting()) return;
@@ -542,6 +567,12 @@ QWidget* CalibrationDialog::createSetupPage()
     responsibilityCheck_->setObjectName(QStringLiteral("calibrationResponsibilityConfirmed"));
     layout->addWidget(certificateConfirmedCheck_);
     layout->addWidget(responsibilityCheck_);
+    rawEvidenceCheck_ = new QCheckBox(
+        QStringLiteral("保存校准及验证的四通道原始波形（研发诊断）"));
+    rawEvidenceCheck_->setObjectName(QStringLiteral("calibrationRawEvidenceCheck"));
+    rawEvidenceCheck_->setChecked(true);
+    rawEvidenceCheck_->setToolTip(QStringLiteral("保存在 BoneDensityData/experiments/specimens；不改变校准算法或结果。"));
+    layout->addWidget(rawEvidenceCheck_);
     layout->addStretch();
     return page;
 }
