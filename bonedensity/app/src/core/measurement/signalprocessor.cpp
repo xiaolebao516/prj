@@ -499,20 +499,77 @@ int SignalProcessor::refineLagByPositiveCrossCorrelation(
         return num / std::sqrt(denX * denY);
     };
 
-    // Calibration-only opt-in. Complete the nearby physical candidate area
-    // before selecting a peak; a 1-sample rough lag shift must not clip a
-    // different high-correlation lobe and switch between wave cycles.
-    // Never use the phantom's target SOS to force a particular result.
-    if (robustLocalPeaks && roughOk) {
+    // Calibration and non-patient specimen acquisition opt-in. Complete the
+    // nearby physical candidate area before selecting a peak; a 1-sample rough
+    // lag shift must not clip a different high-correlation lobe and switch
+    // between wave cycles. Never use a target SOS to force a particular result.
+    if (robustLocalPeaks) {
+        if (!roughOk) {
+            if (bestCorrOut) *bestCorrOut = 0.0;
+            return roughLag;
+        }
         const int halfWidth = qBound(48, int(0.25 * std::abs(roughLag)), 55);
         const int completedMin = qMax(lagMin, roughLag - halfWidth);
         const int completedMax = qMin(lagMax, roughLag + halfWidth);
+        const int span = completedMax - completedMin + 1;
+        QVector<double> corrs(span, -2.0);
+        double maxPosAll = -1.0;
+        for (int lag = completedMin; lag <= completedMax; ++lag) {
+            const double corr = calcCorr(lag);
+            if (!std::isfinite(corr)) continue;
+            corrs[lag - completedMin] = corr;
+            if (corr > maxPosAll) maxPosAll = corr;
+        }
+        if (maxPosAll <= 0.0) {
+            if (bestCorrOut) *bestCorrOut = 0.0;
+            return roughLag;
+        }
+
+        // If roughLag sits inside the dominant 0.0T anti-phase carrier trough
+        // of a single wave packet, the left positive lobe (lag < tauNeg) is a
+        // -T/2 pre-onset lead alias and the right positive lobe (lag > tauNeg)
+        // is the +T/2 post-onset lobe.
+        int searchMin = completedMin;
+        int searchMax = completedMax;
+        const int nbLo = qMax(completedMin, roughLag - 8);
+        const int nbHi = qMin(completedMax, roughLag + 8);
+        double maxNearRough = -2.0;
+        for (int lag = nbLo; lag <= nbHi; ++lag) {
+            maxNearRough = qMax(maxNearRough, corrs[lag - completedMin]);
+        }
+        const int troughLo = qMax(completedMin, roughLag - 12);
+        const int troughHi = qMin(completedMax, roughLag + 12);
+        int tauNeg = roughLag;
+        double minNeg = 2.0;
+        for (int lag = troughLo; lag <= troughHi; ++lag) {
+            const double c = corrs[lag - completedMin];
+            if (c < minNeg) {
+                minNeg = c;
+                tauNeg = lag;
+            }
+        }
+        if (corrs[roughLag - completedMin] < -0.35
+            && maxNearRough <= 0.15
+            && minNeg <= -0.85
+            && -minNeg >= maxPosAll - 0.03) {
+            const int rightLo = qMax(completedMin, tauNeg + 15);
+            const int rightHi = qMin(completedMax, tauNeg + 55);
+            double rightMax = -1.0;
+            for (int lag = rightLo; lag <= rightHi; ++lag) {
+                rightMax = qMax(rightMax, corrs[lag - completedMin]);
+            }
+            if (rightMax >= 0.55) {
+                searchMin = rightLo;
+                searchMax = rightHi;
+            }
+        }
+
         QVector<QPair<int, double>> scores;
         int bestLag = roughLag;
         double best = -1.0;
-        for (int lag = completedMin; lag <= completedMax; ++lag) {
-            const double corr = calcCorr(lag);
-            if (corr <= 0.0 || !std::isfinite(corr)) continue;
+        for (int lag = searchMin; lag <= searchMax; ++lag) {
+            const double corr = corrs[lag - completedMin];
+            if (corr <= 0.0) continue;
             scores.append(qMakePair(lag, corr));
             if (corr > best) { best = corr; bestLag = lag; }
         }

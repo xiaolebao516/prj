@@ -302,6 +302,31 @@ void CoreTests::calibrationPeakSelectionIsCycleStable()
         early,fastLate,280,108,92,250,20,30,&corr,0,true);
     QCOMPARE(fastLag,105);
     QVERIFY(corr>0.95);
+
+    // Single anti-phase wave packet (corr(tauNeg) ~ -1 at lag 138, flanked by
+    // -T/2 lobe near 102 and +T/2 lobe near 174): always selects the +T/2
+    // post-onset lobe even when the two positive side-lobes are nearly tied
+    // or the left side-lobe is slightly higher.
+    QVector<double> antiEarly(800, 0.0), antiLate(800, 0.0);
+    for (int i=180; i<=520; ++i) {
+        const double x=(i-310)/65.0;
+        const double w=std::exp(-0.5*x*x)*std::cos(2.0*3.14159265358979323846*(i-310)/72.0);
+        antiEarly[i]=w;
+        antiLate[i+138]=-w*(1.0-0.002*(i-310));
+    }
+    for (int rough : {136,137,138,139,140,141}) {
+        const int lag=SignalProcessor::refineLagByPositiveCrossCorrelation(
+            antiEarly,antiLate,260,rough,92,250,20,120,&corr,0,true);
+        QVERIFY(lag>=173 && lag<=175);
+        QVERIFY(corr>0.90);
+    }
+
+    // Out-of-range roughLag must be rejected rather than falling through to
+    // the unguarded legacy scan.
+    const int outOfRange=SignalProcessor::refineLagByPositiveCrossCorrelation(
+        antiEarly,antiLate,260,71,92,250,20,120,&corr,0,true);
+    QCOMPARE(outOfRange,71);
+    QCOMPARE(corr,0.0);
 }
 
 void CoreTests::dualWindowQualityRequiresBothAtCommonLag()
