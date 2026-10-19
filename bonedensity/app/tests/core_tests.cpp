@@ -211,8 +211,8 @@ void CoreTests::parameterGroupOfTheFormalProfileIsUnchanged()
                         R"("angle_gate_enabled":true,"frame_corr_A":0.78,"frame_corr_B":0.55,)"
                         R"("frame_target":30,"implementation":"onset-consistency-20260915-v1",)"
                         R"("lag_tolerance":5,"lock_need":10,"partial_relock_retention_lag":2,)"
-                        R"("probe_distance_m":0.00784,"round_cluster_tolerance":180,)"
-                        R"("round_corr_A":0.78,"round_corr_B":0.55,"round_target":5,)"
+                        R"("probe_distance_m":0.00784,"round_corr_A":0.78,"round_corr_B":0.55,)"
+                        R"("round_cluster_tolerance":180,"round_target":5,)"
                         R"("sample_period_s":1.6e-08,"unlock_count":10,"warmup":14,)"
                         R"("window_size":20})"));
     QCOMPARE(ParameterGroup::id(parameters), QStringLiteral("onset-consistency-20260915-v1_5a0ddeea"));
@@ -304,65 +304,58 @@ void CoreTests::calibrationPeakSelectionIsCycleStable()
     QCOMPARE(fastLag,105);
     QVERIFY(corr>0.95);
 
-    // Single anti-phase wave packet (corr(tauNeg) ~ -1 at lag 138, flanked by
-    // -T/2 lobe near 102 and +T/2 lobe near 174): always selects the +T/2
-    // post-onset lobe across roughLag perturbations, and rejects an erroneous
-    // roughLag ~ 102 that lands directly on the -T/2 pre-onset alias.
+    // 1. KJMK-02 anti-phase dual-lobe packet (0.0T trough at lag 136, flanked
+    //    by -T/2 lobe near 101 and +T/2 lobe crest at 171, T = 70 samples):
+    //    disambiguates to the +T/2 lobe and applies single-lobe alpha plateau
+    //    (crest 171 -> plateau 172) without cross-cycle mixing, while rejecting
+    //    an erroneous roughLag ~ 101 that lands on the -T/2 pre-onset alias.
     QVector<double> antiEarly(2000, 0.0), antiLate(2000, 0.0);
     for (int i=180; i<=520; ++i) {
         const double x=(i-310)/65.0;
-        const double w=std::exp(-0.5*x*x)*std::cos(2.0*3.14159265358979323846*(i-310)/72.0);
+        const double w=std::exp(-0.5*x*x)*std::cos(2.0*3.14159265358979323846*(i-310)/70.0);
         antiEarly[i]=w;
-        antiLate[i+138]=-w*(1.0-0.002*(i-310));
+        antiLate[i+136]=-w*(1.0-0.002*(i-310));
     }
-    for (int rough : {136,137,138,139,140,141}) {
+    for (int rough : {134,135,136,137,138,139}) {
         const int lag=SignalProcessor::refineLagByPositiveCrossCorrelation(
             antiEarly,antiLate,260,rough,92,250,20,120,&corr,0,true);
-        QVERIFY(lag>=173 && lag<=175);
+        QCOMPARE(lag,172);
         QVERIFY(corr>0.90);
     }
-    for (int rough : {100,102,104}) {
+    for (int rough : {99,101,103}) {
         const int lag=SignalProcessor::refineLagByPositiveCrossCorrelation(
             antiEarly,antiLate,260,rough,92,250,20,120,&corr,0,true);
         QCOMPARE(lag,rough);
         QCOMPARE(corr,0.0);
     }
 
-    // Normal high-speed material (e.g. copper block, default D=7.84 mm ->
-    // lagMin=93) with early arrival (earlyOnset <= 1300), roughLag ~ 70 and
-    // true positive peak at refinedLag ~ 105 must be accepted under both
-    // anti-phase (0.0T trough at 70, +T/2 peak at 105) and in-phase models.
+    // 2. Copper block real-mechanism test (default D=7.84 mm -> lagMin=93,
+    //    earlyOnset = 645 <= 1300, roughLag ~ 78..80, 0.0T anti-phase trough at
+    //    lag 80, +T/2 positive correlation peak crest at lag 108, T = 56):
+    //    within the confirmed +T/2 lobe (crest 108), continuous alpha plateau
+    //    selects the front-edge lag 105 (matching the standard path).
     QVector<double> copperAntiEarly(2000, 0.0), copperAntiLate(2000, 0.0);
-    for (int i=580; i<=860; ++i) {
-        const double x=(i-700)/55.0;
-        const double w=std::exp(-0.5*x*x)*std::cos(2.0*3.14159265358979323846*(i-700)/70.0);
+    for (int i=560; i<=840; ++i) {
+        const double x=(i-685)/50.0;
+        const double w=std::exp(-0.5*x*x)*std::cos(2.0*3.14159265358979323846*(i-685)/56.0);
         copperAntiEarly[i]=w;
-        copperAntiLate[i+70]=-w;
+        copperAntiLate[i+80]=-w;
     }
-    for (int rough : {68,70,72,105}) {
-        const int lag=SignalProcessor::refineLagByPositiveCrossCorrelation(
-            copperAntiEarly,copperAntiLate,660,rough,93,278,20,120,&corr,0,true);
-        QCOMPARE(lag,105);
+    for (int rough : {77,78,79,80,108}) {
+        double stdCorr=0.0;
+        const int stdLag=SignalProcessor::refineLagByPositiveCrossCorrelation(
+            copperAntiEarly,copperAntiLate,645,rough,93,278,20,120,&stdCorr,0,false);
+        const int robLag=SignalProcessor::refineLagByPositiveCrossCorrelation(
+            copperAntiEarly,copperAntiLate,645,rough,93,278,20,120,&corr,0,true);
+        QCOMPARE(stdLag,105);
+        QCOMPARE(robLag,105);
         QVERIFY(corr>0.90);
     }
-    QVector<double> copperInEarly(2000, 0.0), copperInLate(2000, 0.0);
-    for (int i=620; i<=760; ++i) {
-        const double x=(i-680)/10.0;
-        const double w=std::exp(-0.5*x*x)*std::cos(2.0*3.14159265358979323846*(i-680)/50.0);
-        copperInEarly[i]=w;
-        copperInLate[i+105]=w;
-    }
-    for (int rough : {68,70,72,105}) {
-        const int lag=SignalProcessor::refineLagByPositiveCrossCorrelation(
-            copperInEarly,copperInLate,660,rough,93,278,20,120,&corr,0,true);
-        QCOMPARE(lag,105);
-        QVERIFY(corr>0.95);
-    }
 
-    // KJMK-02 coupling failure where the direct wave (< 1300) is missed and
-    // arrival triggers on a late bottom reflection (earlyOnset = 1404 > 1300,
-    // roughLag = 71, apparent reflection peak ~ 98) must be rejected, along
-    // with completely untrusted roughLag (< 60).
+    // 3. KJMK-02 coupling failure where the direct wave (< 1300) is missed and
+    //    arrival triggers on a late bottom reflection (earlyOnset = 1404 > 1300,
+    //    roughLag = 71, apparent reflection peak ~ 98) must be rejected, along
+    //    with completely untrusted roughLag (< 60).
     QVector<double> lateReflEarly(2000, 0.0), lateReflLate(2000, 0.0);
     for (int i=1350; i<=1560; ++i) {
         const double x=(i-1450)/45.0;
@@ -396,19 +389,16 @@ void CoreTests::calibrationAndAutoAcquisitionShareBChannelPeakSelection()
     frame.ad.resize(2000, 0.0);
     frame.ac.resize(2000, 0.0);
 
-    // Anti-phase B-channel wave packet (roughLag ~ 138, -T/2 alias near 102,
-    // 0.0T trough at 138, +T/2 lobe near 173..174).
+    // 1. KJMK-02 anti-phase B-channel wave packet (roughLag ~ 136, -T/2 alias
+    //    near 101, 0.0T trough at 136, +T/2 crest at 171 -> single-lobe
+    //    plateau selects 172). Without A-channel, calibration accepts B while
+    //    auto-acquisition stops at APairInvalid; with A-channel, both accept.
     for (int i=760; i<=1120; ++i) {
         const double x=(i-900)/55.0;
-        const double w=600.0*std::exp(-0.5*x*x)*std::cos(2.0*3.14159265358979323846*(i-900)/72.0);
+        const double w=600.0*std::exp(-0.5*x*x)*std::cos(2.0*3.14159265358979323846*(i-900)/70.0);
         frame.bd[i]=w;
-        frame.bc[i+138]=-w*(1.0-0.002*(i-900));
+        frame.bc[i+136]=-w*(1.0-0.002*(i-900));
     }
-
-    // 1. Without a valid A-channel signal: calibration mode and non-patient
-    //    auto-acquisition produce the exact same B-channel lag/SOS/corr, while
-    //    their frame-level business validity gates remain distinct (calibration
-    //    accepts B independently; auto-acquisition stops at APairInvalid).
     const FrameArrivals arrivals1 = FrameAnalyzer::detectArrivals(frame);
     PairResult calA1, calB1;
     const CalibrationFrame cal1 = FrameAnalyzer::calibrationFrame(
@@ -418,19 +408,17 @@ void CoreTests::calibrationAndAutoAcquisitionShareBChannelPeakSelection()
     QVERIFY(calB1.valid && auto1.b.valid);
     QVERIFY(cal1.bValid && !cal1.boundaryPeak && cal1.peakConsistent);
     QVERIFY(!cal1.aValid);
-    QVERIFY(cal1.lagB >= 173 && cal1.lagB <= 175);
+    QCOMPARE(cal1.lagB, 172);
     QCOMPARE(auto1.b.refinedLag, cal1.lagB);
     QCOMPARE(auto1.b.sos, cal1.sosB);
     QCOMPARE(auto1.b.corr, cal1.corrB);
     QCOMPARE(auto1.decision, FrameDecision::APairInvalid);
 
-    // 2. With a valid A-channel signal consistent with B: both modes accept
-    //    and report the identical B-channel SOS.
     for (int i=760; i<=1120; ++i) {
         const double x=(i-895)/45.0;
         const double w=-500.0*std::exp(-0.5*x*x)*std::cos(2.0*3.14159265358979323846*(i-895)/68.0);
         frame.ad[i]=w;
-        frame.ac[i+174]=w;
+        frame.ac[i+172]=w;
     }
     const FrameArrivals arrivals2 = FrameAnalyzer::detectArrivals(frame);
     PairResult calA2, calB2;
@@ -443,6 +431,53 @@ void CoreTests::calibrationAndAutoAcquisitionShareBChannelPeakSelection()
     QCOMPARE(auto2.b.refinedLag, cal2.lagB);
     QCOMPARE(auto2.b.sos, cal2.sosB);
     QCOMPARE(auto2.sos, cal2.sosB);
+
+    // 2. Copper block A/B false-rejection recovery: B-channel has 0.0T trough
+    //    at 80 and +T/2 crest at 108 (plateau front selects 105). A-channel
+    //    has a valid first-wave packet at lag 106 (around sample 660) whose
+    //    valley depth is < 30% of a strong secondary reflection at ad=928,
+    //    ac=1056 (lag 128). If B lag were 108, valley search [928+108-20,
+    //    928+108+20] = [1016, 1056] would hit ac=1056 (lagA=128) and fail
+    //    ABDifference; with B lag = 105, [1013, 1053] misses 1056, falls back
+    //    to first-wave correlation (lagA=106), and Measured succeeds.
+    FilteredFrame copperFrame;
+    copperFrame.bd.resize(2000, 0.0);
+    copperFrame.bc.resize(2000, 0.0);
+    copperFrame.ad.resize(2000, 0.0);
+    copperFrame.ac.resize(2000, 0.0);
+    for (int i=580; i<=840; ++i) {
+        const double x=(i-685)/50.0;
+        const double w=600.0*std::exp(-0.5*x*x)*std::cos(2.0*3.14159265358979323846*(i-685)/56.0);
+        copperFrame.bd[i]=w;
+        copperFrame.bc[i+80]=-w;
+    }
+    for (int i=610; i<=740; ++i) {
+        const double x=(i-665)/16.0;
+        const double w=180.0*std::exp(-0.5*x*x)*std::cos(2.0*3.14159265358979323846*(i-665)/48.0);
+        copperFrame.ad[i]+=w;
+        copperFrame.ac[i+109]+=w;
+    }
+    for (int i=905; i<=950; ++i) {
+        const double x=(i-928)/5.0;
+        copperFrame.ad[i]+=-900.0*std::exp(-0.5*x*x);
+    }
+    for (int i=1040; i<=1072; ++i) {
+        const double x=(i-1056)/4.0;
+        copperFrame.ac[i]+=-900.0*std::exp(-0.5*x*x);
+    }
+    const FrameArrivals copperArrivals = FrameAnalyzer::detectArrivals(copperFrame);
+    PairResult calACopper, calBCopper;
+    const CalibrationFrame calCopper = FrameAnalyzer::calibrationFrame(
+        processor, processor, config.frameCorrBMin, copperFrame, copperArrivals, &calACopper, &calBCopper);
+    const FrameAnalysis autoCopper = analyzer.analyze(copperFrame, false);
+
+    QVERIFY(calCopper.bValid && calCopper.aValid);
+    QCOMPARE(calCopper.lagB, 105);
+    QCOMPARE(autoCopper.decision, FrameDecision::Measured);
+    QCOMPARE(autoCopper.b.refinedLag, 105);
+    QVERIFY(!autoCopper.aFromValley);
+    QVERIFY(std::abs(autoCopper.a.refinedLag - 106) <= 1);
+    QCOMPARE(autoCopper.sos, calCopper.sosB);
 }
 
 void CoreTests::dualWindowQualityRequiresBothAtCommonLag()

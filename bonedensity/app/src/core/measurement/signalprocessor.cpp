@@ -654,6 +654,33 @@ int SignalProcessor::refineLagByPositiveCrossCorrelation(
             if (bestCorrOut) *bestCorrOut = 0.0;
             return roughLag;
         }
+
+        // Within the confirmed single positive lobe, apply the same continuous
+        // alpha plateau selection as the standard path, strictly bounded to the
+        // contiguous lobe around bestLag inside [searchMin, searchMax].
+        const double fastLag = 106.0;
+        const double slowLag = 205.0;
+        const double alpha = qBound(0.0, (double(bestLag) - fastLag) / (slowLag - fastLag), 1.0);
+        const double fastRatio = 0.92;
+        const double slowRatio = 0.95;
+        const double ratio = fastRatio + alpha * (slowRatio - fastRatio);
+        const double plateauFloor = ratio * best;
+        int lobeMin = bestLag;
+        while (lobeMin > searchMin && bestLag - (lobeMin - 1) <= 15
+               && corrs[lobeMin - 1 - evalMin] > 0.0
+               && corrs[lobeMin - 1 - evalMin] >= plateauFloor) {
+            --lobeMin;
+        }
+        int lobeMax = bestLag;
+        while (lobeMax < searchMax && (lobeMax + 1) - bestLag <= 15
+               && corrs[lobeMax + 1 - evalMin] > 0.0
+               && corrs[lobeMax + 1 - evalMin] >= plateauFloor) {
+            ++lobeMax;
+        }
+        const int plateauSize = lobeMax - lobeMin + 1;
+        const int idx = qBound(0, int(std::round(alpha * (plateauSize - 1))), plateauSize - 1);
+        bestLag = lobeMin + idx;
+        best = corrs[bestLag - evalMin];
         if (bestCorrOut) *bestCorrOut = best;
         return bestLag;
     }
