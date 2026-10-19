@@ -504,21 +504,34 @@ int SignalProcessor::refineLagByPositiveCrossCorrelation(
     // lag shift must not clip a different high-correlation lobe and switch
     // between wave cycles. Never use a target SOS to force a particular result.
     if (robustLocalPeaks) {
-        if (!roughOk) {
+        const bool roughSlightlyBelow = (roughLag < lagMin
+            && roughLag >= lagMin - roughBelowMargin
+            && roughLag >= roughMinTrust);
+        // Direct first arrivals across 1800..5000 m/s occur within sample 1300
+        // on the early channel (matching estimatePairSpeedByValley). An onset
+        // beyond 1300 is a late bottom reflection after direct-wave coupling
+        // failure and must not be accepted via roughSlightlyBelow/roughOk.
+        constexpr int kMaxFirstWaveEarlyOnset = 1300;
+        if (!(roughOk || roughSlightlyBelow) || earlyOnset > kMaxFirstWaveEarlyOnset) {
             if (bestCorrOut) *bestCorrOut = 0.0;
             return roughLag;
         }
         const int halfWidth = qBound(48, int(0.25 * std::abs(roughLag)), 55);
-        const int completedMin = qMax(lagMin, roughLag - halfWidth);
-        const int completedMax = qMin(lagMax, roughLag + halfWidth);
-        const int span = completedMax - completedMin + 1;
+        const int completedMin = roughOk ? qMax(lagMin, roughLag - halfWidth) : lagMin;
+        const int completedMax = qMin(lagMax, roughLag + (roughOk ? halfWidth : 55));
+        if (completedMin > completedMax) {
+            if (bestCorrOut) *bestCorrOut = 0.0;
+            return roughLag;
+        }
+        const int evalMin = qMin(completedMin, qMax(1, roughLag - 12));
+        const int span = completedMax - evalMin + 1;
         QVector<double> corrs(span, -2.0);
         double maxPosAll = -1.0;
-        for (int lag = completedMin; lag <= completedMax; ++lag) {
+        for (int lag = evalMin; lag <= completedMax; ++lag) {
             const double corr = calcCorr(lag);
             if (!std::isfinite(corr)) continue;
-            corrs[lag - completedMin] = corr;
-            if (corr > maxPosAll) maxPosAll = corr;
+            corrs[lag - evalMin] = corr;
+            if (lag >= completedMin && corr > maxPosAll) maxPosAll = corr;
         }
         if (maxPosAll <= 0.0) {
             if (bestCorrOut) *bestCorrOut = 0.0;
@@ -531,24 +544,25 @@ int SignalProcessor::refineLagByPositiveCrossCorrelation(
         // is the +T/2 post-onset lobe.
         int searchMin = completedMin;
         int searchMax = completedMax;
-        const int nbLo = qMax(completedMin, roughLag - 8);
+        bool antiphaseDisambiguated = false;
+        const int nbLo = qMax(evalMin, roughLag - 8);
         const int nbHi = qMin(completedMax, roughLag + 8);
         double maxNearRough = -2.0;
         for (int lag = nbLo; lag <= nbHi; ++lag) {
-            maxNearRough = qMax(maxNearRough, corrs[lag - completedMin]);
+            maxNearRough = qMax(maxNearRough, corrs[lag - evalMin]);
         }
-        const int troughLo = qMax(completedMin, roughLag - 12);
+        const int troughLo = qMax(evalMin, roughLag - 12);
         const int troughHi = qMin(completedMax, roughLag + 12);
         int tauNeg = roughLag;
         double minNeg = 2.0;
         for (int lag = troughLo; lag <= troughHi; ++lag) {
-            const double c = corrs[lag - completedMin];
+            const double c = corrs[lag - evalMin];
             if (c < minNeg) {
                 minNeg = c;
                 tauNeg = lag;
             }
         }
-        if (corrs[roughLag - completedMin] < -0.35
+        if (corrs[roughLag - evalMin] < -0.35
             && maxNearRough <= 0.15
             && minNeg <= -0.85
             && -minNeg >= maxPosAll - 0.03) {
@@ -556,11 +570,12 @@ int SignalProcessor::refineLagByPositiveCrossCorrelation(
             const int rightHi = qMin(completedMax, tauNeg + 55);
             double rightMax = -1.0;
             for (int lag = rightLo; lag <= rightHi; ++lag) {
-                rightMax = qMax(rightMax, corrs[lag - completedMin]);
+                rightMax = qMax(rightMax, corrs[lag - evalMin]);
             }
             if (rightMax >= 0.55) {
                 searchMin = rightLo;
                 searchMax = rightHi;
+                antiphaseDisambiguated = true;
             }
         }
 
@@ -568,7 +583,7 @@ int SignalProcessor::refineLagByPositiveCrossCorrelation(
         int bestLag = roughLag;
         double best = -1.0;
         for (int lag = searchMin; lag <= searchMax; ++lag) {
-            const double corr = corrs[lag - completedMin];
+            const double corr = corrs[lag - evalMin];
             if (corr <= 0.0) continue;
             scores.append(qMakePair(lag, corr));
             if (corr > best) { best = corr; bestLag = lag; }
@@ -577,6 +592,50 @@ int SignalProcessor::refineLagByPositiveCrossCorrelation(
             if (bestCorrOut) *bestCorrOut = 0.0;
             return roughLag;
         }
+
+        // If roughLag itself landed near a -T/2 pre-onset positive side-lobe,
+        // the 0.0T anti-phase main trough sits to the right of bestLag and is
+        // deeper than both bestLag and the -1.0T trough on the left, followed
+        // by the symmetric +T/2 positive lobe. Reject the pre-onset alias.
+        if (!antiphaseDisambiguated) {
+            const int leftLo = qMax(1, bestLag - 48);
+            const int leftHi = bestLag - 15;
+            double minNegLeft = 0.0;
+            for (int lag = leftLo; lag <= leftHi; ++lag) {
+                const double c = (lag >= evalMin && lag <= completedMax)
+                    ? corrs[lag - evalMin] : calcCorr(lag);
+                if (std::isfinite(c)) minNegLeft = qMin(minNegLeft, c);
+            }
+            const int rightTroughLo = bestLag + 15;
+            const int rightTroughHi = qMin(lagMax, bestLag + 48);
+            double minNegRight = 0.0;
+            int tauNegRight = bestLag;
+            for (int lag = rightTroughLo; lag <= rightTroughHi; ++lag) {
+                const double c = (lag >= evalMin && lag <= completedMax)
+                    ? corrs[lag - evalMin] : calcCorr(lag);
+                if (std::isfinite(c) && c < minNegRight) {
+                    minNegRight = c;
+                    tauNegRight = lag;
+                }
+            }
+            if (minNegRight <= -0.85
+                && -minNegRight >= best - 0.02
+                && -minNegRight >= -minNegLeft + 0.05) {
+                const int rightLobeLo = tauNegRight + 15;
+                const int rightLobeHi = qMin(lagMax, tauNegRight + 55);
+                double rightLobeMax = -1.0;
+                for (int lag = rightLobeLo; lag <= rightLobeHi; ++lag) {
+                    const double c = (lag >= evalMin && lag <= completedMax)
+                        ? corrs[lag - evalMin] : calcCorr(lag);
+                    if (std::isfinite(c)) rightLobeMax = qMax(rightLobeMax, c);
+                }
+                if (rightLobeMax >= 0.80) {
+                    if (bestCorrOut) *bestCorrOut = 0.0;
+                    return roughLag;
+                }
+            }
+        }
+
         const bool clipped = (bestLag == completedMin && completedMin > lagMin)
             || (bestLag == completedMax && completedMax < lagMax);
         double competing = -1.0;
