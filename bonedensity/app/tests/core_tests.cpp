@@ -211,8 +211,8 @@ void CoreTests::parameterGroupOfTheFormalProfileIsUnchanged()
                         R"("angle_gate_enabled":true,"frame_corr_A":0.78,"frame_corr_B":0.55,)"
                         R"("frame_target":30,"implementation":"onset-consistency-20260915-v1",)"
                         R"("lag_tolerance":5,"lock_need":10,"partial_relock_retention_lag":2,)"
-                        R"("probe_distance_m":0.00784,"round_corr_A":0.78,"round_corr_B":0.55,)"
-                        R"("round_cluster_tolerance":180,"round_target":5,)"
+                        R"("probe_distance_m":0.00784,"round_cluster_tolerance":180,)"
+                        R"("round_corr_A":0.78,"round_corr_B":0.55,"round_target":5,)"
                         R"("sample_period_s":1.6e-08,"unlock_count":10,"warmup":14,)"
                         R"("window_size":20})"));
     QCOMPARE(ParameterGroup::id(parameters), QStringLiteral("onset-consistency-20260915-v1_5a0ddeea"));
@@ -330,18 +330,21 @@ void CoreTests::calibrationPeakSelectionIsCycleStable()
     }
 
     // 2. Copper block real-mechanism test (default D=7.84 mm -> lagMin=93,
-    //    earlyOnset = 645 <= 1300, roughLag ~ 78..80, 0.0T anti-phase trough at
-    //    lag 80, +T/2 positive correlation peak crest at lag 108, T = 56):
-    //    within the confirmed +T/2 lobe (crest 108), continuous alpha plateau
-    //    selects the front-edge lag 105 (matching the standard path).
+    //    earlyOnset = 645 <= 1300, roughLag ~ 68..80 or 108, T = 56):
+    //    under both anti-phase (0.0T trough at lag 80, +T/2 crest at lag 108)
+    //    and in-phase (crest at lag 108) models, continuous alpha plateau
+    //    within the confirmed single lobe selects front-edge lag 105.
     QVector<double> copperAntiEarly(2000, 0.0), copperAntiLate(2000, 0.0);
+    QVector<double> copperInEarly(2000, 0.0), copperInLate(2000, 0.0);
     for (int i=560; i<=840; ++i) {
         const double x=(i-685)/50.0;
         const double w=std::exp(-0.5*x*x)*std::cos(2.0*3.14159265358979323846*(i-685)/56.0);
         copperAntiEarly[i]=w;
         copperAntiLate[i+80]=-w;
+        copperInEarly[i]=w;
+        copperInLate[i+108]=w;
     }
-    for (int rough : {77,78,79,80,108}) {
+    for (int rough : {68,70,72,77,78,79,80,108}) {
         double stdCorr=0.0;
         const int stdLag=SignalProcessor::refineLagByPositiveCrossCorrelation(
             copperAntiEarly,copperAntiLate,645,rough,93,278,20,120,&stdCorr,0,false);
@@ -349,6 +352,15 @@ void CoreTests::calibrationPeakSelectionIsCycleStable()
             copperAntiEarly,copperAntiLate,645,rough,93,278,20,120,&corr,0,true);
         QCOMPARE(stdLag,105);
         QCOMPARE(robLag,105);
+        QVERIFY(corr>0.90);
+
+        double stdInCorr=0.0;
+        const int stdInLag=SignalProcessor::refineLagByPositiveCrossCorrelation(
+            copperInEarly,copperInLate,645,rough,93,278,20,120,&stdInCorr,0,false);
+        const int robInLag=SignalProcessor::refineLagByPositiveCrossCorrelation(
+            copperInEarly,copperInLate,645,rough,93,278,20,120,&corr,0,true);
+        QCOMPARE(stdInLag,105);
+        QCOMPARE(robInLag,105);
         QVERIFY(corr>0.90);
     }
 
