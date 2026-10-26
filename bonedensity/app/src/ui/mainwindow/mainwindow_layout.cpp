@@ -22,6 +22,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QMenu>
+#include <QMessageBox>
 #include <QPixmap>
 #include <QProgressBar>
 #include <QPushButton>
@@ -31,6 +32,7 @@
 #include <QToolButton>
 #include <QVBoxLayout>
 #include <algorithm>
+#include <cmath>
 
 using namespace mainwindow_detail;
 using Icons::Glyph;
@@ -108,7 +110,7 @@ void MainWindow::updatePatientSelectionUi()
     ui->btnMeasurementGuide->setEnabled(!navigationLocked);
     ui->pushButton->setEnabled(connected && !navigationLocked);
     ui->triggerButton->setEnabled(connected && !patientMeasureRunning && !nextRoundPending);
-    if (specimenRecordButton) specimenRecordButton->setEnabled(!navigationLocked);
+    if (specimenRecordButton) specimenRecordButton->setEnabled(!navigationLocked && !autoRunning);
     const QString deviceHint = connected ? QString() : QStringLiteral("请先连接设备");
     ui->pushButton->setToolTip(connected ? QStringLiteral("单次读取四通道波形，不计入检测") : deviceHint);
     ui->triggerButton->setToolTip(connected ? QStringLiteral("每 80 ms 连续采集，不计入检测") : deviceHint);
@@ -302,30 +304,81 @@ void MainWindow::setupToolbar()
     specimenRecordButton->setToolTip(QStringLiteral("为自动采集选择试块并保存原始波形；校准记录单独设置。"));
     row->addWidget(specimenRecordButton);
     connect(specimenRecordButton, &QPushButton::clicked, this, [this]() {
-        const QStringList choices = {QStringLiteral("关闭"), QStringLiteral("铜块"),
-                                     QStringLiteral("塑料试块"),
-                                     QStringLiteral("科进校准模块 KJMK-02 / M2607289"),
-                                     QStringLiteral("自定义…")};
+        const QStringList choices = {
+            QStringLiteral("关闭"),
+            QStringLiteral("KSGR-2 紫铜桡骨体模 / 226GM13（原“铜块”）"),
+            QStringLiteral("KSGR-3 聚苯乙烯桡骨体模 / 226GM14"),
+            QStringLiteral("科进校准模块 KJMK-02 / M2607289"),
+            QStringLiteral("其他塑料试块（型号未确认）"),
+            QStringLiteral("自定义…")
+        };
         bool ok = false;
         const QString choice = QInputDialog::getItem(
             this, QStringLiteral("实验数据记录"), QStringLiteral("选择自动采集的试块："),
             choices, 0, false, &ok);
         if (!ok) return;
-        QString name = choice;
-        if (choice == QStringLiteral("自定义…")) {
-            name = QInputDialog::getText(this, QStringLiteral("自定义试块"),
-                QStringLiteral("试块名称或编号："), QLineEdit::Normal, specimenName, &ok).trimmed();
-            if (!ok || name.isEmpty()) return;
+        if (choice == QStringLiteral("关闭")) {
+            specimenRecordingEnabled = false;
+            specimenId.clear();
+            specimenName.clear();
+            specimenTemperatureC = 0.0;
+            specimenTemperatureSet = false;
+            specimenRecordButton->setText(QStringLiteral("记录：关闭"));
+            specimenRecordButton->setToolTip(
+                QStringLiteral("选择试块并输入实测温度后，自动采集将保存四通道原始数据。"));
+            return;
         }
-        specimenRecordingEnabled = choice != QStringLiteral("关闭");
-        specimenName = specimenRecordingEnabled ? name : QString();
-        const QString brief = choice == QStringLiteral("科进校准模块 KJMK-02 / M2607289")
-            ? QStringLiteral("KJMK-02") : name.left(10);
-        specimenRecordButton->setText(specimenRecordingEnabled
-            ? QStringLiteral("记录：%1").arg(brief) : QStringLiteral("记录：关闭"));
-        specimenRecordButton->setToolTip(specimenRecordingEnabled
-            ? QStringLiteral("自动采集时保存 %1 的波形；点击可更换试块或关闭记录。").arg(name)
-            : QStringLiteral("选择试块后，自动采集将保存四通道原始数据。"));
+
+        QString id;
+        QString name;
+        if (choice.startsWith(QStringLiteral("KSGR-2"))) {
+            id = QStringLiteral("KSGR-2-226GM13");
+            name = QStringLiteral("KSGR-2 紫铜桡骨体模 / 226GM13");
+        } else if (choice.startsWith(QStringLiteral("KSGR-3"))) {
+            id = QStringLiteral("KSGR-3-226GM14");
+            name = QStringLiteral("KSGR-3 聚苯乙烯桡骨体模 / 226GM14");
+        } else if (choice == QStringLiteral("科进校准模块 KJMK-02 / M2607289")) {
+            id = QStringLiteral("KJMK-02-M2607289");
+            name = choice;
+        } else if (choice == QStringLiteral("自定义…")) {
+            name = QInputDialog::getText(
+                this, QStringLiteral("自定义试块"), QStringLiteral("试块名称或编号："),
+                QLineEdit::Normal, specimenName, &ok).trimmed();
+            if (!ok || name.isEmpty()) return;
+            id = QStringLiteral("custom");
+        } else {
+            id = QStringLiteral("unspecified-plastic");
+            name = choice;
+        }
+
+        const QString temperatureText = QInputDialog::getText(
+            this, QStringLiteral("记录试块温度"),
+            QStringLiteral("请用温度计测量后输入本次实际温度（°C）："),
+            QLineEdit::Normal, QString(), &ok).trimmed();
+        if (!ok) return;
+        bool temperatureOk = false;
+        const double temperature = temperatureText.toDouble(&temperatureOk);
+        if (!temperatureOk || !std::isfinite(temperature)
+            || temperature < -50.0 || temperature > 100.0) {
+            QMessageBox::warning(this, QStringLiteral("温度无效"),
+                QStringLiteral("请输入有效的实际温度（-50 至 100°C）。未更改当前记录设置。"));
+            return;
+        }
+
+        specimenRecordingEnabled = true;
+        specimenId = id;
+        specimenName = name;
+        specimenTemperatureC = temperature;
+        specimenTemperatureSet = true;
+
+        QString brief = name.left(10);
+        if (id == QStringLiteral("KSGR-2-226GM13")) brief = QStringLiteral("KSGR-2");
+        else if (id == QStringLiteral("KSGR-3-226GM14")) brief = QStringLiteral("KSGR-3");
+        else if (id == QStringLiteral("KJMK-02-M2607289")) brief = QStringLiteral("KJMK-02");
+        specimenRecordButton->setText(QStringLiteral("记录：%1").arg(brief));
+        specimenRecordButton->setToolTip(
+            QStringLiteral("自动采集保存 %1 的四通道原始波形；实测温度 %2°C。温度只作记录，不自动修正 SOS。点击可更换试块。")
+                .arg(name, QString::number(temperature, 'f', 1)));
     });
     row->addSpacing(8);
     row->addWidget(separator(toolbar));

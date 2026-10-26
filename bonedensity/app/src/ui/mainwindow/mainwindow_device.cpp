@@ -262,10 +262,18 @@ void MainWindow::on_triggerButton_clicked()
 
     if (!autoRunning) {
         if (specimenRecordingEnabled) {
+            if (specimenId.isEmpty() || !specimenTemperatureSet) {
+                QMessageBox::warning(this, QStringLiteral("试块信息不完整"),
+                    QStringLiteral("请先在“记录”中选择材料并输入温度计实测值。"));
+                updatePatientSelectionUi();
+                return;
+            }
             startSpecimenRecording(QJsonObject{
                 {"capture_mode", "auto"},
+                {"specimen_id", specimenId},
                 {"specimen_name", specimenName},
-                {"specimen_kind", "research_specimen"}});
+                {"specimen_kind", "research_specimen"},
+                {"temperature_C", specimenTemperatureC}});
         }
         autoTimer->start(80);
         ui->triggerButton->setText("停止自动采集");

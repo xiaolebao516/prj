@@ -226,7 +226,10 @@ private:
 
     // Independent, opt-in evidence. No patient information is written here.
     bool specimenRecordingEnabled = false;
+    QString specimenId;
     QString specimenName;
+    double specimenTemperatureC = 0.0;
+    bool specimenTemperatureSet = false;
     QPushButton* specimenRecordButton = nullptr;
     MeasurementExperimentLog specimenLog;
     bool specimenLogWarningShown = false;

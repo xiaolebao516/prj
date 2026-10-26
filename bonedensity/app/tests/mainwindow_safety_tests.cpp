@@ -542,8 +542,10 @@ void MainWindowSafetyTests::specimenEvidenceRecordsIdentityAndRawFrames()
     window.currentFrame.ad = {4};
     window.startSpecimenRecording({
         {"capture_mode", "auto"},
-        {"specimen_name", QStringLiteral("铜块")},
-        {"specimen_kind", "research_specimen"}});
+        {"specimen_id", QStringLiteral("KSGR-2-226GM13")},
+        {"specimen_name", QStringLiteral("KSGR-2 紫铜桡骨体模 / 226GM13")},
+        {"specimen_kind", "research_specimen"},
+        {"temperature_C", 26.4}});
     QVERIFY2(window.specimenLog.active(), qPrintable(window.specimenLog.error()));
     const QString path = window.specimenLog.path();
     QVERIFY(path.contains(QStringLiteral("specimens")));
@@ -556,7 +558,10 @@ void MainWindowSafetyTests::specimenEvidenceRecordsIdentityAndRawFrames()
     const QJsonObject start = QJsonDocument::fromJson(lines[0]).object();
     const QJsonObject config = start.value("config").toObject();
     QCOMPARE(config.value("capture_mode").toString(), QStringLiteral("auto"));
-    QCOMPARE(config.value("specimen_name").toString(), QStringLiteral("铜块"));
+    QCOMPARE(config.value("specimen_id").toString(), QStringLiteral("KSGR-2-226GM13"));
+    QCOMPARE(config.value("specimen_name").toString(),
+             QStringLiteral("KSGR-2 紫铜桡骨体模 / 226GM13"));
+    QCOMPARE(config.value("temperature_C").toDouble(), 26.4);
     QVERIFY(config.value("sample_period_s").toDouble() > 0);
     const QJsonObject frame = QJsonDocument::fromJson(lines[1]).object();
     QCOMPARE(frame.value("event").toString(), QStringLiteral("frame"));

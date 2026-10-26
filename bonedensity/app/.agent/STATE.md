@@ -6,9 +6,11 @@
 
 ## Stage
 
-`verification`
+`execution`
 
 ## Status
+
+`2026-10-26 SPECIMEN-EVIDENCE-001 active on the existing work branch. This approved subtask is limited to debug specimen labels, measured-temperature metadata, reference documentation, and focused tests. UI-REFRESH-001 external acceptance remains pending.`
 
 `2026-10-09 branches: only main remains (local and origin); codex/feature-complete deleted at c23bf30 after main was fast-forwarded to it. Earlier records naming codex/feature-complete refer to that history. Data now lives in app/BoneDensityData (git-ignored); legacy build/debug and Qt Creator data imported, subjects/birth dates corrected per user (report in BoneDensityData/import-reports).`
 
@@ -20,15 +22,28 @@
 
 ## Active Milestone
 
-`UI-REFRESH-001 - Tidy and restyle the existing single-window UI and fix interaction bugs without changing measurement, acquisition, persistence, or report behavior`
+`SPECIMEN-EVIDENCE-001 - Record standard-specimen identity and measured temperature for debug auto-acquisition`
 
 ## Current Task
 
-`User acceptance of the isolated executable (layout on the real monitor, archive/patient flows, five-round device flow); no commit/push authorized.`
+`Add explicit KSGR-2, KSGR-3 and KJMK-02 labels to specimen recording; store material ID/name and thermometer-measured temperature in new JSONL start configs; document reference values and legacy-log limits. No measurement algorithm or calibration parameter changes.`
 
 ## Plan Status
 
 `approved`
+
+## SPECIMEN-EVIDENCE-001 Approval Evidence
+
+- User confirmed this as an independent subtask of Issue #1, requested all previously used reference specimens be represented, and specified that the reference temperature table should be documentation only while each new auto-acquisition log records material and actual temperature.
+- This authorization does not mark the pending UI-REFRESH-001 on-screen/device acceptance complete. No D, bias, SOS formula, peak selection, patient gate, or calibration activation behavior is in scope.
+- Base branch/HEAD at alignment: `fix/bonedensity-antiphase-peak-unification` / `56b5d8c7067425e305e08240e01a158f0c2e2ca8`.
+
+## SPECIMEN-EVIDENCE-001 Approved Plan and Steps
+
+1. Extend the existing opt-in specimen selector with named KSGR-2, KSGR-3 and KJMK-02 choices, preserving generic/custom recording.
+2. Require a thermometer-measured temperature when configuring a new automatic specimen recording; freeze material ID/name/temperature in the log's start config.
+3. Record the available certificate/label reference points in a research document and explain legacy log handling without editing historical files.
+4. Update focused evidence-recording assertions; perform static diff review. Build/test/device acceptance must be reported only if actually run.
 
 ## UI-REFRESH-001 Approval Evidence
 
@@ -396,7 +411,18 @@ The audit found: stale candidate/bar state across invalid input; retained accept
 
 Evidence and concrete next-change recommendations: `docs/research/measurement-gate-audit-20260905/README.md`, `results.json`, and `code-results.json`. Product source files and the deployed executable were not modified by this audit. Continue by specifying full-path experiment recording and stale/mixed-state repair, then comparing consistent-feature and local-correlation candidates against raw recordings. Exact threshold selection and hard-subject acceptance need new paired recordings. Do not overwrite the existing tutorial milestone or mark it accepted on the basis of this audit.
 
+## Current Task Judgment — SPECIMEN-EVIDENCE-001
+
+- The current code already has an opt-in `specimenRecordButton` and bounded JSONL raw-frame recorder. The missing fields are explicit standard-material IDs and measured temperature for debug automatic acquisition.
+- Reference values are documented, not computed by the selector. Existing logs are not rewritten; missing temperature remains unknown unless external notes establish it.
+- No C++ build or Qt tests have been run in this remote-only workflow. Static review is not test evidence.
+
 ## Verification Status
+
+- `SC-57`: pending — inspect named options and new JSONL start config for stable material ID/name.
+- `SC-58`: pending — verify manual temperature entry is required for new specimen recordings and no calculation/measurement path changes.
+- `SC-59`: pending — verify reference table and legacy-log instructions; old raw logs remain unchanged.
+- `SC-60`: not run — focused tests, main-window safety suite, calibration suite and canonical Debug build have not been executed in this environment.
 
 - `SC-46`, `SC-47`: passed (software) in `age-sos-report-preview`; re-check after integration pending.
 - `SC-48`: software/render/build passed in `age-sos-report-preview`; physical printing and user visual acceptance external; re-check after integration pending.
@@ -479,7 +505,7 @@ Earlier rows below are historical; SC8/SC14 still require actual-user/device evi
 
 ## Next Actions
 
-`Obtain confirmation of the recommended age20 rule. Then persist numbered success criteria and the implementation/verification plan before changing formal source.`
+`Verify SPECIMEN-EVIDENCE-001 on the resulting HEAD: run the focused specimen evidence test, main-window safety suite, calibration suite and canonical Debug build in the approved Qt/MinGW environment. Confirm real-device log labels/temperature with each of the three specimens; preserve UI-REFRESH-001's separate pending user acceptance.`
 
 ## Iteration Control
 
