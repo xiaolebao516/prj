@@ -3,6 +3,7 @@
 **实验候选；不是正式发布或临床仪器校准证书。**
 
 - 仅在 **Debug qmake `CONFIG+=specimen_sos_trial`** 的独立构建 `BoneDensity_SpecimenSosTrial` 中生效；普通 `BoneDensity` 正式构建仍保持原来的 SOS。
+- **Qt Creator 编译说明（2026-10-26 修复）**：选择 Debug 构建，在 qmake 的“额外的参数”中写 `CONFIG+=specimen_sos_trial` 即可。Windows Qt 可能默认启用 `debug_and_release`，导致生成 Release 子 Makefile 并误触试验版的 Debug-only 保护；本仓库已在 `core.pri` 的试验分支自动关闭多配置生成，保留对真正 Release 试验构建的禁止。**更新代码后需重新运行 qmake**。旧版本可临时将 qmake 参数改为 `CONFIG+=specimen_sos_trial CONFIG-=debug_and_release`；更新到修复提交后可移除后半段。请勿在正式 Release 构建中启用试验配置。
 - 底层 B 通道选峰继续使用人体/试块共用的 `robustLocalPeaks=true`；不按材料名称指定峰、不更改 lag/D/Ts、不放宽人体门禁。
 - 对 **A、B 通道有效 SOS** 使用同一材料无关的数学映射：`SOS_trial = 1.07490541 * SOS_raw - 312.11634` (m/s)。最后的 `sosOffset` 参数继续在正式 SOS 汇总后按现有代码使用。B 通道有效而 A 无效的自动采集帧，也会在 B 证据字段中显示修正后的 SOS。
 - 所有试块/人体使用相同的校正映射；不存在 `specimen_id` 运行时分支。保留原始四通道波形和 B lag，可通过每帧 `SOS_raw = D/(lag*Ts)` 离线逆算原值；记录的 `measurementParameters` 增加试验标识、gain、intercept 以避免将试验读数误当正式数据。

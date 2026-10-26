@@ -26,9 +26,13 @@ for(trial, BONE_TRIALS) {
     }
 }
 !isEmpty(BONE_TRIAL) {
-    !CONFIG(debug, debug|release): error("The $$BONE_TRIAL profile must be a Debug build")
-    DEFINES += $$eval($${BONE_TRIAL}.define)
-    BONE_TRIAL_TARGET = $$eval($${BONE_TRIAL}.target)
+    # On Windows, Qt qmake enables debug_and_release by default and creates a
+    # Release build_pass even when Qt Creator selects Debug. The old guard
+    # rejected that generated pass. Trial builds are deliberately single-config.
+    CONFIG -= debug_and_release debug_and_release_target build_all
+    !CONFIG(debug, debug|release): error("The $BONE_TRIAL profile must be a Debug build")
+    DEFINES += $eval(${BONE_TRIAL}.define)
+    BONE_TRIAL_TARGET = $eval(${BONE_TRIAL}.target)
 }
 
 HEADERS += \
