@@ -444,6 +444,20 @@ void CoreTests::calibrationAndAutoAcquisitionShareBChannelPeakSelection()
     QCOMPARE(auto2.b.sos, cal2.sosB);
     QCOMPARE(auto2.sos, cal2.sosB);
 
+    // Isolate the B selector from the patient-only onset-consistency gate:
+    // the synthetic long wave packet is not designed to test that gate.
+    // Before unification, patient analysis could select a different carrier
+    // lobe even though the filtered BD/BC signals were identical.
+    MeasurementProfile compareProfile = profile;
+    compareProfile.enforceBOnsetConsistency = false;
+    const FrameAnalyzer patientComparable(processor, config, compareProfile);
+    const FrameAnalysis patient2 = patientComparable.analyze(frame, true);
+    QVERIFY(patient2.b.valid);
+    QCOMPARE(patient2.b.refinedLag, cal2.lagB);
+    QCOMPARE(patient2.b.roughLag, auto2.b.roughLag);
+    QCOMPARE(patient2.b.corr, cal2.corrB);
+    QCOMPARE(patient2.b.sos, cal2.sosB);
+
     // 2. Copper block A/B false-rejection recovery: B-channel has 0.0T trough
     //    at 80 and +T/2 crest at 108 (plateau front selects 105). A-channel
     //    has a valid first-wave packet at lag 106 (around sample 660) whose
@@ -490,6 +504,13 @@ void CoreTests::calibrationAndAutoAcquisitionShareBChannelPeakSelection()
     QVERIFY(!autoCopper.aFromValley);
     QVERIFY(std::abs(autoCopper.a.refinedLag - 106) <= 1);
     QCOMPARE(autoCopper.sos, calCopper.sosB);
+
+    const FrameAnalysis patientCopper = patientComparable.analyze(copperFrame, true);
+    QVERIFY(patientCopper.b.valid);
+    QCOMPARE(patientCopper.b.refinedLag, calCopper.lagB);
+    QCOMPARE(patientCopper.b.roughLag, autoCopper.b.roughLag);
+    QCOMPARE(patientCopper.b.corr, calCopper.corrB);
+    QCOMPARE(patientCopper.b.sos, calCopper.sosB);
 }
 
 void CoreTests::dualWindowQualityRequiresBothAtCommonLag()

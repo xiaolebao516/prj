@@ -124,14 +124,14 @@ FrameAnalysis FrameAnalyzer::analyze(const FilteredFrame& frame, bool patientMea
         return result;
     }
 
-    // B pair BD -> BC is the reference pair. Non-patient debug/specimen
-    // acquisition uses the same cycle-stable peak selection as calibration;
-    // formal patient measurements keep the clinical profile path unchanged.
+    // A single B-channel peak selector is required for patients, reference
+    // phantoms and calibration. Patient-only onset/quality/stability gates
+    // remain separate; do not pick a lag using a target/reference SOS.
     PairResult& b = result.b;
     b = processor_.estimatePairSpeed(frame.bd, frame.bc, pick.bd, pick.bc, kMinSos, kMaxSos,
                                      "B_pair / BD->BC", -1, -1,
                                      profile_.clippedBPeakExtension(),
-                                     !patientMeasurement);
+                                     true);
     if (!b.valid) {
         qDebug() << "Skip: B_pair invalid, because B_pair is the reference pair";
         result.decision = FrameDecision::BPairInvalid;

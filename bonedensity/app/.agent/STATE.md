@@ -10,7 +10,7 @@
 
 ## Status
 
-`2026-10-26 SPECIMEN-EVIDENCE-001 active on the existing work branch. This approved subtask is limited to debug specimen labels, measured-temperature metadata, reference documentation, and focused tests. UI-REFRESH-001 external acceptance remains pending.`
+`2026-10-26 UNIFIED-PEAK-001 candidate authorized by user's latest explicit instruction to align human/specimen peak logic and investigate three-phantom calibration accuracy. Only a branch candidate and offline/test documentation are in scope; no device deployment, no D/Ts/bias adjustment, no patient gate relaxation. Specimen metadata work remains committed; UI-REFRESH-001 external acceptance remains pending.`
 
 `2026-10-09 branches: only main remains (local and origin); codex/feature-complete deleted at c23bf30 after main was fast-forwarded to it. Earlier records naming codex/feature-complete refer to that history. Data now lives in app/BoneDensityData (git-ignored); legacy build/debug and Qt Creator data imported, subjects/birth dates corrected per user (report in BoneDensityData/import-reports).`
 
@@ -22,15 +22,24 @@
 
 ## Active Milestone
 
-`SPECIMEN-EVIDENCE-001 - Record standard-specimen identity and measured temperature for debug auto-acquisition`
+`UNIFIED-PEAK-001 - Candidate unified B channel peak selection for phantom, calibration and human measurement`
 
 ## Current Task
 
-`Add explicit KSGR-2, KSGR-3 and KJMK-02 labels to specimen recording; store material ID/name and thermometer-measured temperature in new JSONL start configs; document reference values and legacy-log limits. No measurement algorithm or calibration parameter changes.`
+`Use one cycle-stable B peak estimator for specimen/debug, calibration and formal human analysis on this work branch, without modifying human-specific acceptance gates or introducing reference-SOS peak forcing; audit three-phantom 23°C bias and flag unresolved physical errors.`
 
 ## Plan Status
 
 `approved`
+
+## UNIFIED-PEAK-001 Approval and Evidence
+
+- On 2026-10-26 the user explicitly requested to fix peak selection in a unified way for humans and the three reference phantoms, with priority on sound peak identification and reference consistency. This supersedes the SPECIMEN-EVIDENCE-001 temporary algorithm-change prohibition for this candidate only.
+- Latest completed review and evidence: `docs/research/peak-selection-audit-20261026.md` (978 valid B frames reproduced), `docs/research/specimen-fit-20261026.md` (uncorrected medians and calibration models), `docs/research/specimen-reference-values.md` (full certified/label tables).
+- Confirmed issue: `analyze(frame, patientMeasurement=true)` had `robustLocalPeaks=false` while `analyze(...,false)` and `calibrationFrame` used `true`. Change only the choice of existing algorithm on the work branch; do not add forced target lag or modify protected acceptance logic.
+- Independent reference at 23°C: KSGR-3=2310 m/s (expected lag≈212.12), KJMK-02=2711 (≈180.75), KSGR-2=4729 (≈103.62). The KSGR-3 reference lag has poor correlation with existing waves, so parity alone cannot resolve its ≈6.06% uncorrected SOS error.
+- Plan: (1) unify B cycle-stable path; (2) add synthetic anti-phase/copper patient vs phantom/calibration assertions with patient-only onset guard isolated in tests; (3) static review and log residuals; (4) await Qt/MinGW full tests and real human raw replay prior to deployment and calibration acceptance.
+- Verification: code review + offline evidence only; C++/Qt suites, CI, device and patient-path replay **not run** in this remote GitHub environment. Do not mark three-block calibration PASS.
 
 ## SPECIMEN-EVIDENCE-001 Approval Evidence
 
