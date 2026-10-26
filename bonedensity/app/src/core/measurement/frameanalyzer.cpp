@@ -137,6 +137,9 @@ FrameAnalysis FrameAnalyzer::analyze(const FilteredFrame& frame, bool patientMea
         result.decision = FrameDecision::BPairInvalid;
         return result;
     }
+    // Trial changes the reported SOS only, never lag/correlation/validity.
+    // This is the same transform for all materials and for formal human flow.
+    b.sos = profile_.calibratedSos(b.sos);
     // Guard against jumping from the first-wave rough lag to a later packet.
     const int bLagJump = std::abs(b.refinedLag - b.roughLag);
     if (bLagJump > kMaxBLagJump) {
@@ -174,6 +177,7 @@ FrameAnalysis FrameAnalyzer::analyze(const FilteredFrame& frame, bool patientMea
         result.decision = FrameDecision::APairInvalid;
         return result;
     }
+    a.sos = profile_.calibratedSos(a.sos);
 
     // Posture features; computed before the A/B check so the balance bars can
     // still show the tilt of a rejected frame.

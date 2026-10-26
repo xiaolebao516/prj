@@ -8,7 +8,7 @@ INCLUDEPATH += $$PWD
 # Isolated research trial builds, at most one and Debug only, selected with
 # CONFIG+=<name>. Only the measurement profile reads the BONE_*_EXPERIMENT
 # define; BONE_TRIAL_TARGET names the separate executable.
-BONE_TRIALS = observe_before_g_trial dual_window_a_trial b_peak_completion_trial relock_preservation_trial
+BONE_TRIALS = observe_before_g_trial dual_window_a_trial b_peak_completion_trial relock_preservation_trial specimen_sos_trial
 observe_before_g_trial.define = BONE_OBSERVE_BEFORE_G_EXPERIMENT
 observe_before_g_trial.target = BoneDensity_SelfTrial
 dual_window_a_trial.define = BONE_DUAL_WINDOW_A_EXPERIMENT
@@ -17,6 +17,8 @@ b_peak_completion_trial.define = BONE_COMPLETE_B_PEAK_EXPERIMENT
 b_peak_completion_trial.target = BoneDensity_BPeakTrial
 relock_preservation_trial.define = BONE_RELOCK_PRESERVATION_EXPERIMENT
 relock_preservation_trial.target = BoneDensity_RelockTrial
+specimen_sos_trial.define = BONE_SPECIMEN_SOS_TRIAL
+specimen_sos_trial.target = BoneDensity_SpecimenSosTrial
 for(trial, BONE_TRIALS) {
     contains(CONFIG, $$trial) {
         !isEmpty(BONE_TRIAL): error("Select only one trial profile")

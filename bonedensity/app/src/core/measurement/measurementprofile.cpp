@@ -5,7 +5,11 @@
 MeasurementProfile MeasurementProfile::current()
 {
     MeasurementProfile profile;
-#if defined(BONE_COMPLETE_B_PEAK_EXPERIMENT)
+#if defined(BONE_SPECIMEN_SOS_TRIAL)
+    profile.implementation = QStringLiteral("specimen-sos-affine-20261026-trial");
+    profile.title = QStringLiteral("骨密度仪 · 三试块 SOS 校准试验版（非正式）");
+    profile.specimenSosTrial = true;
+#elif defined(BONE_COMPLETE_B_PEAK_EXPERIMENT)
     profile.implementation = QStringLiteral("b-peak-completion-20260908-v1");
     profile.title = QStringLiteral("骨密度仪 · B峰补全试测版（仅研发验证）");
     profile.enforceBOnsetConsistency = false;
@@ -38,6 +42,9 @@ QJsonObject measurementParameters(const MeasureConfig& config, const Measurement
 {
     return QJsonObject{
         {"implementation", profile.implementation},
+        {"specimen_sos_trial", profile.specimenSosTrial},
+        {"specimen_sos_gain", profile.specimenSosTrial ? profile.kSpecimenSosGain : 1.0},
+        {"specimen_sos_intercept_m_s", profile.specimenSosTrial ? profile.kSpecimenSosIntercept : 0.0},
         {"B_onset_forward_limit", profile.enforceBOnsetConsistency ? config.bOnsetForwardLimit : 0},
         {"B_clipped_peak_extension", profile.clippedBPeakExtension()},
         {"partial_relock_retention_lag", profile.deferPartialDiscardUntilRelock

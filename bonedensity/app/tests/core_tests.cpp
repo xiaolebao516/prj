@@ -37,6 +37,7 @@ private slots:
     void clippedBPeakSearchCanBeCompletedWithoutFullRangeScan();
     void calibrationPeakSelectionIsCycleStable();
     void calibrationAndAutoAcquisitionShareBChannelPeakSelection();
+    void specimenSosTrialMapsAllThreeWithoutMaterialBranch();
     void dualWindowQualityRequiresBothAtCommonLag();
     void partialRoundWaitsForRelockBeforeDiscarding();
     void finalRoundSelectionPreservesCompanionsAndBoundaries();
@@ -511,6 +512,59 @@ void CoreTests::calibrationAndAutoAcquisitionShareBChannelPeakSelection()
     QCOMPARE(patientCopper.b.roughLag, autoCopper.b.roughLag);
     QCOMPARE(patientCopper.b.corr, calCopper.corrB);
     QCOMPARE(patientCopper.b.sos, calCopper.sosB);
+}
+
+void CoreTests::specimenSosTrialMapsAllThreeWithoutMaterialBranch()
+{
+    // Triplet is training data: these assertions are not prospective proof.
+    MeasurementProfile normal = MeasurementProfile::current();
+    MeasurementProfile trial = normal;
+    normal.specimenSosTrial = false;
+    trial.specimenSosTrial = true;
+    QCOMPARE(normal.calibratedSos(2450.0), 2450.0);
+    QCOMPARE(normal.calibratedSos(2800.0), 2800.0);
+    QCOMPARE(normal.calibratedSos(490000.0/104.0), 490000.0/104.0);
+    const auto withinOnePercent = [&trial](double raw, double reference) {
+        return std::abs(trial.calibratedSos(raw) / reference - 1.0) < 0.01;
+    };
+    QVERIFY(withinOnePercent(2450.0, 2310.0)); // KSGR-3 @23C
+    QVERIFY(withinOnePercent(2800.0, 2711.0)); // KJMK-02 @23C
+    QVERIFY(withinOnePercent(490000.0/104.0, 4729.0)); // KSGR-2 @23C
+
+    SignalProcessor processor;
+    processor.probeDistanceCD = 7.84e-3;
+    processor.samplePeriod = 16e-9;
+    MeasureConfig config;
+    // Same B/A waves, tested with human and phantom flags.
+    FilteredFrame frame;
+    frame.bd.resize(2000, 0.0);
+    frame.bc.resize(2000, 0.0);
+    frame.ad.resize(2000, 0.0);
+    frame.ac.resize(2000, 0.0);
+    for (int i = 760; i <= 1120; ++i) {
+        const double x=(i-900)/55.0;
+        const double w=600.0*std::exp(-0.5*x*x)*std::cos(2.0*3.14159265358979323846*(i-900)/70.0);
+        frame.bd[i]=w;
+        frame.bc[i+136]=-w*(1.0-0.002*(i-900));
+        frame.ad[i]=w;
+        frame.ac[i+172]=w;
+    }
+    // Isolate the SOS map from the patient-only first-hit consistency gate.
+    normal.enforceBOnsetConsistency = false;
+    trial.enforceBOnsetConsistency = false;
+    for (bool patient : {false, true}) {
+        const FrameAnalysis original = FrameAnalyzer(processor, config, normal).analyze(frame, patient);
+        const FrameAnalysis corrected = FrameAnalyzer(processor, config, trial).analyze(frame, patient);
+        QVERIFY(original.b.valid && corrected.b.valid);
+        QCOMPARE(original.b.roughLag, corrected.b.roughLag);
+        QCOMPARE(original.b.refinedLag, corrected.b.refinedLag);
+        QCOMPARE(original.b.corr, corrected.b.corr);
+        QCOMPARE(original.decision, corrected.decision);
+        QVERIFY(std::abs(corrected.b.sos - trial.calibratedSos(original.b.sos)) < 1e-7);
+        if (original.decision == FrameDecision::Measured) {
+            QVERIFY(std::abs(corrected.sos - trial.calibratedSos(original.sos)) < 1e-7);
+        }
+    }
 }
 
 void CoreTests::dualWindowQualityRequiresBothAtCommonLag()
