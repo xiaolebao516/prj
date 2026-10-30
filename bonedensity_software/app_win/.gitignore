@@ -1,0 +1,16 @@
+.qtcreator/
+.qtcreator/
+/delivery/
+/build
+
+# Generated build artifacts
+/build/
+/build*/
+.claude/settings.local.json
+/BoneDensityData/
+
+# Python bytecode caches from research scripts
+__pycache__/
+*.pyc
+
+/docs/ref
