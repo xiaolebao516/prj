@@ -52,7 +52,7 @@ void MainWindow::resetDisconnectedAcquisitionState()
 namespace {
 
 // The lower unit is a Raspberry Pi Pico 2 running the Pico SDK USB serial
-// (firmware 骨密度仪/hhhh111): VID 0x2E8A, PID 0x0009. Windows names every such
+// (firmware bonedensity_hardware/hhhh111): VID 0x2E8A, PID 0x0009. Windows names every such
 // port "USB 串行设备", so it is recognised by these IDs. The Raspberry Pi Debug
 // Probe (PID 0x000C) and other Raspberry Pi devices do not match.
 bool isDensitometerPort(const QSerialPortInfo& info)
