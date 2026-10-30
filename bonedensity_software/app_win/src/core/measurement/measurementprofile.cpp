@@ -40,11 +40,8 @@ MeasurementProfile MeasurementProfile::current()
 QJsonObject measurementParameters(const MeasureConfig& config, const MeasurementProfile& profile,
                                   const SignalProcessor& processor)
 {
-    return QJsonObject{
+    QJsonObject parameters{
         {"implementation", profile.implementation},
-        {"specimen_sos_trial", profile.specimenSosTrial},
-        {"specimen_sos_gain", profile.specimenSosTrial ? profile.kSpecimenSosGain : 1.0},
-        {"specimen_sos_intercept_m_s", profile.specimenSosTrial ? profile.kSpecimenSosIntercept : 0.0},
         {"B_onset_forward_limit", profile.enforceBOnsetConsistency ? config.bOnsetForwardLimit : 0},
         {"B_clipped_peak_extension", profile.clippedBPeakExtension()},
         {"partial_relock_retention_lag", profile.deferPartialDiscardUntilRelock
@@ -63,4 +60,13 @@ QJsonObject measurementParameters(const MeasureConfig& config, const Measurement
         {"warmup", config.stableLagWarmupCount}, {"lock_need", config.stableLagLockNeedCount},
         {"lag_tolerance", config.stableLagTolerance}, {"unlock_count", config.boneLagUnlockCount},
         {"window_size", config.stableLagWindowSize}};
+    // The specimen SOS coefficients belong to the trial build only. Keeping them
+    // out of the formal profile's recorded form leaves its pinned JSON (and the
+    // parameter-group id derived from it) untouched.
+    if (profile.specimenSosTrial) {
+        parameters.insert(QStringLiteral("specimen_sos_trial"), true);
+        parameters.insert(QStringLiteral("specimen_sos_gain"), profile.kSpecimenSosGain);
+        parameters.insert(QStringLiteral("specimen_sos_intercept_m_s"), profile.kSpecimenSosIntercept);
+    }
+    return parameters;
 }
