@@ -1,0 +1,4 @@
+# Host-side tool builds and captured device streams
+build/
+captured*.bin
+__pycache__/
